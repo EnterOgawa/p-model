@@ -9,12 +9,40 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # クラス: `Config` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Config:
     fig_w_in: float = 11.0
     fig_h_in: float = 6.2
     dpi: int = 180
+
+
+# 関数: `_configure_japanese_font` の入出力契約と処理意図を定義する。
+def _configure_japanese_font() -> None:
+    import matplotlib as mpl
+    from matplotlib import font_manager as fm
+
+    candidates = [
+        "Yu Gothic",
+        "Meiryo",
+        "MS Gothic",
+        "MS PGothic",
+        "Noto Sans CJK JP",
+        "Noto Sans JP",
+        "IPAexGothic",
+    ]
+    available = {f.name for f in fm.fontManager.ttflist}
+    for name in candidates:
+        if name in available:
+            mpl.rcParams["font.family"] = name
+            mpl.rcParams["font.sans-serif"] = [name] + list(mpl.rcParams.get("font.sans-serif", []))
+            break
+
+    mpl.rcParams["axes.unicode_minus"] = False
 
 
 # 関数: `_add_box` の入出力契約と処理意図を定義する。
@@ -47,6 +75,7 @@ def main() -> None:
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    _configure_japanese_font()
     cfg = Config()
 
     fig = plt.figure(figsize=(cfg.fig_w_in, cfg.fig_h_in), dpi=cfg.dpi)
@@ -55,7 +84,7 @@ def main() -> None:
     ax.set_xlim(0.0, 1.0)
     ax.set_ylim(0.0, 1.0)
 
-    fig.suptitle("Phase 7 / Step 7.10: Quantum measurement (Born rule & state update) in P-model", fontsize=13)
+    fig.suptitle("量子測定の位置づけ（Born則と状態更新）", fontsize=13)
 
     # Boxes
     _add_box(
@@ -64,9 +93,9 @@ def main() -> None:
         0.74,
         0.38,
         0.18,
-        "P-field (time-wave density)\n"
-        "u = ln(P/P0),  φ = -c² u\n"
-        "(Part I mapping; local scope)",
+        "P場（時間波密度）\n"
+        "u = ln(P/P0),  φ = -c²u\n"
+        "（Part I の写像・局所記述）",
         fc="#e8f2ff",
         ec="#2b6cb0",
     )
@@ -76,9 +105,9 @@ def main() -> None:
         0.74,
         0.38,
         0.18,
-        "Bound mode envelope\n"
+        "束縛モード包絡\n"
         "ψ(x,t)\n"
-        "(Schr/KG short-wavelength limit)",
+        "（短波長極限でSchr/KG）",
         fc="#f0fff4",
         ec="#2f855a",
     )
@@ -88,9 +117,9 @@ def main() -> None:
         0.45,
         0.38,
         0.18,
-        "Detection rate / click probability\n"
+        "検出率 / クリック確率\n"
         "λ(x,t) ∝ |ψ|²\n"
-        "(Born rule; adopted postulate)",
+        "（Born則：運用上の採用）",
         fc="#fffaf0",
         ec="#b7791f",
     )
@@ -100,9 +129,9 @@ def main() -> None:
         0.16,
         0.38,
         0.18,
-        "Measurement record m\n"
-        "pointer states / coarse-graining\n"
-        "ρ → ρₘ (conditional update)",
+        "測定記録 m\n"
+        "ポインタ状態 / 粗視化\n"
+        "ρ → ρ_m（条件付き更新）",
         fc="#fff5f5",
         ec="#c53030",
     )
@@ -112,9 +141,9 @@ def main() -> None:
         0.38,
         0.38,
         0.20,
-        "Selection / analysis pipeline\n"
-        "w_ab(λ) (setting-dependent acceptance)\n"
-        "systematics knob in Bell tests",
+        "選別・解析パイプライン\n"
+        "w_ab(λ)（設定依存の受理）\n"
+        "Bell解析の系統入口",
         fc="#f7fafc",
         ec="#4a5568",
     )
@@ -128,8 +157,8 @@ def main() -> None:
     ax.text(
         0.05,
         0.05,
-        "Initial version: fixes operational postulates (what is derived vs assumed) to resist the\n"
-        "\"semi-classical\" critique. First-principles derivations (Born rule, update rule) remain future work.",
+        "初期版では、導出済み要素と採用要素の境界を固定し、\n"
+        "「半古典的」という批判に対する検証入口を明示する。Born則と更新則の第一原理導出は今後の課題。",
         fontsize=9.5,
         ha="left",
         va="bottom",
@@ -210,4 +239,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

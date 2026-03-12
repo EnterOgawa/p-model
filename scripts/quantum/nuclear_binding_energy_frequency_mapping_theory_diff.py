@@ -6,6 +6,10 @@ import math
 from pathlib import Path
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
@@ -368,7 +372,11 @@ def main() -> None:
 
     # Plot
 
+    import matplotlib as mpl
     import matplotlib.pyplot as plt
+
+    mpl.rcParams["pdf.fonttype"] = 42
+    mpl.rcParams["ps.fonttype"] = 42
 
     a_vals_p = [a for a, _ in pairs_pmodel]
     r_vals_p = [r for _, r in pairs_pmodel]
@@ -377,7 +385,7 @@ def main() -> None:
     a_vals_s = [a for a, _ in pairs_semf_ref]
     r_vals_s = [r for _, r in pairs_semf_ref]
 
-    fig = plt.figure(figsize=(13.2, 8.2))
+    fig = plt.figure(figsize=(14.2, 10.8))
     gs = fig.add_gridspec(2, 2)
 
     ax0 = fig.add_subplot(gs[0, 0])
@@ -386,11 +394,12 @@ def main() -> None:
     ax0.scatter(a_vals_s, r_vals_s, s=8, alpha=0.16, color="tab:orange", label="SEMF fixed-coeff")
     ax0.axhline(1.0, color="0.2", lw=1.2, ls="--")
     ax0.set_yscale("log")
-    ax0.set_xlabel("A")
-    ax0.set_ylabel("B_pred/B_obs")
-    ax0.set_title("All-nuclei residual scale by model class")
+    ax0.set_xlabel("A", fontsize=14.8)
+    ax0.set_ylabel("B_pred/B_obs", fontsize=14.8)
+    ax0.set_title("All-nuclei residual scale by model class", fontsize=16.0)
     ax0.grid(True, which="both", axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax0.legend(loc="upper right", fontsize=8)
+    ax0.legend(loc="upper right", fontsize=12.6)
+    ax0.tick_params(axis="both", labelsize=13.2)
 
     ax1 = fig.add_subplot(gs[0, 1])
     labels = ["P-model", "Yukawa\nproxy", "SEMF\nfixed"]
@@ -406,21 +415,23 @@ def main() -> None:
     ax1.axhline(0.0, color="0.4", lw=0.9)
     ax1.set_xticks(x)
     ax1.set_xticklabels(labels)
-    ax1.set_ylabel("z (sigma_proxy units)")
-    ax1.set_title("Operational consistency under frozen 3sigma thresholds")
+    ax1.set_ylabel("z (sigma_proxy units)", fontsize=14.8)
+    ax1.set_title("Operational consistency under frozen 3sigma thresholds", fontsize=16.0)
     ax1.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax1.legend(loc="upper right", fontsize=8)
+    ax1.legend(loc="upper right", fontsize=12.6)
+    ax1.tick_params(axis="both", labelsize=13.2)
 
     ax2 = fig.add_subplot(gs[1, 0])
     ax2.hist([math.log10(v) for v in r_vals_p if v > 0], bins=70, alpha=0.52, color="tab:green", label="P-model")
     ax2.hist([math.log10(v) for v in r_vals_y if v > 0], bins=70, alpha=0.45, color="tab:purple", label="Yukawa proxy")
     ax2.hist([math.log10(v) for v in r_vals_s if v > 0], bins=70, alpha=0.45, color="tab:orange", label="SEMF fixed")
     ax2.axvline(0.0, color="0.2", lw=1.2, ls="--")
-    ax2.set_xlabel("log10(B_pred/B_obs)")
-    ax2.set_ylabel("count")
-    ax2.set_title("Residual distributions in common log10 scale")
+    ax2.set_xlabel("log10(B_pred/B_obs)", fontsize=14.8)
+    ax2.set_ylabel("count", fontsize=14.8)
+    ax2.set_title("Residual distributions in common log10 scale", fontsize=16.0)
     ax2.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax2.legend(loc="upper left", fontsize=8)
+    ax2.legend(loc="upper left", fontsize=12.6)
+    ax2.tick_params(axis="both", labelsize=13.2)
 
     ax3 = fig.add_subplot(gs[1, 1])
     a_plot: list[int] = []
@@ -444,17 +455,20 @@ def main() -> None:
     ax3.scatter(a_plot, d_semf, s=8, alpha=0.2, color="tab:red", label="P-model - SEMF")
     ax3.scatter(a_plot, d_y, s=8, alpha=0.2, color="tab:cyan", label="P-model - Yukawa proxy")
     ax3.axhline(0.0, color="0.2", lw=1.2)
-    ax3.set_xlabel("A")
-    ax3.set_ylabel("Delta B [MeV]")
-    ax3.set_title("Differential prediction channel (same AME2020 targets)")
+    ax3.set_xlabel("A", fontsize=14.8)
+    ax3.set_ylabel("Delta B [MeV]", fontsize=14.8)
+    ax3.set_title("Differential prediction channel (same AME2020 targets)", fontsize=16.0)
     ax3.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax3.legend(loc="upper left", fontsize=8)
+    ax3.legend(loc="upper left", fontsize=12.6)
+    ax3.tick_params(axis="both", labelsize=13.2)
 
-    fig.suptitle("Phase 7 / Step 7.13.17.11: theory-difference extraction (P-model vs standard proxies)", y=1.01)
-    fig.subplots_adjust(left=0.06, right=0.98, top=0.91, bottom=0.08, wspace=0.23, hspace=0.30)
+    fig.suptitle("theory-difference extraction (P-model vs standard proxies)", y=0.99, fontsize=17.4)
+    fig.subplots_adjust(left=0.06, right=0.98, top=0.93, bottom=0.08, wspace=0.23, hspace=0.32)
 
     out_png = out_dir / "nuclear_binding_energy_frequency_mapping_theory_diff.png"
+    out_pdf = out_dir / "nuclear_binding_energy_frequency_mapping_theory_diff.pdf"
     fig.savefig(out_png, bbox_inches="tight")
+    fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
 
     out_json = out_dir / "nuclear_binding_energy_frequency_mapping_theory_diff_metrics.json"
@@ -486,7 +500,7 @@ def main() -> None:
                     "top_abs_delta_p_minus_semf": top_delta_semf,
                     "top_abs_delta_p_minus_yukawa": top_delta_yukawa,
                 },
-                "outputs": {"png": str(out_png), "csv": str(out_csv)},
+                "outputs": {"png": str(out_png), "pdf": str(out_pdf), "csv": str(out_csv)},
                 "notes": [
                     "Yukawa and EFT are represented here by stable operational proxies for cross-dataset auditing.",
                     "This step extracts where differential signal is concentrated before precision-target budgeting in Step 7.13.17.12.",
@@ -500,6 +514,7 @@ def main() -> None:
 
     print("[ok] wrote:")
     print(f"  {out_png}")
+    print(f"  {out_pdf}")
     print(f"  {out_csv}")
     print(f"  {out_json}")
 

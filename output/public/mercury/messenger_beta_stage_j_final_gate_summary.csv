@@ -1,0 +1,8 @@
+gate_id,source_metrics,required,status,value,note
+gate_injection_recovery,messenger_beta_stage_f_injection_recovery_metrics.json,pass,pass,"slope=1, max|z|=1.43792e-15",hard gate
+gate_odf_joint_stability,messenger_beta_stage_d_joint_metrics.json,watch_or_better,pass,"beta=-8.54355, sigma=0.679605, data=pass, sigma_status=watch",stage D baseline
+gate_tnf_replay,messenger_beta_stage_e_tnf_replay_metrics.json,watch_or_better,pass,"z_delta=1.95717, status=pass",stage E replay
+gate_beta_dyn_lt_separation,messenger_beta_stage_d_joint_metrics.json|messenger_beta_stage_e_tnf_replay_metrics.json,watch_or_better,pass,"delta_dyn_lt=-9.5857, z_dyn_lt=8.01791, replay_z_lt=2.04463e-05","stageD=pass, stageE=pass"
+gate_spe_sensitivity,messenger_beta_stage_g_spe_sensitivity_metrics.json,watch_or_better,pass,branch=tnf,stage G SPE subsets
+gate_segmentation,messenger_beta_stage_h_segmentation_metrics.json,watch_or_better,pass,"branch_status={'odf': 'pass', 'tnf': 'pass'}",stage H station/link/campaign
+gate_nuisance_sensitivity,messenger_beta_stage_i_nuisance_sensitivity_metrics.json,watch_or_better,pass,"branch_status={'odf': 'pass', 'tnf': 'pass'}",stage I nuisance sweep

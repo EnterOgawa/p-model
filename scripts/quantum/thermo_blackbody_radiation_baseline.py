@@ -11,6 +11,10 @@ from typing import Any, Dict, List
 import matplotlib.pyplot as plt
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
@@ -150,29 +154,31 @@ def main() -> None:
     u_curve = [a_rad * (t**4) for t in xs]
     n_curve = [n_coeff * (t**3) for t in xs]
 
-    fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.2))
+    fig, axes = plt.subplots(2, 1, figsize=(10.8, 9.8))
     ax = axes[0]
     ax.plot(xs, u_curve, color="#1f77b4")
     ax.scatter([r["T_K"] for r in rows], [r["energy_density_J_per_m3"] for r in rows], color="#000000", s=18)
     ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.set_xlabel("Temperature T (K)")
-    ax.set_ylabel("Energy density u (J/m^3)")
-    ax.set_title("Blackbody radiation: u(T)=a T^4")
+    ax.set_xlabel("Temperature T (K)", fontsize=13)
+    ax.set_ylabel("Energy density u (J/m^3)", fontsize=13)
+    ax.set_title("Blackbody radiation: u(T)=a T^4", fontsize=14)
     ax.grid(True, which="both", alpha=0.25)
+    ax.tick_params(axis="both", labelsize=11.5)
 
     ax = axes[1]
     ax.plot(xs, n_curve, color="#d62728")
     ax.scatter([r["T_K"] for r in rows], [r["photon_number_density_per_m3"] for r in rows], color="#000000", s=18)
     ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.set_xlabel("Temperature T (K)")
-    ax.set_ylabel("Photon density n (1/m^3)")
-    ax.set_title("Blackbody radiation: n(T) ∝ T^3")
+    ax.set_xlabel("Temperature T (K)", fontsize=13)
+    ax.set_ylabel("Photon density n (1/m^3)", fontsize=13)
+    ax.set_title("Blackbody radiation: n(T) ∝ T^3", fontsize=14)
     ax.grid(True, which="both", alpha=0.25)
+    ax.tick_params(axis="both", labelsize=11.5)
 
-    fig.suptitle("Thermo baseline: blackbody scalings (SI constants; CODATA via NIST)", y=1.02)
-    fig.tight_layout()
+    fig.suptitle("Thermo baseline: blackbody scalings (SI constants; CODATA via NIST)", y=0.995, fontsize=15)
+    fig.tight_layout(rect=(0, 0, 1, 0.985))
     out_png = out_dir / "thermo_blackbody_radiation_baseline.png"
     fig.savefig(out_png, dpi=180, bbox_inches="tight")
     plt.close(fig)

@@ -1,0 +1,8 @@
+{
+  "generated_utc": "2026-03-07T23:16:51.019181+00:00",
+  "phase_step": "8.7.48.5_extract",
+  "overall_status": "watch",
+  "reason": "skip_extract",
+  "tnf_doppler_csv": "data/mercury/messenger/derived/tnf_doppler_observations.csv",
+  "tnf_range_csv": "data/mercury/messenger/derived/tnf_range_observations.csv"
+}

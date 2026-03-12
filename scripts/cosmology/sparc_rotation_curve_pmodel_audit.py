@@ -22,6 +22,7 @@ V_obs(R) を baryon-only と P-model 補正付きで比較する最小監査を�
 - output/public/cosmology/sparc_rotation_curve_pmodel_audit_points.csv
 - output/public/cosmology/sparc_rotation_curve_pmodel_audit_galaxy_summary.csv
 - output/public/cosmology/sparc_rotation_curve_pmodel_audit.png
+- output/public/cosmology/sparc_rotation_curve_pmodel_audit.pdf
 - output/public/cosmology/sparc_rotation_curve_pmodel_audit_metrics.json
 """
 
@@ -535,27 +536,36 @@ def _plot_summary(
     residual_pull_baryon = (velocity_obs_km_s - velocity_pred_baryon) / sigma_used_km_s
     residual_pull_pmodel = (velocity_obs_km_s - velocity_pred_pmodel) / sigma_used_km_s
 
-    fig, axes = plt.subplots(1, 3, figsize=(15.5, 4.8), dpi=170)
+    # 図99: 1列表示へ統一するため、3パネルを縦並びに再構成する。
+    fig = plt.figure(figsize=(13.8, 16.8), dpi=220)
+    grid = fig.add_gridspec(3, 1, height_ratios=[1.0, 1.0, 1.15], hspace=0.34)
+    axes = [
+        fig.add_subplot(grid[0, 0]),
+        fig.add_subplot(grid[1, 0]),
+        fig.add_subplot(grid[2, 0]),
+    ]
 
     vmax = float(np.nanmax([np.max(velocity_obs_km_s), np.max(velocity_pred_baryon), np.max(velocity_pred_pmodel)]))
     axes[0].scatter(velocity_obs_km_s, velocity_pred_baryon, s=6, alpha=0.35, color="#d62728", label="baryon-only")
     axes[0].scatter(velocity_obs_km_s, velocity_pred_pmodel, s=6, alpha=0.35, color="#1f77b4", label="P-model corrected")
     axes[0].plot([0.0, vmax], [0.0, vmax], "k--", lw=1.0, alpha=0.7)
-    axes[0].set_xlabel("Vobs [km/s]")
-    axes[0].set_ylabel("Vmodel [km/s]")
-    axes[0].set_title("SPARC rotation curves (all points)")
+    axes[0].set_xlabel("Vobs [km/s]", fontsize=16.4)
+    axes[0].set_ylabel("Vmodel [km/s]", fontsize=16.4)
+    axes[0].set_title("SPARC rotation curves (all points)", fontsize=18.2, pad=11.0)
     axes[0].grid(True, alpha=0.25)
-    axes[0].legend(loc="upper left", fontsize=8)
+    axes[0].legend(loc="upper left", fontsize=14.4)
+    axes[0].tick_params(labelsize=14.4)
 
     bins = np.linspace(-8.0, 8.0, 61)
     axes[1].hist(residual_pull_baryon, bins=bins, alpha=0.55, color="#d62728", label="baryon-only")
     axes[1].hist(residual_pull_pmodel, bins=bins, alpha=0.55, color="#1f77b4", label="P-model corrected")
     axes[1].axvline(0.0, color="k", ls="--", lw=1.0)
-    axes[1].set_xlabel("(Vobs - Vmodel) / sigma")
-    axes[1].set_ylabel("count")
-    axes[1].set_title("Normalized residual distribution")
+    axes[1].set_xlabel("(Vobs - Vmodel) / sigma", fontsize=16.4)
+    axes[1].set_ylabel("count", fontsize=16.4)
+    axes[1].set_title("Normalized residual distribution", fontsize=18.2, pad=11.0)
     axes[1].grid(True, alpha=0.25)
-    axes[1].legend(loc="upper right", fontsize=8)
+    axes[1].legend(loc="upper right", fontsize=14.4)
+    axes[1].tick_params(labelsize=14.4)
 
     abs_pull_p50 = float(np.median(np.abs(residual_pull_pmodel)))
     abs_pull_b50 = float(np.median(np.abs(residual_pull_baryon)))
@@ -565,23 +575,25 @@ def _plot_summary(
     model_values = [chi2_dof_baryon, chi2_dof_pmodel]
     model_colors = ["#d62728", "#1f77b4"]
     axes[2].bar(model_labels, model_values, color=model_colors, alpha=0.85)
-    axes[2].set_ylabel("global chi2/dof")
-    axes[2].set_title("Fit quality (single M/L parameter)")
+    axes[2].set_ylabel("global chi2/dof", fontsize=16.4)
+    axes[2].set_title("Fit quality (single M/L parameter)", fontsize=18.2, pad=12.0)
     axes[2].grid(axis="y", alpha=0.25)
+    axes[2].tick_params(labelsize=14.4)
     axes[2].text(
         0.02,
-        0.96,
+        0.965,
         f"median |pull|: baryon={abs_pull_b50:.3f}, P-model={abs_pull_p50:.3f}",
         transform=axes[2].transAxes,
         ha="left",
         va="top",
-        fontsize=8,
+        fontsize=14.0,
     )
 
-    fig.suptitle("SPARC audit: Vobs vs Vbar and P-model-corrected VP (single Υ fit)", fontsize=13)
-    fig.tight_layout()
+    fig.suptitle("SPARC audit: Vobs vs Vbar and P-model-corrected VP (single Υ fit)", fontsize=21.0, y=0.992)
+    fig.subplots_adjust(left=0.070, right=0.985, bottom=0.060, top=0.935)
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, bbox_inches="tight")
+    fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight")
     plt.close(fig)
 
 
@@ -675,6 +687,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     out_galaxy_csv = out_dir / "sparc_rotation_curve_pmodel_audit_galaxy_summary.csv"
     out_png = out_dir / "sparc_rotation_curve_pmodel_audit.png"
     out_metrics = out_dir / "sparc_rotation_curve_pmodel_audit_metrics.json"
+    out_pdf = out_png.with_suffix(".pdf")
 
     _write_points_csv(
         out_points_csv,
@@ -751,6 +764,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             "points_csv": _rel(out_points_csv),
             "galaxy_summary_csv": _rel(out_galaxy_csv),
             "figure_png": _rel(out_png) if out_png.exists() else None,
+            "figure_pdf": _rel(out_pdf) if out_pdf.exists() else None,
             "metrics_json": _rel(out_metrics),
         },
         "notes": [
@@ -779,6 +793,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     "points_csv": _rel(out_points_csv),
                     "galaxy_summary_csv": _rel(out_galaxy_csv),
                     "figure_png": _rel(out_png) if out_png.exists() else None,
+                    "figure_pdf": _rel(out_pdf) if out_pdf.exists() else None,
                 },
                 meta={
                     "n_galaxies": n_galaxies,
@@ -796,6 +811,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     # 条件分岐: `out_png.exists()` を満たす経路を評価する。
     if out_png.exists():
         print(f"[ok] wrote: {out_png}")
+    if out_pdf.exists():
+        print(f"[ok] wrote: {out_pdf}")
 
     print(f"[ok] wrote: {out_metrics}")
     return 0
@@ -805,4 +822,3 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

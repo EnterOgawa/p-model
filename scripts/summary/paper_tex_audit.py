@@ -37,6 +37,7 @@ _PROFILE_TO_TEX = {
     "part2_astrophysics": "pmodel_paper_part2_astrophysics.tex",
     "part3_quantum": "pmodel_paper_part3_quantum.tex",
     "part4_verification": "pmodel_paper_part4_verification.tex",
+    "part5_future_predictions": "pmodel_paper_part5_future_predictions.tex",
 }
 
 _COMPILE_FATAL_PATTERNS = [

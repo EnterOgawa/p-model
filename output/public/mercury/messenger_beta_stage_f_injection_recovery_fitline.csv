@@ -1,0 +1,2 @@
+phase_step,source_branch,n_valid,intercept,slope,intercept_sigma,slope_sigma,z_slope_minus_1,z_intercept,abs_slope_delta,abs_intercept,max_abs_z_error,status_linearity,status_pointwise,status_base_data,status_base_sigma,overall_status
+8.7.48.6,tnf,5,-5.997178627467728e-14,0.999999999999971,95.03307675393451,77.59418224462969,-3.734406382602489e-16,-6.310622398342413e-16,2.8976820942716586e-14,5.997178627467728e-14,1.4379207874065799e-15,pass,pass,pass,watch,pass

@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-22T01:04:58.913232+00:00",
+  "generated_utc": "2026-03-12T06:14:24.736810+00:00",
   "phase": {
     "step": "8.7.18.2",
     "name": "fsigma8_growth_mapping"
@@ -57,6 +57,7 @@
   },
   "outputs": {
     "png": "C:/develop/waveP/output/private/cosmology/cosmology_fsigma8_growth_mapping.png",
+    "pdf": "C:/develop/waveP/output/private/cosmology/cosmology_fsigma8_growth_mapping.pdf",
     "metrics_json": "C:/develop/waveP/output/private/cosmology/cosmology_fsigma8_growth_mapping_metrics.json",
     "falsification_pack_json": "C:/develop/waveP/output/private/cosmology/cosmology_fsigma8_growth_mapping_falsification_pack.json",
     "points_csv": "C:/develop/waveP/output/private/cosmology/cosmology_fsigma8_growth_mapping_points.csv"

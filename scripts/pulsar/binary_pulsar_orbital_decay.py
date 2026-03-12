@@ -271,7 +271,8 @@ def _render_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
     y = [float(m.get("R", float("nan"))) for m in metrics]
     yerr = [float(m.get("sigma_1", float("nan"))) for m in metrics]
 
-    fig, ax = plt.subplots(figsize=(12.8, 6.2), dpi=180)
+    # 図23: 論文面での可読性確保のためキャンバスと文字サイズを拡大。
+    fig, ax = plt.subplots(figsize=(14.8, 8.2), dpi=180)
     ax.axhline(1.0, color="#666", lw=1.2, ls="--", zorder=0)
 
     ax.errorbar(
@@ -304,13 +305,15 @@ def _render_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
             f"{r:.6f}{sig_txt}",
             ha="center",
             va="bottom",
-            fontsize=9.5,
+            fontsize=14.4,
             color="#222",
         )
 
     ax.set_xticks(x, labels, rotation=0, ha="center")
-    ax.set_ylabel("一致度 R = Pdot_b(obs) / Pdot_b(P-model quad)")
-    ax.set_title("二重パルサー：軌道減衰（放射）とP-model（弱場四重極）予測の一致度")
+    ax.tick_params(axis="x", labelsize=14.6)
+    ax.tick_params(axis="y", labelsize=14.6)
+    ax.set_ylabel("一致度 R = Pdot_b(obs) / Pdot_b(P-model quad)", fontsize=17.2)
+    ax.set_title("二重パルサー：軌道減衰（放射）とP-model（弱場四重極）予測の一致度", fontsize=19.0, pad=12.0)
     ax.grid(True, alpha=0.25)
 
     # Tight y-range for readability (auto but keep around 1)
@@ -322,11 +325,14 @@ def _render_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
         pad = max(0.002, 0.25 * (hi - lo))
         ax.set_ylim(lo - pad, hi + pad)
 
-    ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1.0), borderaxespad=0.0)
+    # 図23: 凡例はグラフ左上に重ねて固定する。
+    ax.legend(loc="upper left", bbox_to_anchor=(0.02, 0.98), borderaxespad=0.2, frameon=True, fontsize=14.8)
 
     fig.tight_layout()
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=220, bbox_inches="tight")
+    # Keep PDF in sync so LaTeX (extension-less includegraphics) does not pick stale assets.
+    fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight")
     plt.close(fig)
 
 
@@ -384,7 +390,7 @@ def _render_public_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
     ax.set_ylabel("ずれ（観測/予測 - 1）[%]")
     ax.set_title("二重パルサー：軌道減衰の観測はP-model（弱場四重極）とどれくらい一致？")
     ax.grid(True, alpha=0.25, axis="y")
-    ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1.0), borderaxespad=0.0)
+    ax.legend(loc="upper left", bbox_to_anchor=(0.02, 0.98), borderaxespad=0.2, frameon=True)
 
     finite = [v for v in delta_pct if math.isfinite(v)]
     # 条件分岐: `finite` を満たす経路を評価する。
@@ -397,6 +403,8 @@ def _render_public_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
     fig.tight_layout()
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=220, bbox_inches="tight")
+    # Keep PDF in sync so LaTeX (extension-less includegraphics) does not pick stale assets.
+    fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight")
     plt.close(fig)
 
 

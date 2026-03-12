@@ -281,7 +281,8 @@ def _plot(
     _set_japanese_font()
     import matplotlib.pyplot as plt
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16.8, 6.8))
+    # 図45: 横2列をやめて縦1列（2段）へ変更し、全体を拡大する。
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(15.4, 16.2))
 
     # F_AP curves + points
     ax1.plot(z_curve, f_curve_pbg, linewidth=2.2, label="静的背景P（指数）: F=(1+z)ln(1+z)")
@@ -302,11 +303,12 @@ def _plot(
         ecolor="#111111",
         label="観測（一次ソースから計算）",
     )
-    ax1.set_title("Alcock–Paczynski：F_AP(z)=D_M H / c", fontsize=13)
-    ax1.set_xlabel("赤方偏移 z", fontsize=11)
-    ax1.set_ylabel("F_AP", fontsize=11)
+    ax1.set_title("Alcock–Paczynski：F_AP(z)=D_M H / c", fontsize=16.8)
+    ax1.set_xlabel("赤方偏移 z", fontsize=14.2)
+    ax1.set_ylabel("F_AP", fontsize=14.2)
+    ax1.tick_params(labelsize=12.2)
     ax1.grid(True, linestyle="--", alpha=0.5)
-    ax1.legend(fontsize=9, loc="upper left")
+    ax1.legend(fontsize=12.0, loc="upper left")
 
     # z-scores per model
     ax2.axvline(0.0, color="k", linewidth=1.0, alpha=0.6)
@@ -317,21 +319,16 @@ def _plot(
     ax2.scatter(z_pbg, y + dy, s=45, label="静的背景P（指数）", color="#1f77b4")
     ax2.scatter(z_lcdm, y - dy, s=45, label="flat ΛCDM（参考）", color="#2ca02c")
     ax2.set_yticks(y)
-    ax2.set_yticklabels(labels)
-    ax2.set_xlabel("z-score（(F_model - F_obs)/σ）", fontsize=11)
-    ax2.set_title("モデル比較（z-score）", fontsize=13)
+    ax2.set_yticklabels(labels, fontsize=12.2)
+    ax2.set_xlabel("z-score（(F_model - F_obs)/σ）", fontsize=14.2)
+    ax2.set_title("モデル比較（z-score）", fontsize=16.8)
+    ax2.tick_params(labelsize=12.2)
     ax2.grid(True, linestyle="--", alpha=0.5, axis="x")
-    ax2.legend(fontsize=9, loc="lower right")
+    ax2.legend(fontsize=12.0, loc="lower right")
 
-    fig.suptitle("宇宙論（独立プローブ）：Alcock–Paczynski（AP）制約", fontsize=14)
-    fig.text(
-        0.5,
-        0.01,
-        "注：一次ソースは D_M×(r_d,fid/r_d) と H×(r_d/r_d,fid) を与えるため、F_AP は r_d に依存せず計算できる。",
-        ha="center",
-        fontsize=10,
-    )
-    plt.tight_layout(rect=(0.0, 0.03, 1.0, 0.93))
+    fig.suptitle("宇宙論（独立プローブ）：Alcock–Paczynski（AP）制約", fontsize=18.4)
+    # 図下注記は論文本文側へ移し、図中の重なりを回避する。
+    plt.tight_layout(rect=(0.0, 0.04, 1.0, 0.955))
 
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)
@@ -413,4 +410,3 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

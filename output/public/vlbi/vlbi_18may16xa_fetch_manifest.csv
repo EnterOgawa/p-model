@@ -1,0 +1,9 @@
+key,value
+session,18MAY16XA
+source_url,file://C:/develop/waveP/data/temp/18MAY16XA.tgz
+archive_path,C:\develop\waveP\data\vlbi\sources\vgosdb\18MAY16XA\raw\18MAY16XA.tgz
+archive_size_bytes,2227092
+archive_sha256,cfaa07d75ea623764c86a8e0cd71bf6ed1d9facb47cef3f46c512327ff329436
+extracted_root,C:\develop\waveP\data\vlbi\sources\vgosdb\18MAY16XA\extracted
+archive_type,tar
+member_count,171

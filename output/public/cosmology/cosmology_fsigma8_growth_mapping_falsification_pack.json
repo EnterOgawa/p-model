@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-22T01:04:58.913724+00:00",
+  "generated_utc": "2026-03-12T06:14:24.737301+00:00",
   "kind": "fsigma8_growth_mapping",
   "decision_rule": {
     "mapping_defined": "growth_mapping_defined=true and fsigma8_gate_defined=true",
@@ -21,6 +21,7 @@
   "related_outputs": {
     "metrics_json": "C:/develop/waveP/output/private/cosmology/cosmology_fsigma8_growth_mapping_metrics.json",
     "figure_png": "C:/develop/waveP/output/private/cosmology/cosmology_fsigma8_growth_mapping.png",
+    "figure_pdf": "C:/develop/waveP/output/private/cosmology/cosmology_fsigma8_growth_mapping.pdf",
     "points_csv": "C:/develop/waveP/output/private/cosmology/cosmology_fsigma8_growth_mapping_points.csv"
   }
 }

@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-17T13:31:19.336819+00:00",
+  "generated_utc": "2026-03-08T04:41:01.927611+00:00",
   "phase": {
     "phase": 7,
     "step": "7.21.1",
@@ -26,18 +26,18 @@
     {
       "channel": "bell",
       "title": "Bell cross-dataset connection",
-      "status": "pass",
-      "severity": 0,
+      "status": "reject",
+      "severity": 2,
       "kpi": {
         "selection_ratio_min": 3.6508938846257903,
         "selection_ratio_threshold": 1.0,
         "delay_fast_z_min": 5.53541064134177,
         "delay_z_threshold": 3.0,
-        "pairing_delta_sigma_max": 0.08612854215724108,
+        "pairing_delta_sigma_max": 129.42291337930078,
         "pairing_delta_sigma_threshold": 1.0,
         "selection_score": 0.2739055233051503,
         "delay_score": 0.5419652116853263,
-        "pairing_score": 0.08612854215724108
+        "pairing_score": 129.42291337930078
       },
       "diagnostics": {
         "dataset_n": 5,
@@ -45,7 +45,7 @@
         "delay_fail_n": 1,
         "selection_ok": true,
         "delay_ok": true,
-        "pairing_ok": true
+        "pairing_ok": false
       },
       "notes": [
         "delay gate fail in 1/3 datasets (time-tag subsets still tracked by delay_fast_min)."
@@ -105,12 +105,12 @@
     }
   ],
   "overall": {
-    "status": "pass",
-    "severity": 0,
+    "status": "reject",
+    "severity": 2,
     "status_counts": {
-      "pass": 3,
+      "pass": 2,
       "watch": 0,
-      "reject": 0
+      "reject": 1
     }
   }
 }

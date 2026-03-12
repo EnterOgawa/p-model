@@ -1,0 +1,37 @@
+{
+  "generated_utc": "2026-03-12T03:01:38.964828+00:00",
+  "inputs": {
+    "source_effective": "pds_odf_raw",
+    "model_csv": "C:\\develop\\waveP\\output\\private\\cassini\\cassini_shapiro_y_full.csv",
+    "model_mode": "eq2",
+    "window_days": 10.0,
+    "beta_ref": 1.0,
+    "note": "ODF raw observed y(t) is directly fitted against unit template y_unit(beta=1). No published PPN gamma value is used."
+  },
+  "fit_result": {
+    "n_points": 421841,
+    "window_days": 10.0,
+    "use_bin_count_weights": false,
+    "beta_ref": 1.0,
+    "delta_beta": -615.1089742666451,
+    "delta_beta_sigma_proxy": 13.638155932970045,
+    "beta_est": -614.1089742666451,
+    "beta_est_sigma_proxy": 13.638155932970045,
+    "gamma_est": -1229.2179485332902,
+    "gamma_est_sigma_proxy": 27.27631186594009,
+    "intercept": 1.6276989503435334e-06,
+    "chi2_weighted": 5.475227060373649e-07,
+    "dof": 421839,
+    "sigma2_proxy": 1.2979423572437943e-12,
+    "weighted_rms": 1.1392700310021496e-06,
+    "rmse": 1.1392700310021458e-06,
+    "mae": 9.436544203974542e-07,
+    "corr_obs_fit": 0.06927530305470708,
+    "normal_matrix_det": 2.9436955408506217e-09
+  },
+  "outputs": {
+    "points_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_beta_direct_fit_points.csv",
+    "fit_plot_png": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_beta_direct_fit.png",
+    "fit_plot_pdf": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_beta_direct_fit.pdf"
+  }
+}

@@ -12,6 +12,10 @@ from typing import Any, Optional
 import matplotlib.pyplot as plt
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
@@ -603,7 +607,7 @@ def main() -> None:
     ax1.set_ylabel("α(T) (10^-8 / K)")
     ax1.set_title("Silicon thermal expansion: two-branch Debye–Grüneisen ansatz check")
     ax1.grid(True, alpha=0.25)
-    ax1.legend(loc="best", fontsize=8)
+    ax1.legend(loc="best", fontsize=11.8)
 
     ax2.plot(temps, z_score, color="#000000", lw=1.2, alpha=0.9, label="z = (α_pred−α_obs)/σ_fit")
     ax2.axhline(0.0, color="#666666", lw=1.0, alpha=0.6)
@@ -612,7 +616,7 @@ def main() -> None:
     ax2.set_xlabel("Temperature T (K)")
     ax2.set_ylabel("z")
     ax2.grid(True, alpha=0.25)
-    ax2.legend(loc="best", fontsize=8)
+    ax2.legend(loc="best", fontsize=11.8)
 
     fig.tight_layout()
     out_png = out_dir / "condensed_silicon_thermal_expansion_gruneisen_two_branch_model.png"

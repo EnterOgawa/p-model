@@ -1,0 +1,95 @@
+{
+  "generated_utc": "2026-03-07T15:37:26.403914+00:00",
+  "phase_step": "8.7.48.6",
+  "overall_status": "pass",
+  "source_branch": "tnf",
+  "doppler_csv": "data/mercury/messenger/derived/tnf_doppler_observations.csv",
+  "range_csv": "data/mercury/messenger/derived/tnf_range_observations.csv",
+  "n_rows_joint": 3160,
+  "n_rows_range": 986,
+  "n_rows_doppler": 2174,
+  "beta_grid": [
+    0.0,
+    0.5,
+    1.0,
+    1.5,
+    2.0
+  ],
+  "linearity_fit": {
+    "n_valid": 5,
+    "intercept": -5.997178627467728e-14,
+    "slope": 0.999999999999971,
+    "intercept_sigma": 95.03307675393451,
+    "slope_sigma": 77.59418224462969,
+    "z_slope_minus_1": -3.734406382602489e-16,
+    "z_intercept": -6.310622398342413e-16,
+    "abs_slope_delta": 2.8976820942716586e-14,
+    "abs_intercept": 5.997178627467728e-14,
+    "status": "pass"
+  },
+  "max_abs_z_error": 1.4379207874065799e-15,
+  "status_components": {
+    "linearity": "pass",
+    "pointwise": "pass",
+    "base_data": "pass",
+    "base_sigma": "watch",
+    "base_model": "watch"
+  },
+  "base_fit": {
+    "beta_dyn": 333.6397193344582,
+    "beta_sigma": 122.68717453561317,
+    "beta_z_from_1": 2.7112835599445715,
+    "rss_norm": 27882627162.55911,
+    "dof": 3141
+  },
+  "joint_meta": {
+    "t0_utc": "2011-01-03T16:00:00+00:00",
+    "orbital_period_days": 87.9691,
+    "scale_range": 280768.01906556956,
+    "scale_doppler": 0.6429047713279722,
+    "station_ids_range_top": [
+      "25",
+      "26",
+      "45",
+      "34",
+      "15",
+      "55",
+      "54",
+      "65"
+    ],
+    "station_ids_doppler_top": [
+      "25",
+      "26",
+      "34",
+      "45",
+      "15",
+      "55",
+      "65",
+      "54"
+    ],
+    "station_base_range": "25",
+    "station_base_doppler": "25"
+  },
+  "gating_policy": {
+    "linearity_abs_slope_delta_pass": 0.05,
+    "linearity_abs_slope_delta_watch": 0.1,
+    "linearity_abs_intercept_pass": 0.05,
+    "linearity_abs_intercept_watch": 0.1,
+    "pointwise_max_abs_z_pass": 2.0,
+    "pointwise_max_abs_z_watch": 3.0,
+    "min_joint_rows": 300
+  },
+  "plot": "generated",
+  "outputs_private": [
+    "output/private/mercury/messenger_beta_stage_f_injection_recovery_summary.csv",
+    "output/private/mercury/messenger_beta_stage_f_injection_recovery_fitline.csv",
+    "output/private/mercury/messenger_beta_stage_f_injection_recovery.pdf",
+    "output/private/mercury/messenger_beta_stage_f_injection_recovery.png"
+  ],
+  "outputs_public": [
+    "output/public/mercury/messenger_beta_stage_f_injection_recovery_summary.csv",
+    "output/public/mercury/messenger_beta_stage_f_injection_recovery_fitline.csv",
+    "output/public/mercury/messenger_beta_stage_f_injection_recovery.pdf",
+    "output/public/mercury/messenger_beta_stage_f_injection_recovery.png"
+  ]
+}

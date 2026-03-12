@@ -5,6 +5,10 @@ import math
 from pathlib import Path
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
@@ -169,8 +173,8 @@ def main() -> None:
 
     import matplotlib.pyplot as plt
 
-    fig = plt.figure(figsize=(13.6, 4.2), dpi=160)
-    gs = fig.add_gridspec(1, 2, wspace=0.28)
+    fig = plt.figure(figsize=(10.8, 10.2), dpi=170)
+    gs = fig.add_gridspec(2, 1, hspace=0.30)
 
     # Panel A: triplet channel (a_t vs r_t) with mixed-radius curve from B
     ax0 = fig.add_subplot(gs[0, 0])
@@ -191,11 +195,12 @@ def main() -> None:
         else:
             ax0.plot([x], [y], marker="o", lw=0, label=label)
 
-    ax0.set_xlabel("triplet scattering length a_t (fm)")
-    ax0.set_ylabel("triplet effective range r_t (fm)")
-    ax0.set_title("np triplet low-energy parameters")
+    ax0.set_xlabel("triplet scattering length a_t (fm)", fontsize=13)
+    ax0.set_ylabel("triplet effective range r_t (fm)", fontsize=13)
+    ax0.set_title("np triplet low-energy parameters", fontsize=14)
     ax0.grid(True, ls=":", lw=0.6, alpha=0.6)
-    ax0.legend(frameon=True, fontsize=8, loc="upper right")
+    ax0.tick_params(axis="both", labelsize=11.5)
+    ax0.legend(frameon=True, fontsize=10.5, loc="lower right")
     ax0.text(
         0.02,
         0.02,
@@ -203,12 +208,12 @@ def main() -> None:
         transform=ax0.transAxes,
         va="bottom",
         ha="left",
-        fontsize=9,
+        fontsize=11,
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.85, "edgecolor": "0.85"},
     )
 
     # Panel B: singlet channel summary (a_s vs r_s)
-    ax1 = fig.add_subplot(gs[0, 1])
+    ax1 = fig.add_subplot(gs[1, 0])
     for r in rows:
         label = f"eq{r['eq_label']}"
         x = float(r["a_s_fm"])
@@ -221,14 +226,15 @@ def main() -> None:
         else:
             ax1.plot([x], [y], marker="o", lw=0, label=label)
 
-    ax1.set_xlabel("singlet scattering length a_s (fm)")
-    ax1.set_ylabel("singlet effective range r_s (fm)")
-    ax1.set_title("np singlet low-energy parameters")
+    ax1.set_xlabel("singlet scattering length a_s (fm)", fontsize=13)
+    ax1.set_ylabel("singlet effective range r_s (fm)", fontsize=13)
+    ax1.set_title("np singlet low-energy parameters", fontsize=14)
     ax1.grid(True, ls=":", lw=0.6, alpha=0.6)
-    ax1.legend(frameon=True, fontsize=8, loc="upper right")
+    ax1.tick_params(axis="both", labelsize=11.5)
+    ax1.legend(frameon=True, fontsize=10.5, loc="upper right")
 
-    fig.suptitle("Phase 7 / Step 7.9.2: np scattering baseline (observables fixed)", y=1.03)
-    fig.tight_layout()
+    fig.suptitle("np scattering baseline (observables fixed)", y=0.995, fontsize=15)
+    fig.subplots_adjust(left=0.10, right=0.98, top=0.94, bottom=0.08, hspace=0.35)
 
     out_png = out_dir / "nuclear_np_scattering_baseline.png"
     fig.savefig(out_png, bbox_inches="tight")

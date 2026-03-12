@@ -1,0 +1,38 @@
+{
+  "generated_utc": "2026-03-07T04:50:57.191105+00:00",
+  "session_label": "22MAY11XA",
+  "expected_internal_id": "AUA020",
+  "input_root": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\22MAY11XA\\extracted",
+  "scan_summary": {
+    "n_netcdf_scanned": 206,
+    "session_value_counts": {
+      "RD2205": 206
+    },
+    "observed_session_values": [
+      "RD2205"
+    ],
+    "status": "watch",
+    "alias_confirmed": false,
+    "rationale": "expected internal id was not found in scanned Session metadata"
+  },
+  "session_value_examples": {
+    "RD2205": [
+      "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\22MAY11XA\\extracted\\22MAY11XA\\Apriori\\Antenna.nc",
+      "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\22MAY11XA\\extracted\\22MAY11XA\\Apriori\\Eccentricity.nc",
+      "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\22MAY11XA\\extracted\\22MAY11XA\\Apriori\\Source.nc",
+      "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\22MAY11XA\\extracted\\22MAY11XA\\Apriori\\Station.nc",
+      "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\22MAY11XA\\extracted\\22MAY11XA\\CrossReference\\ObsCrossRef.nc"
+    ]
+  },
+  "wrapper_files_sample": [
+    "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\22MAY11XA\\extracted\\22MAY11XA\\22MAY11XA_V001_iWACO_kall.wrp",
+    "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\22MAY11XA\\extracted\\22MAY11XA\\22MAY11XA_V002_iGSFC_kall.wrp",
+    "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\22MAY11XA\\extracted\\22MAY11XA\\22MAY11XA_V003_iGSFC_kall.wrp",
+    "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\22MAY11XA\\extracted\\22MAY11XA\\22MAY11XA_V004_iGSFC_kall.wrp",
+    "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\22MAY11XA\\extracted\\22MAY11XA\\22MAY11XA_V004_iIVS_kall.wrp"
+  ],
+  "outputs": {
+    "json": "C:\\develop\\waveP\\output\\vlbi\\vlbi_22may11xa_session_identity_audit.json",
+    "csv": "C:\\develop\\waveP\\output\\vlbi\\vlbi_22may11xa_session_identity_audit.csv"
+  }
+}

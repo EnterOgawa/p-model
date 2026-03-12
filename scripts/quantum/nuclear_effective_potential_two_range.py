@@ -1,10 +1,39 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import csv
 import json
 import math
 from pathlib import Path
+
+
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
+# 関数: `_configure_japanese_font` の入出力契約と処理意図を定義する。
+def _configure_japanese_font() -> None:
+    import matplotlib as mpl
+    from matplotlib import font_manager as fm
+
+    candidates = [
+        "Yu Gothic",
+        "Meiryo",
+        "MS Gothic",
+        "MS PGothic",
+        "Noto Sans CJK JP",
+        "Noto Sans JP",
+        "IPAexGothic",
+    ]
+    available = {f.name for f in fm.fontManager.ttflist}
+    for name in candidates:
+        if name in available:
+            mpl.rcParams["font.family"] = name
+            mpl.rcParams["font.sans-serif"] = [name] + list(mpl.rcParams.get("font.sans-serif", []))
+            break
+
+    mpl.rcParams["axes.unicode_minus"] = False
 
 
 # 関数: `_sha256` の入出力契約と処理意図を定義する。
@@ -22,6 +51,47 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
             h.update(b)
 
     return h.hexdigest()
+
+
+# 関数: `_normalize_cache_key_value` の入出力契約と処理意図を定義する。
+def _normalize_cache_key_value(obj: object) -> object:
+    """
+    Convert nested Python objects into a stable, JSON-serializable key payload.
+    Floats are rounded to reduce cache misses from tiny binary-representation noise.
+    """
+    if isinstance(obj, bool | int | str) or obj is None:
+        return obj
+
+    if isinstance(obj, float):
+        if math.isnan(obj):
+            return "NaN"
+
+        if math.isinf(obj):
+            return ("+Inf" if obj > 0 else "-Inf")
+
+        return round(float(obj), 12)
+
+    if isinstance(obj, Path):
+        return str(obj)
+
+    if isinstance(obj, dict):
+        items = sorted(obj.items(), key=lambda kv: str(kv[0]))
+        return {str(k): _normalize_cache_key_value(v) for k, v in items}
+
+    if isinstance(obj, (list, tuple)):
+        return [_normalize_cache_key_value(v) for v in obj]
+
+    return str(obj)
+
+
+# 関数: `_build_call_cache_key` の入出力契約と処理意図を定義する。
+def _build_call_cache_key(*, fn_name: str, args: tuple[object, ...], kwargs: dict[str, object]) -> str:
+    payload = {
+        "fn": fn_name,
+        "args": _normalize_cache_key_value(list(args)),
+        "kwargs": _normalize_cache_key_value(kwargs),
+    }
+    return json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
 # 関数: `_load_json` の入出力契約と処理意図を定義する。
@@ -5421,12 +5491,117 @@ def main(argv: list[str] | None = None) -> None:
         default="7.9.8",
         help="Select which roadmap step output to generate (default: 7.9.8).",
     )
+    p.add_argument(
+        "--no-fit-cache",
+        action="store_true",
+        help="Disable persistent fit-result cache and recompute all fit calls.",
+    )
+    p.add_argument(
+        "--reset-fit-cache",
+        action="store_true",
+        help="Delete the persistent fit cache before this run.",
+    )
+    p.add_argument(
+        "--eq-only",
+        type=int,
+        choices=[18, 19],
+        default=None,
+        help="Render/export only one dataset label (18 or 19).",
+    )
+    p.add_argument(
+        "--export-pdf",
+        action="store_true",
+        help="Also export PDF beside PNG for the rendered figure.",
+    )
     args = p.parse_args(argv)
     step = str(args.step)
+    eq_only: int | None = int(args.eq_only) if args.eq_only is not None else None
 
     root = Path(__file__).resolve().parents[2]
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
+
+    fit_cache_path = out_dir / "nuclear_effective_potential_fit_cache.json"
+    fit_cache_enabled = not bool(args.no_fit_cache)
+    fit_cache_dirty = False
+    fit_cache_hits = 0
+    fit_cache_misses = 0
+    fit_cache_store: dict[str, dict[str, object]] = {}
+
+    if fit_cache_enabled:
+        if args.reset_fit_cache and fit_cache_path.exists():
+            fit_cache_path.unlink(missing_ok=True)
+
+        if fit_cache_path.exists():
+            try:
+                raw_cache = _load_json(fit_cache_path)
+                payload = raw_cache.get("cache") if isinstance(raw_cache.get("cache"), dict) else raw_cache
+                if isinstance(payload, dict):
+                    fit_cache_store = {
+                        str(k): (v if isinstance(v, dict) else {}) for k, v in payload.items()
+                    }
+            except Exception:
+                fit_cache_store = {}
+
+    # 関数: `_cached_callable` の入出力契約と処理意図を定義する。
+    def _cached_callable(tag: str, fn):
+        # 関数: `_wrapped` の入出力契約と処理意図を定義する。
+        def _wrapped(*f_args, **f_kwargs):
+            nonlocal fit_cache_dirty, fit_cache_hits, fit_cache_misses
+            if not fit_cache_enabled:
+                return fn(*f_args, **f_kwargs)
+
+            bucket = fit_cache_store.setdefault(tag, {})
+            key = _build_call_cache_key(fn_name=tag, args=tuple(f_args), kwargs=dict(f_kwargs))
+            if key in bucket:
+                fit_cache_hits += 1
+                return copy.deepcopy(bucket[key])
+
+            value = fn(*f_args, **f_kwargs)
+            try:
+                json.dumps(value, ensure_ascii=False)
+                bucket[key] = copy.deepcopy(value)
+                fit_cache_dirty = True
+                fit_cache_misses += 1
+            except Exception:
+                pass
+            return value
+
+        return _wrapped
+
+    orig_fit_triplet_two_range = globals()["_fit_triplet_two_range"]
+    orig_fit_triplet_two_range_pion = globals()["_fit_triplet_two_range_pion_constrained"]
+    orig_fit_triplet_three_range_tail = globals()["_fit_triplet_three_range_tail_pion_constrained"]
+    orig_fit_triplet_three_range_barrier = globals()["_fit_triplet_three_range_barrier_tail_pion_constrained"]
+    orig_fit_triplet_three_range_barrier_free = globals()["_fit_triplet_three_range_barrier_tail_pion_constrained_free_depth"]
+    orig_fit_triplet_repulsive_core = globals()["_fit_triplet_repulsive_core_fixed_geometry"]
+    orig_fit_singlet_v2 = globals()["_fit_v2s_for_singlet"]
+    orig_fit_singlet_v1v2 = globals()["_fit_v1v2_for_singlet_by_a_and_r"]
+    orig_fit_singlet_v1v2_barrier_tail = globals()["_fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail"]
+
+    _fit_triplet_two_range = _cached_callable("fit_triplet_two_range", orig_fit_triplet_two_range)
+    _fit_triplet_two_range_pion_constrained = _cached_callable(
+        "fit_triplet_two_range_pion_constrained", orig_fit_triplet_two_range_pion
+    )
+    _fit_triplet_three_range_tail_pion_constrained = _cached_callable(
+        "fit_triplet_three_range_tail_pion_constrained", orig_fit_triplet_three_range_tail
+    )
+    _fit_triplet_three_range_barrier_tail_pion_constrained = _cached_callable(
+        "fit_triplet_three_range_barrier_tail_pion_constrained", orig_fit_triplet_three_range_barrier
+    )
+    _fit_triplet_three_range_barrier_tail_pion_constrained_free_depth = _cached_callable(
+        "fit_triplet_three_range_barrier_tail_pion_constrained_free_depth", orig_fit_triplet_three_range_barrier_free
+    )
+    _fit_triplet_repulsive_core_fixed_geometry = _cached_callable(
+        "fit_triplet_repulsive_core_fixed_geometry", orig_fit_triplet_repulsive_core
+    )
+    _fit_v2s_for_singlet = _cached_callable("fit_v2s_for_singlet", orig_fit_singlet_v2)
+    _fit_v1v2_for_singlet_by_a_and_r = _cached_callable(
+        "fit_v1v2_for_singlet_by_a_and_r", orig_fit_singlet_v1v2
+    )
+    _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail = _cached_callable(
+        "fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail", orig_fit_singlet_v1v2_barrier_tail
+    )
 
     # Exact SI constants (for conversion only).
     c = 299_792_458.0
@@ -5487,6 +5662,11 @@ def main(argv: list[str] | None = None) -> None:
             },
         },
     ]
+    if eq_only is not None:
+        datasets = [d for d in datasets if int(d.get("eq_label", -1)) == eq_only]
+        # 条件分岐: `not datasets` を満たす経路を評価する。
+        if not datasets:
+            raise SystemExit(f"[fail] no dataset found for --eq-only {eq_only}")
 
     pion_scale = (
         _load_pion_range_scale(root=root)
@@ -7390,6 +7570,25 @@ def main(argv: list[str] | None = None) -> None:
         tol_a_fm = 0.2
         tol_r_fm = 0.05
 
+        legacy_step85_metrics = (
+            out_dir / "nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan_metrics.json"
+        )
+        legacy_step85 = _load_json(legacy_step85_metrics) if legacy_step85_metrics.exists() else {}
+        legacy_step85_scan = (
+            legacy_step85.get("barrier_tail_channel_split_kq_triplet_barrier_fraction_scan")
+            if isinstance(legacy_step85.get("barrier_tail_channel_split_kq_triplet_barrier_fraction_scan"), dict)
+            else None
+        )
+        if isinstance(legacy_step85_scan, dict):
+            legacy_sel = legacy_step85_scan.get("selected")
+            if isinstance(legacy_sel, dict):
+                legacy_frac = float(legacy_sel.get("barrier_len_fraction_t", float("nan")))
+                legacy_k = float(legacy_sel.get("k_t", float("nan")))
+                if math.isfinite(legacy_frac) and math.isfinite(legacy_k):
+                    triplet_barrier_len_fraction_best = float(legacy_frac)
+                    barrier_height_factor_kq_t_best = float(legacy_k)
+                    barrier_tail_channel_split_kq_triplet_barrier_fraction_scan = legacy_step85_scan
+
         # Precompute the frozen singlet fit once (does not depend on the triplet scan params).
         r1_s_fm_fixed = float(singlet_r1_over_lambda_pi_best) * float(lambda_pi_pm_fm)
         r2_s_fm_fixed = float(singlet_r2_over_lambda_pi_best) * float(lambda_pi_pm_fm)
@@ -7442,184 +7641,185 @@ def main(argv: list[str] | None = None) -> None:
 
         # Scan: triplet barrier/tail split fraction and a small grid on k_t (q_t fixed from 7.13.8.4).
 
-        barrier_len_fraction_grid = [0.1, 0.15, 0.2, 0.25, 0.3]
-        k_t_grid = [0.0, 0.5, 1.0, 2.0, float(k_t_prev)]
+        if triplet_barrier_len_fraction_best is None or barrier_height_factor_kq_t_best is None:
+            barrier_len_fraction_grid = [0.1, 0.15, 0.2, 0.25, 0.3]
+            k_t_grid = [0.0, 0.5, 1.0, 2.0, float(k_t_prev)]
 
-        scan_rows: list[dict[str, object]] = []
-        best_rank: tuple[int, int, float, float, float, float, float, float] | None = None
-        best_frac: float | None = None
-        best_k: float | None = None
+            scan_rows: list[dict[str, object]] = []
+            best_rank: tuple[int, int, float, float, float, float, float, float] | None = None
+            best_frac: float | None = None
+            best_k: float | None = None
 
-        for frac in barrier_len_fraction_grid:
-            for k_t in k_t_grid:
-                per_ds: list[dict[str, object]] = []
-                outside_count = 0
-                max_dist_v2t = 0.0
-                min_margin_v2t = float("inf")
-                max_triplet_pen = 0.0
+            for frac in barrier_len_fraction_grid:
+                for k_t in k_t_grid:
+                    per_ds: list[dict[str, object]] = []
+                    outside_count = 0
+                    max_dist_v2t = 0.0
+                    min_margin_v2t = float("inf")
+                    max_triplet_pen = 0.0
 
-                for d in datasets:
-                    label = str(d["label"])
-                    eq_label = int(d["eq_label"])
-                    trip = d["triplet"]
-                    sing = d["singlet"]
+                    for d in datasets:
+                        label = str(d["label"])
+                        eq_label = int(d["eq_label"])
+                        trip = d["triplet"]
+                        sing = d["singlet"]
 
-                    tfit = _fit_triplet_three_range_barrier_tail_pion_constrained_free_depth(
-                        b_mev=b_mev,
-                        targets=trip,
-                        mu_mev=mu_mev,
-                        hbarc_mev_fm=hbarc_mev_fm,
-                        lambda_pi_fm=float(lambda_pi_pm_fm),
-                        tail_len_over_lambda=1.0,
-                        barrier_len_fraction=float(frac),
-                        barrier_height_factor=float(k_t),
-                        tail_depth_factor=float(q_t_fixed),
+                        tfit = _fit_triplet_three_range_barrier_tail_pion_constrained_free_depth(
+                            b_mev=b_mev,
+                            targets=trip,
+                            mu_mev=mu_mev,
+                            hbarc_mev_fm=hbarc_mev_fm,
+                            lambda_pi_fm=float(lambda_pi_pm_fm),
+                            tail_len_over_lambda=1.0,
+                            barrier_len_fraction=float(frac),
+                            barrier_height_factor=float(k_t),
+                            tail_depth_factor=float(q_t_fixed),
+                        )
+                        a_t_fit = float(tfit.get("a_exact_fm", float("nan")))
+                        ere_t = tfit.get("ere") if isinstance(tfit.get("ere"), dict) else {}
+                        r_t_fit = float(ere_t.get("r_eff_fm", float("nan"))) if isinstance(ere_t, dict) else float("nan")
+                        v2t_fit = float(ere_t.get("v2_fm3", float("nan"))) if isinstance(ere_t, dict) else float("nan")
+
+                        da_t = a_t_fit - float(trip["a_t_fm"])
+                        dr_t = r_t_fit - float(trip["r_t_fm"])
+
+                        ok_ar = bool(
+                            math.isfinite(da_t)
+                            and math.isfinite(dr_t)
+                            and abs(float(da_t)) <= float(tol_a_fm)
+                            and abs(float(dr_t)) <= float(tol_r_fm)
+                        )
+                        ok_v2t = bool(
+                            math.isfinite(v2t_fit) and float(v2t_env_scan["min"]) <= float(v2t_fit) <= float(v2t_env_scan["max"])
+                        )
+
+                        dist_v2t = dist_to_env(float(v2t_fit), v2t_env_scan)
+                        max_dist_v2t = max(float(max_dist_v2t), float(dist_v2t))
+                        min_margin_v2t = min(float(min_margin_v2t), float(margin_to_env(float(v2t_fit), v2t_env_scan)))
+
+                        # 条件分岐: `math.isfinite(da_t) and math.isfinite(dr_t)` を満たす経路を評価する。
+                        if math.isfinite(da_t) and math.isfinite(dr_t):
+                            triplet_pen = max(abs(float(da_t)) / float(tol_a_fm), abs(float(dr_t)) / float(tol_r_fm))
+                            max_triplet_pen = max(float(max_triplet_pen), float(triplet_pen))
+                        else:
+                            max_triplet_pen = float("inf")
+
+                        # Frozen singlet check (from 7.13.8.4).
+
+                        sf = singlet_fixed_by_eq.get(eq_label, {})
+                        r_s_fit = float(sf.get("r_s_fit_fm", float("nan")))
+                        v2s_pred = float(sf.get("v2s_pred_fm3", float("nan")))
+                        ok_rs = bool(math.isfinite(r_s_fit) and float(rs_env_scan["min"]) <= float(r_s_fit) <= float(rs_env_scan["max"]))
+                        ok_v2s = bool(
+                            math.isfinite(v2s_pred) and float(v2s_env_scan["min"]) <= float(v2s_pred) <= float(v2s_env_scan["max"])
+                        )
+
+                        outside_count += int(not ok_ar) + int(not ok_v2t) + int(not ok_rs) + int(not ok_v2s)
+
+                        per_ds.append(
+                            {
+                                "label": label,
+                                "eq_label": eq_label,
+                                "a_t_fit_fm": (float(a_t_fit) if math.isfinite(a_t_fit) else None),
+                                "r_t_fit_fm": (float(r_t_fit) if math.isfinite(r_t_fit) else None),
+                                "v2t_fit_fm3": (float(v2t_fit) if math.isfinite(v2t_fit) else None),
+                                "a_t_fit_minus_obs_fm": (float(da_t) if math.isfinite(da_t) else None),
+                                "r_t_fit_minus_obs_fm": (float(dr_t) if math.isfinite(dr_t) else None),
+                                "within_triplet_ar_tolerance": bool(ok_ar),
+                                "within_v2t_envelope": bool(ok_v2t),
+                                "r1_s_fm": float(r1_s_fm_fixed),
+                                "r2_s_fm": float(r2_s_fm_fixed),
+                                "v2s_pred_fm3": (float(v2s_pred) if math.isfinite(v2s_pred) else None),
+                                "r_s_fit_fm": (float(r_s_fit) if math.isfinite(r_s_fit) else None),
+                                "r_s_fit_minus_obs_fm": (
+                                    float(r_s_fit - float(sing["r_s_fm"])) if math.isfinite(r_s_fit) else None
+                                ),
+                                "within_r_s_envelope": bool(ok_rs),
+                                "within_v2s_envelope": bool(ok_v2s),
+                                "error": None,
+                            }
+                        )
+
+                    within_all = bool(outside_count == 0)
+
+                    # Selection: prefer strict pass; then fewer violations; then keep v2t away from the envelope edge.
+                    v2_margin_rank = -float(min_margin_v2t) if math.isfinite(min_margin_v2t) else float("inf")
+                    rank = (
+                        0 if within_all else 1,
+                        int(outside_count),
+                        float(v2_margin_rank),
+                        float(max_triplet_pen) if math.isfinite(max_triplet_pen) else float("inf"),
+                        abs(float(frac) - 0.5),
+                        abs(float(k_t) - float(k_t_prev)),
+                        float(frac),
+                        float(k_t),
                     )
-                    a_t_fit = float(tfit.get("a_exact_fm", float("nan")))
-                    ere_t = tfit.get("ere") if isinstance(tfit.get("ere"), dict) else {}
-                    r_t_fit = float(ere_t.get("r_eff_fm", float("nan"))) if isinstance(ere_t, dict) else float("nan")
-                    v2t_fit = float(ere_t.get("v2_fm3", float("nan"))) if isinstance(ere_t, dict) else float("nan")
-
-                    da_t = a_t_fit - float(trip["a_t_fm"])
-                    dr_t = r_t_fit - float(trip["r_t_fm"])
-
-                    ok_ar = bool(
-                        math.isfinite(da_t)
-                        and math.isfinite(dr_t)
-                        and abs(float(da_t)) <= float(tol_a_fm)
-                        and abs(float(dr_t)) <= float(tol_r_fm)
-                    )
-                    ok_v2t = bool(
-                        math.isfinite(v2t_fit) and float(v2t_env_scan["min"]) <= float(v2t_fit) <= float(v2t_env_scan["max"])
-                    )
-
-                    dist_v2t = dist_to_env(float(v2t_fit), v2t_env_scan)
-                    max_dist_v2t = max(float(max_dist_v2t), float(dist_v2t))
-                    min_margin_v2t = min(float(min_margin_v2t), float(margin_to_env(float(v2t_fit), v2t_env_scan)))
-
-                    # 条件分岐: `math.isfinite(da_t) and math.isfinite(dr_t)` を満たす経路を評価する。
-                    if math.isfinite(da_t) and math.isfinite(dr_t):
-                        triplet_pen = max(abs(float(da_t)) / float(tol_a_fm), abs(float(dr_t)) / float(tol_r_fm))
-                        max_triplet_pen = max(float(max_triplet_pen), float(triplet_pen))
-                    else:
-                        max_triplet_pen = float("inf")
-
-                    # Frozen singlet check (from 7.13.8.4).
-
-                    sf = singlet_fixed_by_eq.get(eq_label, {})
-                    r_s_fit = float(sf.get("r_s_fit_fm", float("nan")))
-                    v2s_pred = float(sf.get("v2s_pred_fm3", float("nan")))
-                    ok_rs = bool(math.isfinite(r_s_fit) and float(rs_env_scan["min"]) <= float(r_s_fit) <= float(rs_env_scan["max"]))
-                    ok_v2s = bool(
-                        math.isfinite(v2s_pred) and float(v2s_env_scan["min"]) <= float(v2s_pred) <= float(v2s_env_scan["max"])
-                    )
-
-                    outside_count += int(not ok_ar) + int(not ok_v2t) + int(not ok_rs) + int(not ok_v2s)
-
-                    per_ds.append(
+                    scan_rows.append(
                         {
-                            "label": label,
-                            "eq_label": eq_label,
-                            "a_t_fit_fm": (float(a_t_fit) if math.isfinite(a_t_fit) else None),
-                            "r_t_fit_fm": (float(r_t_fit) if math.isfinite(r_t_fit) else None),
-                            "v2t_fit_fm3": (float(v2t_fit) if math.isfinite(v2t_fit) else None),
-                            "a_t_fit_minus_obs_fm": (float(da_t) if math.isfinite(da_t) else None),
-                            "r_t_fit_minus_obs_fm": (float(dr_t) if math.isfinite(dr_t) else None),
-                            "within_triplet_ar_tolerance": bool(ok_ar),
-                            "within_v2t_envelope": bool(ok_v2t),
-                            "r1_s_fm": float(r1_s_fm_fixed),
-                            "r2_s_fm": float(r2_s_fm_fixed),
-                            "v2s_pred_fm3": (float(v2s_pred) if math.isfinite(v2s_pred) else None),
-                            "r_s_fit_fm": (float(r_s_fit) if math.isfinite(r_s_fit) else None),
-                            "r_s_fit_minus_obs_fm": (
-                                float(r_s_fit - float(sing["r_s_fm"])) if math.isfinite(r_s_fit) else None
-                            ),
-                            "within_r_s_envelope": bool(ok_rs),
-                            "within_v2s_envelope": bool(ok_v2s),
-                            "error": None,
+                            "barrier_len_fraction_t": float(frac),
+                            "k_t": float(k_t),
+                            "q_t_fixed": float(q_t_fixed),
+                            "within_all": bool(within_all),
+                            "outside_count": int(outside_count),
+                            "max_dist_v2t_fm3": (float(max_dist_v2t) if math.isfinite(max_dist_v2t) else None),
+                            "min_margin_v2t_fm3": (float(min_margin_v2t) if math.isfinite(min_margin_v2t) else None),
+                            "max_triplet_ar_penalty": (float(max_triplet_pen) if math.isfinite(max_triplet_pen) else None),
+                            "per_dataset": per_ds,
                         }
                     )
+                    # 条件分岐: `best_rank is None or rank < best_rank` を満たす経路を評価する。
+                    if best_rank is None or rank < best_rank:
+                        best_rank = rank
+                        best_frac = float(frac)
+                        best_k = float(k_t)
 
-                within_all = bool(outside_count == 0)
+            # 条件分岐: `best_frac is None or best_k is None` を満たす経路を評価する。
 
-                # Selection: prefer strict pass; then fewer violations; then keep v2t away from the envelope edge.
-                v2_margin_rank = -float(min_margin_v2t) if math.isfinite(min_margin_v2t) else float("inf")
-                rank = (
-                    0 if within_all else 1,
-                    int(outside_count),
-                    float(v2_margin_rank),
-                    float(max_triplet_pen) if math.isfinite(max_triplet_pen) else float("inf"),
-                    abs(float(frac) - 0.5),
-                    abs(float(k_t) - float(k_t_prev)),
-                    float(frac),
-                    float(k_t),
-                )
-                scan_rows.append(
-                    {
-                        "barrier_len_fraction_t": float(frac),
-                        "k_t": float(k_t),
-                        "q_t_fixed": float(q_t_fixed),
-                        "within_all": bool(within_all),
-                        "outside_count": int(outside_count),
-                        "max_dist_v2t_fm3": (float(max_dist_v2t) if math.isfinite(max_dist_v2t) else None),
-                        "min_margin_v2t_fm3": (float(min_margin_v2t) if math.isfinite(min_margin_v2t) else None),
-                        "max_triplet_ar_penalty": (float(max_triplet_pen) if math.isfinite(max_triplet_pen) else None),
-                        "per_dataset": per_ds,
-                    }
-                )
-                # 条件分岐: `best_rank is None or rank < best_rank` を満たす経路を評価する。
-                if best_rank is None or rank < best_rank:
-                    best_rank = rank
-                    best_frac = float(frac)
-                    best_k = float(k_t)
+            if best_frac is None or best_k is None:
+                raise SystemExit("[fail] triplet barrier fraction scan produced no candidates")
 
-        # 条件分岐: `best_frac is None or best_k is None` を満たす経路を評価する。
-
-        if best_frac is None or best_k is None:
-            raise SystemExit("[fail] triplet barrier fraction scan produced no candidates")
-
-        triplet_barrier_len_fraction_best = float(best_frac)
-        barrier_height_factor_kq_t_best = float(best_k)
-        barrier_tail_channel_split_kq_triplet_barrier_fraction_scan = {
-            "source_step": "7.13.8.4",
-            "source_metrics_json": str(prev_r2_metrics),
-            "selected_channel_split_kq_from_7_13_8_4": {
-                "k_t_prev": float(k_t_prev),
-                "q_t_fixed": float(q_t_fixed),
-                "k_s": float(k_s_sel),
-                "q_s": float(q_s_sel),
-            },
-            "frozen_singlet_geometry_from_7_13_8_4": {
-                "r1_s_over_lambda_pi_pm_fixed": float(r1_over_fixed),
-                "r2_s_over_lambda_pi_pm_fixed": float(r2_over_fixed),
-            },
-            "scan_grids": {
-                "barrier_len_fraction_t_grid": [float(x) for x in barrier_len_fraction_grid],
-                "k_t_grid": [float(x) for x in k_t_grid],
-            },
-            "selected": {
-                "barrier_len_fraction_t": float(best_frac),
-                "k_t": float(best_k),
-                "q_t_fixed": float(q_t_fixed),
-                "rank": list(best_rank) if best_rank is not None else None,
-            },
-            "observed_envelope_v2s_fm3": v2s_env_scan,
-            "observed_envelope_v2t_fm3": v2t_env_scan,
-            "observed_envelope_r_s_fm": rs_env_scan,
-            "policy": {
-                "frozen_from_step": "Freeze singlet geometry (R1_s/λπ, R2_s/λπ) and (k_s,q_s) from Step 7.13.8.4.",
-                "triplet_scan": (
-                    "Scan triplet barrier_len_fraction_t (within L3=λπ) and a small grid on k_t, with q_t frozen; "
-                    "require triplet (a_t,r_t) within tolerance and v2t within envelope, while keeping the frozen singlet (r_s,v2s) within envelope."
-                ),
-                "triplet_ar_tolerance": {"tol_a_fm": float(tol_a_fm), "tol_r_fm": float(tol_r_fm)},
-                "selection_rule": (
-                    "Prefer strict pass (within_all), then fewer violations, then maximize the minimum margin of v2t to the envelope edge, "
-                    "then minimize triplet AR penalty, then prefer barrier_len_fraction_t closer to 0.5, then prefer k_t closer to the previous selection."
-                ),
-            },
-            "rows": scan_rows,
-        }
+            triplet_barrier_len_fraction_best = float(best_frac)
+            barrier_height_factor_kq_t_best = float(best_k)
+            barrier_tail_channel_split_kq_triplet_barrier_fraction_scan = {
+                "source_step": "7.13.8.4",
+                "source_metrics_json": str(prev_r2_metrics),
+                "selected_channel_split_kq_from_7_13_8_4": {
+                    "k_t_prev": float(k_t_prev),
+                    "q_t_fixed": float(q_t_fixed),
+                    "k_s": float(k_s_sel),
+                    "q_s": float(q_s_sel),
+                },
+                "frozen_singlet_geometry_from_7_13_8_4": {
+                    "r1_s_over_lambda_pi_pm_fixed": float(r1_over_fixed),
+                    "r2_s_over_lambda_pi_pm_fixed": float(r2_over_fixed),
+                },
+                "scan_grids": {
+                    "barrier_len_fraction_t_grid": [float(x) for x in barrier_len_fraction_grid],
+                    "k_t_grid": [float(x) for x in k_t_grid],
+                },
+                "selected": {
+                    "barrier_len_fraction_t": float(best_frac),
+                    "k_t": float(best_k),
+                    "q_t_fixed": float(q_t_fixed),
+                    "rank": list(best_rank) if best_rank is not None else None,
+                },
+                "observed_envelope_v2s_fm3": v2s_env_scan,
+                "observed_envelope_v2t_fm3": v2t_env_scan,
+                "observed_envelope_r_s_fm": rs_env_scan,
+                "policy": {
+                    "frozen_from_step": "Freeze singlet geometry (R1_s/λπ, R2_s/λπ) and (k_s,q_s) from Step 7.13.8.4.",
+                    "triplet_scan": (
+                        "Scan triplet barrier_len_fraction_t (within L3=λπ) and a small grid on k_t, with q_t frozen; "
+                        "require triplet (a_t,r_t) within tolerance and v2t within envelope, while keeping the frozen singlet (r_s,v2s) within envelope."
+                    ),
+                    "triplet_ar_tolerance": {"tol_a_fm": float(tol_a_fm), "tol_r_fm": float(tol_r_fm)},
+                    "selection_rule": (
+                        "Prefer strict pass (within_all), then fewer violations, then maximize the minimum margin of v2t to the envelope edge, "
+                        "then minimize triplet AR penalty, then prefer barrier_len_fraction_t closer to 0.5, then prefer k_t closer to the previous selection."
+                    ),
+                },
+                "rows": scan_rows,
+            }
 
     results: list[dict[str, object]] = []
     for d in datasets:
@@ -8512,12 +8712,83 @@ def main(argv: list[str] | None = None) -> None:
     rs_pred = [float(r["fit_singlet"]["ere"]["r_eff_fm"]) for r in results]
     rs_within = all(math.isfinite(v) and rs_env["min"] <= v <= rs_env["max"] for v in rs_pred)
 
+    _configure_japanese_font()
     import matplotlib.pyplot as plt
 
-    fig = plt.figure(figsize=(15.6, 8.6), dpi=160, constrained_layout=True)
-    gs = fig.add_gridspec(2, 3, wspace=0.25, hspace=0.25)
+    enlarged_readability_steps = {"7.9.7", "7.13.8", "7.13.8.5"}
+    # 条件分岐: `step in enlarged_readability_steps` を満たす経路を評価する。
+    if step in enlarged_readability_steps:
+        plt.rcParams.update(
+            {
+                "font.size": 20.5,
+                "axes.titlesize": 22.5,
+                "axes.labelsize": 20.8,
+                "xtick.labelsize": 18.8,
+                "ytick.labelsize": 18.8,
+                "legend.fontsize": 18.5,
+            }
+        )
+        # Part3 図23-25は1列表示で、各パネルの視認性を優先する。
+        max_dataset_cols = 1
+        # 図25-28（7.13.8 / 7.13.8.5）はより縦長+横幅拡張で、注記とX軸可読性を両立する。
+        if step in {"7.13.8", "7.13.8.5"}:
+            fig_w = 16.8
+            block_h = 20.4
+        else:
+            fig_w = 15.6
+            # 図23-24（7.9.7）は従来の拡大バランスを維持する。
+            block_h = 17.2
+        use_constrained_layout = False
+        legend_fontsize = 18.5
+        panel_note_fontsize = 17.0
+        # 3セット図の最上段注記は、軸内に完全に収まる右側中段へ固定する。
+        if step in {"7.13.8", "7.13.8.5"}:
+            top_note_x = 0.965
+            top_note_y = 0.52
+            top_note_ha = "right"
+            top_note_va = "center"
+        else:
+            top_note_x = 0.76
+            top_note_y = 0.50
+            top_note_ha = "left"
+            top_note_va = "center"
+    else:
+        plt.rcParams.update(
+            {
+                "font.size": 11.5,
+                "axes.titlesize": 13.0,
+                "axes.labelsize": 12.0,
+                "xtick.labelsize": 10.5,
+                "ytick.labelsize": 10.5,
+                "legend.fontsize": 10.0,
+            }
+        )
+        max_dataset_cols = 2
+        fig_w = 18.4
+        block_h = 12.8
+        use_constrained_layout = True
+        legend_fontsize = 9.5
+        panel_note_fontsize = 9.0
+        top_note_x = 0.02
+        top_note_y = 0.98
+        top_note_ha = "left"
+        top_note_va = "top"
 
-    for row, r in enumerate(results):
+    n_results = max(1, len(results))
+    dataset_cols = max_dataset_cols
+    dataset_blocks = (n_results + max_dataset_cols - 1) // max_dataset_cols
+    fig_h = block_h * dataset_blocks
+    fig = plt.figure(figsize=(fig_w, fig_h), dpi=160, constrained_layout=use_constrained_layout)
+    if step in {"7.13.8", "7.13.8.5"}:
+        gs_hspace = 0.56
+    else:
+        gs_hspace = 0.62 if step in enlarged_readability_steps else 0.34
+    gs = fig.add_gridspec(3 * dataset_blocks, dataset_cols, wspace=0.24, hspace=gs_hspace)
+
+    for dataset_idx, r in enumerate(results):
+        block_row = dataset_idx // max_dataset_cols
+        block_col = dataset_idx % max_dataset_cols
+        row0 = block_row * 3
         label = str(r["label"])
         geo = r["fit_triplet"]["geometry"]
         # 条件分岐: `step == "7.9.8"` を満たす経路を評価する。
@@ -8618,7 +8889,7 @@ def main(argv: list[str] | None = None) -> None:
             else 0.0
         )
 
-        ax0 = fig.add_subplot(gs[row, 0])
+        ax0 = fig.add_subplot(gs[row0, block_col])
         r_plot = [i * 0.02 for i in range(0, 501)]  # 0..10 fm
 
         sing_geo = r.get("fit_singlet", {}).get("geometry", {})
@@ -8735,13 +9006,13 @@ def main(argv: list[str] | None = None) -> None:
             vt = [v_profile(rr, vc_mev=vc, rc_fm=rc, r1_fm=r1, r2_fm=r2, r3_fm=r3, v1=v1t, v2=v2t, v3=v3t) for rr in r_plot]
             vs = [v_profile(rr, vc_mev=vc, rc_fm=rc, r1_fm=r1_s, r2_fm=r2_s, r3_fm=r3, v1=v1s, v2=v2s, v3=v3s) for rr in r_plot]
 
-        ax0.plot(r_plot, vt, lw=2.0, color="tab:blue", label="triplet (fit B,a_t,r_t,v2t)")
+        ax0.plot(r_plot, vt, lw=2.0, color="tab:blue", label="三重項（B, a_t, r_t, v2t をフィット）")
         # 条件分岐: `step == "7.9.6"` を満たす経路を評価する。
         if step == "7.9.6":
-            ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label="singlet (share V1; fit V2 by a_s)")
+            ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label="一重項（V1共有、a_sでV2をフィット）")
         # 条件分岐: 前段条件が不成立で、`step == "7.13.3"` を追加評価する。
         elif step == "7.13.3":
-            ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label="singlet (fit V1,V2(signed) by a_s,r_s)")
+            ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label="一重項（a_s, r_sで V1, V2 をフィット）")
         elif step in (
             "7.13.5",
             "7.13.6",
@@ -8753,12 +9024,12 @@ def main(argv: list[str] | None = None) -> None:
             "7.13.8.4",
             "7.13.8.5",
         ):
-            ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label="singlet (fit V1,V2>=0 by a_s,r_s; barrier+tail)")
+            ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label="一重項（a_s, r_sで V1, V2>=0 をフィット）")
         # 条件分岐: 前段条件が不成立で、`step == "7.13.4"` を追加評価する。
         elif step == "7.13.4":
-            ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label="singlet (fit V1,V2(signed) by a_s,r_s; shared tail)")
+            ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label="一重項（a_s, r_sで V1, V2 をフィット、テール共有）")
         else:
-            ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label="singlet (fit V1,V2 by a_s,r_s)")
+            ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label="一重項（a_s, r_sで V1, V2 をフィット）")
 
         # 条件分岐: `step == "7.9.8" and rc > 0.0` を満たす経路を評価する。
 
@@ -8827,44 +9098,44 @@ def main(argv: list[str] | None = None) -> None:
         ):
             ax0.axvline(float(lambda_pi_pm_fm), color="tab:green", lw=1.1, ls="--")
 
-        ax0.set_xlabel("r (fm)")
-        ax0.set_ylabel("V(r) (MeV)")
+        ax0.set_xlabel("距離 r（fm）")
+        ax0.set_ylabel("ポテンシャル V(r)（MeV）")
         # 条件分岐: `step == "7.13.3"` を満たす経路を評価する。
         if step == "7.13.3":
-            title = f"{label}: 2-range (λπ constrained; signed V2_s)"
+            title = f"{label}\n2レンジ（λπ拘束、符号付きV2_s）"
         # 条件分岐: 前段条件が不成立で、`step in ("7.13.5", "7.13.6")` を追加評価する。
         elif step in ("7.13.5", "7.13.6"):
-            title = f"{label}: 3-range (λπ constrained; barrier+tail split)"
+            title = f"{label}\n3レンジ（λπ拘束、障壁+テール分割）"
         # 条件分岐: 前段条件が不成立で、`step in ("7.13.7", "7.13.8", "7.13.8.1")` を追加評価する。
         elif step in ("7.13.7", "7.13.8", "7.13.8.1"):
-            title = f"{label}: 3-range (λπ constrained; barrier+tail split; free tail depth)"
+            title = f"{label}\n3レンジ（λπ拘束、障壁+テール分割、テール深さ自由）"
         # 条件分岐: 前段条件が不成立で、`step == "7.13.8.2"` を追加評価する。
         elif step == "7.13.8.2":
-            title = f"{label}: 3-range (λπ constrained; barrier+tail split; channel-split)"
+            title = f"{label}\n3レンジ（λπ拘束、障壁+テール分割、チャネル分離）"
         # 条件分岐: 前段条件が不成立で、`step == "7.13.8.3"` を追加評価する。
         elif step == "7.13.8.3":
-            title = f"{label}: 3-range (λπ constrained; barrier+tail split; channel-split + singlet R1_s scan)"
+            title = f"{label}\n3レンジ（チャネル分離 + 一重項R1_s走査）"
         # 条件分岐: 前段条件が不成立で、`step == "7.13.8.4"` を追加評価する。
         elif step == "7.13.8.4":
-            title = f"{label}: 3-range (λπ constrained; barrier+tail split; channel-split + singlet R2_s scan)"
+            title = f"{label}\n3レンジ（チャネル分離 + 一重項R2_s走査）"
         # 条件分岐: 前段条件が不成立で、`step == "7.13.8.5"` を追加評価する。
         elif step == "7.13.8.5":
-            title = f"{label}: 3-range (λπ constrained; barrier+tail split; triplet barrier-fraction scan)"
+            title = f"{label}\n3レンジ（三重項障壁比率走査）"
         # 条件分岐: 前段条件が不成立で、`step == "7.13.4"` を追加評価する。
         elif step == "7.13.4":
-            title = f"{label}: 3-range (λπ constrained; shared tail)"
+            title = f"{label}\n3レンジ（λπ拘束、テール共有）"
         # 条件分岐: 前段条件が不成立で、`step == "7.9.8"` を追加評価する。
         elif step == "7.9.8":
-            title = f"{label}: repulsive core + two-range well"
+            title = f"{label}\n反発コア + 2レンジ井戸"
         else:
-            title = f"{label}: two-range well (shared geometry)"
+            title = f"{label}\n2レンジ井戸（幾何共有）"
 
         ax0.set_title(title)
         ax0.grid(True, ls=":", lw=0.6, alpha=0.6)
-        ax0.legend(frameon=True, fontsize=8, loc="lower right")
+        ax0.legend(frameon=True, fontsize=legend_fontsize, loc="lower right")
         ax0.text(
-            0.02,
-            0.98,
+            top_note_x,
+            top_note_y,
             (
                 (
                     (
@@ -8883,10 +9154,10 @@ def main(argv: list[str] | None = None) -> None:
                         if step == "7.13.3"
                         else (
                             (
-                                f"R1≈{r1:.3f} fm, R2≈{r2:.3f} fm, Rb≈{rb:.3f} fm, R3≈{r3:.3f} fm\n"
+                                f"R1≈{r1:.3f} fm, R2≈{r2:.3f} fm\nRb≈{rb:.3f} fm, R3≈{r3:.3f} fm\n"
                                 f"R1/λπ≈{(r1 / float(lambda_pi_pm_fm)):.3f}, R2/λπ≈{(r2 / float(lambda_pi_pm_fm)):.3f}, "
                                 f"Rb/λπ≈{(rb / float(lambda_pi_pm_fm)):.3f}, R3/λπ≈{(r3 / float(lambda_pi_pm_fm)):.3f}\n"
-                                f"V1t≈{v1t:.2f}, V2t≈{v2t:.2f}, Vb≈{vb_t:.2f}, Vt≈{vt_t:.2f} MeV\nV2s≈{v2s:.2f} MeV"
+                                f"V1t≈{v1t:.2f}, V2t≈{v2t:.2f} MeV\nVb≈{vb_t:.2f}, Vt≈{vt_t:.2f} MeV\nV2s≈{v2s:.2f} MeV"
                             )
                             if step in ("7.13.5", "7.13.6", "7.13.7", "7.13.8", "7.13.8.1", "7.13.8.2", "7.13.8.3", "7.13.8.4", "7.13.8.5")
                             else (
@@ -8899,30 +9170,31 @@ def main(argv: list[str] | None = None) -> None:
                 )
             ),
             transform=ax0.transAxes,
-            va="top",
-            ha="left",
-            fontsize=9,
+            va=top_note_va,
+            ha=top_note_ha,
+            fontsize=panel_note_fontsize,
             bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.85, "edgecolor": "0.85"},
+            clip_on=True,
         )
 
-        ax1 = fig.add_subplot(gs[row, 1])
+        ax1 = fig.add_subplot(gs[row0 + 1, block_col])
         ere_t = r["fit_triplet"]["ere"]
         pts = ere_t["points"]
         xs = [(p["k_fm1"] ** 2) for p in pts]
         ys = [p["kcot_fm1"] for p in pts]
-        ax1.plot(xs, ys, "o", ms=3.2, alpha=0.8, label="k-grid")
+        ax1.plot(xs, ys, "o", ms=3.2, alpha=0.8, label="kグリッド")
         coeffs = ere_t["coeffs"]
         c0 = float(coeffs["c0_fm1"])
         c2 = float(coeffs["c2_fm"])
         c4 = float(coeffs["c4_fm3"])
         x_line = [0.0, max(xs) if xs else 0.002**2]
         y_line = [c0 + c2 * x + c4 * (x * x) for x in x_line]
-        ax1.plot(x_line, y_line, "-", lw=2.0, color="0.35", label="ERE fit")
-        ax1.set_xlabel("k² (fm⁻²)")
-        ax1.set_ylabel("k cot δ (fm⁻¹)")
-        ax1.set_title("Triplet: ERE fit (target v2)")
+        ax1.plot(x_line, y_line, "-", lw=2.0, color="0.35", label="EREフィット")
+        ax1.set_xlabel("波数二乗 $k^2$（fm$^{-2}$）")
+        ax1.set_ylabel("有効レンジ関数 $k\\cot\\delta$（fm$^{-1}$）")
+        ax1.set_title("三重項: EREフィット（v2を目標）")
         ax1.grid(True, ls=":", lw=0.6, alpha=0.6)
-        ax1.legend(frameon=True, fontsize=9, loc="best")
+        ax1.legend(frameon=True, fontsize=legend_fontsize, loc="best")
         ax1.text(
             0.02,
             0.02,
@@ -8930,23 +9202,23 @@ def main(argv: list[str] | None = None) -> None:
             transform=ax1.transAxes,
             va="bottom",
             ha="left",
-            fontsize=9,
+            fontsize=panel_note_fontsize,
             bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.85, "edgecolor": "0.85"},
         )
 
-        ax2 = fig.add_subplot(gs[row, 2])
+        ax2 = fig.add_subplot(gs[row0 + 2, block_col])
         dt = r["comparison"]["triplet"]
         ds = r["comparison"]["singlet"]
         # 条件分岐: `step == "7.9.6"` を満たす経路を評価する。
         if step == "7.9.6":
-            names = ["v2t(fit)", "r_s(pred)", "v2s(pred)"]
+            names = ["v2t（フィット）", "r_s（予測）", "v2s（予測）"]
             deltas = [
                 float(dt["v2t_fit_minus_obs_fm3"]),
                 float(ds["r_s_pred_minus_obs_fm"]),
                 float(ds["v2s_pred_minus_obs_fm3"]),
             ]
         else:
-            names = ["v2t(fit)", "r_s(fit)", "v2s(pred)"]
+            names = ["v2t（フィット）", "r_s（フィット）", "v2s（予測）"]
             deltas = [
                 float(dt["v2t_fit_minus_obs_fm3"]),
                 float(ds["r_s_fit_minus_obs_fm"]),
@@ -8957,37 +9229,46 @@ def main(argv: list[str] | None = None) -> None:
         ax2.bar(range(len(names)), deltas, color=["tab:blue", "tab:orange", "tab:orange"], alpha=0.85)
         ax2.set_xticks(range(len(names)))
         ax2.set_xticklabels(names, rotation=10, ha="right")
-        ax2.set_ylabel("fit/pred − obs (units: fm³, fm, fm³)")
-        ax2.set_title("Cross-check vs observed (eq source)")
+        ax2.set_ylabel("フィット/予測 − 観測（単位: fm³, fm, fm³）")
+        ax2.set_title("観測値とのクロスチェック（eq出典）")
         ax2.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
+        crosscheck_note_y = 0.02 if step == "7.13.8" else 0.98
+        crosscheck_note_va = "bottom" if step == "7.13.8" else "top"
         ax2.text(
             0.02,
-            0.98,
-            "Triplet: v2 is targeted\nSinglet: a_s (+ r_s) are targeted; v2 is predicted",
+            crosscheck_note_y,
+            "三重項: v2を目標\n一重項: a_s（+ r_s）を目標; v2は予測",
             transform=ax2.transAxes,
-            va="top",
+            va=crosscheck_note_va,
             ha="left",
-            fontsize=9,
+            fontsize=panel_note_fontsize,
             bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.85, "edgecolor": "0.85"},
         )
 
     suptitle_by_step = {
-        "7.9.6": "Phase 7 / Step 7.9.6: two-range ansatz — fit triplet (B,a_t,r_t,v2t), predict singlet (r_s,v2s)",
-        "7.9.7": "Phase 7 / Step 7.9.7: two-range ansatz — fit triplet (B,a_t,r_t,v2t), fit singlet (a_s,r_s), predict v2s",
-        "7.9.8": "Phase 7 / Step 7.9.8: repulsive core + two-range — fit triplet (B,a_t,r_t,v2t), fit singlet (a_s,r_s), predict v2s",
-        "7.13.3": "Phase 7 / Step 7.13.3: λπ-constrained 2-range — fit triplet (B,a_t,r_t,v2t), fit singlet (a_s,r_s) with signed V2, predict v2s",
-        "7.13.4": "Phase 7 / Step 7.13.4: λπ-constrained 3-range (shared tail) — fit triplet (B,a_t,r_t,v2t), fit singlet (a_s,r_s) with signed V2, predict v2s",
-        "7.13.5": "Phase 7 / Step 7.13.5: λπ-constrained 3-range (barrier+tail split; mean-preserving) — fit triplet (B,a_t,r_t,v2t), fit singlet (a_s,r_s) with V2>=0, predict v2s",
-        "7.13.6": "Phase 7 / Step 7.13.6: λπ-constrained 3-range (barrier+tail split; mean-preserving) + k-scan — select k by cross-systematics, then fit triplet/singlet and predict v2s",
-        "7.13.7": "Phase 7 / Step 7.13.7: λπ-constrained 3-range (barrier+tail split; free tail depth) + q-scan — select q by cross-systematics, then fit triplet/singlet and predict v2s",
-        "7.13.8": "Phase 7 / Step 7.13.8: λπ-constrained 3-range (barrier+tail split; free tail depth) + (k,q)-scan — select (k,q) by cross-systematics, then fit triplet/singlet and predict v2s",
-        "7.13.8.1": "Phase 7 / Step 7.13.8.1: λπ-constrained 3-range (barrier+tail split; free tail depth) + extended (k,q)-scan — require triplet v2t and singlet v2s within envelope",
-        "7.13.8.2": "Phase 7 / Step 7.13.8.2: λπ-constrained 3-range (barrier+tail split; free tail depth) + channel-split (k,q) — scan (k_t,q_t,k_s,q_s) and fit triplet/singlet",
-        "7.13.8.3": "Phase 7 / Step 7.13.8.3: λπ-constrained 3-range (barrier+tail split; free tail depth) + channel-split (k,q) + singlet R1_s/λπ scan — reuse 7.13.8.2 selection and scan R1_s/λπ",
-        "7.13.8.4": "Phase 7 / Step 7.13.8.4: λπ-constrained 3-range (barrier+tail split; free tail depth) + channel-split (k,q) + singlet R2_s/λπ scan — freeze R1_s from 7.13.8.3 and scan R2_s/λπ",
-        "7.13.8.5": "Phase 7 / Step 7.13.8.5: λπ-constrained 3-range (barrier+tail split; free tail depth) + channel-split (k,q) + triplet barrier split scan — freeze singlet split from 7.13.8.4 and scan triplet barrier_len_fraction_t",
+        "7.9.6": "2レンジ仮説: 三重項(B,a_t,r_t,v2t)をフィットし、一重項(r_s,v2s)を予測",
+        "7.9.7": "2レンジ仮説: 三重項(B,a_t,r_t,v2t)と一重項(a_s,r_s)をフィットし、v2sを予測",
+        "7.9.8": "反発コア + 2レンジ: 三重項/一重項をフィットして v2s を予測",
+        "7.13.3": "λπ拘束2レンジ: 三重項をフィットし、一重項(a_s,r_s)を符号付きV2でフィット",
+        "7.13.4": "λπ拘束3レンジ（テール共有）: 三重項/一重項をフィットして v2s を予測",
+        "7.13.5": "λπ拘束3レンジ（障壁+テール分割）: 三重項/一重項をフィットして v2s を予測",
+        "7.13.6": "λπ拘束3レンジ（障壁+テール分割）+ k走査: k選択後に三重項/一重項をフィット",
+        "7.13.7": "λπ拘束3レンジ（障壁+テール分割、テール深さ自由）+ q走査",
+        "7.13.8": "λπ拘束3レンジ（障壁+テール分割、テール深さ自由）+ (k,q)走査",
+        "7.13.8.1": "λπ拘束3レンジ + 拡張(k,q)走査: 三重項v2t/一重項v2s包絡を要求",
+        "7.13.8.2": "λπ拘束3レンジ + チャネル分離(k,q): (k_t,q_t,k_s,q_s)を走査",
+        "7.13.8.3": "λπ拘束3レンジ + チャネル分離(k,q) + 一重項R1_s/λπ走査",
+        "7.13.8.4": "λπ拘束3レンジ + チャネル分離(k,q) + 一重項R2_s/λπ走査",
+        "7.13.8.5": "λπ拘束3レンジ + チャネル分離(k,q) + 三重項障壁比率走査",
     }
-    fig.suptitle(suptitle_by_step[step], y=1.02)
+    fig.suptitle(suptitle_by_step[step], y=0.995)
+    # 条件分岐: `not use_constrained_layout` を満たす経路を評価する。
+    if not use_constrained_layout:
+        if step in {"7.13.8", "7.13.8.5"}:
+            manual_hspace = 0.56
+        else:
+            manual_hspace = 0.62 if step in enlarged_readability_steps else 0.42
+        fig.subplots_adjust(left=0.07, right=0.98, top=0.93, bottom=0.05, wspace=0.24, hspace=manual_hspace)
 
     out_png_by_step = {
         "7.9.6": out_dir / "nuclear_effective_potential_two_range.png",
@@ -9006,8 +9287,57 @@ def main(argv: list[str] | None = None) -> None:
         "7.13.8.5": out_dir / "nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan.png",
     }
     out_png = out_png_by_step[step]
+    if eq_only is not None:
+        out_png = out_png.with_name(f"{out_png.stem}_eq{eq_only}{out_png.suffix}")
     fig.savefig(out_png, bbox_inches="tight")
+    out_pdf: Path | None = None
+    if args.export_pdf:
+        out_pdf = out_png.with_suffix(".pdf")
+        fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
+
+    split_png_by_eq: dict[str, str] = {}
+    split_steps = {"7.9.7", "7.13.8", "7.13.8.5"}
+    if step in split_steps and max_dataset_cols == 1 and dataset_blocks >= 2:
+        try:
+            arr = plt.imread(out_png)
+            # 条件分岐: `arr.ndim >= 2 and arr.shape[0] > 0` を満たす経路を評価する。
+            if arr.ndim >= 2 and arr.shape[0] > 0:
+                h_px = int(arr.shape[0])
+                # Split画像で軸ラベルが境界で欠けないよう、分割境界を下方向へずらす。
+                # 重要: 各sliceが重複しないよう、境界は単調増加の1本列として確定する。
+                split_pad_px = max(20, int(round(0.03 * h_px / dataset_blocks)))
+                base_bounds = [int(round(i * h_px / dataset_blocks)) for i in range(dataset_blocks + 1)]
+                adjusted_bounds = list(base_bounds)
+                for b in range(1, dataset_blocks):
+                    lower = adjusted_bounds[b - 1] + 1
+                    upper = base_bounds[b + 1] - 1
+                    candidate = base_bounds[b] + split_pad_px
+                    if candidate < lower:
+                        candidate = lower
+                    if candidate > upper:
+                        candidate = upper
+                    adjusted_bounds[b] = candidate
+
+                for idx, row in enumerate(results):
+                    block_row = idx // max_dataset_cols
+                    y0 = int(adjusted_bounds[block_row])
+                    y1 = int(adjusted_bounds[block_row + 1])
+                    # 条件分岐: `y1 <= y0` を満たす経路を評価する。
+                    if y1 <= y0:
+                        continue
+
+                    eq_label_obj = row.get("eq_label")
+                    try:
+                        eq_label = int(eq_label_obj)
+                    except Exception:
+                        eq_label = idx + 1
+                    split_key = f"eq{eq_label}"
+                    split_path = out_dir / f"{out_png.stem}_{split_key}{out_png.suffix}"
+                    plt.imsave(split_path, arr[y0:y1, ...])
+                    split_png_by_eq[split_key] = str(split_path)
+        except Exception as exc:
+            print(f"[warn] split-by-eq export skipped: {exc}")
 
     out_csv: Path | None = None
     # 条件分岐: `step == "7.13.3"` を満たす経路を評価する。
@@ -9867,6 +10197,11 @@ def main(argv: list[str] | None = None) -> None:
         },
         "outputs": {"png": str(out_png)},
     }
+    if out_pdf is not None:
+        metrics["outputs"]["pdf"] = str(out_pdf)
+
+    if split_png_by_eq:
+        metrics["outputs"]["png_split_by_eq"] = split_png_by_eq
 
     # 条件分岐: `out_csv is not None` を満たす経路を評価する。
     if out_csv is not None:
@@ -9931,7 +10266,17 @@ def main(argv: list[str] | None = None) -> None:
         "7.13.8.5": out_dir / "nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan_metrics.json",
     }
     out_json = out_json_by_step[step]
+    if eq_only is not None:
+        out_json = out_json.with_name(f"{out_json.stem}_eq{eq_only}{out_json.suffix}")
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    if fit_cache_enabled and fit_cache_dirty:
+        cache_payload = {
+            "cache_version": 1,
+            "step": step,
+            "cache": fit_cache_store,
+        }
+        fit_cache_path.write_text(json.dumps(cache_payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
     # Canonical alias (stable path) for downstream A-dependence / paper tables.
     # This avoids hard-coding long, step-specific filenames in other scripts.
@@ -9950,6 +10295,11 @@ def main(argv: list[str] | None = None) -> None:
 
     print("[ok] wrote:")
     print(f"  {out_png}")
+    if out_pdf is not None:
+        print(f"  {out_pdf}")
+    if split_png_by_eq:
+        for eq_key in sorted(split_png_by_eq.keys()):
+            print(f"  {split_png_by_eq[eq_key]}")
     # 条件分岐: `out_csv is not None` を満たす経路を評価する。
     if out_csv is not None:
         print(f"  {out_csv}")
@@ -9958,6 +10308,9 @@ def main(argv: list[str] | None = None) -> None:
     # 条件分岐: `canonical_json is not None` を満たす経路を評価する。
     if canonical_json is not None:
         print(f"  {canonical_json}")
+
+    if fit_cache_enabled:
+        print(f"  [fit-cache] path={fit_cache_path} hits={fit_cache_hits} misses={fit_cache_misses}")
 
 
 # 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。

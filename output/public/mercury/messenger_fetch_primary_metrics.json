@@ -1,0 +1,68 @@
+{
+  "generated_utc": "2026-03-07T15:31:04.093997+00:00",
+  "phase_step": "8.7.48.1",
+  "overall_status": "pass",
+  "base_url": "https://pds-geosciences.wustl.edu/messenger/urn-nasa-pds-mess-rs-raw/",
+  "data_root": "data/mercury/messenger",
+  "products": [
+    "data-odf",
+    "data-tnf"
+  ],
+  "years": [
+    "2015"
+  ],
+  "extensions": [
+    ".csv",
+    ".dat",
+    ".fmt",
+    ".lbl",
+    ".tab",
+    ".txt",
+    ".xml"
+  ],
+  "max_files_per_year": 80,
+  "fetch_root_metadata": true,
+  "force": false,
+  "status_counts": {
+    "download": 80,
+    "skip": 84,
+    "reject": 0
+  },
+  "n_tasks": 164,
+  "n_results": 164,
+  "total_bytes": 379278211,
+  "inspect_log": {
+    "products": {
+      "data-odf": {
+        "product_url": "https://pds-geosciences.wustl.edu/messenger/urn-nasa-pds-mess-rs-raw/data-odf/",
+        "root_status": "ok",
+        "root_files": 2,
+        "year_status": {
+          "2015": {
+            "status": "ok",
+            "files": 80
+          }
+        }
+      },
+      "data-tnf": {
+        "product_url": "https://pds-geosciences.wustl.edu/messenger/urn-nasa-pds-mess-rs-raw/data-tnf/",
+        "root_status": "ok",
+        "root_files": 2,
+        "year_status": {
+          "2015": {
+            "status": "ok",
+            "files": 80
+          }
+        }
+      }
+    }
+  },
+  "outputs_private": [
+    "output/private/mercury/messenger_fetch_primary_manifest.csv",
+    "output/private/mercury/messenger_fetch_primary_metrics.json"
+  ],
+  "outputs_public": [
+    "output/public/mercury/messenger_fetch_primary_manifest.csv",
+    "output/public/mercury/messenger_fetch_primary_metrics.json"
+  ]
+}

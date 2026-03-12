@@ -8,6 +8,10 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -344,7 +348,13 @@ def main() -> None:
 
     import matplotlib.pyplot as plt
 
-    fig, axes = plt.subplots(1, 3, figsize=(16.5, 4.8), dpi=150)
+    fig, axes = plt.subplots(3, 1, figsize=(13.8, 13.6), dpi=170)
+    panel_title_font = 15.4
+    axis_label_font = 13.8
+    tick_font = 12.8
+    legend_font = 13.2
+    summary_box_font = 13.0
+    suptitle_font = 18.4
 
     # Weihs
     ax = axes[0]
@@ -359,11 +369,12 @@ def main() -> None:
         ax.axvline(weihs_rec_w, color="tab:orange", ls=":", lw=1.6, label=f"natural window ≈ {weihs_rec_w:.3g} ns")
 
     ax.set_xscale("log")
-    ax.set_title(f"Weihs 1998: |S| vs window ({weihs_dataset_id})")
-    ax.set_xlabel("window half-width (ns)")
-    ax.set_ylabel("|S| (fixed variant)")
+    ax.set_title(f"Weihs 1998: |S| vs window ({weihs_dataset_id})", fontsize=panel_title_font)
+    ax.set_xlabel("window half-width (ns)", fontsize=axis_label_font)
+    ax.set_ylabel("|S| (fixed variant)", fontsize=axis_label_font)
     ax.grid(True, alpha=0.3)
-    ax.legend(fontsize=9, frameon=True)
+    ax.legend(fontsize=legend_font, frameon=True)
+    ax.tick_params(axis="both", labelsize=tick_font)
 
     # NIST
     ax = axes[1]
@@ -402,12 +413,13 @@ def main() -> None:
         title_bits.append(f"KS(A)={ksa:.3f}" if ksa is not None else "KS(A)=n/a")
         title_bits.append(f"KS(B)={ksb:.3f}" if ksb is not None else "KS(B)=n/a")
 
-    ax.set_title(" | ".join(title_bits))
+    ax.set_title(" | ".join(title_bits), fontsize=panel_title_font)
     ax.set_xscale("log")
-    ax.set_xlabel("window half-width (ns)")
-    ax.set_ylabel("CH J_prob (A1=0,B1=0)")
+    ax.set_xlabel("window half-width (ns)", fontsize=axis_label_font)
+    ax.set_ylabel("CH J_prob (A1=0,B1=0)", fontsize=axis_label_font)
     ax.grid(True, alpha=0.3)
-    ax.legend(fontsize=9, frameon=True)
+    ax.legend(fontsize=legend_font, frameon=True)
+    ax.tick_params(axis="both", labelsize=tick_font)
 
     # Delft
     ax = axes[2]
@@ -440,18 +452,41 @@ def main() -> None:
 
     ax.axvline(float(delft15_rec_off_ps) / 1000.0, color="0.25", ls=":", lw=1.0)
     ax.axhline(2.0, color="0.25", ls="--", lw=1.0, label="local bound S=2")
-    ax.set_title("Delft (event-ready): CHSH S vs start offset")
-    ax.set_xlabel("start offset (ns)")
-    ax.set_ylabel("CHSH S")
+    ax.set_title("Delft (event-ready): CHSH S vs start offset", fontsize=panel_title_font)
+    ax.set_xlabel("start offset (ns)", fontsize=axis_label_font)
+    ax.set_ylabel("CHSH S", fontsize=axis_label_font)
     ax.grid(True, alpha=0.3)
-    ax.legend(fontsize=9, frameon=True)
+    ax.legend(fontsize=legend_font, frameon=True, loc="lower right")
+    ax.tick_params(axis="both", labelsize=tick_font)
 
-    fig.tight_layout()
+    # Summary annotation inside the Delft panel (avoid extra bottom panel).
+    summary_lines = [
+        "Selection sensitivity summary",
+        f"Weihs Δ|S|={weihs_s_min:.3g}→{weihs_s_max:.3g}",
+        f"NIST ΔJ={nist_j_min:.3g}→{nist_j_max:.3g}",
+        f"Delft2015 ΔS={delft15_s_min:.3g}→{delft15_s_max:.3g}",
+        f"Delft2016 ΔS={delft16_s_min:.3g}→{delft16_s_max:.3g}" if delft16_s_min is not None and delft16_s_max is not None else "Delft2016: n/a",
+    ]
+    ax.text(
+        0.02,
+        0.96,
+        "\n".join(summary_lines),
+        transform=ax.transAxes,
+        va="top",
+        ha="left",
+        fontsize=summary_box_font,
+        bbox={"boxstyle": "round,pad=0.35", "facecolor": "white", "alpha": 0.9, "edgecolor": "0.8"},
+    )
+
+    fig.suptitle("Bell selection sensitivity summary", fontsize=suptitle_font, y=0.992)
+    fig.tight_layout(rect=(0, 0, 1, 0.972))
 
     out_tag = str(args.out_tag)
     out_png = out_dir / f"{out_tag}.png"
+    out_pdf = out_dir / f"{out_tag}.pdf"
     out_json = out_dir / f"{out_tag}.json"
     fig.savefig(out_png)
+    fig.savefig(out_pdf)
     plt.close(fig)
 
     metrics = {
@@ -513,7 +548,7 @@ def main() -> None:
             "recommended_start_offset_ps": delft16_rec_off_ps,
         },
         "giustina2015": giustina_block_info,
-        "outputs": {"png": str(out_png), "json": str(out_json)},
+        "outputs": {"png": str(out_png), "pdf": str(out_pdf), "json": str(out_json)},
         "repro": {
             "script": "python -B scripts/quantum/bell_selection_sensitivity_summary.py",
             "inputs": [
@@ -537,6 +572,7 @@ def main() -> None:
 
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"[ok] png : {out_png}")
+    print(f"[ok] pdf : {out_pdf}")
     print(f"[ok] json: {out_json}")
 
 

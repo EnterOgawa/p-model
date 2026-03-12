@@ -1,0 +1,156 @@
+{
+  "generated_utc": "2026-03-07T05:50:41.589985+00:00",
+  "method": {
+    "description": "stable-source constrained refit on high-sensitivity sessions",
+    "nuisance_mode": "baseline_intercept_linear",
+    "observable_series": "full",
+    "min_sensitivity_ns": 10.0,
+    "stable_source_gate": {
+      "min_source_sessions": 3,
+      "max_source_chi2_dof": 2.0,
+      "min_source_total_points": 0,
+      "require_source_status": "pass",
+      "min_source_points_per_session": 20
+    }
+  },
+  "input": {
+    "source_summary_csv": "C:\\develop\\waveP\\output\\public\\vlbi\\vlbi_beta_source_session_matrix_source_summary.csv",
+    "allsky_summary_csv": "C:\\develop\\waveP\\output\\vlbi\\vlbi_allsky_beta_consistency_summary_local_source_0814_425_or_time_q2.csv",
+    "session_root": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb",
+    "n_sessions_selected": 5,
+    "n_sessions_valid": 5,
+    "n_stable_sources": 4
+  },
+  "stable_sources": [
+    "0955+476",
+    "1639-062",
+    "1657-261",
+    "1954-388"
+  ],
+  "stable_source_rows": [
+    {
+      "source": "0955+476",
+      "n_sessions": 3,
+      "total_points": 663,
+      "beta_weighted_mean": 28.3473340951177,
+      "beta_weighted_sigma": 2.4387212958379645,
+      "chi2_dof": 0.5133178981393014,
+      "status": "pass"
+    },
+    {
+      "source": "1639-062",
+      "n_sessions": 3,
+      "total_points": 382,
+      "beta_weighted_mean": 38.14374192752798,
+      "beta_weighted_sigma": 11.607401465294343,
+      "chi2_dof": 1.3861114510457155,
+      "status": "pass"
+    },
+    {
+      "source": "1954-388",
+      "n_sessions": 3,
+      "total_points": 118,
+      "beta_weighted_mean": 69.06886267761291,
+      "beta_weighted_sigma": 20.243444391173995,
+      "chi2_dof": 0.44289539506277864,
+      "status": "pass"
+    },
+    {
+      "source": "1657-261",
+      "n_sessions": 3,
+      "total_points": 89,
+      "beta_weighted_mean": 133.4493416295159,
+      "beta_weighted_sigma": 3.8690030299185845e-16,
+      "chi2_dof": 1.2712532686753424,
+      "status": "pass"
+    }
+  ],
+  "session_summary": [
+    {
+      "session": "17MAY01XA",
+      "max_abs_bendsun_ns": 57.69163335272564,
+      "n_points_all": 4010,
+      "n_points_stable": 140,
+      "n_stable_sources_present": 1,
+      "beta_est_stable": 29.887098089273856,
+      "beta_sigma_stable": 13.56149261493812,
+      "beta_est_all": 1.1866902903646863,
+      "beta_sigma_all": 0.06961457006841056,
+      "delta_beta_stable_minus_all": 28.70040779890917,
+      "abs_z_stable_vs_all": 2.116288412295745,
+      "top_source_by_points": "1639-062"
+    },
+    {
+      "session": "18MAY01XA",
+      "max_abs_bendsun_ns": 38.915678326779855,
+      "n_points_all": 12427,
+      "n_points_stable": 265,
+      "n_stable_sources_present": 4,
+      "beta_est_stable": 48.47595477309562,
+      "beta_sigma_stable": 3.096097929148497,
+      "beta_est_all": 1.402180917020599,
+      "beta_sigma_all": 0.055657027442395014,
+      "delta_beta_stable_minus_all": 47.07377385607502,
+      "abs_z_stable_vs_all": 15.201770330800159,
+      "top_source_by_points": "1639-062"
+    },
+    {
+      "session": "22MAY09XA",
+      "max_abs_bendsun_ns": 11.981812554125794,
+      "n_points_all": 4874,
+      "n_points_stable": 74,
+      "n_stable_sources_present": 2,
+      "beta_est_stable": 79.4699563511326,
+      "beta_sigma_stable": 24.536681098874983,
+      "beta_est_all": 5.460978325679481,
+      "beta_sigma_all": 0.38943244120781795,
+      "delta_beta_stable_minus_all": 74.00897802545312,
+      "abs_z_stable_vs_all": 3.0158788779006693,
+      "top_source_by_points": "1954-388"
+    },
+    {
+      "session": "20MAY06XA",
+      "max_abs_bendsun_ns": 11.452581368343477,
+      "n_points_all": 719,
+      "n_points_stable": 48,
+      "n_stable_sources_present": 1,
+      "beta_est_stable": 22.524339952431344,
+      "beta_sigma_stable": 6.359955081750093,
+      "beta_est_all": 9.23257380132607,
+      "beta_sigma_all": 1.2206749153850662,
+      "delta_beta_stable_minus_all": 13.291766151105273,
+      "abs_z_stable_vs_all": 2.0524532019093193,
+      "top_source_by_points": "0955+476"
+    },
+    {
+      "session": "20MAY04XA",
+      "max_abs_bendsun_ns": 10.106397771203248,
+      "n_points_all": 9994,
+      "n_points_stable": 725,
+      "n_stable_sources_present": 4,
+      "beta_est_stable": 41.11388557920258,
+      "beta_sigma_stable": 2.9201343512945757,
+      "beta_est_all": 8.049708263926952,
+      "beta_sigma_all": 0.2797635712639582,
+      "delta_beta_stable_minus_all": 33.06417731527563,
+      "abs_z_stable_vs_all": 11.271218549053115,
+      "top_source_by_points": "0955+476"
+    }
+  ],
+  "consistency": {
+    "n_valid": 5,
+    "beta_weighted_mean": 42.341533190416925,
+    "beta_weighted_sigma": 1.9864841698522677,
+    "chi2": 16.94460112788236,
+    "dof": 4.0,
+    "chi2_dof": 4.23615028197059,
+    "status": "watch"
+  },
+  "outputs": {
+    "summary_csv": "C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_stable_source_refit_summary.csv",
+    "source_presence_csv": "C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_stable_source_refit_source_presence.csv",
+    "metrics_json": "C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_stable_source_refit_metrics.json",
+    "plot_pdf": "C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_stable_source_refit.pdf",
+    "plot_png": "C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_stable_source_refit.png"
+  }
+}

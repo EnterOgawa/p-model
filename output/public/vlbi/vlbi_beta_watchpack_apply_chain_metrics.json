@@ -1,0 +1,128 @@
+{
+  "generated_utc": "2026-03-07T06:17:44.616575+00:00",
+  "step": "8.7.46.24",
+  "selected_scenario": "pair_source_17may01xa_0235_164__20may06xa_3c418",
+  "selected_policy": "multi_local_mask:pair_source_17may01xa_0235_164__20may06xa_3c418",
+  "selected_allsky_summary_csv": "C:\\develop\\waveP\\output\\vlbi\\vlbi_allsky_beta_consistency_summary_pair_source_17may01xa_0235_164__20may06xa_3c418.csv",
+  "selected_threshold_ns": 10.0,
+  "commands": [
+    {
+      "cmd": [
+        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-B",
+        "C:\\develop\\waveP\\scripts\\vlbi\\vlbi_beta_source_session_matrix.py",
+        "--allsky-summary",
+        "C:\\develop\\waveP\\output\\vlbi\\vlbi_allsky_beta_consistency_summary_pair_source_17may01xa_0235_164__20may06xa_3c418.csv",
+        "--session-root",
+        "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb",
+        "--min-sensitivity-ns",
+        "10.0",
+        "--min-source-points",
+        "20",
+        "--nuisance-mode",
+        "baseline_intercept_linear",
+        "--observable-series",
+        "full"
+      ],
+      "returncode": 0,
+      "ok": true,
+      "stdout_tail": "Wrote: C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_source_session_matrix_details.csv\nWrote: C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_source_session_matrix_source_summary.csv\nWrote: C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_source_session_matrix_metrics.json\nWrote: C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_source_session_matrix.pdf\nWrote: C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_source_session_matrix.png\nSynced: C:\\develop\\waveP\\output\\public\\vlbi",
+      "stderr_tail": ""
+    },
+    {
+      "cmd": [
+        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-B",
+        "C:\\develop\\waveP\\scripts\\vlbi\\vlbi_beta_stable_source_refit.py",
+        "--allsky-summary",
+        "C:\\develop\\waveP\\output\\vlbi\\vlbi_allsky_beta_consistency_summary_pair_source_17may01xa_0235_164__20may06xa_3c418.csv",
+        "--source-summary",
+        "C:\\develop\\waveP\\output\\public\\vlbi\\vlbi_beta_source_session_matrix_source_summary.csv",
+        "--session-root",
+        "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb",
+        "--min-sensitivity-ns",
+        "10.0",
+        "--min-source-sessions",
+        "3",
+        "--max-source-chi2-dof",
+        "2.0",
+        "--require-source-status",
+        "pass",
+        "--min-source-points-per-session",
+        "20",
+        "--nuisance-mode",
+        "baseline_intercept_linear",
+        "--observable-series",
+        "full"
+      ],
+      "returncode": 0,
+      "ok": true,
+      "stdout_tail": "Wrote: C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_stable_source_refit_summary.csv\nWrote: C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_stable_source_refit_source_presence.csv\nWrote: C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_stable_source_refit_metrics.json\nWrote: C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_stable_source_refit.pdf\nWrote: C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_stable_source_refit.png\nSynced: C:\\develop\\waveP\\output\\public\\vlbi",
+      "stderr_tail": ""
+    },
+    {
+      "cmd": [
+        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-B",
+        "C:\\develop\\waveP\\scripts\\vlbi\\vlbi_beta_timeband_stratified_refit.py",
+        "--allsky-summary",
+        "C:\\develop\\waveP\\output\\vlbi\\vlbi_allsky_beta_consistency_summary_pair_source_17may01xa_0235_164__20may06xa_3c418.csv",
+        "--source-summary",
+        "C:\\develop\\waveP\\output\\public\\vlbi\\vlbi_beta_source_session_matrix_source_summary.csv",
+        "--session-root",
+        "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb",
+        "--min-sensitivity-ns",
+        "10.0",
+        "--min-source-sessions",
+        "3",
+        "--max-source-chi2-dof",
+        "2.0",
+        "--require-source-status",
+        "pass",
+        "--min-source-points-per-session",
+        "20",
+        "--min-quartile-points",
+        "8",
+        "--min-quartile-sigma",
+        "0.01",
+        "--max-session-pairwise-z",
+        "20.0",
+        "--min-valid-quartiles-per-session",
+        "2",
+        "--nuisance-mode",
+        "baseline_intercept_linear",
+        "--observable-series",
+        "full"
+      ],
+      "returncode": 0,
+      "ok": true,
+      "stdout_tail": "Wrote: C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_timeband_stratified_refit_details.csv\nWrote: C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_timeband_stratified_refit_session_summary.csv\nWrote: C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_timeband_stratified_refit_quartile_consistency.csv\nWrote: C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_timeband_stratified_refit_metrics.json\nWrote: C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_timeband_stratified_refit.pdf\nWrote: C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_timeband_stratified_refit.png\nSynced: C:\\develop\\waveP\\output\\public\\vlbi",
+      "stderr_tail": ""
+    },
+    {
+      "cmd": [
+        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-B",
+        "C:\\develop\\waveP\\scripts\\vlbi\\vlbi_beta_high_sensitivity_threshold_sweep.py",
+        "--allsky-summary",
+        "C:\\develop\\waveP\\output\\vlbi\\vlbi_allsky_beta_consistency_summary_pair_source_17may01xa_0235_164__20may06xa_3c418.csv",
+        "--thresholds",
+        "10,12,15,20",
+        "--min-sessions-operational",
+        "3"
+      ],
+      "returncode": 0,
+      "ok": true,
+      "stdout_tail": "Wrote: C:\\develop\\waveP\\output\\vlbi\\vlbi_high_sensitivity_threshold_sweep.csv\nWrote: C:\\develop\\waveP\\output\\vlbi\\vlbi_high_sensitivity_threshold_sweep_metrics.json\nWrote: C:\\develop\\waveP\\output\\vlbi\\vlbi_high_sensitivity_threshold_sweep.pdf\nWrote: C:\\develop\\waveP\\output\\vlbi\\vlbi_high_sensitivity_threshold_sweep.png\nSynced: C:\\develop\\waveP\\output\\public\\vlbi",
+      "stderr_tail": ""
+    }
+  ],
+  "canonical_sync": {
+    "allsky_summary_public": "C:\\develop\\waveP\\output\\public\\vlbi\\vlbi_allsky_beta_consistency_summary.csv",
+    "allsky_summary_private": "C:\\develop\\waveP\\output\\vlbi\\vlbi_allsky_beta_consistency_summary.csv",
+    "copied_pairs_n": 20
+  },
+  "outputs": {
+    "metrics_json": "C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_watchpack_apply_chain_metrics.json"
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-22T05:02:50.495313+00:00",
+  "generated_utc": "2026-03-12T07:07:47.189191+00:00",
   "inputs": {
     "tt": "C:/develop/waveP/data/cosmology/planck2018_com_power_spect_tt_binned_r3.01.txt",
     "te": "C:/develop/waveP/data/cosmology/planck2018_com_power_spect_te_binned_r3.02.txt",
@@ -286,6 +286,7 @@
   },
   "outputs": {
     "png": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_polarization_phase_audit.png",
+    "pdf": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_polarization_phase_audit.pdf",
     "metrics_json": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_polarization_phase_audit_metrics.json",
     "falsification_pack_json": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_polarization_phase_audit_falsification_pack.json",
     "peaks_csv": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_polarization_phase_audit_peaks.csv"

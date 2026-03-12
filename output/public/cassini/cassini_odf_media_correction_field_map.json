@@ -1,0 +1,176 @@
+{
+  "generated_utc": "2026-03-12T03:01:42.726960+00:00",
+  "inputs": {
+    "label_count_scanned": 14,
+    "label_count_missing": 0
+  },
+  "source_documents": {
+    "trk_2_23_paths": [
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0022\\document\\trk_2_23_000531.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0023\\document\\trk_2_23_000531.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0024\\document\\trk_2_23_000531.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0025\\document\\trk_2_23_000531.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0026\\document\\trk_2_23_000531.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0027\\document\\trk_2_23_000531.txt"
+    ],
+    "trk_2_18_paths_local": [],
+    "trk_2_18_reference_count_in_labels": 56,
+    "trk_2_18_local_available": false,
+    "trk_2_18_note": "TRK-2-18 is referenced in ODF FORMAT ID=1 notes, but local SCE1 bundle did not contain TRK-2-18."
+  },
+  "trk_2_23_csp_tokens": {
+    "adjust": true,
+    "delete": true,
+    "model_chpart": true,
+    "model_wet_nupart": true,
+    "model_dry_nupart": true,
+    "model_drvid": true,
+    "downlink_specifier": true,
+    "doppler_range_data_type": true
+  },
+  "trk_2_23_csp_context_confirmed": true,
+  "odf_tables_scanned": [
+    "ODF3C_TABLE",
+    "ODF4A15_TABLE",
+    "ODF4A25_TABLE",
+    "ODF4A34_TABLE",
+    "ODF4A45_TABLE",
+    "ODF4A65_TABLE",
+    "ODF4B25_TABLE"
+  ],
+  "odf_proxy_field_counts": {
+    "ODF3C_TABLE": 9,
+    "ODF4B25_TABLE": 4
+  },
+  "odf_direct_media_fields": [],
+  "odf_proxy_fields": [
+    "ODF3C_TABLE:DATA VALIDITY INDICATOR",
+    "ODF3C_TABLE:DOWNLINK BAND ID",
+    "ODF3C_TABLE:EXCITER BAND ID",
+    "ODF3C_TABLE:PRIMARY RECEIVING STATION DOWNLINK DELAY",
+    "ODF3C_TABLE:PRIMARY RECEIVING STATION ID",
+    "ODF3C_TABLE:TIME TAG - FRACTIONAL PART",
+    "ODF3C_TABLE:TIME TAG - INTEGER PART",
+    "ODF3C_TABLE:TRANSMITTING STATION ID",
+    "ODF3C_TABLE:UPLINK BAND ID",
+    "ODF4B25_TABLE:RAMP START FREQUENCY - FRACTIONAL PART",
+    "ODF4B25_TABLE:RAMP START FREQUENCY - GHZ",
+    "ODF4B25_TABLE:RAMP START FREQUENCY - INTEGER PART",
+    "ODF4B25_TABLE:STATION ID"
+  ],
+  "record_level_media_state_extractable": true,
+  "parser_media_hook_mode": "external_csp_join_ready",
+  "external_csp_availability": {
+    "generated_utc": "2026-03-12T03:01:42.726931+00:00",
+    "required_mediums": [
+      "IONCAL",
+      "TROPCAL",
+      "PLSMCAL"
+    ],
+    "local_csp_file_count": 0,
+    "local_csp_paths": [],
+    "local_csp_medium_counts": {
+      "IONCAL": 1,
+      "TROPCAL": 1,
+      "PLSMCAL": 1
+    },
+    "local_mediums_observed": [
+      "IONCAL",
+      "PLSMCAL",
+      "TROPCAL"
+    ],
+    "all_required_mediums_local": true,
+    "ancillary_manifest_path": "C:\\develop\\waveP\\data\\cassini\\sources\\csp_media_ancillary\\media_ancillary_manifest.json",
+    "ancillary_manifest_available": true,
+    "ancillary_medium_availability": {
+      "IONCAL": true,
+      "TROPCAL": true,
+      "PLSMCAL": true
+    },
+    "ancillary_all_required_mediums_local": true,
+    "ancillary_command_windows_n": 183,
+    "source_documents": {
+      "trk_2_23_paths": [
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0022\\document\\trk_2_23_000531.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0023\\document\\trk_2_23_000531.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0024\\document\\trk_2_23_000531.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0025\\document\\trk_2_23_000531.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0026\\document\\trk_2_23_000531.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0027\\document\\trk_2_23_000531.txt"
+      ],
+      "casrssis_paths": [
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0022\\document\\casrssis.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0023\\document\\casrssis.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0024\\document\\casrssis.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0025\\document\\casrssis.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0026\\document\\casrssis.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0027\\document\\casrssis.txt"
+      ],
+      "dors_002_020501_paths": [
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0022\\document\\dors_002_020501.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0023\\document\\dors_002_020501.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0024\\document\\dors_002_020501.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0025\\document\\dors_002_020501.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0026\\document\\dors_002_020501.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0027\\document\\dors_002_020501.txt"
+      ],
+      "route_confirmed_paths": [
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0022\\document\\trk_2_23_000531.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0023\\document\\trk_2_23_000531.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0024\\document\\trk_2_23_000531.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0025\\document\\trk_2_23_000531.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0026\\document\\trk_2_23_000531.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0027\\document\\trk_2_23_000531.txt"
+      ]
+    },
+    "doc_csp_name_samples": [
+      "IONCAL_82_0112_DOPR.CSP",
+      "TROPCAL_82_0002_DOPRNG.CSP"
+    ],
+    "doc_medium_mentions": {
+      "IONCAL": 24,
+      "TROPCAL": 18,
+      "PLSMCAL": 12
+    },
+    "delivery_route_documented": true,
+    "public_reproducibility_state": "pds_ancillary_payload_complete",
+    "hard_watch_required": false,
+    "hard_watch_reason": "",
+    "next_action": "Local CSP payload is complete; run record-level media join hook."
+  },
+  "external_csp_join_hook": {
+    "required_join_keys": [
+      "time_utc",
+      "station_rx",
+      "station_tx",
+      "downlink_band_id",
+      "uplink_band_id",
+      "data_type_id",
+      "source_file"
+    ],
+    "available_join_keys": [
+      "data_type_id",
+      "doppler_hz",
+      "downlink_band_id",
+      "source_file",
+      "station_rx",
+      "station_tx",
+      "t_days",
+      "time_utc",
+      "uplink_band_id",
+      "y_obs"
+    ],
+    "missing_join_keys": [],
+    "payload_ready_for_join": true,
+    "record_level_media_state_extractable_via_csp": true,
+    "hook_mode": "external_csp_join_ready",
+    "join_metrics_available": true,
+    "join_metrics_json": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_media_state_join_metrics.json",
+    "join_metrics_record_level_extractable": true,
+    "join_metrics_coverage_any_ratio": 1.0,
+    "join_metrics_coverage_on_mapped_ratio": 1.0,
+    "watch_reason": ""
+  },
+  "status": "pass",
+  "watch_reason": ""
+}

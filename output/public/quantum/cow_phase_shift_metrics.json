@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-16T15:07:48.885399+00:00",
+  "generated_utc": "2026-03-11T13:56:00.797219+00:00",
   "phase": {
     "phase": 7,
     "step": "7.16.11",
@@ -50,9 +50,11 @@
   },
   "outputs": {
     "png": "C:\\develop\\waveP\\output\\public\\quantum\\cow_phase_shift.png",
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\cow_phase_shift.pdf",
     "integration_csv": "C:\\develop\\waveP\\output\\public\\quantum\\cow_experiment_data_integration.csv",
     "hv_sweep_csv": "C:\\develop\\waveP\\output\\public\\quantum\\cow_phase_shift_hv_sweep.csv",
-    "complete_analysis_png": "C:\\develop\\waveP\\output\\public\\quantum\\cow_experiment_complete_analysis.png"
+    "complete_analysis_png": "C:\\develop\\waveP\\output\\public\\quantum\\cow_experiment_complete_analysis.png",
+    "complete_analysis_pdf": "C:\\develop\\waveP\\output\\public\\quantum\\cow_experiment_complete_analysis.pdf"
   },
   "notes": [
     "This script focuses on reproducing the scaling and magnitude of the COW phase shift.",

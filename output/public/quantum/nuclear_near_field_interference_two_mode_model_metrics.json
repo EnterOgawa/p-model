@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T14:10:01.339661+00:00",
+  "generated_utc": "2026-03-11T13:56:27.605613+00:00",
   "phase": 7,
   "step": "7.13.16",
   "inputs": {
@@ -30,6 +30,7 @@
     "ratio_B_over_mu_c2": 0.004738572711996657
   },
   "outputs": {
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_near_field_interference_two_mode_model.pdf",
     "png": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_near_field_interference_two_mode_model.png"
   },
   "notes": [

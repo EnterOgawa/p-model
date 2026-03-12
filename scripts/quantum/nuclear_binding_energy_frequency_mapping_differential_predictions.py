@@ -6,6 +6,10 @@ import math
 from pathlib import Path
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
@@ -210,7 +214,11 @@ def main() -> None:
     }
 
     # Plot
+    import matplotlib as mpl
     import matplotlib.pyplot as plt
+
+    mpl.rcParams["pdf.fonttype"] = 42
+    mpl.rcParams["ps.fonttype"] = 42
 
     a_vals: list[int] = []
     rg_vals: list[float] = []
@@ -223,7 +231,7 @@ def main() -> None:
         except Exception:
             continue
 
-    fig = plt.figure(figsize=(12.8, 7.6))
+    fig = plt.figure(figsize=(14.2, 10.4))
     gs = fig.add_gridspec(2, 2, height_ratios=[1.0, 1.0])
 
     # (0,0) global ratio vs A (log scale; baseline underpredicts)
@@ -231,10 +239,11 @@ def main() -> None:
     ax0.scatter(a_vals, rg_vals, s=8, alpha=0.18, color="tab:purple")
     ax0.axhline(1.0, color="0.2", lw=1.2, ls="--")
     ax0.set_yscale("log")
-    ax0.set_xlabel("A")
-    ax0.set_ylabel("B_pred/B_obs (global R; baseline)")
-    ax0.set_title("Global distance proxy (R in exp): large A-trend mismatch")
+    ax0.set_xlabel("A", fontsize=14.6)
+    ax0.set_ylabel("B_pred/B_obs (global R; baseline)", fontsize=14.6)
+    ax0.set_title("Global distance proxy (R in exp): large A-trend mismatch", fontsize=15.8)
     ax0.grid(True, which="both", axis="y", ls=":", lw=0.6, alpha=0.6)
+    ax0.tick_params(axis="both", labelsize=12.8)
 
     # (0,1) local spacing ratio vs A (linear-ish around O(1))
     ax1 = fig.add_subplot(gs[0, 1])
@@ -242,10 +251,11 @@ def main() -> None:
     ax1.axhline(1.0, color="0.2", lw=1.2, ls="--")
     ax1.set_xlim(0, 305)
     ax1.set_ylim(0.0, max(3.0, _percentile(sorted(rl_vals), 99.5)))
-    ax1.set_xlabel("A")
-    ax1.set_ylabel("B_pred/B_obs (local spacing d)")
-    ax1.set_title("Local spacing proxy (d=ρ^{-1/3}): A-trend largely removed")
+    ax1.set_xlabel("A", fontsize=14.6)
+    ax1.set_ylabel("B_pred/B_obs (local spacing d)", fontsize=14.6)
+    ax1.set_title("Local spacing proxy (d=ρ^{-1/3}): A-trend largely removed", fontsize=15.8)
     ax1.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
+    ax1.tick_params(axis="both", labelsize=12.8)
 
     # (1,0) distributions (log10)
     ax2 = fig.add_subplot(gs[1, 0])
@@ -254,11 +264,12 @@ def main() -> None:
     ax2.hist(lg, bins=60, alpha=0.55, color="tab:purple", label="global R (log10 ratio)")
     ax2.hist(ll, bins=60, alpha=0.55, color="tab:blue", label="local spacing d (log10 ratio)")
     ax2.axvline(0.0, color="0.2", lw=1.2, ls="--")
-    ax2.set_xlabel("log10(B_pred/B_obs)")
-    ax2.set_ylabel("count")
-    ax2.set_title("Residual distributions (same frozen anchor/range; only distance proxy differs)")
+    ax2.set_xlabel("log10(B_pred/B_obs)", fontsize=14.6)
+    ax2.set_ylabel("count", fontsize=14.6)
+    ax2.set_title("Residual distributions (same frozen anchor/range; only distance proxy differs)", fontsize=15.8)
     ax2.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax2.legend(loc="upper left", fontsize=9)
+    ax2.legend(loc="upper left", fontsize=12.2)
+    ax2.tick_params(axis="both", labelsize=12.8)
 
     # (1,1) group medians (parity + magic) for local mapping
     ax3 = fig.add_subplot(gs[1, 1])
@@ -275,14 +286,17 @@ def main() -> None:
     ax3.axhline(1.0, color="0.2", lw=1.2, ls="--")
     ax3.set_xticks(range(len(groups)))
     ax3.set_xticklabels(groups, rotation=20, ha="right")
-    ax3.set_ylabel("median(B_pred/B_obs)")
-    ax3.set_title("Local mapping group medians (parity & magic flags)")
+    ax3.set_ylabel("median(B_pred/B_obs)", fontsize=14.6)
+    ax3.set_title("Local mapping group medians (parity & magic flags)", fontsize=15.8)
     ax3.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
+    ax3.tick_params(axis="both", labelsize=12.8)
 
-    fig.suptitle("Phase 7 / Step 7.13.17.9: differential predictions (distance proxy audit)", y=1.02)
-    fig.subplots_adjust(left=0.07, right=0.98, top=0.90, bottom=0.12, wspace=0.25, hspace=0.35)
+    fig.suptitle("differential predictions (distance proxy audit)", y=0.99, fontsize=17.4)
+    fig.subplots_adjust(left=0.07, right=0.98, top=0.93, bottom=0.12, wspace=0.25, hspace=0.36)
 
+    out_pdf = out_dir / "nuclear_binding_energy_frequency_mapping_differential_predictions.pdf"
     out_png = out_dir / "nuclear_binding_energy_frequency_mapping_differential_predictions.png"
+    fig.savefig(out_pdf, bbox_inches="tight")
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
@@ -300,7 +314,7 @@ def main() -> None:
                     "local_distance_proxy": "d = ρ^{-1/3} = (4π/3)^{1/3} · r0, with r0=R_model/A^(1/3)",
                 },
                 "stats": stats,
-                "outputs": {"png": str(out_png), "csv": str(out_csv)},
+                "outputs": {"pdf": str(out_pdf), "png": str(out_png), "csv": str(out_csv)},
                 "notes": [
                     "This step does not add fit freedom; it audits which 'distance' interpretation dominates the all-nuclei mismatch.",
                     "If a local spacing proxy largely removes the A-trend, the remaining structure (pairing/magic) can be treated as secondary corrections rather than the dominant failure mode.",
@@ -313,6 +327,7 @@ def main() -> None:
     )
 
     print("[ok] wrote:")
+    print(f"  {out_pdf}")
     print(f"  {out_png}")
     print(f"  {out_csv}")
     print(f"  {out_json}")
@@ -322,4 +337,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

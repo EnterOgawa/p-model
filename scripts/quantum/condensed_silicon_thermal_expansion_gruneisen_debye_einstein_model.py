@@ -13,6 +13,10 @@ from typing import Any, Optional
 import matplotlib.pyplot as plt
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
@@ -880,6 +884,11 @@ def main(argv: Optional[list[str]] = None) -> None:
 
     # Figure
 
+    title_font = 15.4
+    axis_label_font = 13.8
+    tick_font = 12.6
+    legend_font = 11.8
+
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10.5, 7.0), sharex=True, gridspec_kw={"height_ratios": [2, 1]})
 
     ax1.plot(temps, alpha_obs_1e8, color="#d62728", lw=2.0, label="NIST TRC fit (obs) α(T)")
@@ -920,26 +929,31 @@ def main(argv: Optional[list[str]] = None) -> None:
     if zero_pred is not None:
         ax1.axvline(float(zero_pred["x_cross"]), color="#999999", lw=1.0, ls="--", alpha=0.7)
 
-    ax1.set_ylabel("α(T) (10^-8 / K)")
+    ax1.set_ylabel("α(T) (10^-8 / K)", fontsize=axis_label_font)
     ax1.set_title(
         "Silicon thermal expansion: Debye+Einstein (optical) ansatz check"
         if int(args.einstein_branches) == 1
-        else "Silicon thermal expansion: Debye+Einstein×2 (two optical branches) ansatz check"
+        else "Silicon thermal expansion: Debye+Einstein×2 (two optical branches) ansatz check",
+        fontsize=title_font,
     )
     ax1.grid(True, alpha=0.25)
-    ax1.legend(loc="best", fontsize=8)
+    ax1.tick_params(axis="both", labelsize=tick_font)
+    ax1.legend(loc="best", fontsize=legend_font)
 
     ax2.plot(temps, z_score, color="#000000", lw=1.2, alpha=0.9, label="z = (α_pred−α_obs)/σ_fit")
     ax2.axhline(0.0, color="#666666", lw=1.0, alpha=0.6)
     ax2.axhline(3.0, color="#999999", lw=1.0, ls="--", alpha=0.7)
     ax2.axhline(-3.0, color="#999999", lw=1.0, ls="--", alpha=0.7)
-    ax2.set_xlabel("Temperature T (K)")
-    ax2.set_ylabel("z")
+    ax2.set_xlabel("Temperature T (K)", fontsize=axis_label_font)
+    ax2.set_ylabel("z", fontsize=axis_label_font)
     ax2.grid(True, alpha=0.25)
-    ax2.legend(loc="best", fontsize=8)
+    ax2.tick_params(axis="both", labelsize=tick_font)
+    ax2.legend(loc="best", fontsize=legend_font)
 
     fig.tight_layout()
+    out_pdf = out_dir / f"{out_tag}.pdf"
     out_png = out_dir / f"{out_tag}.png"
+    fig.savefig(out_pdf)
     fig.savefig(out_png, dpi=180)
     plt.close(fig)
 
@@ -1016,7 +1030,7 @@ def main(argv: Optional[list[str]] = None) -> None:
                         "Acceptance is evaluated against the NIST TRC curve-fit standard-error scale σ_fit (proxy for data-level accuracy).",
                     ],
                 },
-                "outputs": {"csv": str(out_csv), "png": str(out_png)},
+                "outputs": {"csv": str(out_csv), "pdf": str(out_pdf), "png": str(out_png)},
             },
             ensure_ascii=False,
             indent=2,
@@ -1026,6 +1040,7 @@ def main(argv: Optional[list[str]] = None) -> None:
     )
 
     print(f"[ok] wrote: {out_csv}")
+    print(f"[ok] wrote: {out_pdf}")
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_metrics}")
 

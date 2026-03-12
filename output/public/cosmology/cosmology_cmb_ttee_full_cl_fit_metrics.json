@@ -1,0 +1,96 @@
+{
+  "generated_utc": "2026-03-12T06:32:52.183049+00:00",
+  "domain": "cosmology",
+  "step": "8.7.35.1 (CMB TT/TE/EE simultaneous full C_ell fit audit)",
+  "dataset": {
+    "TT": "Planck 2018 TT binned (R3.01)",
+    "TE": "Planck 2018 TE binned (R3.02)",
+    "EE": "Planck 2018 EE binned (R3.02)"
+  },
+  "inputs": {
+    "tt_data": "C:/develop/waveP/data/cosmology/planck2018_com_power_spect_tt_binned_r3.01.txt",
+    "te_data": "C:/develop/waveP/data/cosmology/planck2018_com_power_spect_te_binned_r3.02.txt",
+    "ee_data": "C:/develop/waveP/data/cosmology/planck2018_com_power_spect_ee_binned_r3.02.txt",
+    "ell_max": 2500.0,
+    "grid": {
+      "alpha_min": 0.97,
+      "alpha_max": 1.03,
+      "alpha_step": 0.001,
+      "delta_min": -80.0,
+      "delta_max": 80.0,
+      "delta_step": 1.0,
+      "n_alpha": 61,
+      "n_delta": 161
+    }
+  },
+  "fit": {
+    "baseline_lcdm": {
+      "n_bin_total": 215,
+      "chi2_total": 200.76526799224456,
+      "chi2_dof": 0.9337919441499747,
+      "aic": 200.76526799224456,
+      "k_params": 0,
+      "per_channel_chi2": {
+        "TT": 65.12154684822823,
+        "TE": 72.74013733585016,
+        "EE": 62.903583808166154
+      }
+    },
+    "pmodel_flexible": {
+      "chi2_total": 198.3404094825316,
+      "chi2_dof": 0.9581662293842107,
+      "aic": 214.3404094825316,
+      "k_params": 8,
+      "alpha": 1.0,
+      "delta_ell": 0.0,
+      "per_channel": {
+        "TT": {
+          "chi2": 65.0176212461226,
+          "gain": 0.9994963329180259,
+          "offset": 0.41872711454925116
+        },
+        "TE": {
+          "chi2": 71.75637493200043,
+          "gain": 0.9944579943734071,
+          "offset": -0.0016966706231195097
+        },
+        "EE": {
+          "chi2": 61.56641330440859,
+          "gain": 1.0000291608345775,
+          "offset": 0.014085828457724821
+        }
+      }
+    },
+    "pmodel_shape_only": {
+      "chi2_total": 200.76526799224456,
+      "alpha": 1.0,
+      "delta_ell": 0.0,
+      "per_channel_chi2": {
+        "TT": 65.12154684822823,
+        "TE": 72.74013733585016,
+        "EE": 62.903583808166154
+      }
+    },
+    "delta_aic_baseline_minus_pmodel": -13.575141490287052,
+    "winner": "baseline_lcdm",
+    "status": "reject",
+    "decision_rule": "ΔAIC=AIC_baseline-AIC_P; >2:pass, (-2,2]:watch, <=-2:reject",
+    "decomposition": {
+      "chi2_improvement_total": 2.424858509712948,
+      "shape_improvement": 0.0,
+      "channel_scaling_improvement": 2.424858509712948,
+      "aic_penalty": 16.0,
+      "net_delta_aic": -13.575141490287052
+    }
+  },
+  "notes": [
+    "本監査は TT/TE/EE binned spectra の同時評価であり、Planck full-likelihood の代替ではない。",
+    "P-model側は baseline テンプレートの共有 remap（alpha,delta）とチャネル毎の線形調整（gain/offset）で summary-level 適合度を評価する。"
+  ],
+  "outputs": {
+    "png": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_ttee_full_cl_fit.png",
+    "pdf": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_ttee_full_cl_fit.pdf",
+    "metrics_json": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_ttee_full_cl_fit_metrics.json",
+    "summary_csv": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_ttee_full_cl_fit_summary.csv"
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T14:54:19.794989+00:00",
+  "generated_utc": "2026-03-02T01:57:55.015293+00:00",
   "phase": 7,
   "step": "7.13.8.5",
   "model": {
@@ -994,6 +994,10 @@
   },
   "outputs": {
     "png": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan.png",
+    "png_split_by_eq": {
+      "eq18": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan_eq18.png",
+      "eq19": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan_eq19.png"
+    },
     "csv": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan.csv"
   },
   "pion_range_scale": {

@@ -314,10 +314,10 @@ def main(argv: list[str] | None = None) -> int:
 
     _set_japanese_font()
 
-    fig, axes = plt.subplots(1, 2, figsize=(12.5, 5.0), dpi=160, sharey=True)
+    fig, axes = plt.subplots(2, 1, figsize=(13.6, 11.8), dpi=180, sharex=True)
     ax0, ax1 = axes
 
-    ax0.set_title("ε（peakfit）：公開 ξℓ vs catalog-based ξℓ（LCDM座標）")
+    ax0.set_title("ε（peakfit）：公開 ξℓ vs catalog-based ξℓ（LCDM座標）", fontsize=15.5)
     ax0.axhline(0.0, color="0.6", lw=1, ls="--")
     _errorbar(ax0, x=z_ref, y=y_post, err_lo=lo_post, err_hi=hi_post, label="Ross 2016（post-recon）", color="#1f77b4", marker="o", x_offset=-0.004)
     _errorbar(ax0, x=z_ref, y=y_pre, err_lo=lo_pre, err_hi=hi_pre, label="Satpathy 2016（pre-recon）", color="#9467bd", marker="s", x_offset=0.000)
@@ -336,22 +336,26 @@ def main(argv: list[str] | None = None) -> int:
             x_offset=+0.008,
         )
 
-    ax0.set_xlabel("z_eff")
-    ax0.set_ylabel("ε（AP warping）")
+    ax0.set_xlabel("z_eff", fontsize=13.2)
+    ax0.set_ylabel("ε（AP warping）", fontsize=13.2)
     ax0.grid(True, alpha=0.3)
-    ax0.legend(loc="best", fontsize=8)
+    ax0.tick_params(labelsize=12.0)
+    ax0.legend(loc="best", fontsize=11.2)
 
-    ax1.set_title("ε（peakfit）：catalog距離写像の差（lcdm vs P_bg）")
+    ax1.set_title("ε（peakfit）：catalog距離写像の差（lcdm vs P_bg）", fontsize=15.5)
     ax1.axhline(0.0, color="0.6", lw=1, ls="--")
     _errorbar(ax1, x=z_ref, y=y_cat_lcdm, err_lo=lo_cat_lcdm, err_hi=hi_cat_lcdm, label="catalog（lcdm）", color="#ff7f0e", marker="^", x_offset=-0.003)
     _errorbar(ax1, x=z_ref, y=y_cat_pbg, err_lo=lo_cat_pbg, err_hi=hi_cat_pbg, label="catalog（P_bg）", color="#2ca02c", marker="o", x_offset=+0.003)
 
-    ax1.set_xlabel("z_eff")
+    ax1.set_xlabel("z_eff", fontsize=13.2)
+    ax1.set_ylabel("ε（AP warping）", fontsize=13.2)
     ax1.grid(True, alpha=0.3)
-    ax1.legend(loc="best", fontsize=8)
+    ax1.tick_params(labelsize=12.0)
+    ax1.legend(loc="best", fontsize=11.2)
 
-    fig.suptitle("BOSS DR12（z-bin 0.38/0.51/0.61）：εクロスチェック（スクリーニング）", y=1.02)
-    fig.tight_layout()
+    # 注: Figure 39 の上端タイトル欠けを避けるため、タイトル位置を下げて上余白を確保する。
+    fig.suptitle("BOSS DR12（z-bin 0.38/0.51/0.61）：εクロスチェック（スクリーニング）", y=0.972, fontsize=17.2)
+    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.952))
 
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png)

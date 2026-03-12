@@ -5,6 +5,30 @@ import math
 from pathlib import Path
 
 
+# 関数: `_configure_japanese_font` の入出力契約と処理意図を定義する。
+def _configure_japanese_font() -> None:
+    import matplotlib as mpl
+    from matplotlib import font_manager as fm
+
+    candidates = [
+        "Yu Gothic",
+        "Meiryo",
+        "MS Gothic",
+        "MS PGothic",
+        "Noto Sans CJK JP",
+        "Noto Sans JP",
+        "IPAexGothic",
+    ]
+    available = {f.name for f in fm.fontManager.ttflist}
+    for name in candidates:
+        if name in available:
+            mpl.rcParams["font.family"] = name
+            mpl.rcParams["font.sans-serif"] = [name] + list(mpl.rcParams.get("font.sans-serif", []))
+            break
+
+    mpl.rcParams["axes.unicode_minus"] = False
+
+
 # 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
@@ -95,46 +119,50 @@ def main() -> None:
     # |φ|/c^2 ~ B / (m c^2). This is only a bookkeeping number here.
     phi_over_c2 = b_j / (mu * c**2) if mu > 0 else float("nan")
 
+    _configure_japanese_font()
+
     # Plot
     import matplotlib.pyplot as plt
 
-    fig = plt.figure(figsize=(12.8, 4.0), dpi=160)
-    gs = fig.add_gridspec(1, 2, wspace=0.28)
+    fig = plt.figure(figsize=(10.8, 9.8), dpi=170)
+    gs = fig.add_gridspec(2, 1, hspace=0.30)
 
     ax0 = fig.add_subplot(gs[0, 0])
     ax0.errorbar([0.0], [b_mev], yerr=[sigma_b_mev], fmt="o", capsize=5, lw=1.8)
     ax0.set_xticks([0.0])
-    ax0.set_xticklabels(["deuteron"])
-    ax0.set_ylabel("binding energy B (MeV)")
-    ax0.set_title("Mass defect baseline (CODATA via NIST)")
+    ax0.set_xticklabels(["重水素"])
+    ax0.set_ylabel("束縛エネルギー B (MeV)", fontsize=13)
+    ax0.set_title("質量欠損ベースライン（CODATA/NIST）", fontsize=14)
     ax0.grid(True, ls=":", lw=0.6, alpha=0.6)
+    ax0.tick_params(axis="both", labelsize=11.5)
     ax0.text(
         0.02,
         0.98,
         (
             "B = (m_p + m_n − m_d)c²\n"
             f"B ≈ {b_mev:.6f} ± {sigma_b_mev:.6f} MeV\n"
-            f"|φ|/c² (bookkeeping) ≈ {abs(phi_over_c2):.3e}"
+            f"|φ|/c²（記帳値）≈ {abs(phi_over_c2):.3e}"
         ),
         transform=ax0.transAxes,
         va="top",
         ha="left",
-        fontsize=9,
+        fontsize=11,
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.85, "edgecolor": "0.85"},
     )
 
-    ax1 = fig.add_subplot(gs[0, 1])
+    ax1 = fig.add_subplot(gs[1, 0])
     x = [0.0, 1.0]
     y = [rd_fm, inv_kappa_fm]
     yerr = [sigma_rd_fm, 0.0]
-    ax1.errorbar([x[0]], [y[0]], yerr=[yerr[0]], fmt="o", capsize=5, lw=1.8, label="r_d (charge rms)")
-    ax1.plot([x[1]], [y[1]], marker="s", lw=0.0, label="1/κ from B (tail scale)")
+    ax1.errorbar([x[0]], [y[0]], yerr=[yerr[0]], fmt="o", capsize=5, lw=1.8, label="r_d（電荷rms半径）")
+    ax1.plot([x[1]], [y[1]], marker="s", lw=0.0, label="Bから得る 1/κ（テール尺度）")
     ax1.set_xticks(x)
     ax1.set_xticklabels(["r_d", "1/κ"])
-    ax1.set_ylabel("length scale (fm)")
-    ax1.set_title("Size constraints (radius vs binding tail)")
+    ax1.set_ylabel("長さスケール (fm)", fontsize=13)
+    ax1.set_title("サイズ制約（半径と束縛テール）", fontsize=14)
     ax1.grid(True, ls=":", lw=0.6, alpha=0.6)
-    ax1.legend(frameon=True, fontsize=9, loc="upper right")
+    ax1.tick_params(axis="both", labelsize=11.5)
+    ax1.legend(frameon=True, fontsize=11, loc="upper right")
     ax1.text(
         0.02,
         0.02,
@@ -142,11 +170,11 @@ def main() -> None:
         transform=ax1.transAxes,
         va="bottom",
         ha="left",
-        fontsize=9,
+        fontsize=11,
     )
 
-    fig.suptitle("Phase 7 / Step 7.9: deuteron nuclear baseline (observables fixed)", y=1.03)
-    fig.tight_layout()
+    fig.suptitle("重水素の核ベースライン（観測量固定）", y=0.995, fontsize=15)
+    fig.subplots_adjust(left=0.10, right=0.98, top=0.94, bottom=0.08, hspace=0.35)
 
     out_png = out_dir / "nuclear_binding_deuteron.png"
     fig.savefig(out_png, bbox_inches="tight")
@@ -218,4 +246,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

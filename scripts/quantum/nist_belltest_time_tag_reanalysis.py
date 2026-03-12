@@ -897,8 +897,13 @@ def main() -> None:
     # Plot
     import matplotlib.pyplot as plt
 
-    fig = plt.figure(figsize=(13.5, 4.2), dpi=150)
-    gs = fig.add_gridspec(1, 3, width_ratios=[1.0, 1.0, 1.35])
+    fig = plt.figure(figsize=(15.8, 10.4), dpi=160)
+    panel_title_font = 14.8
+    axis_label_font = 13.8
+    tick_font = 12.6
+    legend_font = 12.4
+    suptitle_font = 16.4
+    gs = fig.add_gridspec(2, 2, height_ratios=[1.0, 1.08], wspace=0.22, hspace=0.34)
 
     # 関数: `_delay_panel` の入出力契約と処理意図を定義する。
     def _delay_panel(ax, title: str, d0: np.ndarray, d1: np.ndarray) -> None:
@@ -906,7 +911,7 @@ def main() -> None:
         allv = np.concatenate([d0, d1]) if d0.size and d1.size else (d0 if d0.size else d1)
         # 条件分岐: `allv.size == 0` を満たす経路を評価する。
         if allv.size == 0:
-            ax.set_title(title + " (no data)")
+            ax.set_title(title + " (no data)", fontsize=panel_title_font)
             return
 
         hi = float(np.percentile(allv, 99.5))
@@ -914,11 +919,12 @@ def main() -> None:
         bins = np.linspace(0.0, hi, 120)
         ax.hist(d0, bins=bins, alpha=0.55, label="setting=0", color="#1f77b4")
         ax.hist(d1, bins=bins, alpha=0.55, label="setting=1", color="#ff7f0e")
-        ax.set_title(title)
-        ax.set_xlabel("click delay from sync (ns)")
-        ax.set_ylabel("count")
+        ax.set_title(title, fontsize=panel_title_font)
+        ax.set_xlabel("click delay from sync (ns)", fontsize=axis_label_font)
+        ax.set_ylabel("count", fontsize=axis_label_font)
         ax.grid(True, ls=":", lw=0.6, alpha=0.6)
-        ax.legend(frameon=True, fontsize=9)
+        ax.legend(frameon=True, fontsize=legend_font)
+        ax.tick_params(axis="both", labelsize=tick_font)
 
     ax0 = fig.add_subplot(gs[0, 0])
     _delay_panel(ax0, "Alice: click delay vs setting", a0, a1)
@@ -926,7 +932,7 @@ def main() -> None:
     ax1 = fig.add_subplot(gs[0, 1])
     _delay_panel(ax1, "Bob: click delay vs setting", b0, b1)
 
-    ax2 = fig.add_subplot(gs[0, 2])
+    ax2 = fig.add_subplot(gs[1, :])
     w = np.asarray(cfg.windows_ns, dtype=float)
     ax2.plot(w, pairs, marker="o", lw=1.5, label="pairs total")
     ax2.plot(w, counts[:, 0, 0], marker="o", lw=1.2, label="c00")
@@ -934,24 +940,25 @@ def main() -> None:
     ax2.plot(w, counts[:, 1, 0], marker="o", lw=1.2, label="c10")
     ax2.plot(w, counts[:, 1, 1], marker="o", lw=1.2, label="c11")
     ax2.set_xscale("log")
-    ax2.set_xlabel("coincidence window (ns)")
-    ax2.set_ylabel("greedy-paired coincidences")
-    ax2.set_title("Window dependence (aligned by GPS PPS)")
+    ax2.set_xlabel("coincidence window (ns)", fontsize=axis_label_font)
+    ax2.set_ylabel("greedy-paired coincidences", fontsize=axis_label_font)
+    ax2.set_title("Window dependence (aligned by GPS PPS)", fontsize=panel_title_font)
     ax2.grid(True, which="both", ls=":", lw=0.6, alpha=0.6)
-    ax2.legend(frameon=True, fontsize=9, ncol=2)
+    ax2.legend(frameon=True, fontsize=legend_font, ncol=2)
+    ax2.tick_params(axis="both", labelsize=tick_font)
 
     fig.suptitle(
         "NIST Bell test (time-tag): setting-dependent delays can bias coincidence selection",
         y=1.02,
-        fontsize=12,
+        fontsize=suptitle_font,
     )
 
-    note = f"offset(bob→alice)≈{offset_seconds:.3f} s ({offset_seconds/3600.0:.2f} h); KS(A)={ks_a:.3f}, KS(B)={ks_b:.3f}"
-    fig.text(0.01, -0.02, note, fontsize=9)
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, 0.03, 1, 0.98))
 
     out_png = _tag("nist_belltest_time_tag_bias", ext="png")
+    out_pdf = _tag("nist_belltest_time_tag_bias", ext="pdf")
     fig.savefig(out_png, bbox_inches="tight")
+    fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
 
     # 関数: `_infer_run_base` の入出力契約と処理意図を定義する。
@@ -1019,7 +1026,7 @@ def main() -> None:
                 "c11": list(map(int, counts[:, 1, 1].tolist())),
             },
         },
-        "outputs": {"png": str(out_png), "csv": str(out_csv)},
+        "outputs": {"png": str(out_png), "pdf": str(out_pdf), "csv": str(out_csv)},
         "notes": [
             "This script does NOT reproduce the official loophole-free p-value calculation.",
             "It demonstrates that detection-time distributions depend on settings, which can make coincidence selection setting-dependent.",
@@ -1030,6 +1037,7 @@ def main() -> None:
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(f"[ok] png : {out_png}")
+    print(f"[ok] pdf : {out_pdf}")
     print(f"[ok] csv : {out_csv}")
     print(f"[ok] json: {out_json}")
 

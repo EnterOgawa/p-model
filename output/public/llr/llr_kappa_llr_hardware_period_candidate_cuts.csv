@@ -1,0 +1,12 @@
+station,source,candidate_year,n_left,n_right,score_balance,gap_years,viable,selected,selected_source,log_path
+APOL,observation_year_gap,2021,708,723,708,6.0,True,True,observation_year_gap,C:\develop\waveP\data\llr\stations\apol_20250116.log
+GRSM,station_log_date_installed,2014,735,10143,735,,True,True,station_log_date_installed,C:\develop\waveP\data\llr\stations\grsm_20200205.log
+MATM,station_log_date_installed,2013,30,315,30,,True,False,station_log_date_installed,C:\develop\waveP\data\llr\stations\matm_20250310.log
+MATM,station_log_date_installed,2014,52,293,52,,True,False,station_log_date_installed,C:\develop\waveP\data\llr\stations\matm_20250310.log
+MATM,station_log_date_installed,2017,78,267,78,,True,True,station_log_date_installed,C:\develop\waveP\data\llr\stations\matm_20250310.log
+MATM,station_log_date_installed,2022,297,48,48,,True,False,station_log_date_installed,C:\develop\waveP\data\llr\stations\matm_20250310.log
+MATM,station_log_date_installed,2023,306,39,39,,True,False,station_log_date_installed,C:\develop\waveP\data\llr\stations\matm_20250310.log
+MATM,station_log_date_installed,2024,309,36,36,,True,False,station_log_date_installed,C:\develop\waveP\data\llr\stations\matm_20250310.log
+MDOL,station_log_date_installed,2015,29,2,2,,False,,single_period,C:\develop\waveP\data\llr\stations\mdol_20191210.log
+WETL,station_log_date_installed,2019,22,372,22,,True,False,station_log_date_installed,C:\develop\waveP\data\llr\stations\wetl_20230315.log
+WETL,station_log_date_installed,2022,108,286,108,,True,True,station_log_date_installed,C:\develop\waveP\data\llr\stations\wetl_20230315.log

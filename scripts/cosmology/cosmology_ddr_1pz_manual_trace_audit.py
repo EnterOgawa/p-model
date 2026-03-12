@@ -352,7 +352,7 @@ def _plot(path: Path, rows: List[Dict[str, Any]], summary: Dict[str, Any]) -> No
         for role_index, role_name in enumerate(role_order):
             role_matrix[role_index, pipeline_index] = float(role_counts.get(role_name, 0))
 
-    figure = plt.figure(figsize=(14.5, 8.5))
+    figure = plt.figure(figsize=(15.2, 9.4))
     grid = figure.add_gridspec(2, 1, height_ratios=(0.58, 0.42))
     axis_top = figure.add_subplot(grid[0, 0])
     axis_bottom = figure.add_subplot(grid[1, 0])
@@ -374,10 +374,11 @@ def _plot(path: Path, rows: List[Dict[str, Any]], summary: Dict[str, Any]) -> No
 
     axis_top.set_xticks(x_positions)
     axis_top.set_xticklabels(pipeline_labels, rotation=8, ha="right")
-    axis_top.set_ylabel("rows with (1+z)")
-    axis_top.set_title("DDR audit: where (1+z) enters in SNe Ia/BAO pipelines")
+    axis_top.set_ylabel("rows with (1+z)", fontsize=13.0)
+    axis_top.set_title("DDR audit: where (1+z) enters in SNe Ia/BAO pipelines", fontsize=14.5)
+    axis_top.tick_params(labelsize=11.2)
     axis_top.grid(axis="y", linestyle="--", alpha=0.35)
-    axis_top.legend(loc="upper right", frameon=True)
+    axis_top.legend(loc="upper right", frameon=True, fontsize=11.0)
 
     geometry_points = summary["geometry_injection_points"]
     # 条件分岐: `geometry_points` を満たす経路を評価する。
@@ -391,8 +392,9 @@ def _plot(path: Path, rows: List[Dict[str, Any]], summary: Dict[str, Any]) -> No
         axis_bottom.set_yticks(y_positions)
         axis_bottom.set_yticklabels(labels)
         axis_bottom.set_xlim(0.0, 1.4)
-        axis_bottom.set_xlabel("geometry-side injection marker (1 = detected)")
-        axis_bottom.set_title("Detected insertion points for D_A = D_M/(1+z)")
+        axis_bottom.set_xlabel("geometry-side injection marker (1 = detected)", fontsize=13.0)
+        axis_bottom.set_title("Detected insertion points for D_A = D_M/(1+z)", fontsize=14.5)
+        axis_bottom.tick_params(labelsize=11.0)
         axis_bottom.grid(axis="x", linestyle="--", alpha=0.35)
         for point_index, item in enumerate(geometry_points):
             axis_bottom.text(
@@ -401,17 +403,18 @@ def _plot(path: Path, rows: List[Dict[str, Any]], summary: Dict[str, Any]) -> No
                 str(item["equation"]),
                 va="center",
                 ha="left",
-                fontsize=9,
+                fontsize=10.6,
             )
     else:
         axis_bottom.axis("off")
-        axis_bottom.text(0.5, 0.5, "No geometry-side (1+z) insertion detected.", ha="center", va="center")
+        axis_bottom.text(0.5, 0.5, "No geometry-side (1+z) insertion detected.", ha="center", va="center", fontsize=12.0)
 
     figure.suptitle(
         "Step 5.3.18: manual line-by-line trace for implicit expansion assumption in DDR pipelines",
+        fontsize=15.8,
         y=0.98,
     )
-    figure.subplots_adjust(left=0.08, right=0.98, top=0.92, bottom=0.08, hspace=0.38)
+    figure.subplots_adjust(left=0.08, right=0.98, top=0.92, bottom=0.08, hspace=0.42)
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=160)
     plt.close(figure)

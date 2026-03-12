@@ -357,6 +357,9 @@ def _write_csv(path: Path, payload: Dict[str, Any]) -> None:
 # 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, payload: Dict[str, Any]) -> None:
+    import matplotlib.patches as mpatches
+    from matplotlib import colors as mcolors
+
     matrices = payload.get("matrices") if isinstance(payload.get("matrices"), dict) else {}
     labels = matrices.get("channel_order") if isinstance(matrices.get("channel_order"), list) else []
     cov = np.array(matrices.get("channel_covariance") or [], dtype=float)
@@ -374,17 +377,83 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
 
     fig, axes = plt.subplots(2, 2, figsize=(11.5, 8.0), dpi=180)
 
-    im0 = axes[0, 0].imshow(cov, cmap="viridis")
+    n_ch = len(labels)
+    x_edges = np.arange(n_ch + 1, dtype=float) - 0.5
+    y_edges = np.arange(n_ch + 1, dtype=float) - 0.5
+
+    # imshow を避けて pcolormesh を使い、PDFをベクターで保持する。
+    im0 = axes[0, 0].pcolormesh(
+        x_edges,
+        y_edges,
+        cov,
+        cmap="viridis",
+        shading="flat",
+    )
+    axes[0, 0].set_xlim(-0.5, n_ch - 0.5)
+    axes[0, 0].set_ylim(n_ch - 0.5, -0.5)
     axes[0, 0].set_title("Channel covariance")
     axes[0, 0].set_xticks(range(len(labels)), labels, rotation=25, ha="right")
     axes[0, 0].set_yticks(range(len(labels)), labels)
-    fig.colorbar(im0, ax=axes[0, 0], fraction=0.046, pad=0.04)
+    cax0 = axes[0, 0].inset_axes([1.02, 0.0, 0.03, 1.0])
+    c_norm0 = mcolors.Normalize(vmin=float(np.nanmin(cov)), vmax=float(np.nanmax(cov)))
+    c_vals0 = np.linspace(float(np.nanmin(cov)), float(np.nanmax(cov)), 129)
+    c_map0 = plt.get_cmap("viridis")
+    for i in range(len(c_vals0) - 1):
+        y0 = float(c_vals0[i])
+        y1 = float(c_vals0[i + 1])
+        yc = 0.5 * (y0 + y1)
+        cax0.add_patch(
+            mpatches.Rectangle(
+                (0.0, y0),
+                1.0,
+                y1 - y0,
+                facecolor=c_map0(c_norm0(yc)),
+                edgecolor="none",
+            )
+        )
+    cax0.set_xlim(0.0, 1.0)
+    cax0.set_ylim(float(c_vals0[0]), float(c_vals0[-1]))
+    cax0.set_xticks([])
+    cax0.yaxis.tick_right()
+    cax0.tick_params(labelsize=9.5)
 
-    im1 = axes[0, 1].imshow(corr, cmap="coolwarm", vmin=-1.0, vmax=1.0)
+    im1 = axes[0, 1].pcolormesh(
+        x_edges,
+        y_edges,
+        corr,
+        cmap="coolwarm",
+        vmin=-1.0,
+        vmax=1.0,
+        shading="flat",
+    )
+    axes[0, 1].set_xlim(-0.5, n_ch - 0.5)
+    axes[0, 1].set_ylim(n_ch - 0.5, -0.5)
     axes[0, 1].set_title("Channel correlation")
     axes[0, 1].set_xticks(range(len(labels)), labels, rotation=25, ha="right")
     axes[0, 1].set_yticks(range(len(labels)), labels)
-    fig.colorbar(im1, ax=axes[0, 1], fraction=0.046, pad=0.04)
+    cax1 = axes[0, 1].inset_axes([1.02, 0.0, 0.03, 1.0])
+    c_norm1 = mcolors.Normalize(vmin=-1.0, vmax=1.0)
+    c_vals1 = np.linspace(-1.0, 1.0, 129)
+    c_map1 = plt.get_cmap("coolwarm")
+    for i in range(len(c_vals1) - 1):
+        y0 = float(c_vals1[i])
+        y1 = float(c_vals1[i + 1])
+        yc = 0.5 * (y0 + y1)
+        cax1.add_patch(
+            mpatches.Rectangle(
+                (0.0, y0),
+                1.0,
+                y1 - y0,
+                facecolor=c_map1(c_norm1(yc)),
+                edgecolor="none",
+            )
+        )
+    cax1.set_xlim(0.0, 1.0)
+    cax1.set_ylim(-1.0, 1.0)
+    cax1.set_xticks([])
+    cax1.set_yticks(np.linspace(-1.0, 1.0, 5))
+    cax1.yaxis.tick_right()
+    cax1.tick_params(labelsize=9.5)
 
     axes[1, 0].bar(range(len(eig_vals)), eig_vals, color="#4c6ef5")
     axes[1, 0].set_title("Covariance eigenvalues")

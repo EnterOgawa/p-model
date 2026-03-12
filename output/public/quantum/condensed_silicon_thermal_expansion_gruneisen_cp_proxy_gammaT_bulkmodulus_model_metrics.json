@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T15:18:50.376778+00:00",
+  "generated_utc": "2026-03-11T13:18:12.343549+00:00",
   "phase": 7,
   "step": "7.14.17",
   "inputs": {
@@ -83,6 +83,7 @@
   },
   "outputs": {
     "csv": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_cp_proxy_gammaT_bulkmodulus_model.csv",
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_cp_proxy_gammaT_bulkmodulus_model.pdf",
     "png": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_cp_proxy_gammaT_bulkmodulus_model.png"
   }
 }

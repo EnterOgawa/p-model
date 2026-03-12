@@ -1,0 +1,4 @@
+scenario,drop_session,recommended_threshold_ns,recommended_n_sessions,recommended_chi2_dof,recommended_status,candidate_count,reason,delta_recommended_chi2_dof_vs_keep
+keep_all,,10.0,5,178.59660160292225,reject,1,operational_pool,0.0
+drop_22MAY09XA,22MAY09XA,10.0,4,203.82507406491536,reject,1,operational_pool,25.228472461993107
+drop_20MAY04XA,20MAY04XA,10.0,4,53.02268790436338,reject,1,operational_pool,-125.57391369855887

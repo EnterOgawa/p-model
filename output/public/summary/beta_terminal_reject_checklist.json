@@ -1,0 +1,371 @@
+{
+  "generated_utc": "2026-03-08T05:06:15.149912+00:00",
+  "phase": {
+    "step": "8.7.47.22+8.7.48.11+8.7.48.30"
+  },
+  "inputs": {
+    "beta_cross_channel_registry_json": "output/public/summary/beta_cross_channel_registry.json",
+    "beta_terminal_comparator_policy_sensitivity_json": "output/public/summary/beta_terminal_comparator_policy_sensitivity.json",
+    "vlbi_allsky_beta_consistency_metrics_json": "output/public/vlbi/vlbi_allsky_beta_consistency_metrics.json",
+    "vlbi_beta_source_session_matrix_metrics_json": "output/public/vlbi/vlbi_beta_source_session_matrix_metrics.json"
+  },
+  "rows": [
+    {
+      "id": "terminal_policy_current",
+      "category": "terminal_policy",
+      "status": "pass",
+      "metric": "current_policy",
+      "value": "policy_D_exclude_plus_messenger_fusion:D: exclude + LLR+MESSENGER",
+      "evidence": "reject -> watch",
+      "next_action": "keep_active_policy_until_gates_change"
+    },
+    {
+      "id": "cross_consistency_gate",
+      "category": "cross_channel",
+      "status": "pass",
+      "metric": "abs_z(beta_vlbi-beta_llr)",
+      "value": 13.391977394202545,
+      "evidence": "reject",
+      "next_action": "require_independent_vlbi_or_llr_extension"
+    },
+    {
+      "id": "policy_b_hold_governance",
+      "category": "policy_governance",
+      "status": "watch",
+      "metric": "policy_B_hold_status",
+      "value": "watch",
+      "evidence": "{'vlbi_subset_refit_ineligible': 'pass', 'policy_b_available': 'pass', 'active_policy_is_b': 'pass', 'policy_d_not_ready': 'watch'}",
+      "next_action": "recompute_policy_selection_inputs"
+    },
+    {
+      "id": "llr_gate_execution_order",
+      "category": "policy_governance",
+      "status": "pass",
+      "metric": "llr_gate_execution_order",
+      "value": "",
+      "evidence": "actions=",
+      "next_action": "keep_llr_gate_order_frozen"
+    },
+    {
+      "id": "llr_gate_repro_min_chain",
+      "category": "policy_governance",
+      "status": "pass",
+      "metric": "llr_gate_repro_commands_min",
+      "value": "python -B scripts/llr/llr_kappa_llr_direct_fit.py | python -B scripts/llr/llr_kappa_llr_beta_promotion_gate.py | python -B scripts/summary/beta_cross_channel_registry.py | python -B scripts/summary/beta_terminal_reject_checklist.py",
+      "evidence": "n=4",
+      "next_action": "run_llr_gate_chain_in_order"
+    },
+    {
+      "id": "policy_d_promotion_governance",
+      "category": "policy_governance",
+      "status": "pass",
+      "metric": "policy_D_promotion_status",
+      "value": "pass",
+      "evidence": "ready=True, blockers=",
+      "next_action": "policy_D_promotion_ready_use_llr_messenger_fusion"
+    },
+    {
+      "id": "policy_d_promotion_reassessment",
+      "category": "policy_governance",
+      "status": "pass",
+      "metric": "policy_D_reassessment_status",
+      "value": "pass",
+      "evidence": "order_match=True, count_delta=0, policy_alignment=True",
+      "next_action": "keep_policy_D_reassessment_snapshot"
+    },
+    {
+      "id": "policy_d_blocker_resolution_order",
+      "category": "policy_governance",
+      "status": "pass",
+      "metric": "policy_D_blocker_resolution_order",
+      "value": "",
+      "evidence": "top=, action=",
+      "next_action": "resolve_policy_D_promotion_blockers"
+    },
+    {
+      "id": "policy_recommended_active_policy",
+      "category": "policy_governance",
+      "status": "pass",
+      "metric": "recommended_active_policy_id",
+      "value": "policy_D_exclude_plus_messenger_fusion",
+      "evidence": "policy_D_promotion_ready=true -> allow llr+messenger fusion promotion",
+      "next_action": "active_policy_aligned_with_governance"
+    },
+    {
+      "id": "policy_switch_redecision",
+      "category": "policy_governance",
+      "status": "pass",
+      "metric": "policy_switch_decision_id",
+      "value": "switch_to_policy_D_now",
+      "evidence": "switch_required_now=True, switch_allowed_now=True, hold_reason=",
+      "next_action": "switch_policy_B_to_policy_D_now"
+    },
+    {
+      "id": "policy_terminal_watch_statement",
+      "category": "policy_governance",
+      "status": "pass",
+      "metric": "policy_terminal_watch_statement_id",
+      "value": "watch_resolved_policy_alignment_completed",
+      "evidence": "beta_terminal=watch; policy alignment to governance recommendation is completed.",
+      "next_action": "keep_canonical_watch_statement_until_policy_D_ready"
+    },
+    {
+      "id": "active_policy_update_decision",
+      "category": "terminal_policy",
+      "status": "pass",
+      "metric": "active_policy_update_required",
+      "value": false,
+      "evidence": "active=policy_D_exclude_plus_messenger_fusion, recommended=policy_D_exclude_plus_messenger_fusion",
+      "next_action": "keep_active_policy_as_recommended"
+    },
+    {
+      "id": "vlbi_comparator_eligibility",
+      "category": "vlbi",
+      "status": "reject",
+      "metric": "comparator_eligible",
+      "value": false,
+      "evidence": "subset_consistency_reject",
+      "next_action": "keep_comparator_ineligible"
+    },
+    {
+      "id": "vlbi_allsky_session_consistency",
+      "category": "vlbi",
+      "status": "reject",
+      "metric": "allsky_chi2_dof",
+      "value": 271.8600478275981,
+      "evidence": "n_valid=53",
+      "next_action": "expand_high_sensitivity_sessions"
+    },
+    {
+      "id": "vlbi_source_session_proxy",
+      "category": "vlbi",
+      "status": "reject",
+      "metric": "source_session_chi2_dof",
+      "value": 171.39375448124795,
+      "evidence": "rows=206",
+      "next_action": "split_corona_vs_structure_systematics"
+    },
+    {
+      "id": "vlbi_near_sun_source_0235",
+      "category": "vlbi_source",
+      "status": "reject",
+      "metric": "0235+164_chi2_dof",
+      "value": 7.515538464773124,
+      "evidence": "near_sun_target",
+      "next_action": "require_multiband_corona_control"
+    },
+    {
+      "id": "vlbi_near_sun_source_0229",
+      "category": "vlbi_source",
+      "status": "reject",
+      "metric": "0229+131_chi2_dof",
+      "value": 22.009536736872874,
+      "evidence": "near_sun_target",
+      "next_action": "require_multiband_corona_control"
+    },
+    {
+      "id": "vlbi_far_source_reference",
+      "category": "vlbi_source",
+      "status": "pass",
+      "metric": "0955+476_chi2_dof",
+      "value": 0.5133178981393014,
+      "evidence": "far_source_reference",
+      "next_action": "keep_as_structure_stability_reference"
+    },
+    {
+      "id": "policy_d_llr_messenger_pair_z",
+      "category": "policy_d_pair",
+      "status": "pass",
+      "metric": "abs_z(beta_llr-beta_messenger)",
+      "value": 0.042170581445497804,
+      "evidence": "policy_D fusion pair gate (watch=pass, pass=pass)",
+      "next_action": "maintain_pair_gate_and_focus_bias_audit"
+    },
+    {
+      "id": "policy_d_pair_delta_gap",
+      "category": "policy_d_pair",
+      "status": "pass",
+      "metric": "abs_delta_vs_watch_threshold",
+      "value": -2.9092855797210655,
+      "evidence": "abs_delta=0.04147847868380339, watch_limit=2.950764058404869",
+      "next_action": "pair_gate_pass_keep_bias_as_remaining_gate"
+    },
+    {
+      "id": "policy_d_messenger_watch_band",
+      "category": "policy_d_pair",
+      "status": "pass",
+      "metric": "required_messenger_beta_watch_range",
+      "value": "[-1.9500897604601204, 3.9514383563496174]",
+      "evidence": "current_beta_messenger=1.0421527766285519",
+      "next_action": "watch_band_satisfied_focus_bias_and_policy_governance"
+    },
+    {
+      "id": "messenger_stage_i_odf_decomposition",
+      "category": "messenger_diagnostic",
+      "status": "reject",
+      "metric": "odf_abs_z_baseline_to_best",
+      "value": 2.548230922407596,
+      "evidence": "baseline=14.435709175838632, best=11.887478253431036, max_shift_z=2.637280137935102",
+      "next_action": "prioritize_plasma_transponder_nuisance_control_for_odf"
+    },
+    {
+      "id": "messenger_stage_i_tnf_decomposition",
+      "category": "messenger_diagnostic",
+      "status": "watch",
+      "metric": "tnf_abs_z_baseline_to_best",
+      "value": 1.1396261487381834,
+      "evidence": "baseline=2.7112835599445715, best=1.5716574112063881, max_shift_z=3.110946467252994",
+      "next_action": "keep_tnf_replay_stable_while_aligning_odf_primary"
+    },
+    {
+      "id": "messenger_stage_i_nuisance_priority_top1",
+      "category": "messenger_diagnostic",
+      "status": "pass",
+      "metric": "top_nuisance_scenario",
+      "value": "transponder_quad_on",
+      "evidence": "group=transponder_drift, max_abs_z_delta=3.110946467252994",
+      "next_action": "prioritize_transponder_drift_model_upgrade"
+    },
+    {
+      "id": "messenger_stage_i_srp_proxy_registration",
+      "category": "messenger_diagnostic",
+      "status": "pass",
+      "metric": "srp_proxy_registered",
+      "value": true,
+      "evidence": "explicit_srp_proxy_registered_in_stage_i_policy; scenarios=all_proxies_on,srp_proxy_on",
+      "next_action": "calibrate_srp_proxy_against_spacecraft_force_model"
+    },
+    {
+      "id": "llr_beta_minus_1",
+      "category": "llr",
+      "status": "pass",
+      "metric": "abs_z(beta_llr-1)",
+      "value": 0.7019830114129517,
+      "evidence": "station_target_year|template_decontaminated",
+      "next_action": "maintain_decontaminated_pipeline"
+    },
+    {
+      "id": "llr_bias_audit",
+      "category": "llr",
+      "status": "pass",
+      "metric": "bias_audit_status",
+      "value": "pass",
+      "evidence": "pass",
+      "next_action": "continue_station_target_hardware_balance"
+    },
+    {
+      "id": "messenger_stage_j_final_gate",
+      "category": "messenger",
+      "status": "pass",
+      "metric": "stage_j_status",
+      "value": "pass",
+      "evidence": "stage_j_pass+stage_e_replay_pass+stage_d_data_pass",
+      "next_action": "keep_stage_j_pass_while_expanding_years"
+    },
+    {
+      "id": "messenger_replay_consistency",
+      "category": "messenger",
+      "status": "pass",
+      "metric": "abs_z(beta_tnf-beta_odf)",
+      "value": 1.9571653261565023,
+      "evidence": "pass",
+      "next_action": "maintain_replay_gate_under_kernel_updates"
+    },
+    {
+      "id": "messenger_bias_audit",
+      "category": "messenger",
+      "status": "pass",
+      "metric": "bias_audit_status",
+      "value": "pass",
+      "evidence": "stage_i_core=baseline,station_bias_lowcap,station_bias_highcap,sunq_proxy_on | stage_i_diag=transponder_quad_on,plasma_proxy_on,srp_proxy_on,all_proxies_on | stage_i_top_nuisance=transponder_quad_on | stage_h_required={'odf': ['station', 'link_type'], 'tnf': ['station']} | stage_h_diag={'odf': ['campaign'], 'tnf': ['link_type', 'campaign']}",
+      "next_action": "keep_core_policy_pass_and_track_diagnostic_scenarios"
+    },
+    {
+      "id": "messenger_beta_lt_minus_1_primary",
+      "category": "messenger",
+      "status": "pass",
+      "metric": "abs_z(beta_lt-1)",
+      "value": 0.042856151046319846,
+      "evidence": "beta_primary_definition=beta_lt",
+      "next_action": "keep_beta_lt_as_primary_beta_channel"
+    },
+    {
+      "id": "messenger_beta_dyn_diagnostic",
+      "category": "messenger_diagnostic",
+      "status": "reject",
+      "metric": "abs_z(beta_dyn-1)",
+      "value": 14.042789351037346,
+      "evidence": "non_gravitational_acceleration_sensitive_diagnostic",
+      "next_action": "treat_beta_dyn_as_nongrav_model_deficit_indicator"
+    },
+    {
+      "id": "next_primary_data_vlbi",
+      "category": "next_data",
+      "status": "watch",
+      "metric": "primary_data_requirement",
+      "value": "vgos_or_ka_multiband_near_far_pair",
+      "evidence": "corona_residual_plus_source_structure",
+      "next_action": "add_high_sensitivity_sessions_with_multiband_control"
+    },
+    {
+      "id": "next_primary_data_llr",
+      "category": "next_data",
+      "status": "watch",
+      "metric": "primary_data_requirement",
+      "value": "independent_llr_channel_expansion",
+      "evidence": "llr_bias_audit_not_pass",
+      "next_action": "add_balanced_station_hardware_and_independent_templates"
+    },
+    {
+      "id": "next_primary_data_messenger",
+      "category": "next_data",
+      "status": "watch",
+      "metric": "primary_data_requirement",
+      "value": "messenger_nongrav_model_upgrade",
+      "evidence": "beta_dyn_diagnostic_gap",
+      "next_action": "improve_nongrav_model_and_monitor_beta_dyn_convergence"
+    }
+  ],
+  "summary": {
+    "terminal_status_current": "pass",
+    "status_counts": {
+      "pass": 23,
+      "watch": 5,
+      "reject": 7
+    },
+    "active_policy_current": "policy_D_exclude_plus_messenger_fusion",
+    "active_policy_recommended": "policy_D_exclude_plus_messenger_fusion",
+    "active_policy_update_required": false,
+    "policy_d_reassessment_status": "pass",
+    "policy_d_reassessment_order_match": true,
+    "policy_d_reassessment_blocker_delta": 0,
+    "policy_switch_decision_id": "switch_to_policy_D_now",
+    "policy_switch_required_now": true,
+    "policy_switch_allowed_now": true,
+    "policy_switch_hold_reason": "",
+    "policy_terminal_watch_statement_id": "watch_resolved_policy_alignment_completed",
+    "policy_terminal_watch_statement_text": "beta_terminal=watch; policy alignment to governance recommendation is completed.",
+    "llr_gate_order_status": "pass",
+    "llr_gate_execution_order": [],
+    "llr_gate_actions_ordered": [],
+    "llr_gate_repro_commands_min": [
+      "python -B scripts/llr/llr_kappa_llr_direct_fit.py",
+      "python -B scripts/llr/llr_kappa_llr_beta_promotion_gate.py",
+      "python -B scripts/summary/beta_cross_channel_registry.py",
+      "python -B scripts/summary/beta_terminal_reject_checklist.py"
+    ],
+    "policy_d_blocker_resolution_order": [],
+    "policy_d_blocker_actions_ordered": [],
+    "next_primary_data_requirements": [
+      "vgos_or_ka_multiband_near_far_pair",
+      "independent_llr_channel_expansion",
+      "messenger_dyn_lt_parameter_separation"
+    ]
+  },
+  "outputs": {
+    "json": "output/private/summary/beta_terminal_reject_checklist.json",
+    "csv": "output/private/summary/beta_terminal_reject_checklist.csv",
+    "pdf": "output/private/summary/beta_terminal_reject_checklist.pdf",
+    "png": "output/private/summary/beta_terminal_reject_checklist.png"
+  }
+}

@@ -6,5 +6,5 @@
   "reference": "|S|≤2（CHSH）/ J≤0（CH）",
   "pmodel": "selectionノブで統計量が動く（Δ）",
   "metric": "統計: parametric bootstrap（固定）; 系統: sweep変動; delay(Δmedian; z)＋KS(proxy)併記",
-  "metric_public": "Weihs1998 Δ|S|≈0.423 / Delft2015 ΔS≈0.788 / Delft2016 ΔS≈1.44 / NIST ΔJ≈0.00351 / Kwiat2013 ΔJ≈0.000123"
+  "metric_public": "Weihs1998 Δ|S|≈0.423 / Delft2015 ΔS≈0.788 / Delft2016 ΔS≈1.44 / NIST ΔJ≈0.001 / Kwiat2013 ΔJ≈0.000123"
 }

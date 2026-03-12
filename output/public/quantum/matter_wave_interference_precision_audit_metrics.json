@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-27T02:42:23.068713+00:00",
+  "generated_utc": "2026-03-12T01:15:57.154392+00:00",
   "phase": 7,
   "step": "7.16.13",
   "title": "Matter-wave interference precision audit (electron/atom/molecule)",
@@ -50,7 +50,8 @@
   },
   "outputs": {
     "summary_csv": "C:\\develop\\waveP\\output\\public\\quantum\\matter_wave_interference_precision_audit_summary.csv",
-    "summary_png": "C:\\develop\\waveP\\output\\public\\quantum\\matter_wave_interference_precision_audit.png"
+    "summary_png": "C:\\develop\\waveP\\output\\public\\quantum\\matter_wave_interference_precision_audit.png",
+    "summary_pdf": "C:\\develop\\waveP\\output\\public\\quantum\\matter_wave_interference_precision_audit.pdf"
   },
   "precision_gap_watch": {
     "observable": "current_over_required_precision_ratio",

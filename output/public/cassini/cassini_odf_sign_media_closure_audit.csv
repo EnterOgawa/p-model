@@ -1,0 +1,17 @@
+candidate,fit_intercept,delta_beta,delta_beta_sigma_proxy,corr_obs_fit,rmse,weighted_rms,zscore_vs_tdf_plasma,zscore_vs_tdf_raw,zscore_min_vs_tdf,is_best_candidate
+same_sign,yes,-615.108974266645,13.63815593297,0.0692753030547071,1.139270031002146e-06,1.139270031002146e-06,45.1097859530538,45.10416076555,45.10416076555,no
+invert_sign,yes,615.108974266645,13.63815593297,0.0692753030547071,1.139270031002146e-06,1.139270031002146e-06,45.0942926753613,45.099966137024,45.0942926753613,no
+same_sign_offset_removed,no,-395.78465923206,11.9851860048451,0.0692753030547071,1.140788950625003e-06,1.140788950625003e-06,33.0316137474842,33.0252081657256,33.0252081657256,no
+invert_sign_offset_removed,no,395.78465923206,11.9851860048451,0.0692753030547071,1.140788950625003e-06,1.140788950625003e-06,33.0139836745214,33.020435023457,33.0139836745214,yes
+
+media_audit_status,watch
+media_record_level_flag_detected,False
+media_scanned_labels,14
+media_missing_labels,0
+media_watch_reason,ODF labels contain correction-related descriptions but no explicit record-level media flag field.
+
+media_manifest_extractable,True
+media_manifest_hook_mode,external_csp_join_ready
+media_manifest_external_csp_state,pds_ancillary_payload_complete
+media_manifest_external_csp_hard_watch,False
+media_manifest_external_csp_watch_reason,

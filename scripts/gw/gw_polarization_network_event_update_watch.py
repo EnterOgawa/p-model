@@ -618,6 +618,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_json = outdir / f"{args.prefix}.json"
     out_csv = outdir / f"{args.prefix}.csv"
     out_png = outdir / f"{args.prefix}.png"
+    out_pdf = out_png.with_suffix(".pdf")
     out_checklist_csv = outdir / f"{args.prefix}_checklist.csv"
     _write_csv(out_csv, [row])
     _write_csv(out_checklist_csv, checklist_rows)
@@ -665,6 +666,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "audit_json": str(out_json).replace("\\", "/"),
             "audit_csv": str(out_csv).replace("\\", "/"),
             "audit_png": str(out_png).replace("\\", "/"),
+            "audit_pdf": str(out_pdf).replace("\\", "/") if out_pdf.exists() else "",
             "audit_checklist_csv": str(out_checklist_csv).replace("\\", "/"),
         },
         "falsification": {
@@ -695,8 +697,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     }
     _write_json(state_path, state_payload)
 
+    copied_sources = [out_json, out_csv, out_png, out_checklist_csv]
+    if out_pdf.exists():
+        copied_sources.append(out_pdf)
+
     copied: List[str] = []
-    for src in [out_json, out_csv, out_png, out_checklist_csv]:
+    for src in copied_sources:
         dst = public_outdir / src.name
         shutil.copy2(src, dst)
         copied.append(str(dst).replace("\\", "/"))

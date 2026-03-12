@@ -148,6 +148,12 @@ def main(argv: List[str] | None = None) -> int:
         help="Skip running upstream scripts and only evaluate existing output JSON files.",
     )
     parser.add_argument(
+        "--shared-gate-policy",
+        choices=["strict_hard", "watch_if_bell_pairing_only"],
+        default="strict_hard",
+        help="Shared gate policy id propagated to chain-lock/closure audits.",
+    )
+    parser.add_argument(
         "--out-json",
         type=str,
         default=str(ROOT / "output" / "public" / "quantum" / "lagrangian_noether_closure_operational_cycle_8722_8721.json"),
@@ -162,11 +168,25 @@ def main(argv: List[str] | None = None) -> int:
         type=str,
         default=str(ROOT / "output" / "public" / "quantum" / "lagrangian_noether_closure_operational_cycle_8722_8721.png"),
     )
+    parser.add_argument(
+        "--weak-json",
+        type=str,
+        default=str(ROOT / "output" / "public" / "quantum" / "weak_interaction_beta_decay_route_ab_audit.json"),
+        help="Input weak-interaction closure JSON (default: public fixed artifact).",
+    )
+    parser.add_argument(
+        "--drift-json",
+        type=str,
+        default=str(ROOT / "output" / "public" / "quantum" / "lagrangian_noether_observable_closure_drift_audit.json"),
+        help="Input closure-drift JSON (default: public fixed artifact).",
+    )
     args = parser.parse_args(argv)
 
     out_json = Path(args.out_json)
     out_csv = Path(args.out_csv)
     out_png = Path(args.out_png)
+    weak_json = Path(args.weak_json)
+    drift_json = Path(args.drift_json)
     # 条件分岐: `not out_json.is_absolute()` を満たす経路を評価する。
     if not out_json.is_absolute():
         out_json = (ROOT / out_json).resolve()
@@ -181,6 +201,16 @@ def main(argv: List[str] | None = None) -> int:
     if not out_png.is_absolute():
         out_png = (ROOT / out_png).resolve()
 
+    # 条件分岐: `not weak_json.is_absolute()` を満たす経路を評価する。
+
+    if not weak_json.is_absolute():
+        weak_json = (ROOT / weak_json).resolve()
+
+    # 条件分岐: `not drift_json.is_absolute()` を満たす経路を評価する。
+
+    if not drift_json.is_absolute():
+        drift_json = (ROOT / drift_json).resolve()
+
     runs: List[Dict[str, Any]] = []
     # 条件分岐: `not args.skip_upstream` を満たす経路を評価する。
     if not args.skip_upstream:
@@ -188,12 +218,24 @@ def main(argv: List[str] | None = None) -> int:
             [sys.executable, "-B", "scripts/quantum/weak_interaction_ckm_first_row_audit.py"],
             [sys.executable, "-B", "scripts/quantum/weak_interaction_pmns_first_row_audit.py"],
             [sys.executable, "-B", "scripts/quantum/weak_interaction_beta_decay_route_ab_audit.py"],
+            [sys.executable, "-B", "scripts/quantum/quantum_connection_shared_kpi.py"],
+            [
+                sys.executable,
+                "-B",
+                "scripts/quantum/derivation_observable_chain_lock_audit.py",
+                "--shared-gate-policy",
+                str(args.shared_gate_policy),
+            ],
+            [
+                sys.executable,
+                "-B",
+                "scripts/quantum/lagrangian_noether_observable_closure_audit.py",
+                "--shared-gate-policy",
+                str(args.shared_gate_policy),
+            ],
             [sys.executable, "-B", "scripts/quantum/lagrangian_noether_observable_closure_drift_audit.py"],
         ]
         runs = [_run(cmd) for cmd in commands]
-
-    weak_json = ROOT / "output" / "public" / "quantum" / "weak_interaction_beta_decay_route_ab_audit.json"
-    drift_json = ROOT / "output" / "public" / "quantum" / "lagrangian_noether_observable_closure_drift_audit.json"
 
     weak = _load_json(weak_json)
     drift = _load_json(drift_json)
@@ -207,6 +249,8 @@ def main(argv: List[str] | None = None) -> int:
     drift_status = str(drift_decision.get("overall_status") or "reject")
     recalc_required = bool(drift_decision.get("recalc_required"))
     recalc_status = "pass" if recalc_required is False else "reject"
+    closure_shared_gate_policy = str(drift_decision.get("closure_shared_gate_policy") or "unknown")
+    shared_policy_status = "pass" if closure_shared_gate_policy == str(args.shared_gate_policy) else "reject"
 
     rows = [
         _metric_row(
@@ -224,6 +268,14 @@ def main(argv: List[str] | None = None) -> int:
             "A_stay_B_reject",
             transition_status,
             "Route-A/B transition consistency.",
+        ),
+        _metric_row(
+            "op_cycle::shared_gate_policy",
+            "closure shared_gate_policy alignment",
+            closure_shared_gate_policy,
+            str(args.shared_gate_policy),
+            shared_policy_status,
+            "Closure drift output must match requested shared gate policy id.",
         ),
         _metric_row(
             "op_cycle::ckm_pmns_closure",
@@ -282,6 +334,8 @@ def main(argv: List[str] | None = None) -> int:
         "decision": {
             "overall_status": overall_status,
             "decision": decision,
+            "shared_gate_policy": str(args.shared_gate_policy),
+            "closure_shared_gate_policy": closure_shared_gate_policy,
             "watch_is_allowed_only_for": ["op_cycle::ckm_pmns_closure"],
             "rule": "Reject if any non-CKM row is reject; watch if only CKM closure is watch; pass if all pass.",
         },
@@ -316,6 +370,7 @@ def main(argv: List[str] | None = None) -> int:
                 "metrics": {
                     "overall_status": overall_status,
                     "decision": decision,
+                    "shared_gate_policy": str(args.shared_gate_policy),
                     "ckm_pmns_closure_status": ckm_pmns_status,
                     "drift_overall_status": drift_status,
                     "drift_recalc_required": recalc_required,
@@ -332,4 +387,3 @@ def main(argv: List[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

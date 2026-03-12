@@ -1,0 +1,77 @@
+{
+  "generated_utc": "2026-03-07T09:14:08.007343+00:00",
+  "phase": {
+    "step": "8.7.47.13"
+  },
+  "input": {
+    "points_csv": "output/private/llr/batch/llr_batch_points.csv",
+    "n_points": 13079,
+    "n_station": 5,
+    "n_target": 6,
+    "n_clusters_station_target_night": 4112,
+    "station_fit_mode": "station_target_year",
+    "target_fit_mode": "station_target_year",
+    "imbalance_fit_mode": "station_target_year",
+    "stratified_weight_scheme": "inv_station_target",
+    "imbalance_schemes": [
+      "uniform",
+      "inv_station",
+      "inv_target",
+      "inv_station_target",
+      "station_cap_p95"
+    ]
+  },
+  "baseline_reference": {
+    "available": true,
+    "path": "C:\\develop\\waveP\\output\\public\\llr\\llr_kappa_llr_metrics.json",
+    "station_chi2_dof": 8.104516305375583,
+    "target_chi2_dof": 4.243632762919645,
+    "imbalance_max_abs_z_vs_uniform": 4.963920289773529
+  },
+  "cluster_robust": {
+    "station_stratified": {
+      "fit_mode": "station_target_year",
+      "min_points": 180,
+      "n_groups": 5,
+      "indep_chi2_dof": 8.104516305375583,
+      "cluster_chi2_dof": 1.2781735290526886,
+      "indep_status": "reject",
+      "cluster_status": "pass"
+    },
+    "target_stratified": {
+      "fit_mode": "station_target_year",
+      "min_points": 180,
+      "n_groups": 6,
+      "indep_chi2_dof": 4.243632762919645,
+      "cluster_chi2_dof": 0.3039360014437223,
+      "indep_status": "watch",
+      "cluster_status": "pass"
+    },
+    "imbalance_policy": {
+      "n_valid_policies": 5,
+      "max_abs_z_vs_uniform_cluster": 1.4500581016770522,
+      "z_status_cluster": "pass",
+      "cluster_chi2_dof": 0.9189437193166088,
+      "cluster_status": "pass"
+    },
+    "delta_vs_baseline": {
+      "station_chi2_dof_delta_cluster_minus_indep": -6.826342776322894,
+      "target_chi2_dof_delta_cluster_minus_indep": -3.9396967614759224,
+      "imbalance_max_abs_z_delta_cluster_minus_indep": -3.5138621880964767
+    },
+    "gate_status": {
+      "station_stratified_gate": "pass",
+      "target_stratified_gate": "pass",
+      "imbalance_policy_gate": "pass"
+    },
+    "overall_status": "pass"
+  },
+  "outputs": {
+    "policy_csv": "output/private/llr/llr_kappa_llr_cluster_robust_policy_summary.csv",
+    "station_csv": "output/private/llr/llr_kappa_llr_cluster_robust_station_summary.csv",
+    "target_csv": "output/private/llr/llr_kappa_llr_cluster_robust_target_summary.csv",
+    "metrics_json": "output/private/llr/llr_kappa_llr_cluster_robust_metrics.json",
+    "plot_pdf": "output/private/llr/llr_kappa_llr_cluster_robust_audit.pdf",
+    "plot_png": "output/private/llr/llr_kappa_llr_cluster_robust_audit.png"
+  }
+}

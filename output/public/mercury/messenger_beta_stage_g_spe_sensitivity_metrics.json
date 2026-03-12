@@ -1,0 +1,80 @@
+{
+  "generated_utc": "2026-03-07T15:58:34.600297+00:00",
+  "phase_step": "8.7.48.7",
+  "overall_status": "pass",
+  "source_branch": "tnf",
+  "doppler_csv": "data/mercury/messenger/derived/tnf_doppler_observations.csv",
+  "range_csv": "data/mercury/messenger/derived/tnf_range_observations.csv",
+  "kernels_dir": "data/mercury/messenger/spice/generic",
+  "kernel_status": "pass",
+  "kernel_rows": [
+    {
+      "kernel_key": "lsk",
+      "filename": "naif0012.tls",
+      "status": "exists",
+      "note": "ok",
+      "exists": 1,
+      "bytes": 5257,
+      "path": "data/mercury/messenger/spice/generic/naif0012.tls",
+      "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0012.tls"
+    },
+    {
+      "kernel_key": "spk_planet",
+      "filename": "de440s.bsp",
+      "status": "exists",
+      "note": "ok",
+      "exists": 1,
+      "bytes": 32726016,
+      "path": "data/mercury/messenger/spice/generic/de440s.bsp",
+      "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440s.bsp"
+    }
+  ],
+  "n_rows_joint": 3160,
+  "n_rows_range": 986,
+  "n_rows_doppler": 2174,
+  "spe_proxy_stats": {
+    "n_finite": 3160,
+    "min_deg": 4.607030532371662,
+    "median_deg": 33.96116095573939,
+    "max_deg": 102.18363345632594
+  },
+  "subset_status": {
+    "spe_gt_90": "pass",
+    "spe_35_90_diagnostic": "watch",
+    "spe_gt_35": "pass",
+    "spe_le_35_diagnostic": "watch"
+  },
+  "gating_policy": {
+    "primary_subset": "SPE > 90",
+    "extended_subset": "35 < SPE <= 90",
+    "operational_subset": "SPE > 35",
+    "excluded_subset": "SPE <= 35",
+    "required_subsets_for_overall": [
+      "SPE > 90",
+      "SPE > 35"
+    ],
+    "diagnostic_only_subsets": [
+      "35 < SPE <= 90",
+      "SPE <= 35"
+    ],
+    "subset_delta_pass_abs_z": 2.0,
+    "subset_delta_watch_abs_z": 5.0,
+    "insufficient_rows_policy": "watch",
+    "spe_definition": "Sun-Mercury-Earth angle (Mercury proxy for MESSENGER)"
+  },
+  "outputs_private": [
+    "output/private/mercury/messenger_beta_stage_g_spe_sensitivity_summary.csv",
+    "output/private/mercury/messenger_beta_stage_g_spe_profile.csv",
+    "output/private/mercury/messenger_beta_stage_g_spe_kernel_status.csv",
+    "output/private/mercury/messenger_beta_stage_g_spe_sensitivity.pdf",
+    "output/private/mercury/messenger_beta_stage_g_spe_sensitivity.png"
+  ],
+  "plot": "generated",
+  "outputs_public": [
+    "output/public/mercury/messenger_beta_stage_g_spe_sensitivity_summary.csv",
+    "output/public/mercury/messenger_beta_stage_g_spe_profile.csv",
+    "output/public/mercury/messenger_beta_stage_g_spe_kernel_status.csv",
+    "output/public/mercury/messenger_beta_stage_g_spe_sensitivity.pdf",
+    "output/public/mercury/messenger_beta_stage_g_spe_sensitivity.png"
+  ]
+}

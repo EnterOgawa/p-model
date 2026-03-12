@@ -1,0 +1,11 @@
+key,value
+public_reproducibility_state,pds_ancillary_payload_complete
+local_csp_file_count,0
+all_required_mediums_local,True
+delivery_route_documented,True
+hard_watch_required,False
+hard_watch_reason,
+next_action,Local CSP payload is complete; run record-level media join hook.
+local_csp_medium_counts.IONCAL,1
+local_csp_medium_counts.TROPCAL,1
+local_csp_medium_counts.PLSMCAL,1

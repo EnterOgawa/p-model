@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-22T11:27:59.815723+00:00",
+  "generated_utc": "2026-03-12T06:53:24.023892+00:00",
   "input": "C:/develop/waveP/data/cosmology/planck2018_com_power_spect_tt_binned_r3.01.txt",
   "source_note": {
     "dataset": "Planck 2018 TT binned spectrum (COM_PowerSpect_CMB-TT-binned_R3.01)",
@@ -345,6 +345,7 @@
   },
   "outputs": {
     "png": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_acoustic_peak_reconstruction.png",
+    "pdf": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_acoustic_peak_reconstruction.pdf",
     "metrics_json": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_acoustic_peak_reconstruction_metrics.json",
     "falsification_pack_json": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_acoustic_peak_reconstruction_falsification_pack.json",
     "peaks_csv": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_acoustic_peak_reconstruction_peaks.csv"

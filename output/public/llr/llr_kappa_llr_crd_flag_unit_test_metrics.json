@@ -1,0 +1,141 @@
+{
+  "generated_utc": "2026-03-08T05:03:45.018297+00:00",
+  "phase": {
+    "step": "8.7.47.16"
+  },
+  "input": {
+    "points_csv": "output/private/llr/batch/llr_batch_points.csv",
+    "n_points": 13079,
+    "fit_mode": "station_target_year",
+    "weight_scheme": "inv_station_target",
+    "weight_floor_station": 180,
+    "weight_floor_target": 180,
+    "weight_floor_station_target": 120,
+    "max_weight_cap": 8.0,
+    "min_points_group": 200
+  },
+  "baseline": {
+    "kappa_est": 1.5287267089537062,
+    "kappa_sigma_cluster": 0.11016131859420442,
+    "status_cluster": "reject"
+  },
+  "tests": [
+    {
+      "test_id": "com",
+      "test_label": "COM Correction (1 vs 0)",
+      "n_a": 0,
+      "n_b": 13079,
+      "fit_mode": "station_target_year",
+      "note": "H4 center-of-mass correction flag",
+      "fit_ok": false,
+      "status": "not_testable",
+      "reason": "insufficient_contrast(min=200)",
+      "kappa_a": NaN,
+      "sigma_a": NaN,
+      "kappa_b": NaN,
+      "sigma_b": NaN,
+      "delta_a_minus_b": NaN,
+      "sigma_delta": NaN,
+      "z_delta": NaN,
+      "abs_z_delta": NaN
+    },
+    {
+      "test_id": "crd_vs_meritii_inversion",
+      "test_label": "Quality inversion (0 vs nonzero)",
+      "n_a": 8724,
+      "n_b": 702,
+      "fit_mode": "station_target_year",
+      "note": "CRD-vs-MeritII inversion proxy on record11 quality code",
+      "fit_ok": true,
+      "status": "pass",
+      "reason": "",
+      "kappa_a": 1.6906911938247067,
+      "sigma_a": 0.08863711907328999,
+      "kappa_b": 1.9373245358802134,
+      "sigma_b": 0.13686489412282632,
+      "delta_a_minus_b": -0.2466333420555067,
+      "sigma_delta": 0.1630599218718844,
+      "z_delta": -1.5125319528196857,
+      "abs_z_delta": 1.5125319528196857
+    },
+    {
+      "test_id": "range_type",
+      "test_label": "Range Type (2 vs 1)",
+      "n_a": 13079,
+      "n_b": 0,
+      "fit_mode": "station_target_year",
+      "note": "H4 range_type split",
+      "fit_ok": false,
+      "status": "not_testable",
+      "reason": "insufficient_contrast(min=200)",
+      "kappa_a": NaN,
+      "sigma_a": NaN,
+      "kappa_b": NaN,
+      "sigma_b": NaN,
+      "delta_a_minus_b": NaN,
+      "sigma_delta": NaN,
+      "z_delta": NaN,
+      "abs_z_delta": NaN
+    },
+    {
+      "test_id": "refraction",
+      "test_label": "Refraction (1 vs 0)",
+      "n_a": 0,
+      "n_b": 13079,
+      "fit_mode": "station_target_year",
+      "note": "H4 tropospheric refraction flag",
+      "fit_ok": false,
+      "status": "not_testable",
+      "reason": "insufficient_contrast(min=200)",
+      "kappa_a": NaN,
+      "sigma_a": NaN,
+      "kappa_b": NaN,
+      "sigma_b": NaN,
+      "delta_a_minus_b": NaN,
+      "sigma_delta": NaN,
+      "z_delta": NaN,
+      "abs_z_delta": NaN
+    },
+    {
+      "test_id": "system_delay",
+      "test_label": "System Delay (1 vs 0)",
+      "n_a": 13079,
+      "n_b": 0,
+      "fit_mode": "station_target_year",
+      "note": "H4 station system-delay correction flag",
+      "fit_ok": false,
+      "status": "not_testable",
+      "reason": "insufficient_contrast(min=200)",
+      "kappa_a": NaN,
+      "sigma_a": NaN,
+      "kappa_b": NaN,
+      "sigma_b": NaN,
+      "delta_a_minus_b": NaN,
+      "sigma_delta": NaN,
+      "z_delta": NaN,
+      "abs_z_delta": NaN
+    }
+  ],
+  "gate_status": {
+    "overall_status": "pass",
+    "per_test_status": [
+      "not_testable",
+      "pass",
+      "not_testable",
+      "not_testable",
+      "not_testable"
+    ],
+    "n_testable_tests": 1,
+    "n_not_testable_tests": 4,
+    "non_blocking_statuses": [
+      "not_testable"
+    ]
+  },
+  "outputs": {
+    "summary_csv": "output/private/llr/llr_kappa_llr_crd_flag_unit_test_summary.csv",
+    "coverage_csv": "output/private/llr/llr_kappa_llr_crd_flag_unit_test_flag_coverage.csv",
+    "metrics_json": "output/private/llr/llr_kappa_llr_crd_flag_unit_test_metrics.json",
+    "plot_pdf": "output/private/llr/llr_kappa_llr_crd_flag_unit_test_audit.pdf",
+    "plot_png": "output/private/llr/llr_kappa_llr_crd_flag_unit_test_audit.png"
+  }
+}

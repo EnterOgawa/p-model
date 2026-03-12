@@ -1,0 +1,492 @@
+{
+  "generated_utc": "2026-03-12T03:01:43.117129+00:00",
+  "inputs": {
+    "observed_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_sce1_odf_observed_raw.csv",
+    "pds_manifest_odf": "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\manifest_odf.json"
+  },
+  "counts": {
+    "n_observed_rows": 421841,
+    "n_source_files": 14,
+    "n_label_missing": 0,
+    "station_rx_unique": [
+      25
+    ],
+    "station_tx_unique": [
+      25
+    ]
+  },
+  "keys": {
+    "band_id": {
+      "key": "band_id",
+      "status": "pass",
+      "downlink_band_id_unique": [
+        3
+      ],
+      "uplink_band_id_unique": [
+        3
+      ],
+      "data_type_id_unique": [
+        12
+      ],
+      "pass_condition": "single downlink/uplink band across fitted ODF rows",
+      "evidence": "observed CSV unique-value census"
+    },
+    "doppler_sign_convention": {
+      "key": "doppler_sign_convention",
+      "status": "watch",
+      "sign_formula_basis": "ODF3C Item 4: Observable=[B/|B|]*[(Nj-Ni)/(tj-ti)-|Fb*K+B|]",
+      "residual_definition_basis": "ODF3C Item 4: residual = observed Doppler - predicted Doppler",
+      "parser_mapping": "y_obs = doppler_hz / carrier_hz (no parser-side sign inversion)",
+      "observed_sign_counts": {
+        "positive": 419768,
+        "negative": 2073
+      },
+      "recordlevel_reaudit_json": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_sign_recordlevel_reaudit.json",
+      "recordlevel_reaudit_available": true,
+      "terminal_gate_status": "watch",
+      "terminal_gate_pass": false,
+      "terminal_gate_selected_interval": {
+        "best_candidate": "invert_sign_offset_removed",
+        "arc_start": 166,
+        "arc_end": 167,
+        "n_arcs": 2,
+        "arc_ids": [
+          "sce1_166",
+          "sce1_167"
+        ],
+        "n_points": 73156,
+        "coverage_ratio_points": 0.1734207912459908
+      },
+      "terminal_gate_selected_coverage_ratio_points": 0.1734207912459908,
+      "terminal_gate_selected_n_arcs": 2,
+      "terminal_gate_min_contiguous_arcs": 2,
+      "terminal_gate_min_coverage_ratio_points": 0.25,
+      "watch_reason_codes": [
+        "sign_terminal_gate_not_closed",
+        "stable_arc_coverage_below_gate"
+      ],
+      "watch_reason": "record-level terminal gate for ODF sign convention is not closed"
+    },
+    "media_correction_state": {
+      "key": "media_correction_state",
+      "status": "pass",
+      "parser_state": "raw ODF observable path; no additional plasma/tropo correction in parser",
+      "label_note": "ODF labels expose ODF3C/ODF4 proxy context but no explicit per-record media-model flag.",
+      "record_level_media_state_extractable": true,
+      "parser_media_hook_mode": "external_csp_join_ready",
+      "trk_2_18_local_available": false,
+      "trk_2_18_reference_count_in_labels": 56,
+      "crosswalk_json": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_media_correction_field_map.json",
+      "crosswalk_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_media_correction_field_map.csv",
+      "external_csp_public_reproducibility_state": "pds_ancillary_payload_complete",
+      "external_csp_hard_watch_required": false,
+      "external_csp_hard_watch_reason": "",
+      "external_csp_local_csp_file_count": 0,
+      "external_csp_local_mediums_observed": [
+        "IONCAL",
+        "PLSMCAL",
+        "TROPCAL"
+      ],
+      "external_csp_required_mediums": [
+        "IONCAL",
+        "TROPCAL",
+        "PLSMCAL"
+      ],
+      "external_csp_delivery_route_documented": true,
+      "external_csp_join_hook_mode": "external_csp_join_ready",
+      "external_csp_join_extractable": true,
+      "external_csp_join_required_keys": [
+        "time_utc",
+        "station_rx",
+        "station_tx",
+        "downlink_band_id",
+        "uplink_band_id",
+        "data_type_id",
+        "source_file"
+      ],
+      "external_csp_join_missing_keys": [],
+      "external_csp_join_metrics_json": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_media_state_join_metrics.json",
+      "external_csp_join_coverage_any_ratio": 1.0,
+      "external_csp_join_coverage_on_mapped_ratio": 1.0,
+      "external_csp_availability_json": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_external_csp_availability.json",
+      "external_csp_availability_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_external_csp_availability.csv",
+      "watch_reason": "record-level media-correction state is not explicitly extractable from current ODF fields"
+    },
+    "time_scale_id": {
+      "key": "time_scale_id",
+      "status": "pass",
+      "file_reference_date_unique": [
+        19500101
+      ],
+      "file_reference_time_unique": [
+        0
+      ],
+      "parser_mapping": "time_utc = EPOCH_1950 + seconds + frac_ms",
+      "time_scale_inference": "EME50 epoch anchor (19500101 or legacy 0 treated as EME50)",
+      "pass_condition": "single ODF reference date/time across used label set (EME50-compatible)",
+      "evidence": "ODF1B Item 20/21 (FILE REFERENCE DATE/TIME)"
+    }
+  },
+  "overall_status": "watch",
+  "overall_if_ready_for_absolute_beta": false,
+  "promotion_gate": "all four keys must be pass",
+  "source_files": [
+    "cors_0022/sce1_162/odf/c32easc2002_162_0000k252v0.odf",
+    "cors_0022/sce1_163/odf/c32easc2002_163_0000k252v0.odf",
+    "cors_0022/sce1_164/odf/c32easc2002_164_0000k252v0.odf",
+    "cors_0023/sce1_166/odf/c32easc2002_166_0000k252v0.odf",
+    "cors_0023/sce1_167/odf/c32easc2002_167_0000k252v0.odf",
+    "cors_0024/sce1_172/odf/c32easc2002_172_0000k252v0.odf",
+    "cors_0025/sce1_173/odf/c32easc2002_173_0000k252v0.odf",
+    "cors_0025/sce1_174/odf/c32easc2002_174_0000k252v0.odf",
+    "cors_0025/sce1_175/odf/c32easc2002_175_0000k252v0.odf",
+    "cors_0025/sce1_176/odf/c32easc2002_176_0000k252v0.odf",
+    "cors_0026/sce1_177/odf/c32easc2002_177_0000k252v0.odf",
+    "cors_0026/sce1_178/odf/c32easc2002_178_0000k252v0.odf",
+    "cors_0026/sce1_180/odf/c32easc2002_180_0000k252v0.odf",
+    "cors_0027/sce1_181/odf/c32easc2002_181_0000k252v0.odf"
+  ],
+  "label_meta_by_source_file": {
+    "cors_0022/sce1_162/odf/c32easc2002_162_0000k252v0.odf": {
+      "label_path": "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0022\\sce1_162\\odf\\c32easc2002_162_0000k252v0.lbl",
+      "odf1b_record_1based": 2,
+      "file_reference_date": 19500101,
+      "file_reference_time": 0,
+      "start_time": "2002-163T02:19:41",
+      "stop_time": "2002-163T02:32:00",
+      "status": "ok"
+    },
+    "cors_0022/sce1_163/odf/c32easc2002_163_0000k252v0.odf": {
+      "label_path": "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0022\\sce1_163\\odf\\c32easc2002_163_0000k252v0.lbl",
+      "odf1b_record_1based": 2,
+      "file_reference_date": 19500101,
+      "file_reference_time": 0,
+      "start_time": "2002-163T19:00:39",
+      "stop_time": "2002-164T02:31:03",
+      "status": "ok"
+    },
+    "cors_0022/sce1_164/odf/c32easc2002_164_0000k252v0.odf": {
+      "label_path": "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0022\\sce1_164\\odf\\c32easc2002_164_0000k252v0.lbl",
+      "odf1b_record_1based": 2,
+      "file_reference_date": 19500101,
+      "file_reference_time": 0,
+      "start_time": "2002-164T16:37:28",
+      "stop_time": "2002-165T02:26:13",
+      "status": "ok"
+    },
+    "cors_0023/sce1_166/odf/c32easc2002_166_0000k252v0.odf": {
+      "label_path": "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0023\\sce1_166\\odf\\c32easc2002_166_0000k252v0.lbl",
+      "odf1b_record_1based": 2,
+      "file_reference_date": 19500101,
+      "file_reference_time": 0,
+      "start_time": "2002-166T16:21:31",
+      "stop_time": "2002-167T02:30:52",
+      "status": "ok"
+    },
+    "cors_0023/sce1_167/odf/c32easc2002_167_0000k252v0.odf": {
+      "label_path": "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0023\\sce1_167\\odf\\c32easc2002_167_0000k252v0.lbl",
+      "odf1b_record_1based": 2,
+      "file_reference_date": 19500101,
+      "file_reference_time": 0,
+      "start_time": "2002-167T16:16:45",
+      "stop_time": "2002-168T02:26:40",
+      "status": "ok"
+    },
+    "cors_0024/sce1_172/odf/c32easc2002_172_0000k252v0.odf": {
+      "label_path": "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0024\\sce1_172\\odf\\c32easc2002_172_0000k252v0.lbl",
+      "odf1b_record_1based": 2,
+      "file_reference_date": 19500101,
+      "file_reference_time": 0,
+      "start_time": "2002-172T18:44:34",
+      "stop_time": "2002-172T23:40:08",
+      "status": "ok"
+    },
+    "cors_0025/sce1_173/odf/c32easc2002_173_0000k252v0.odf": {
+      "label_path": "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0025\\sce1_173\\odf\\c32easc2002_173_0000k252v0.lbl",
+      "odf1b_record_1based": 2,
+      "file_reference_date": 19500101,
+      "file_reference_time": 0,
+      "start_time": "2002-173T15:57:12",
+      "stop_time": "2002-174T01:18:29",
+      "status": "ok"
+    },
+    "cors_0025/sce1_174/odf/c32easc2002_174_0000k252v0.odf": {
+      "label_path": "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0025\\sce1_174\\odf\\c32easc2002_174_0000k252v0.lbl",
+      "odf1b_record_1based": 2,
+      "file_reference_date": 19500101,
+      "file_reference_time": 0,
+      "start_time": "2002-174T15:52:11",
+      "stop_time": "2002-175T01:55:49",
+      "status": "ok"
+    },
+    "cors_0025/sce1_175/odf/c32easc2002_175_0000k252v0.odf": {
+      "label_path": "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0025\\sce1_175\\odf\\c32easc2002_175_0000k252v0.lbl",
+      "odf1b_record_1based": 2,
+      "file_reference_date": 19500101,
+      "file_reference_time": 0,
+      "start_time": "2002-175T15:52:10",
+      "stop_time": "2002-176T00:32:10",
+      "status": "ok"
+    },
+    "cors_0025/sce1_176/odf/c32easc2002_176_0000k252v0.odf": {
+      "label_path": "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0025\\sce1_176\\odf\\c32easc2002_176_0000k252v0.lbl",
+      "odf1b_record_1based": 2,
+      "file_reference_date": 19500101,
+      "file_reference_time": 0,
+      "start_time": "2002-176T15:47:46",
+      "stop_time": "2002-177T01:51:42",
+      "status": "ok"
+    },
+    "cors_0026/sce1_177/odf/c32easc2002_177_0000k252v0.odf": {
+      "label_path": "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0026\\sce1_177\\odf\\c32easc2002_177_0000k252v0.lbl",
+      "odf1b_record_1based": 2,
+      "file_reference_date": 19500101,
+      "file_reference_time": 0,
+      "start_time": "2002-177T15:42:11",
+      "stop_time": "2002-177T21:53:11",
+      "status": "ok"
+    },
+    "cors_0026/sce1_178/odf/c32easc2002_178_0000k252v0.odf": {
+      "label_path": "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0026\\sce1_178\\odf\\c32easc2002_178_0000k252v0.lbl",
+      "odf1b_record_1based": 2,
+      "file_reference_date": 19500101,
+      "file_reference_time": 0,
+      "start_time": "2002-178T15:42:13",
+      "stop_time": "2002-179T01:46:04",
+      "status": "ok"
+    },
+    "cors_0026/sce1_180/odf/c32easc2002_180_0000k252v0.odf": {
+      "label_path": "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0026\\sce1_180\\odf\\c32easc2002_180_0000k252v0.lbl",
+      "odf1b_record_1based": 2,
+      "file_reference_date": 19500101,
+      "file_reference_time": 0,
+      "start_time": "2002-180T15:32:14",
+      "stop_time": "2002-181T01:41:08",
+      "status": "ok"
+    },
+    "cors_0027/sce1_181/odf/c32easc2002_181_0000k252v0.odf": {
+      "label_path": "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0027\\sce1_181\\odf\\c32easc2002_181_0000k252v0.lbl",
+      "odf1b_record_1based": 2,
+      "file_reference_date": 19500101,
+      "file_reference_time": 0,
+      "start_time": "2002-181T15:32:16",
+      "stop_time": "2002-182T01:31:08",
+      "status": "ok"
+    }
+  },
+  "media_correction_field_crosswalk": {
+    "generated_utc": "2026-03-12T03:01:42.726960+00:00",
+    "inputs": {
+      "label_count_scanned": 14,
+      "label_count_missing": 0
+    },
+    "source_documents": {
+      "trk_2_23_paths": [
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0022\\document\\trk_2_23_000531.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0023\\document\\trk_2_23_000531.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0024\\document\\trk_2_23_000531.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0025\\document\\trk_2_23_000531.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0026\\document\\trk_2_23_000531.txt",
+        "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0027\\document\\trk_2_23_000531.txt"
+      ],
+      "trk_2_18_paths_local": [],
+      "trk_2_18_reference_count_in_labels": 56,
+      "trk_2_18_local_available": false,
+      "trk_2_18_note": "TRK-2-18 is referenced in ODF FORMAT ID=1 notes, but local SCE1 bundle did not contain TRK-2-18."
+    },
+    "trk_2_23_csp_tokens": {
+      "adjust": true,
+      "delete": true,
+      "model_chpart": true,
+      "model_wet_nupart": true,
+      "model_dry_nupart": true,
+      "model_drvid": true,
+      "downlink_specifier": true,
+      "doppler_range_data_type": true
+    },
+    "trk_2_23_csp_context_confirmed": true,
+    "odf_tables_scanned": [
+      "ODF3C_TABLE",
+      "ODF4A15_TABLE",
+      "ODF4A25_TABLE",
+      "ODF4A34_TABLE",
+      "ODF4A45_TABLE",
+      "ODF4A65_TABLE",
+      "ODF4B25_TABLE"
+    ],
+    "odf_proxy_field_counts": {
+      "ODF3C_TABLE": 9,
+      "ODF4B25_TABLE": 4
+    },
+    "odf_direct_media_fields": [],
+    "odf_proxy_fields": [
+      "ODF3C_TABLE:DATA VALIDITY INDICATOR",
+      "ODF3C_TABLE:DOWNLINK BAND ID",
+      "ODF3C_TABLE:EXCITER BAND ID",
+      "ODF3C_TABLE:PRIMARY RECEIVING STATION DOWNLINK DELAY",
+      "ODF3C_TABLE:PRIMARY RECEIVING STATION ID",
+      "ODF3C_TABLE:TIME TAG - FRACTIONAL PART",
+      "ODF3C_TABLE:TIME TAG - INTEGER PART",
+      "ODF3C_TABLE:TRANSMITTING STATION ID",
+      "ODF3C_TABLE:UPLINK BAND ID",
+      "ODF4B25_TABLE:RAMP START FREQUENCY - FRACTIONAL PART",
+      "ODF4B25_TABLE:RAMP START FREQUENCY - GHZ",
+      "ODF4B25_TABLE:RAMP START FREQUENCY - INTEGER PART",
+      "ODF4B25_TABLE:STATION ID"
+    ],
+    "record_level_media_state_extractable": true,
+    "parser_media_hook_mode": "external_csp_join_ready",
+    "external_csp_availability": {
+      "generated_utc": "2026-03-12T03:01:42.726931+00:00",
+      "required_mediums": [
+        "IONCAL",
+        "TROPCAL",
+        "PLSMCAL"
+      ],
+      "local_csp_file_count": 0,
+      "local_csp_paths": [],
+      "local_csp_medium_counts": {
+        "IONCAL": 1,
+        "TROPCAL": 1,
+        "PLSMCAL": 1
+      },
+      "local_mediums_observed": [
+        "IONCAL",
+        "PLSMCAL",
+        "TROPCAL"
+      ],
+      "all_required_mediums_local": true,
+      "ancillary_manifest_path": "C:\\develop\\waveP\\data\\cassini\\sources\\csp_media_ancillary\\media_ancillary_manifest.json",
+      "ancillary_manifest_available": true,
+      "ancillary_medium_availability": {
+        "IONCAL": true,
+        "TROPCAL": true,
+        "PLSMCAL": true
+      },
+      "ancillary_all_required_mediums_local": true,
+      "ancillary_command_windows_n": 183,
+      "source_documents": {
+        "trk_2_23_paths": [
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0022\\document\\trk_2_23_000531.txt",
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0023\\document\\trk_2_23_000531.txt",
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0024\\document\\trk_2_23_000531.txt",
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0025\\document\\trk_2_23_000531.txt",
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0026\\document\\trk_2_23_000531.txt",
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0027\\document\\trk_2_23_000531.txt"
+        ],
+        "casrssis_paths": [
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0022\\document\\casrssis.txt",
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0023\\document\\casrssis.txt",
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0024\\document\\casrssis.txt",
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0025\\document\\casrssis.txt",
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0026\\document\\casrssis.txt",
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0027\\document\\casrssis.txt"
+        ],
+        "dors_002_020501_paths": [
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0022\\document\\dors_002_020501.txt",
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0023\\document\\dors_002_020501.txt",
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0024\\document\\dors_002_020501.txt",
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0025\\document\\dors_002_020501.txt",
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0026\\document\\dors_002_020501.txt",
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0027\\document\\dors_002_020501.txt"
+        ],
+        "route_confirmed_paths": [
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0022\\document\\trk_2_23_000531.txt",
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0023\\document\\trk_2_23_000531.txt",
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0024\\document\\trk_2_23_000531.txt",
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0025\\document\\trk_2_23_000531.txt",
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0026\\document\\trk_2_23_000531.txt",
+          "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0027\\document\\trk_2_23_000531.txt"
+        ]
+      },
+      "doc_csp_name_samples": [
+        "IONCAL_82_0112_DOPR.CSP",
+        "TROPCAL_82_0002_DOPRNG.CSP"
+      ],
+      "doc_medium_mentions": {
+        "IONCAL": 24,
+        "TROPCAL": 18,
+        "PLSMCAL": 12
+      },
+      "delivery_route_documented": true,
+      "public_reproducibility_state": "pds_ancillary_payload_complete",
+      "hard_watch_required": false,
+      "hard_watch_reason": "",
+      "next_action": "Local CSP payload is complete; run record-level media join hook."
+    },
+    "external_csp_join_hook": {
+      "required_join_keys": [
+        "time_utc",
+        "station_rx",
+        "station_tx",
+        "downlink_band_id",
+        "uplink_band_id",
+        "data_type_id",
+        "source_file"
+      ],
+      "available_join_keys": [
+        "data_type_id",
+        "doppler_hz",
+        "downlink_band_id",
+        "source_file",
+        "station_rx",
+        "station_tx",
+        "t_days",
+        "time_utc",
+        "uplink_band_id",
+        "y_obs"
+      ],
+      "missing_join_keys": [],
+      "payload_ready_for_join": true,
+      "record_level_media_state_extractable_via_csp": true,
+      "hook_mode": "external_csp_join_ready",
+      "join_metrics_available": true,
+      "join_metrics_json": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_media_state_join_metrics.json",
+      "join_metrics_record_level_extractable": true,
+      "join_metrics_coverage_any_ratio": 1.0,
+      "join_metrics_coverage_on_mapped_ratio": 1.0,
+      "watch_reason": ""
+    },
+    "status": "pass",
+    "watch_reason": ""
+  },
+  "sign_recordlevel_terminal_assessment": {
+    "path": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_sign_recordlevel_reaudit.json",
+    "available": true,
+    "status": "watch",
+    "gate_pass": false,
+    "reasons": [
+      "stable_arc_coverage_below_gate"
+    ],
+    "selected_interval": {
+      "best_candidate": "invert_sign_offset_removed",
+      "arc_start": 166,
+      "arc_end": 167,
+      "n_arcs": 2,
+      "arc_ids": [
+        "sce1_166",
+        "sce1_167"
+      ],
+      "n_points": 73156,
+      "coverage_ratio_points": 0.1734207912459908
+    },
+    "selected_interval_coverage_ratio_points": 0.1734207912459908,
+    "selected_interval_n_arcs": 2,
+    "min_contiguous_arcs": 2,
+    "min_coverage_ratio_points": 0.25,
+    "sign_closed_best_window_quality": false,
+    "sign_closed_all_record_levels": false,
+    "window_best_scenario": {
+      "window_days": 4.0,
+      "outlier_trim_quantile": 0.01,
+      "n_points": 117484,
+      "residual_abs_threshold": 1.6022763808736488e-06,
+      "best_candidate": "same_sign",
+      "best_delta_beta": 0.5675651496484327,
+      "best_delta_beta_sigma_proxy": 32.644235206589656,
+      "best_corr_obs_fit": 5.0725175229831194e-05,
+      "best_zscore_min_vs_tdf": 0.014149977124321188,
+      "gate_pass": false
+    }
+  }
+}

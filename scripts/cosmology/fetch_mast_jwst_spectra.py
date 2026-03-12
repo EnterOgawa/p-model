@@ -2872,7 +2872,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     manifest_all_path = base_dir / "manifest_all.json"
 
     # When running on a subset of targets, do not clobber previous entries.
-    # This keeps the aggregated manifest usable for dashboards/Table 1 without requiring a full rerun.
+    # This keeps the aggregated manifest usable for dashboards/verification-summary tables without requiring a full rerun.
     if manifest_all_path.exists():
         try:
             prev = json.loads(manifest_all_path.read_text(encoding="utf-8"))

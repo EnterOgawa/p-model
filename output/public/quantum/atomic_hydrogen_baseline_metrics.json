@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T14:02:02.615784+00:00",
+  "generated_utc": "2026-03-11T13:53:43.555612+00:00",
   "phase": 7,
   "step": "7.12",
   "title": "Atomic baseline (Hydrogen; NIST ASD)",
@@ -199,5 +199,9 @@
       ]
     }
   ],
-  "note": "This output fixes a small set of observed vacuum wavelengths as a reproducible baseline. P-model derivation of atomic/molecular binding is tracked in Roadmap Step 7.12+."
+  "note": "This output fixes a small set of observed vacuum wavelengths as a reproducible baseline. P-model derivation of atomic/molecular binding is tracked in Roadmap Step 7.12+.",
+  "outputs": {
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\atomic_hydrogen_baseline.pdf",
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\atomic_hydrogen_baseline.png"
+  }
 }

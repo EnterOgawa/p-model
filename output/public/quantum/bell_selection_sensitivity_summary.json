@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T14:04:50.854725+00:00",
+  "generated_utc": "2026-03-11T13:54:46.178469+00:00",
   "step": "Phase 7 / Step 7.4 (selection sensitivity summary)",
   "nist": {
     "trial_tag": "03_43_afterfixingModeLocking_s3600",
@@ -16,12 +16,18 @@
       "bob": 0.04112778021955209
     },
     "j_prob_trial_best": 6.518427199813021e-06,
-    "j_prob_sweep_min": -0.0014067091362638773,
-    "j_prob_sweep_max": 0.0021000022088797947,
-    "j_prob_sweep_subtracted_clipped_min": -0.0014092113775486539,
-    "j_prob_sweep_subtracted_clipped_max": -0.0013825120707554501,
-    "recommended_window_ns": null,
-    "recommended_window_method": null
+    "j_prob_sweep_min": -0.0014069705805686468,
+    "j_prob_sweep_max": -0.00040354898411957315,
+    "j_prob_sweep_subtracted_clipped_min": -0.0014071199376583599,
+    "j_prob_sweep_subtracted_clipped_max": -0.0014071199376583599,
+    "recommended_window_ns": 2000.0,
+    "recommended_window_method": {
+      "name": "trial_match_pairs_total",
+      "note": "Recommended window matches the trial-based coincidence total (independent pipeline).",
+      "trial_total_coinc": 38158,
+      "selected_pairs_total": 23756,
+      "abs_delta_pairs": 14402
+    }
   },
   "kwiat2013": {
     "dataset_id": "kwiat2013_prl111_130406_05082013_15",
@@ -34,8 +40,13 @@
     "j_prob_trial_best": -8.12025607476813e-05,
     "j_prob_sweep_min": -0.00012626839841629233,
     "j_prob_sweep_max": -2.877514281541989e-06,
-    "recommended_window_ns": null,
-    "recommended_window_method": null
+    "recommended_window_ns": 2812.5,
+    "recommended_window_method": {
+      "name": "dataset_recommendation",
+      "recommended_window_bins": 18000,
+      "timebins_per_second": 6400000000.0,
+      "note": "Use the public dataset guidance (data_organization.txt) to avoid p-hacking optics."
+    }
   },
   "weihs": {
     "out_tag": "weihs1998_longdist_longdist1",
@@ -50,8 +61,27 @@
     "abs_S_max": 2.9002764964975367,
     "abs_S_accidental_subtracted_min": 2.6455215858517867,
     "abs_S_accidental_subtracted_max": 2.9018438331640475,
-    "recommended_window_ns": null,
-    "recommended_window_method": null
+    "recommended_window_ns": 22.251267208428718,
+    "recommended_window_method": {
+      "name": "dt_peak_hist_signal_fraction",
+      "signal_fraction": 0.99,
+      "sample_max": 200000,
+      "hist_half_range_ns": 200.0,
+      "hist_bin_width_ns": 0.5,
+      "background_exclusion_ns": 50.0,
+      "background_median_per_bin": 3.0,
+      "background_threshold_ksigma": 3.0,
+      "peak_center_ns": -4.408291266875841,
+      "selected_dt_count": 11322,
+      "near_peak_count": 8157,
+      "width_ns": 22.0,
+      "drift_window_ns": 10.0,
+      "drift_half_ns": 0.2512672084287178,
+      "time_tag_schema": {
+        "schema": "a_t_s/b_t_s",
+        "time_unit": "s"
+      }
+    }
   },
   "delft2015": {
     "source_manifest": {
@@ -92,21 +122,22 @@
   },
   "outputs": {
     "png": "C:\\develop\\waveP\\output\\public\\quantum\\bell_selection_sensitivity_summary.png",
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\bell_selection_sensitivity_summary.pdf",
     "json": "C:\\develop\\waveP\\output\\public\\quantum\\bell_selection_sensitivity_summary.json"
   },
   "repro": {
     "script": "python -B scripts/quantum/bell_selection_sensitivity_summary.py",
     "inputs": [
       "C:\\develop\\waveP\\output\\public\\quantum\\bell\\nist_03_43_afterfixingModeLocking_s3600\\window_sweep_metrics.json",
-      null,
+      "C:\\develop\\waveP\\output\\public\\quantum\\bell\\nist_03_43_afterfixingModeLocking_s3600\\covariance.json",
       "C:\\develop\\waveP\\output\\public\\quantum\\bell\\kwiat2013_prl111_130406_05082013_15\\window_sweep_metrics.json",
-      null,
+      "C:\\develop\\waveP\\output\\public\\quantum\\bell\\kwiat2013_prl111_130406_05082013_15\\covariance.json",
       "C:\\develop\\waveP\\output\\public\\quantum\\bell\\weihs1998_longdist_longdist1\\window_sweep_metrics.json",
-      null,
+      "C:\\develop\\waveP\\output\\public\\quantum\\bell\\weihs1998_longdist_longdist1\\covariance.json",
       "C:\\develop\\waveP\\output\\public\\quantum\\bell\\delft_hensen2015\\offset_sweep_metrics.json",
-      null,
+      "C:\\develop\\waveP\\output\\public\\quantum\\bell\\delft_hensen2015\\covariance.json",
       "C:\\develop\\waveP\\output\\public\\quantum\\bell\\delft_hensen2016_srep30289\\offset_sweep_metrics.json",
-      null
+      "C:\\develop\\waveP\\output\\public\\quantum\\bell\\delft_hensen2016_srep30289\\covariance.json"
     ]
   },
   "notes": [

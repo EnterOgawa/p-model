@@ -1,0 +1,41 @@
+{
+  "generated_utc": "2026-03-07T04:50:14.704865+00:00",
+  "session_label": "21MAY17XA",
+  "expected_internal_id": "AUA020",
+  "input_root": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\21MAY17XA\\extracted",
+  "scan_summary": {
+    "n_netcdf_scanned": 369,
+    "session_value_counts": {
+      "AOV059": 369
+    },
+    "observed_session_values": [
+      "AOV059"
+    ],
+    "status": "watch",
+    "alias_confirmed": false,
+    "rationale": "expected internal id was not found in scanned Session metadata"
+  },
+  "session_value_examples": {
+    "AOV059": [
+      "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\21MAY17XA\\extracted\\21MAY17XA\\Apriori\\Antenna.nc",
+      "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\21MAY17XA\\extracted\\21MAY17XA\\Apriori\\Antenna_V001.nc",
+      "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\21MAY17XA\\extracted\\21MAY17XA\\Apriori\\Eccentricity.nc",
+      "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\21MAY17XA\\extracted\\21MAY17XA\\Apriori\\Eccentricity_V001.nc",
+      "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\21MAY17XA\\extracted\\21MAY17XA\\Apriori\\Source.nc"
+    ]
+  },
+  "wrapper_files_sample": [
+    "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\21MAY17XA\\extracted\\21MAY17XA\\21MAY17XA_V001_iGSI_kall.wrp",
+    "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\21MAY17XA\\extracted\\21MAY17XA\\21MAY17XA_V002_iGSFC_kall.wrp",
+    "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\21MAY17XA\\extracted\\21MAY17XA\\21MAY17XA_V002_iGSI_kall.wrp",
+    "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\21MAY17XA\\extracted\\21MAY17XA\\21MAY17XA_V003_iGSFC_kall.wrp",
+    "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\21MAY17XA\\extracted\\21MAY17XA\\21MAY17XA_V003_iGSI_kall.wrp",
+    "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\21MAY17XA\\extracted\\21MAY17XA\\21MAY17XA_V004_iGSFC_kall.wrp",
+    "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\21MAY17XA\\extracted\\21MAY17XA\\21MAY17XA_V004_iGSI_kall.wrp",
+    "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\21MAY17XA\\extracted\\21MAY17XA\\21MAY17XA_V004_iIVS_kall.wrp"
+  ],
+  "outputs": {
+    "json": "C:\\develop\\waveP\\output\\vlbi\\vlbi_21may17xa_session_identity_audit.json",
+    "csv": "C:\\develop\\waveP\\output\\vlbi\\vlbi_21may17xa_session_identity_audit.csv"
+  }
+}

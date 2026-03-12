@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T14:12:24.811977+00:00",
+  "generated_utc": "2026-03-02T01:57:51.172633+00:00",
   "phase": 7,
   "step": "7.9.7",
   "model": {
@@ -899,6 +899,10 @@
     }
   },
   "outputs": {
-    "png": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_effective_potential_two_range_fit_as_rs.png"
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_effective_potential_two_range_fit_as_rs.png",
+    "png_split_by_eq": {
+      "eq18": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_effective_potential_two_range_fit_as_rs_eq18.png",
+      "eq19": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_effective_potential_two_range_fit_as_rs_eq19.png"
+    }
   }
 }

@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-20T12:39:04.780087+00:00",
+  "generated_utc": "2026-03-04T11:28:53.708184+00:00",
   "phase": 7,
   "step": "7.18.2",
   "name": "Condensed/Thermo falsification pack (baseline targets + thresholds)",
@@ -13,7 +13,7 @@
   "tests": [
     {
       "metrics_json": "output/public/quantum/condensed_silicon_lattice_baseline_metrics.json",
-      "metrics_sha256": "7c649dd8756e1d3126bc5e6569f3cef69f126be760c090ee9dc3dadadd3feee4",
+      "metrics_sha256": "bdc97a3946dbf9ade42784d18d0bf202ea5103af9c4936ad4918668c3804a7a7",
       "phase": 7,
       "step": "7.14.1",
       "inputs": {
@@ -44,14 +44,14 @@
         ]
       },
       "outputs": {
-        "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_lattice_baseline.csv",
-        "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_lattice_baseline.png"
+        "csv": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_lattice_baseline.csv",
+        "png": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_lattice_baseline.png"
       },
       "notes": null
     },
     {
       "metrics_json": "output/public/quantum/condensed_silicon_heat_capacity_baseline_metrics.json",
-      "metrics_sha256": "225d60f8b437fe079ca49dcf308371fb03048f4f970e82f44d327481654dae3b",
+      "metrics_sha256": "e25a2a7ba46b9d0bdd80756bddb32766299cbfc51a5a09884ce1a86374fca1ad",
       "phase": 7,
       "step": "7.14.2",
       "inputs": {
@@ -116,8 +116,8 @@
         ]
       },
       "outputs": {
-        "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_heat_capacity_baseline.csv",
-        "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_heat_capacity_baseline.png"
+        "csv": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_heat_capacity_baseline.csv",
+        "png": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_heat_capacity_baseline.png"
       },
       "notes": [
         "Cp° computed from NIST Shomate coefficients; t=T/1000.",
@@ -126,7 +126,7 @@
     },
     {
       "metrics_json": "output/public/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json",
-      "metrics_sha256": "6a01d342d24a80e1c6baa85b5e288c219a85c5b98786bb34208fafa4cac79647",
+      "metrics_sha256": "20107f3fec83d061221a04cc242d43d309b6f7dcd7b980d4874a95d66d3c1a5d",
       "phase": 7,
       "step": "7.14.3",
       "inputs": {
@@ -148,8 +148,8 @@
         ]
       },
       "outputs": {
-        "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_heat_capacity_debye_baseline.csv",
-        "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_heat_capacity_debye_baseline.png"
+        "csv": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_heat_capacity_debye_baseline.csv",
+        "png": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_heat_capacity_debye_baseline.png"
       },
       "notes": [
         "This is a baseline/target for Step 7.14: low-temperature Cp and a 1-parameter Debye fit (θ_D) as a compact summary.",
@@ -158,7 +158,7 @@
     },
     {
       "metrics_json": "output/public/quantum/condensed_silicon_resistivity_temperature_coefficient_baseline_metrics.json",
-      "metrics_sha256": "554194954d80a989e6c18d071f7e3c5d5ca10708d4e61b12b08b2773c45f749b",
+      "metrics_sha256": "aad17dd901ffdf4e3b7664acccdec6719e009684b2cae013f2a0f7c9767c741a",
       "phase": 7,
       "step": "7.14.4",
       "inputs": {
@@ -194,8 +194,8 @@
         ]
       },
       "outputs": {
-        "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_resistivity_temperature_coefficient_baseline.csv",
-        "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_resistivity_temperature_coefficient_baseline.png"
+        "csv": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_resistivity_temperature_coefficient_baseline.csv",
+        "png": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_resistivity_temperature_coefficient_baseline.png"
       },
       "notes": [
         "This is an operational baseline extracted from Appendix E of NBS IR 74-496 (v.d. Pauw method data).",
@@ -205,7 +205,7 @@
     },
     {
       "metrics_json": "output/public/quantum/condensed_silicon_thermal_expansion_baseline_metrics.json",
-      "metrics_sha256": "d2235d1e76abb13dc3cc745c79ac3d43a1a6c3d50e8a5d95b5b8c2ace5f3c834",
+      "metrics_sha256": "8e6254f4bf72e1e6b413fbae324f9fea136f9da4a3ca1b84b7d8c24f48da0857",
       "phase": null,
       "step": null,
       "inputs": {
@@ -270,15 +270,15 @@
         ]
       },
       "outputs": {
-        "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_baseline.csv",
-        "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_baseline.png",
-        "metrics_json": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_baseline_metrics.json"
+        "csv": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_baseline.csv",
+        "png": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_baseline.png",
+        "metrics_json": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_baseline_metrics.json"
       },
       "notes": null
     },
     {
       "metrics_json": "output/public/quantum/condensed_ofhc_copper_thermal_conductivity_baseline_metrics.json",
-      "metrics_sha256": "9b14cc122bd24ba59726a40e6bbfe2a410a6db94db6785ad0a245aaf184354d5",
+      "metrics_sha256": "306f99d7d8c23be1815d7c7170d0036a9986fd9502de8c97217edb4d335e60d6",
       "phase": 7,
       "step": "7.14.6",
       "inputs": {
@@ -562,8 +562,8 @@
         ]
       },
       "outputs": {
-        "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_ofhc_copper_thermal_conductivity_baseline.csv",
-        "png": "C:\\develop\\waveP\\output\\quantum\\condensed_ofhc_copper_thermal_conductivity_baseline.png"
+        "csv": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_ofhc_copper_thermal_conductivity_baseline.csv",
+        "png": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_ofhc_copper_thermal_conductivity_baseline.png"
       },
       "notes": [
         "This is a fixed baseline derived from NIST TRC Cryogenics 'Material Properties: OFHC Copper'.",
@@ -573,7 +573,7 @@
     },
     {
       "metrics_json": "output/public/quantum/thermo_blackbody_entropy_baseline_metrics.json",
-      "metrics_sha256": "b56eb1d027c9a7f65aab2cb0d9619afb179d9992674f463749acf84698a80547",
+      "metrics_sha256": "54c2fdd210d2408990111c860bc33b84c3b36a5a240f37d90a175dc1a75f139d",
       "phase": 7,
       "step": "7.15.2",
       "inputs": {
@@ -589,14 +589,14 @@
         ]
       },
       "outputs": {
-        "csv": "C:\\develop\\waveP\\output\\quantum\\thermo_blackbody_entropy_baseline.csv",
-        "png": "C:\\develop\\waveP\\output\\quantum\\thermo_blackbody_entropy_baseline.png"
+        "csv": "C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_entropy_baseline.csv",
+        "png": "C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_entropy_baseline.png"
       },
       "notes": null
     },
     {
       "metrics_json": "output/public/quantum/thermo_blackbody_radiation_baseline_metrics.json",
-      "metrics_sha256": "40451b2f7f82be47cdd12585a7fe9087a5464b28817e3bced264060e685ebd2e",
+      "metrics_sha256": "b29958c424c60e1b5f3c28ac13fa2660767746c2082f05afdaae31c9b33ea35e",
       "phase": 7,
       "step": "7.15.1",
       "inputs": {
@@ -607,8 +607,8 @@
       },
       "falsification": null,
       "outputs": {
-        "csv": "C:\\develop\\waveP\\output\\quantum\\thermo_blackbody_radiation_baseline.csv",
-        "png": "C:\\develop\\waveP\\output\\quantum\\thermo_blackbody_radiation_baseline.png"
+        "csv": "C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_radiation_baseline.csv",
+        "png": "C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_radiation_baseline.png"
       },
       "notes": [
         "This is a baseline/consistency anchor for Step 7.15 (stat mech / thermo).",
@@ -619,7 +619,7 @@
   ],
   "holdout_audit": {
     "summary_json": "output/public/quantum/condensed_holdout_audit_summary.json",
-    "summary_sha256": "c6e5a2ed6d43cc99515bbfeaeab56a79bc10d0fc2ea5002ae0c6e6d024a7cb0d",
+    "summary_sha256": "b6aff32d57e0440791a6ae1adea86c5942c331631bda8e4467570d5dba1c671e",
     "phase": 7,
     "step": "7.20.6",
     "thresholds": {
@@ -638,7 +638,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/condensed_silicon_thermal_expansion_gruneisen_holdout_splits_metrics.json",
-              "sha256": "4facf9eb3d690e83a909722d692833fb43512a28452fd3130bf601cdbe74b636"
+              "sha256": "9e32b4921d0ddb1bdb1dd86c4799e55484bdcae14723a11815cd480bba8af261"
             }
           },
           "kpi_include": false,
@@ -839,7 +839,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_gamma_omega_pwlinear_split_leaky_mode_softening_kim2015_fig2_bulkmodulus_ridge1e-06_leak2p40e-01_warp1p32_model_metrics.json",
-              "sha256": "53867eb5371164fa23f0dee4fdf3bd26f547bde7463691edc8884e910bca05c9"
+              "sha256": "74c88de7c763fb54b495f200acf327d04afd6fc3a983619f09bab67e24592c84"
             }
           },
           "kpi_include": true,
@@ -999,7 +999,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/condensed_silicon_heat_capacity_holdout_splits_metrics.json",
-              "sha256": "88090c7a5f65cb21c9f7dbc0bd8f1c0f3e91356abe145bf848fa6eff4bf23a42"
+              "sha256": "f7419c89897364f76f2ab9b20603fc62dcacfd585cfb0c659c64e74be86afb1b"
             }
           },
           "kpi_include": true,
@@ -1253,7 +1253,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/condensed_silicon_bulk_modulus_holdout_splits_metrics.json",
-              "sha256": "404c637fed4a1459579329d7d27dab4bb88da98003e6a880f40673151a709516"
+              "sha256": "e8a56e795aa691905d4e5076cce13f086a8f769e151d860c127461c2a5c3fac5"
             }
           },
           "kpi_include": true,
@@ -1507,7 +1507,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/condensed_ofhc_copper_thermal_conductivity_holdout_splits_metrics.json",
-              "sha256": "982f25205c9200f516b3afa1d6058d0015d264fc662a0c7163a774b76e51f1e4"
+              "sha256": "dfe5154aae92c0c99aa02e180b7d6b535d9695d1f4009c4ab0d0502c5955e8d5"
             }
           },
           "kpi_include": true,
@@ -2667,7 +2667,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_photon_flux_holdout_splits_metrics.json",
-              "sha256": "73f9aed518d24dc4182ead4c86fc90440f73fb80cb2bb745836cec96ee73f423"
+              "sha256": "abe40d32f26d5ac12cd43ea4c793c477ee3d2d8cfa93c3d42d869d0d1ed80a31"
             }
           },
           "kpi_include": true,
@@ -4467,7 +4467,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_enthalpy_energy_ratio_holdout_splits_metrics.json",
-              "sha256": "efd6fe6ba24441d9085d4ef16bba8cf3ddc96acd0e695969878046421ab3fef0"
+              "sha256": "e300e7bd35d8ef684622d7ae3172400597d4f99941f60ba3a3a3987ece6768a9"
             }
           },
           "kpi_include": true,
@@ -4667,7 +4667,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_enthalpy_pressure_ratio_holdout_splits_metrics.json",
-              "sha256": "57829127993b3641818c5d010569102457a443248f256a047f7519b1e84ab50a"
+              "sha256": "2c3a679261375060de8f09a8f6183f0b8df90a421a652b5828bdcadbeff2002a"
             }
           },
           "kpi_include": true,
@@ -4867,7 +4867,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_enthalpy_entropy_ratio_holdout_splits_metrics.json",
-              "sha256": "8b5da7c70f8f76fc990b8daaab5d72134f5874a9e0197e7478da20b3887e4050"
+              "sha256": "533cd24ad5e3c13e55c1c3104bad133eb3ecfd4148c27afc096bef5d265c1926"
             }
           },
           "kpi_include": true,
@@ -5067,7 +5067,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_helmholtz_free_energy_density_holdout_splits_metrics.json",
-              "sha256": "c255547c9e10fb3c89f234282fe101a4c293cf585c804e81fa2bbfe244ff7d2a"
+              "sha256": "79946b06a686f7babda04af4fd2376af18b4781c04400d1dd7f050ec0b06dd6b"
             }
           },
           "kpi_include": true,
@@ -5267,7 +5267,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_helmholtz_entropy_ratio_holdout_splits_metrics.json",
-              "sha256": "ef30a6cf6a8b7ccf01a8513880e59b7d5d53f673100c4733d3eff121eb000b40"
+              "sha256": "c2370d14f970186e4cfb6c254f87660ea0d820c4c9775c617045925f697ac26e"
             }
           },
           "kpi_include": true,
@@ -5467,7 +5467,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_helmholtz_energy_ratio_holdout_splits_metrics.json",
-              "sha256": "b4cd413736dea5c4eece7fb33cfbff479d4e1b60033f93dbeb65df2d96e8cc1c"
+              "sha256": "b8da29a7d7fbc2bcaec7ddbbbe3286b36482201026bc9310eb3eb84922002220"
             }
           },
           "kpi_include": true,
@@ -5667,7 +5667,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_helmholtz_enthalpy_ratio_holdout_splits_metrics.json",
-              "sha256": "39a6f2fb03f485afdb027c43cdf16968bf8b5e8f94f7e538962d8bb973d0601a"
+              "sha256": "75c1dc0df22ada5527262f8f4cc4597181ff7a250ecdb43de5870f0748644e19"
             }
           },
           "kpi_include": true,
@@ -5867,7 +5867,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_helmholtz_pressure_ratio_holdout_splits_metrics.json",
-              "sha256": "638fa9992472e8dd7031287e4dac6369ca0dba619c051de67f7bce649f754b5f"
+              "sha256": "57b78d727276d02aee7bf86812d31bde5306abcda259caa03bebad00e9727c33"
             }
           },
           "kpi_include": true,
@@ -6067,7 +6067,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_helmholtz_free_energy_flux_holdout_splits_metrics.json",
-              "sha256": "aa4a4921edc0695db29dd0e21571c43d0439939062f6c87f401e87cd973004fd"
+              "sha256": "dd1ec17e7ba87905c6f0edd741c5cf36bfe7958fab3792952639aa28e90a79a3"
             }
           },
           "kpi_include": true,
@@ -6267,7 +6267,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_helmholtz_flux_ratio_holdout_splits_metrics.json",
-              "sha256": "271b30f7c71a2cd6daac06092e40d719ca4d871581743bd9630c9323b306d756"
+              "sha256": "1fd44fb97062d193a502731686cdc0204d29afe1db06ccc2a0898e3070b98ff8"
             }
           },
           "kpi_include": true,
@@ -6467,7 +6467,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_enthalpy_flux_holdout_splits_metrics.json",
-              "sha256": "9ad4bc475129cb8a740c3e44513d4868c6bac400be4c48add80719ffd606ed91"
+              "sha256": "299c31a0340dd377fb252f51dc52d90e2fe6895c44234618a46830705f2d7e70"
             }
           },
           "kpi_include": true,
@@ -6667,7 +6667,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_enthalpy_flux_ratio_holdout_splits_metrics.json",
-              "sha256": "2d4ae24f421eb216caefd28c7c4bae7bb40ef833261e546cb8a7d77bf5706814"
+              "sha256": "aa6d7451771f461c054e39402d2f9a5c2bcf14ad96e294fe40fa0e7a385d801e"
             }
           },
           "kpi_include": true,
@@ -6867,7 +6867,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_enthalpy_momentum_ratio_holdout_splits_metrics.json",
-              "sha256": "00c85d162933ca31598f2f65d09e7d913a40841825ef833c078256e6e9c2971b"
+              "sha256": "845347c2768b26c53770dd0672758c263ec16d48a786f8aa7480b3272cfd0621"
             }
           },
           "kpi_include": true,
@@ -7067,7 +7067,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_helmholtz_momentum_ratio_holdout_splits_metrics.json",
-              "sha256": "d1283fd72bc80d056513d1c2d6442b3bf61534313c82eb013bcbb4b66c01e28b"
+              "sha256": "39620bde86a9012ce95714d450b30aa85df82e1f6f71a8c7fe8af22f2d78ffbb"
             }
           },
           "kpi_include": true,
@@ -7267,7 +7267,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_momentum_density_holdout_splits_metrics.json",
-              "sha256": "41612350fee9712ea4411775e917a2cf8eded40543945667c65f11a7210fe5dc"
+              "sha256": "0eb6792527591c804e7fcfd39449160f794f78be019f95954709e9377a810642"
             }
           },
           "kpi_include": true,
@@ -7467,7 +7467,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_momentum_energy_ratio_holdout_splits_metrics.json",
-              "sha256": "2c99175d49b508878d7d6453b4a59f628240cd8467eddcf5aafd544562f27df9"
+              "sha256": "6b31749e2e2f029e0789263e7c0566b085311d462ca2ad37746c43dfca80577c"
             }
           },
           "kpi_include": true,
@@ -7867,7 +7867,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_momentum_pressure_ratio_holdout_splits_metrics.json",
-              "sha256": "20dbbd59f6fc33ad500b9e3fe97976553748875ef2784c1f798ca335ad17e840"
+              "sha256": "1c6e8fbd1385ee40dec8a9646d929c6062c5dc8a042ff7c85ba133687e13bd2c"
             }
           },
           "kpi_include": true,
@@ -8067,7 +8067,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_pressure_momentum_ratio_holdout_splits_metrics.json",
-              "sha256": "2a9fcd838359c24e8a86c507e13933f9ffecd62b809a97fff803a58e9acfbd52"
+              "sha256": "87b7f088ea3cdf581c0d606da5a3577fb903acff10459ce48fb8ba7148a54f46"
             }
           },
           "kpi_include": true,
@@ -8267,7 +8267,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_momentum_entropy_ratio_holdout_splits_metrics.json",
-              "sha256": "db8314cd92d752a5ccfe463983b3650d2e392eafa5196e981372ef16f1c94033"
+              "sha256": "5ca451b32e967382446a166e3e9419bfa501c00c4fb726add068e1795191dd26"
             }
           },
           "kpi_include": true,
@@ -8867,7 +8867,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_momentum_per_photon_holdout_splits_metrics.json",
-              "sha256": "71a72d8dfe891dcab50081f331bb583fb31adbcc55bf5492c6db778af9f39f8c"
+              "sha256": "4f7da10ca562e7994cb3337a0d5d71d3fd6eef088f9fe32a25fd76a968253b93"
             }
           },
           "kpi_include": true,
@@ -9067,7 +9067,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_momentum_per_photon_flux_holdout_splits_metrics.json",
-              "sha256": "59e7a441a38a7bca8b92031274c3278e886d460d68b1874fcce6447fdfc88b9e"
+              "sha256": "77cda18684208614f486bdd4e519a7b14f573098af30d90ae1736ccffc075407"
             }
           },
           "kpi_include": true,
@@ -9267,7 +9267,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_pressure_per_photon_holdout_splits_metrics.json",
-              "sha256": "6b5c8664f2c5cd6a041503084c8f64c3637a1231b15cfdfd0f15a2e257828c35"
+              "sha256": "ceec95913c5b970dbba0adf8891e3a802a151e3b8dc57d1819b8c33e0603aced"
             }
           },
           "kpi_include": true,
@@ -9467,7 +9467,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_photon_density_per_pressure_holdout_splits_metrics.json",
-              "sha256": "939b2cf47398b4f1dbf833a38bb1336dcc7242803f6ed09273da1b5b97740fc6"
+              "sha256": "9c874c549678254dc4193d738abf0840d3f8d4d9123e6934020d59d8dd5512c4"
             }
           },
           "kpi_include": true,
@@ -9667,7 +9667,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_photon_density_per_energy_density_holdout_splits_metrics.json",
-              "sha256": "fa7d12f6d3084282c6713fc63bc6bbcb4ae446b9c634c5e94967440f0af62d1a"
+              "sha256": "0540094380d9bed70136284f5e9d8e6bbb6a43ce6058c7fc8c85cbc5f0ec8730"
             }
           },
           "kpi_include": true,
@@ -9867,7 +9867,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_photon_density_per_enthalpy_density_holdout_splits_metrics.json",
-              "sha256": "f77e244632e34e103c5a8db66fb427ff6ab21e6a1a18a8da4bd1fb8bc06429a2"
+              "sha256": "5c2023b7ea71bd134f5a53cd9ee474c375cd851f83fde78d4e42ab8de381f087"
             }
           },
           "kpi_include": true,
@@ -10267,7 +10267,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_photon_density_per_momentum_density_holdout_splits_metrics.json",
-              "sha256": "cf06ba144cbe82e0b42f81590a5e8f2bfb34bb99c6e0097a4a33417ad9c469d7"
+              "sha256": "aa8fcb7d51a28997f67b4b25a678c405f235c6ebb753e24bb3377187db0cddfd"
             }
           },
           "kpi_include": true,
@@ -10467,7 +10467,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_photon_flux_per_energy_density_holdout_splits_metrics.json",
-              "sha256": "ab0228d1bc84230867b2681947b2620a9e6a86bfa25270b13ab0fd2d2cd5c6f8"
+              "sha256": "4c6f6e1ab8a453163454341df6aca578641f483b470f5b6735260a7e489bcf3a"
             }
           },
           "kpi_include": true,
@@ -10667,7 +10667,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_photon_flux_per_enthalpy_density_holdout_splits_metrics.json",
-              "sha256": "de539f8288d8165ce33f9b48d08d3be684e16b91e43bd8ebe997859d28ee995c"
+              "sha256": "db1d0eaacb3742139f0cf1bea70961131b7c0f784763010aebfefb8d754465aa"
             }
           },
           "kpi_include": true,
@@ -10867,7 +10867,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_photon_flux_per_pressure_holdout_splits_metrics.json",
-              "sha256": "77cd2acd51cb4c5da6fa24461c12f9d7cac554db2834ef5d8035097935b100d0"
+              "sha256": "975b3f15777243fab7e5a18324b291fd2cdb500c6f090b166aad973d6e373578"
             }
           },
           "kpi_include": true,
@@ -11067,7 +11067,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_photon_flux_per_heat_capacity_density_holdout_splits_metrics.json",
-              "sha256": "7279bd9bee80c85838a9f10fc4c89fdbf44d4417c4bd52cdaa7f6e3e49fe0b3a"
+              "sha256": "5991fc33417bfdc7c2482ced578777765b5e267eb4ef50427e4d21b26dac3044"
             }
           },
           "kpi_include": true,
@@ -11267,7 +11267,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_photon_flux_per_heat_capacity_flux_holdout_splits_metrics.json",
-              "sha256": "261145222d6611bb14637fad2e82b25ef19c9b8ee3df229087479891439529c6"
+              "sha256": "e4c3ea6a8847747555ff8b1d21fd58dbf573ed205c0dae2f608169c0697f641e"
             }
           },
           "kpi_include": true,
@@ -11467,7 +11467,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_photon_flux_per_entropy_density_holdout_splits_metrics.json",
-              "sha256": "9de668c686000bcf64ad6147004ab63012148841ab165daf1c9e598a7f938abd"
+              "sha256": "2bbd9bcf527d5616e31f359b53b66f5169237e9eeef3300707046c85c5cd87b2"
             }
           },
           "kpi_include": true,
@@ -12467,7 +12467,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_photon_flux_per_momentum_density_holdout_splits_metrics.json",
-              "sha256": "b6751bb1bcff43591e4612e03f8a9bff1caccb9f6de14384e26b478d3773073a"
+              "sha256": "9da2f74009cd0be89f2249f4f449a620470a796dae67193c20a60da91cf0d619"
             }
           },
           "kpi_include": true,
@@ -13067,7 +13067,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_pressure_per_photon_flux_holdout_splits_metrics.json",
-              "sha256": "8bd796b387208744034afb6805ff95b4bd088e589df1b2e6d17ab8875de7f6eb"
+              "sha256": "1d4c2b7f514701daa53077a0ff76b1cf90a01a99d308680068384abe109685b3"
             }
           },
           "kpi_include": true,
@@ -13267,7 +13267,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_pressure_per_entropy_flux_holdout_splits_metrics.json",
-              "sha256": "4d2d363a376df9b9f087eaea4bac3f5e9a2cbd6d86aae111f97b1a5aae3dd2bc"
+              "sha256": "2ac8022e6a19d053331a388718e6e3abced728fb4699130680392e8661ba04e2"
             }
           },
           "kpi_include": true,
@@ -13467,7 +13467,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_energy_per_entropy_flux_holdout_splits_metrics.json",
-              "sha256": "c58fe6cd7b45115eb5d13effb7d5cd20f217fb6d2e0978509ee4378f3d788c29"
+              "sha256": "d3052aa18c0f19f5dd9a28adbdfe977ef76dfb20252e4cd742ca9b0e68c23355"
             }
           },
           "kpi_include": true,
@@ -13667,7 +13667,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_enthalpy_per_entropy_flux_holdout_splits_metrics.json",
-              "sha256": "b6e824c3d3625f5bd418e7f73479f518de6d60477b3e1e01389a553a7488037b"
+              "sha256": "88a0970d416ad267005c3331d40cb93e4834f15de9687650a20a4bee3f0918b8"
             }
           },
           "kpi_include": true,
@@ -13867,7 +13867,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_photon_density_per_entropy_flux_holdout_splits_metrics.json",
-              "sha256": "01ecb468a836e301e96fa441722da66551ae4b32306ba9af4ac270a9bd15405f"
+              "sha256": "ce03a59611bd6e5bf3d576b496041e52d376fc4ec097d426e43307ba97271810"
             }
           },
           "kpi_include": true,
@@ -14067,7 +14067,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_pressure_per_enthalpy_flux_holdout_splits_metrics.json",
-              "sha256": "e6f3e29074917ab57b0645e85008600fcaadb90bf8ac336e50da78eb719ec05c"
+              "sha256": "1eff5cb6abdc2b6cee6a90d4f8cc4ed2d22716998c61524dd2e98c915866adb4"
             }
           },
           "kpi_include": true,
@@ -14467,7 +14467,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_entropy_per_enthalpy_flux_holdout_splits_metrics.json",
-              "sha256": "e56feebc0e86c46fcf86d6fcf972fd80477f80cab3268c357aa1037c52ecf7f0"
+              "sha256": "4e682a7725c8d60f1059ae02f73fda0ed3d35a39385752d94cf235ec72152cc4"
             }
           },
           "kpi_include": true,
@@ -14667,7 +14667,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_entropy_per_enthalpy_density_holdout_splits_metrics.json",
-              "sha256": "e09c419a12cf5219b1406f4326986fe05aff1776babb5e8062ad0c008a2a9cbf"
+              "sha256": "526a115e62635303834c9ef62b9e9c8af93ecd3616f673c1eca98989b3cdcc88"
             }
           },
           "kpi_include": true,
@@ -15267,7 +15267,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_energy_per_enthalpy_flux_holdout_splits_metrics.json",
-              "sha256": "4239e753f7c3814ef06a338b51e09959984ebe6dfcc475552dd623857fb8fe02"
+              "sha256": "a9e5fc120f79e602036dd14e8a8bb5c25dfc2c9ad280be8811289cf837d30639"
             }
           },
           "kpi_include": true,
@@ -15467,7 +15467,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_heat_capacity_per_enthalpy_flux_holdout_splits_metrics.json",
-              "sha256": "9a7c939a17fddfbf9a353e4b2f95560a8bdb9bab1c32e9daefeaf37138f5428e"
+              "sha256": "72670b0d8bec2954ce581dcd1a20d50873f5fbf1635a19e0e8f1b7416c63d216"
             }
           },
           "kpi_include": true,
@@ -16467,7 +16467,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_photon_density_per_enthalpy_flux_holdout_splits_metrics.json",
-              "sha256": "6ee87c1c9806c9dd511a868071e91ef6c2b951916c7aff3b57d146a03622e289"
+              "sha256": "c2ad8469d62c8877ed569e20701105d93ad125675386d83c96d786f340e0f315"
             }
           },
           "kpi_include": true,
@@ -16667,7 +16667,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_photon_flux_per_enthalpy_flux_holdout_splits_metrics.json",
-              "sha256": "37d7d3231badaa7db792c5829c25031c85583b2f037f3c4cbb833ad4bc9bd453"
+              "sha256": "3b7c657b0290e92d6371d7daa479f104c9e88a321350ec12f0ef022849a0c8bf"
             }
           },
           "kpi_include": true,
@@ -17067,7 +17067,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_pressure_per_heat_capacity_flux_holdout_splits_metrics.json",
-              "sha256": "dcb744c2eee7215b59746ef6a87c1a4d279be1b26bd5c45df9003b230c4fd70b"
+              "sha256": "6712c4b6c633576d217f35f82059c816325d64042d62704a43d9cea1d50cf160"
             }
           },
           "kpi_include": true,
@@ -17467,7 +17467,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_pressure_per_heat_capacity_density_holdout_splits_metrics.json",
-              "sha256": "28a04083efc694c998f52ed3e8a7dfa3cc2610bc5364a89c43b4ef0e8ce76567"
+              "sha256": "561c00bf51b843850ca5a7df75dae02b709027857f9c02c12f813fffdd638ce9"
             }
           },
           "kpi_include": true,
@@ -17667,7 +17667,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_energy_per_heat_capacity_density_holdout_splits_metrics.json",
-              "sha256": "bbedf1258f5c166ebb97092dcd2a7db7abd2c1e5bcee9f22700652cd06e81420"
+              "sha256": "0d6d9e2f43a7f118cc65ab38cc2d0ca97e55a01ecbadac5c4ff113362d0e35ee"
             }
           },
           "kpi_include": true,
@@ -17867,7 +17867,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_enthalpy_per_heat_capacity_density_holdout_splits_metrics.json",
-              "sha256": "3ed261b2d06d56cd8974a6a98015e781257f8fd1ef268f540363e273e19a7a5c"
+              "sha256": "2b98a86243fb106abb3466490131e714a738beeb939840dc60efa0866bea5d3d"
             }
           },
           "kpi_include": true,
@@ -18067,7 +18067,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_entropy_per_heat_capacity_density_holdout_splits_metrics.json",
-              "sha256": "b8b66ba100b7865553d60908e8811246734de00571cf9f9b95d24517d105b5e5"
+              "sha256": "9fa20512c3222738c554d5a097bf0382858bd9c1ed0417b8e5af8ebcd3989978"
             }
           },
           "kpi_include": true,
@@ -18267,7 +18267,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_energy_per_heat_capacity_flux_holdout_splits_metrics.json",
-              "sha256": "8bc55d5ceb13e904c63edb3e626148f348cf7414ada70617830990c5f0741980"
+              "sha256": "a8a843805f934f0051f0964695464b7b9e92376b66b96451922ed261fbcbbf62"
             }
           },
           "kpi_include": true,
@@ -18867,7 +18867,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_enthalpy_per_heat_capacity_flux_holdout_splits_metrics.json",
-              "sha256": "cbfdb3c5449f1d3e3d40441fa518cecb2dc4d179269b5ef7f628a38288ca63be"
+              "sha256": "d759650eaeff8ef6d99fa8b860a5c33140c375ef9ddbcc82b40f710a539380dc"
             }
           },
           "kpi_include": true,
@@ -19067,7 +19067,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_entropy_per_heat_capacity_flux_holdout_splits_metrics.json",
-              "sha256": "e5f879fad3e068e5445edc4c54cfe2f17b56335a259dd03bf22472f0bb3eba73"
+              "sha256": "138610fd17c7e63ebfd717ab3cbd95c8d7101eb48d7f5819dbbe7325d74247ef"
             }
           },
           "kpi_include": true,
@@ -19267,7 +19267,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_heat_capacity_per_entropy_flux_holdout_splits_metrics.json",
-              "sha256": "aa10fed6b8c611ce0d240b1e17a092abfcc5ee8eb35a5363c7401058daa31fc0"
+              "sha256": "afe3d3869245a9768c22db6362d958043c6bdb8354dcbad6bee85a004ea365e6"
             }
           },
           "kpi_include": true,
@@ -19467,7 +19467,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_photon_density_per_heat_capacity_flux_holdout_splits_metrics.json",
-              "sha256": "71f2512a270c15f00abcf779b998da2aaa1cdf9e2c8953acb8387e9f67524f96"
+              "sha256": "11926b9f5c5002de37f7b43270fc73557f941763f88cc7013c449643b819a4bf"
             }
           },
           "kpi_include": true,
@@ -19867,7 +19867,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_photon_density_per_heat_capacity_density_holdout_splits_metrics.json",
-              "sha256": "5c39eafde366e82b806e7754e7a35129330bea18fe618a4715a99728d3ca24ee"
+              "sha256": "87e82292262ddb43be617828c53e0bee2cf1c9d59c089320eb923e3fe5a86baf"
             }
           },
           "kpi_include": true,
@@ -20067,7 +20067,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_heat_capacity_per_photon_holdout_splits_metrics.json",
-              "sha256": "47f5d187400f45144cd340404782bada3f443a3dbd002c7c8a05a1e62eba3e74"
+              "sha256": "b62724518763e363513bcecf3809737b91bb417d532bf8272fc8ff4275e73f7d"
             }
           },
           "kpi_include": true,
@@ -20267,7 +20267,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_heat_capacity_per_photon_flux_holdout_splits_metrics.json",
-              "sha256": "a950ac297c7d25eb2586b1a1b88ed2738cc31d195e30700eaa57c67f276ad46b"
+              "sha256": "9d2585a8861e07f56cc1e8bcc82f62fbf9fbe5dd0fccba7c496b613b46b84491"
             }
           },
           "kpi_include": true,
@@ -20467,7 +20467,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_heat_capacity_entropy_ratio_holdout_splits_metrics.json",
-              "sha256": "55a745a409960869cc7b94684107a9d7e60251e7aeab512f7d3efc14b4619d2f"
+              "sha256": "7b7afaa6d4b464bbfa575eb008d410aee34254d2e30f97372d95ef8106dd42c4"
             }
           },
           "kpi_include": true,
@@ -20667,7 +20667,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_heat_capacity_flux_ratio_holdout_splits_metrics.json",
-              "sha256": "d5bc8444f0fe28c796604001b988e8bc7ee8f99598deb0d4593f6af09acefb9b"
+              "sha256": "3eb1f7d64b3528f99b5d641f2c423074d7ff1bee7c5c89b30ba6987959ab8ae1"
             }
           },
           "kpi_include": true,
@@ -20867,7 +20867,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_heat_capacity_momentum_ratio_holdout_splits_metrics.json",
-              "sha256": "73fd7211ea53a63dc9f0f1d54b83f3c56d8b5eb392cf2edd739f0b8d6454c40f"
+              "sha256": "04b9642b0d73bb1ed83f9b47e170a8ae94bc25e5ada984b57a6edce16fea368c"
             }
           },
           "kpi_include": true,
@@ -21067,7 +21067,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_heat_capacity_energy_ratio_holdout_splits_metrics.json",
-              "sha256": "79d5c73b67a30672e583c301e71f47bd6a546ee2a7149804517e691a0c5938ca"
+              "sha256": "b74de9b01fe1da392b8d2a50b77f7086a1ba2d71c7c72de6133d989d337a01f7"
             }
           },
           "kpi_include": true,
@@ -21267,7 +21267,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_heat_capacity_pressure_ratio_holdout_splits_metrics.json",
-              "sha256": "887c203eb260cb7890e13507a0d03c53a7c775c82031acd5b736e4993fc46321"
+              "sha256": "c258b2b9ffb86edf93369f7a3f16c1d9ef19d60b6945629d26ea02526a94ff67"
             }
           },
           "kpi_include": true,
@@ -21467,7 +21467,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_heat_capacity_enthalpy_ratio_holdout_splits_metrics.json",
-              "sha256": "35a1218944b9e13808ad2920f0c611673a6cc6d8019d495d584645a34ddd70b4"
+              "sha256": "977a2672035d60cf5eef369e9babca63356d86bfdcf353196024a4df0d532c3e"
             }
           },
           "kpi_include": true,
@@ -21667,7 +21667,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_enthalpy_per_photon_holdout_splits_metrics.json",
-              "sha256": "3b04342716ced0f4f748949f2080325bc0f581f6f04ab9d65e8d60969049f739"
+              "sha256": "c4b93e73c582ee827e9e683ead176a335d5168bf676a8cad83d94d2d93ad7d35"
             }
           },
           "kpi_include": true,
@@ -21867,7 +21867,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_enthalpy_per_photon_flux_holdout_splits_metrics.json",
-              "sha256": "098108ffb929860b6d5afc02c32c5ada37d49bd2f93e21f54bf312b8634d2efd"
+              "sha256": "f2a6da8cff375f7e154219d273720b9c989746175ecf07c49725138f85067022"
             }
           },
           "kpi_include": true,
@@ -22067,7 +22067,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_energy_per_photon_flux_holdout_splits_metrics.json",
-              "sha256": "1383752070412f9717900d02247e8b9df5c1e527f645ba844886094fffb1afb6"
+              "sha256": "13ad4c2076059a8f402a4e3990ba497158ce4a7c677c7942a77cc8ad133eaf08"
             }
           },
           "kpi_include": true,
@@ -22267,7 +22267,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_helmholtz_per_photon_holdout_splits_metrics.json",
-              "sha256": "3566aaac1780f85c432a0513bf95aa064e4274423f4f71d23b11ea1bf76288ac"
+              "sha256": "496856dcd3e8eed56ff7d9926c64f9216f2d6b67893a7f7b515900c29553f998"
             }
           },
           "kpi_include": true,
@@ -23667,7 +23667,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_entropy_per_photon_flux_holdout_splits_metrics.json",
-              "sha256": "43db71c977e3ea366fadd7ee3d67910d0e12d1317dfeb6ef5f7559aa87a95b42"
+              "sha256": "c85eb30dd8841697b784e27bbd28b72b5bedb62e15f5f9baebae2ac046375cc1"
             }
           },
           "kpi_include": true,
@@ -23867,7 +23867,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_flux_per_photon_holdout_splits_metrics.json",
-              "sha256": "b6a622b8093d4822a9a8d3f98c05aa80d66be7c9cd2e2d78900992ed31b5a47e"
+              "sha256": "6e5b17ec76e0fb47743e1c86ae66dc85b2c583283f8f3fd355937c9480c519d9"
             }
           },
           "kpi_include": true,
@@ -24667,7 +24667,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_pressure_entropy_ratio_holdout_splits_metrics.json",
-              "sha256": "72b58691f21e24ab77fc7f2f599a5ba3d20df25439b33b9323f466d7a54fd6ed"
+              "sha256": "d2a12390d6902038f04f681c57cc82c0eb8e9ebccc07d5e27e6b9cfc4d621ce1"
             }
           },
           "kpi_include": true,
@@ -25267,7 +25267,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_pressure_flux_ratio_holdout_splits_metrics.json",
-              "sha256": "51ac2a1173aef3c4531264aaf94b93ec1616135f17fb88d1a887868ae28e6f70"
+              "sha256": "cc698747d619e5fdeb4f988211064dea7312a4b3c1ca492969513180f0b22e91"
             }
           },
           "kpi_include": true,
@@ -25467,7 +25467,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_momentum_flux_ratio_holdout_splits_metrics.json",
-              "sha256": "c8f1035b83da6160a9b899e620ed0a7a48d229c7565ea91bac6cab9cc6a46489"
+              "sha256": "63acaac50fec2a63bf71217e6996a00868a5e5f1358c38a88ebb1b9a9c3258d6"
             }
           },
           "kpi_include": true,
@@ -26067,7 +26067,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_entropy_flux_holdout_splits_metrics.json",
-              "sha256": "79a25392e88cc55a2e08753f7d54947325b41d2851d4f3790c1da298c8b61c89"
+              "sha256": "c14ff72e9fc978603729645abdbda2c01bef711d39d91ce4c4d1119d22c78bc1"
             }
           },
           "kpi_include": true,
@@ -26667,7 +26667,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_entropy_per_photon_holdout_splits_metrics.json",
-              "sha256": "791ab0848092f5aef014603e91dba540f148c237b8447a2906db4a580cddedce"
+              "sha256": "070806a7a59c492ad798eb3cf9bfb43eefe21cb822a8f5de65996d51a5a9c373"
             }
           },
           "kpi_include": true,
@@ -26867,7 +26867,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_peak_frequency_wavelength_product_holdout_splits_metrics.json",
-              "sha256": "54c5bf2d9a336f4e04c388ba3c462c6860e86d28c145251c12aebb6e6d336cf8"
+              "sha256": "c2c4bb040a3eecb962dca585af3210a3a2c4ad78788a48350efc12693682f6d7"
             }
           },
           "kpi_include": true,
@@ -27067,7 +27067,7 @@
           "inputs": {
             "holdout_metrics_json": {
               "path": "output/public/quantum/thermo_blackbody_peak_frequency_per_wavelength_holdout_splits_metrics.json",
-              "sha256": "e29a5b1c01d140562d3a2a005748f1defa832aec4a672d0482485f907a894198"
+              "sha256": "ffe2599dae403cb29aff70ca947ab4d77f64ccfee152082463fed2e94541a2d1"
             }
           },
           "kpi_include": true,

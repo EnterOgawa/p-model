@@ -12,6 +12,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # クラス: `Config` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Config:
@@ -41,8 +45,8 @@ class Config:
     neutron_star_radius_m: float = 12_000.0
 
     # Plot settings
-    fig_w_in: float = 12.5
-    fig_h_in: float = 6.2
+    fig_w_in: float = 14.6
+    fig_h_in: float = 8.2
     dpi: int = 175
 
 
@@ -353,22 +357,22 @@ def main() -> None:
     ax.bar(x + w / 2, req, width=w, label="required (3σ) to see Δ", color="#c53030", alpha=0.75)
     ax.set_yscale("log")
     ax.set_xticks(x)
-    ax.set_xticklabels(labels, rotation=12, ha="right")
-    ax.set_ylabel("precision (fractional or absolute Δf/f)")
-    ax.set_title("Phase 7 / Step 7.16.12: atom-interferometer unified audit (P-model vs GR; Earth field)")
+    ax.set_xticklabels(labels, rotation=12, ha="right", fontsize=13.4)
+    ax.set_ylabel("precision (fractional or absolute Δf/f)", fontsize=14.4)
+    ax.set_title("Atom-interferometer unified audit (P-model vs GR; Earth field)", fontsize=16.6)
     ax.grid(True, axis="y", ls=":", lw=0.7, alpha=0.6)
-    ax.legend(loc="upper left", fontsize=9, frameon=True)
+    ax.legend(loc="upper right", fontsize=12.4, frameon=True)
+    ax.tick_params(axis="y", labelsize=12.6)
 
-    note = (
-        "P-model: dτ/dt = exp(-x), GR: dτ/dt = sqrt(1-2x), x=GM/(c^2 r).  "
-        "We compare Δf/f between r and r+Δr in the Earth field (stationary)."
-    )
-    fig.text(0.01, -0.02, note, fontsize=9)
     fig.tight_layout()
     out_png = out_dir / "gravity_quantum_interference_delta_predictions.png"
+    out_pdf = out_dir / "gravity_quantum_interference_delta_predictions.pdf"
     out_png_unified = out_dir / "atom_interferometer_unified_audit.png"
+    out_pdf_unified = out_dir / "atom_interferometer_unified_audit.pdf"
     fig.savefig(out_png, bbox_inches="tight")
+    fig.savefig(out_pdf, bbox_inches="tight")
     fig.savefig(out_png_unified, bbox_inches="tight")
+    fig.savefig(out_pdf_unified, bbox_inches="tight")
     plt.close(fig)
 
     summary_rows: list[dict[str, Any]] = [
@@ -443,7 +447,9 @@ def main() -> None:
         "outputs": {
             "summary_csv": str(summary_csv),
             "summary_png": str(out_png_unified),
+            "summary_pdf": str(out_pdf_unified),
             "legacy_png": str(out_png),
+            "legacy_pdf": str(out_pdf),
         },
     }
     summary_json = out_dir / "atom_interferometer_unified_audit_metrics.json"
@@ -575,7 +581,9 @@ def main() -> None:
         },
         "outputs": {
             "png": str(out_png),
+            "pdf": str(out_pdf),
             "atom_interferometer_unified_audit_png": str(out_png_unified),
+            "atom_interferometer_unified_audit_pdf": str(out_pdf_unified),
             "atom_interferometer_unified_audit_csv": str(summary_csv),
             "atom_interferometer_unified_audit_metrics": str(summary_json),
         },
@@ -589,6 +597,7 @@ def main() -> None:
     out_json.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(f"[ok] png : {out_png}")
+    print(f"[ok] pdf : {out_pdf}")
     print(f"[ok] json: {out_json}")
 
 

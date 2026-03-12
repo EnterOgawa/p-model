@@ -1,0 +1,38 @@
+{
+  "generated_utc": "2026-03-07T04:51:13.239690+00:00",
+  "session_label": "22MAY31XA",
+  "expected_internal_id": "AUA020",
+  "input_root": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\22MAY31XA\\extracted",
+  "scan_summary": {
+    "n_netcdf_scanned": 245,
+    "session_value_counts": {
+      "R11053": 245
+    },
+    "observed_session_values": [
+      "R11053"
+    ],
+    "status": "watch",
+    "alias_confirmed": false,
+    "rationale": "expected internal id was not found in scanned Session metadata"
+  },
+  "session_value_examples": {
+    "R11053": [
+      "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\22MAY31XA\\extracted\\22MAY31XA\\AGGO\\AzEl.nc",
+      "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\22MAY31XA\\extracted\\22MAY31XA\\AGGO\\Cal-AxisOffset.nc",
+      "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\22MAY31XA\\extracted\\22MAY31XA\\AGGO\\Cal-Cable.nc",
+      "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\22MAY31XA\\extracted\\22MAY31XA\\AGGO\\Cal-CableCorrections.nc",
+      "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\22MAY31XA\\extracted\\22MAY31XA\\AGGO\\Cal-SlantPathTropDry_kNMF.nc"
+    ]
+  },
+  "wrapper_files_sample": [
+    "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\22MAY31XA\\extracted\\22MAY31XA\\22MAY31XA_V001_iMPI_kall.wrp",
+    "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\22MAY31XA\\extracted\\22MAY31XA\\22MAY31XA_V002_iGSFC_kall.wrp",
+    "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\22MAY31XA\\extracted\\22MAY31XA\\22MAY31XA_V003_iGSFC_kall.wrp",
+    "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\22MAY31XA\\extracted\\22MAY31XA\\22MAY31XA_V004_iGSFC_kall.wrp",
+    "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\22MAY31XA\\extracted\\22MAY31XA\\22MAY31XA_V004_iIVS_kall.wrp"
+  ],
+  "outputs": {
+    "json": "C:\\develop\\waveP\\output\\vlbi\\vlbi_22may31xa_session_identity_audit.json",
+    "csv": "C:\\develop\\waveP\\output\\vlbi\\vlbi_22may31xa_session_identity_audit.csv"
+  }
+}

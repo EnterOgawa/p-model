@@ -6,6 +6,34 @@ import math
 from pathlib import Path
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
+# 関数: `_configure_japanese_font` の入出力契約と処理意図を定義する。
+def _configure_japanese_font() -> None:
+    import matplotlib as mpl
+    from matplotlib import font_manager as fm
+
+    candidates = [
+        "Yu Gothic",
+        "Meiryo",
+        "MS Gothic",
+        "MS PGothic",
+        "Noto Sans CJK JP",
+        "Noto Sans JP",
+        "IPAexGothic",
+    ]
+    available = {f.name for f in fm.fontManager.ttflist}
+    for name in candidates:
+        if name in available:
+            mpl.rcParams["font.family"] = name
+            mpl.rcParams["font.sans-serif"] = [name] + list(mpl.rcParams.get("font.sans-serif", []))
+            break
+
+    mpl.rcParams["axes.unicode_minus"] = False
+
+
 # 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
@@ -454,13 +482,14 @@ def main() -> None:
     ]
 
     # Plot: core falsification metrics + independent cross-check panel.
+    _configure_japanese_font()
     import matplotlib.pyplot as plt
 
-    labels = [m["model_id"] for m in models]
+    labels = ["グローバル比 R", "局所間隔比 d"]
     z_vals = [float(m["z_median"]) for m in models]
     z_delta_vals = [float(m["z_delta_median"]) for m in models]
 
-    fig, axs = plt.subplots(2, 2, figsize=(15.6, 8.2))
+    fig, axs = plt.subplots(2, 2, figsize=(17.2, 14.6))
     ax0, ax1, ax2, ax3 = axs.flatten()
 
     ax0.bar(range(len(labels)), z_vals, color=["tab:purple", "tab:blue"], alpha=0.85)
@@ -469,9 +498,10 @@ def main() -> None:
     ax0.axhline(0.0, color="0.4", lw=0.9)
     ax0.set_xticks(range(len(labels)))
     ax0.set_xticklabels(labels, rotation=15, ha="right")
-    ax0.set_ylabel("z_median (log10 ratio)")
-    ax0.set_title("Median residual consistency (|z|<=3)")
+    ax0.set_ylabel("z_median（log10比）", fontsize=22.0)
+    ax0.set_title("中央値残差の整合性（|z|<=3）", fontsize=24.0)
     ax0.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
+    ax0.tick_params(labelsize=19.5)
 
     ax1.bar(range(len(labels)), z_delta_vals, color=["tab:purple", "tab:blue"], alpha=0.85)
     ax1.axhline(thresholds["z_delta_median_abs_max"], color="0.2", lw=1.2, ls="--")
@@ -479,9 +509,10 @@ def main() -> None:
     ax1.axhline(0.0, color="0.4", lw=0.9)
     ax1.set_xticks(range(len(labels)))
     ax1.set_xticklabels(labels, rotation=15, ha="right")
-    ax1.set_ylabel("z_Δmedian (log10 ratio)")
-    ax1.set_title("A-trend consistency (|z_Δmedian|<=3)")
+    ax1.set_ylabel("z_Δmedian（log10比）", fontsize=22.0)
+    ax1.set_title("Aトレンド整合性（|z_Δmedian|<=3）", fontsize=24.0)
     ax1.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
+    ax1.tick_params(labelsize=19.5)
 
     ch_labels = [str(c.get("channel_id", "")) for c in channels]
     ch_vals = []
@@ -493,14 +524,15 @@ def main() -> None:
     ax2.bar(range(len(ch_labels)), ch_vals, color=["tab:red", "tab:blue"], alpha=0.85)
     ax2.set_xticks(range(len(ch_labels)))
     ax2.set_xticklabels(ch_labels, rotation=15, ha="right")
-    ax2.set_ylabel("median σ_req,rel [%]")
-    ax2.set_title("Channel precision demand (3σ)")
+    ax2.set_ylabel("中央値 σ_req,rel [%]", fontsize=22.0)
+    ax2.set_title("チャネル精度要求（3σ）", fontsize=24.0)
     ax2.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
+    ax2.tick_params(labelsize=19.5)
 
     radius_threshold = _safe_float(radii_crosscheck.get("strict_threshold_sigma"))
     base = radii_crosscheck.get("baseline_def0") if isinstance(radii_crosscheck.get("baseline_def0"), dict) else {}
     pair = radii_crosscheck.get("pairing_def0_fit") if isinstance(radii_crosscheck.get("pairing_def0_fit"), dict) else {}
-    radius_labels = ["base Sn", "base Sp", "pair Sn", "pair Sp"]
+    radius_labels = ["基準 Sn", "基準 Sp", "pair-fit Sn", "pair-fit Sp"]
     radius_vals = [
         _safe_float(base.get("max_abs_resid_sigma_sn")),
         _safe_float(base.get("max_abs_resid_sigma_sp")),
@@ -515,33 +547,34 @@ def main() -> None:
 
     ax3.set_xticks(range(len(radius_labels)))
     ax3.set_xticklabels(radius_labels, rotation=15, ha="right")
-    ax3.set_ylabel("max abs residual [σ]")
-    ax3.set_title("Independent cross-check (radii kink @ A_min=100)")
+    ax3.set_ylabel("最大絶対残差 [σ]", fontsize=22.0)
+    ax3.set_title("独立クロスチェック（電荷半径キンク, A_min=100）", fontsize=24.0)
     ax3.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
+    ax3.tick_params(labelsize=19.5)
 
     sn_rms = _safe_float(sep_crosscheck.get("sn_rms_total_mev"))
     s2n_rms = _safe_float(sep_crosscheck.get("s2n_rms_total_mev"))
     gap_sn_med = _safe_float(sep_crosscheck.get("gap_sn_rms_median_mev"))
     gap_s2n_med = _safe_float(sep_crosscheck.get("gap_s2n_rms_median_mev"))
     text_lines = [
-        f"Sn RMS: {sn_rms:.2f} MeV" if sn_rms is not None else "Sn RMS: n/a",
-        f"S2n RMS: {s2n_rms:.2f} MeV" if s2n_rms is not None else "S2n RMS: n/a",
-        f"gap Sn median RMS: {gap_sn_med:.2f} MeV" if gap_sn_med is not None else "gap Sn median RMS: n/a",
-        f"gap S2n median RMS: {gap_s2n_med:.2f} MeV" if gap_s2n_med is not None else "gap S2n median RMS: n/a",
+        f"Sn RMS: {sn_rms:.2f} MeV" if sn_rms is not None else "Sn RMS: なし",
+        f"S2n RMS: {s2n_rms:.2f} MeV" if s2n_rms is not None else "S2n RMS: なし",
+        f"gap Sn 中央RMS: {gap_sn_med:.2f} MeV" if gap_sn_med is not None else "gap Sn 中央RMS: なし",
+        f"gap S2n 中央RMS: {gap_s2n_med:.2f} MeV" if gap_s2n_med is not None else "gap S2n 中央RMS: なし",
     ]
     ax3.text(
-        0.02,
+        0.98,
         0.98,
         "\n".join(text_lines),
         transform=ax3.transAxes,
         va="top",
-        ha="left",
-        fontsize=9,
+        ha="right",
+        fontsize=23.5,
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.8, "edgecolor": "0.8"},
     )
 
-    fig.suptitle("Phase 7 / Step 7.13.17.14: falsification pack + independent cross-checks", y=0.98)
-    fig.subplots_adjust(left=0.06, right=0.985, top=0.90, bottom=0.20, wspace=0.30, hspace=0.34)
+    fig.suptitle("反証条件パックと独立クロスチェック", y=0.985, fontsize=26.0)
+    fig.subplots_adjust(left=0.065, right=0.985, top=0.91, bottom=0.10, wspace=0.20, hspace=0.38)
 
     out_png = out_dir / "nuclear_binding_energy_frequency_mapping_falsification_pack.png"
     fig.savefig(out_png, bbox_inches="tight")

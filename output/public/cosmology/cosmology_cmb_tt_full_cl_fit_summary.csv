@@ -1,0 +1,11 @@
+metric,value
+n_bin,83.0
+chi2_baseline_lcdm,65.12154684822823
+chi2_pmodel,64.13935618128198
+aic_baseline_lcdm,65.12154684822823
+aic_pmodel,72.13935618128198
+delta_aic_baseline_minus_pmodel,-7.017809333053748
+alpha,1.001
+delta_ell,-0.5
+gain,0.9997005227021882
+offset,1.1245600953579942

@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-13T07:43:08.180692+00:00",
+  "generated_utc": "2026-03-08T05:19:59.148652+00:00",
   "domain": "cosmology",
   "step": "16.4 (BAO re-derivation entry: xi multipoles peak fit)",
   "dataset": "ross_post",
@@ -224,6 +224,7 @@
   ],
   "outputs": {
     "png": "C:/develop/waveP/output/private/cosmology/cosmology_bao_xi_multipole_peakfit.png",
+    "pdf": "C:/develop/waveP/output/private/cosmology/cosmology_bao_xi_multipole_peakfit.pdf",
     "metrics_json": "C:/develop/waveP/output/private/cosmology/cosmology_bao_xi_multipole_peakfit_metrics.json"
   }
 }

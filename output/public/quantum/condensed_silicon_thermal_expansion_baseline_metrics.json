@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-01-31T15:05:42.408898+00:00",
+  "generated_utc": "2026-03-11T13:54:50.754200+00:00",
   "dataset": "Phase 7 / Step 7.14.5 silicon thermal expansion coefficient baseline (NIST TRC fit)",
   "inputs": {
     "extracted_values_json": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_trc_silicon_thermal_expansion\\extracted_values.json",
@@ -126,8 +126,8 @@
     "600K": 383.9092037037037
   },
   "outputs": {
-    "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_baseline.csv",
-    "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_baseline.png",
-    "metrics_json": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_baseline_metrics.json"
+    "csv": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_baseline.csv",
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_baseline.png",
+    "metrics_json": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_baseline_metrics.json"
   }
 }

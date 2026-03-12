@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T14:54:19.794989+00:00",
+  "generated_utc": "2026-03-04T15:31:52.976787+00:00",
   "phase": 7,
   "step": "7.13.8.5",
   "model": {
@@ -50,461 +50,6 @@
     "B_MeV": 2.22456634198942
   },
   "results_by_dataset": [
-    {
-      "label": "eq18 (GWU/SAID)",
-      "eq_label": 18,
-      "inputs": {
-        "B_MeV": 2.22456634198942,
-        "triplet": {
-          "a_t_fm": 5.403,
-          "r_t_fm": 1.7494,
-          "v2t_fm3": 0.163
-        },
-        "singlet": {
-          "a_s_fm": -23.719,
-          "r_s_fm": 2.626,
-          "v2s_fm3": -0.005
-        }
-      },
-      "fit_triplet": {
-        "geometry": {
-          "R1_fm": 1.0303626979905982,
-          "R2_fm": 1.413816930654131,
-          "Rb_fm": 1.555198623719544,
-          "R3_fm": 2.827633861308262,
-          "L3_total_fm": 1.413816930654131,
-          "Lb_fm": 0.14138169306541312,
-          "Lt_fm": 1.272435237588718,
-          "lambda_pi_pm_fm": 1.413816930654131,
-          "R1_over_lambda_pi_pm": 0.7287808454195551,
-          "R2_over_lambda_pi_pm": 1.0,
-          "Rb_over_lambda_pi_pm": 1.0999999999999999,
-          "R3_over_lambda_pi_pm": 2.0,
-          "pion_constraint": {
-            "lambda_pi_fm": 1.413816930654131,
-            "R1_over_lambda_pi_bounds": [
-              0.25,
-              0.75
-            ],
-            "R2_over_lambda_pi_bounds": [
-              1.0,
-              2.05
-            ]
-          },
-          "tail_constraint": {
-            "tail_len_over_lambda": 1.0,
-            "barrier_len_fraction": 0.1,
-            "barrier_height_factor": 0.0,
-            "tail_depth_factor": 1.3,
-            "tail_mean_factor_definition": "<V>/V(R2) = (λπ/L3) * (1 - exp(-L3/λπ))",
-            "barrier_tail_rule": "Vb = barrier_height_factor*V3_mean, Vt = tail_depth_factor*V3_mean (no mean-preserving constraint)"
-          },
-          "tail_factor": 0.6321205588285577,
-          "barrier_tail_config": {
-            "lambda_pi_fm": 1.413816930654131,
-            "tail_len_over_lambda": 1.0,
-            "L3_total_fm": 1.413816930654131,
-            "barrier_len_fraction": 0.1,
-            "Lb_fm": 0.14138169306541312,
-            "Lt_fm": 1.272435237588718,
-            "tail_factor": 0.6321205588285577,
-            "barrier_height_factor": 0.0,
-            "tail_depth_factor": 1.3,
-            "tail_depth_factor_mean_preserving": 1.1111111111111112,
-            "barrier_coeff": 0.0,
-            "tail_depth_coeff": 0.8217567264771249
-          }
-        },
-        "V1_t_MeV": 83.76215894206064,
-        "V2_t_MeV": 14.0,
-        "V3_t_MeV": 0.0,
-        "V3_mean_t_MeV": 8.849687823599808,
-        "V3_barrier_t_MeV": 0.0,
-        "V3_tail_t_MeV": 11.504594170679749,
-        "a_t_exact_fm": 5.409708421324121,
-        "ere": {
-          "a_fm": 5.409708415934768,
-          "r_eff_fm": 1.7497296569011005,
-          "v2_fm3": 0.05203267668986607,
-          "coeffs": {
-            "c0_fm1": -0.1848528466071134,
-            "c2_fm": 0.8748648284505502,
-            "c4_fm3": 0.05203267668986607
-          },
-          "fit_rms_fm1": 1.5318301233624586e-10,
-          "points": [
-            {
-              "k_fm1": 0.002,
-              "kcot_fm1": -0.18484934696678035,
-              "delta_rad": -0.010819199502132146
-            },
-            {
-              "k_fm1": 0.004,
-              "kcot_fm1": -0.18483884858811073,
-              "delta_rad": -0.02163709519155797
-            },
-            {
-              "k_fm1": 0.006,
-              "kcot_fm1": -0.18482135125652224,
-              "delta_rad": -0.03245238440697066
-            },
-            {
-              "k_fm1": 0.008,
-              "kcot_fm1": -0.18479685492131934,
-              "delta_rad": -0.043263766787288785
-            },
-            {
-              "k_fm1": 0.01,
-              "kcot_fm1": -0.1847653595115527,
-              "delta_rad": -0.05406994541534603
-            },
-            {
-              "k_fm1": 0.012,
-              "kcot_fm1": -0.18472686493604637,
-              "delta_rad": -0.06486962795390254
-            },
-            {
-              "k_fm1": 0.014,
-              "kcot_fm1": -0.18468137108342772,
-              "delta_rad": -0.07566152777146996
-            },
-            {
-              "k_fm1": 0.016,
-              "kcot_fm1": -0.1846288778221697,
-              "delta_rad": -0.08644436505548043
-            },
-            {
-              "k_fm1": 0.018000000000000002,
-              "kcot_fm1": -0.1845693850006362,
-              "delta_rad": -0.09721686791038697
-            },
-            {
-              "k_fm1": 0.02,
-              "kcot_fm1": -0.18450289244713633,
-              "delta_rad": -0.10797777343834045
-            },
-            {
-              "k_fm1": 0.022,
-              "kcot_fm1": -0.18442939996998717,
-              "delta_rad": -0.11872582880016097
-            },
-            {
-              "k_fm1": 0.024,
-              "kcot_fm1": -0.1843489073575808,
-              "delta_rad": -0.12945979225440338
-            },
-            {
-              "k_fm1": 0.026000000000000002,
-              "kcot_fm1": -0.18426141437846136,
-              "delta_rad": -0.14017843417240072
-            },
-            {
-              "k_fm1": 0.028,
-              "kcot_fm1": -0.18416692078140762,
-              "delta_rad": -0.15088053802726983
-            },
-            {
-              "k_fm1": 0.03,
-              "kcot_fm1": -0.1840654262955238,
-              "delta_rad": -0.1615649013549632
-            },
-            {
-              "k_fm1": 0.032,
-              "kcot_fm1": -0.18395693063033733,
-              "delta_rad": -0.1722303366855623
-            },
-            {
-              "k_fm1": 0.034,
-              "kcot_fm1": -0.18384143347590393,
-              "delta_rad": -0.18287567244312247
-            },
-            {
-              "k_fm1": 0.036000000000000004,
-              "kcot_fm1": -0.18371893450291926,
-              "delta_rad": -0.19349975381250106
-            },
-            {
-              "k_fm1": 0.038,
-              "kcot_fm1": -0.1835894333628398,
-              "delta_rad": -0.20410144357172139
-            },
-            {
-              "k_fm1": 0.04,
-              "kcot_fm1": -0.18345292968800897,
-              "delta_rad": -0.21467962288856018
-            },
-            {
-              "k_fm1": 0.042,
-              "kcot_fm1": -0.18330942309179124,
-              "delta_rad": -0.22523319208017112
-            },
-            {
-              "k_fm1": 0.044,
-              "kcot_fm1": -0.18315891316871477,
-              "delta_rad": -0.2357610713346922
-            },
-            {
-              "k_fm1": 0.046,
-              "kcot_fm1": -0.1830013994946194,
-              "delta_rad": -0.24626220139392407
-            },
-            {
-              "k_fm1": 0.048,
-              "kcot_fm1": -0.18283688162681375,
-              "delta_rad": -0.25673554419629374
-            },
-            {
-              "k_fm1": 0.05,
-              "kcot_fm1": -0.18266535910423878,
-              "delta_rad": -0.26718008347946043
-            },
-            {
-              "k_fm1": 0.052000000000000005,
-              "kcot_fm1": -0.18248683144763836,
-              "delta_rad": -0.2775948253420537
-            },
-            {
-              "k_fm1": 0.054,
-              "kcot_fm1": -0.18230129815973903,
-              "delta_rad": -0.2879787987641609
-            },
-            {
-              "k_fm1": 0.056,
-              "kcot_fm1": -0.18210875872543522,
-              "delta_rad": -0.2983310560863245
-            },
-            {
-              "k_fm1": 0.058,
-              "kcot_fm1": -0.18190921261198278,
-              "delta_rad": -0.30865067344692565
-            },
-            {
-              "k_fm1": 0.06,
-              "kcot_fm1": -0.18170265926920032,
-              "delta_rad": -0.31893675117796405
-            }
-          ]
-        },
-        "fit_score": 2.2594817108452925,
-        "fit_deltas": {
-          "da_fm": 0.006708421324121083,
-          "dr_fm": 0.000329656901100428,
-          "dv2_fm3": -0.11096732331013394
-        },
-        "note": "Triplet: λπ-constrained geometry + barrier+tail split beyond R2 (free tail depth); freeze singlet split from Step 7.13.8.4 and scan triplet barrier_len_fraction_t (and small k_t grid) to recover (a_t,r_t) within tolerance, then fit per dataset."
-      },
-      "fit_singlet": {
-        "V1_s_MeV": 161.2646718146718,
-        "V2_s_MeV": 9.57166344209508,
-        "V3_s_MeV": 0.0,
-        "Vb_s_MeV": 3.025222621968009,
-        "Vt_s_MeV": 6.050445243936018,
-        "geometry": {
-          "R1_fm": 0.636217618794359,
-          "R2_fm": 2.1207253959811965,
-          "Rb_fm": 2.827633861308262,
-          "R3_fm": 3.5345423266353277,
-          "R1_s_over_lambda_pi_pm": 0.45,
-          "R2_s_over_lambda_pi_pm": 1.5
-        },
-        "a_s_exact_fm": -23.719000002148032,
-        "ere": {
-          "a_fm": -23.719000613154396,
-          "r_eff_fm": 2.626338346198004,
-          "v2_fm3": -0.1028186903167873,
-          "coeffs": {
-            "c0_fm1": 0.04216029234576632,
-            "c2_fm": 1.313169173099002,
-            "c4_fm3": -0.1028186903167873
-          },
-          "fit_rms_fm1": 9.031985142176813e-10,
-          "points": [
-            {
-              "k_fm1": 0.002,
-              "kcot_fm1": 0.04216554608345119,
-              "delta_rad": 0.04739656753485793
-            },
-            {
-              "k_fm1": 0.004,
-              "kcot_fm1": 0.0421813040194908,
-              "delta_rad": 0.09454601712446002
-            },
-            {
-              "k_fm1": 0.006,
-              "kcot_fm1": 0.04220756718339722,
-              "delta_rad": 0.1412084989385864
-            },
-            {
-              "k_fm1": 0.008,
-              "kcot_fm1": 0.04224433548085691,
-              "delta_rad": 0.1871581731931116
-            },
-            {
-              "k_fm1": 0.01,
-              "kcot_fm1": 0.04229160877968095,
-              "delta_rad": 0.23218896942187509
-            },
-            {
-              "k_fm1": 0.012,
-              "kcot_fm1": 0.04234938690965721,
-              "delta_rad": 0.2761190315431756
-            },
-            {
-              "k_fm1": 0.014,
-              "kcot_fm1": 0.04241766966235753,
-              "delta_rad": 0.31879367264168024
-            },
-            {
-              "k_fm1": 0.016,
-              "kcot_fm1": 0.04249645679090223,
-              "delta_rad": 0.3600868214036545
-            },
-            {
-              "k_fm1": 0.018000000000000002,
-              "kcot_fm1": 0.04258574800968574,
-              "delta_rad": 0.39990107835675387
-            },
-            {
-              "k_fm1": 0.02,
-              "kcot_fm1": 0.04268554299405374,
-              "delta_rad": 0.4381665985423699
-            },
-            {
-              "k_fm1": 0.022,
-              "kcot_fm1": 0.0427958413799424,
-              "delta_rad": 0.47483907209155285
-            },
-            {
-              "k_fm1": 0.024,
-              "kcot_fm1": 0.04291664276347182,
-              "delta_rad": 0.5098970882657287
-            },
-            {
-              "k_fm1": 0.026000000000000002,
-              "kcot_fm1": 0.043047946700499364,
-              "delta_rad": 0.5433391505360401
-            },
-            {
-              "k_fm1": 0.028,
-              "kcot_fm1": 0.04318975270612727,
-              "delta_rad": 0.5751805713075453
-            },
-            {
-              "k_fm1": 0.03,
-              "kcot_fm1": 0.043342060254170645,
-              "delta_rad": 0.6054504256897526
-            },
-            {
-              "k_fm1": 0.032,
-              "kcot_fm1": 0.0435048687765795,
-              "delta_rad": 0.6341886929442853
-            },
-            {
-              "k_fm1": 0.034,
-              "kcot_fm1": 0.043678177662820485,
-              "delta_rad": 0.6614436678292334
-            },
-            {
-              "k_fm1": 0.036000000000000004,
-              "kcot_fm1": 0.043861986259215065,
-              "delta_rad": 0.6872696852904597
-            },
-            {
-              "k_fm1": 0.038,
-              "kcot_fm1": 0.044056293868233336,
-              "delta_rad": 0.7117251719900826
-            },
-            {
-              "k_fm1": 0.04,
-              "kcot_fm1": 0.044261099747747154,
-              "delta_rad": 0.7348710167323328
-            },
-            {
-              "k_fm1": 0.042,
-              "kcot_fm1": 0.044476403110239024,
-              "delta_rad": 0.7567692378385585
-            },
-            {
-              "k_fm1": 0.044,
-              "kcot_fm1": 0.044702203121967925,
-              "delta_rad": 0.777481917477018
-            },
-            {
-              "k_fm1": 0.046,
-              "kcot_fm1": 0.04493849890209236,
-              "delta_rad": 0.7970703693810824
-            },
-            {
-              "k_fm1": 0.048,
-              "kcot_fm1": 0.045185289521751375,
-              "delta_rad": 0.8155945059577294
-            },
-            {
-              "k_fm1": 0.05,
-              "kcot_fm1": 0.04544257400310032,
-              "delta_rad": 0.833112372399717
-            },
-            {
-              "k_fm1": 0.052000000000000005,
-              "kcot_fm1": 0.045710351318304906,
-              "delta_rad": 0.8496798182248855
-            },
-            {
-              "k_fm1": 0.054,
-              "kcot_fm1": 0.0459886203884926,
-              "delta_rad": 0.8653502800614488
-            },
-            {
-              "k_fm1": 0.056,
-              "kcot_fm1": 0.046277380082658845,
-              "delta_rad": 0.8801746530581833
-            },
-            {
-              "k_fm1": 0.058,
-              "kcot_fm1": 0.046576629216532384,
-              "delta_rad": 0.8942012317530674
-            },
-            {
-              "k_fm1": 0.06,
-              "kcot_fm1": 0.046886366551394984,
-              "delta_rad": 0.9074757044249678
-            }
-          ]
-        },
-        "fit_mode": "Channel-split barrier+tail (k_t,q_t)/(k_s,q_s) + singlet geometry split (R1_s,R2_s); fit (V1_s,V2_s>=0) to match (a_s,r_s).",
-        "fit_targets": [
-          "a_s",
-          "r_s"
-        ],
-        "prediction_targets": [
-          "v2s"
-        ],
-        "fit_method": "bisection",
-        "fit_scan": {
-          "v1": {},
-          "v2": {
-            "v2_min": 0.0,
-            "v2_max": 161.2646718146718,
-            "n_scan": 900
-          }
-        },
-        "note_fit": "solve V1_s by r_s (bisection) with barrier+tail",
-        "note_profile": "",
-        "note": "Singlet: uses R1_s=(R1_s/λπ)·λπ (frozen from Step 7.13.8.3 by r_s envelope) and a global R2_s=(R2_s/λπ)·λπ; fits (V1_s,V2_s) by (a_s,r_s). v2s is a prediction."
-      },
-      "comparison": {
-        "triplet": {
-          "a_t_fit_minus_obs_fm": 0.006708421324121083,
-          "r_t_fit_minus_obs_fm": 0.000329656901100428,
-          "v2t_fit_minus_obs_fm3": -0.11096732331013394
-        },
-        "singlet": {
-          "a_s_fit_minus_obs_fm": -2.1480310863353225e-09,
-          "r_s_fit_minus_obs_fm": 0.0003383461980042135,
-          "v2s_pred_minus_obs_fm3": -0.09781869031678729
-        }
-      }
-    },
     {
       "label": "eq19 (Nijmegen)",
       "eq_label": 19,
@@ -964,18 +509,18 @@
   "systematics_proxy": {
     "observed_envelope_v2t_fm3": {
       "min": 0.04,
-      "max": 0.163
+      "max": 0.04
     },
     "observed_envelope_r_s_fm": {
-      "min": 2.626,
+      "min": 2.678,
       "max": 2.678
     },
     "observed_envelope_v2s_fm3": {
       "min": -0.48,
-      "max": -0.005
+      "max": -0.48
     },
-    "predicted_r_s_within_envelope": true,
-    "predicted_v2s_within_envelope": true,
+    "predicted_r_s_within_envelope": false,
+    "predicted_v2s_within_envelope": false,
     "notes": [
       "Eq.(18) and Eq.(19) are two phase-shift analyses in the same primary source; their difference is treated as an analysis-dependent systematics proxy.",
       "Triplet fit is performed per dataset to expose sensitivity of the inferred u-profile to that proxy.",
@@ -988,12 +533,13 @@
       "If predicted singlet v2s falls outside the analysis-dependent envelope, the ansatz class is rejected as a representation of the nuclear-scale u-profile."
     ],
     "within_envelope": {
-      "r_s": true,
-      "v2s": true
+      "r_s": false,
+      "v2s": false
     }
   },
   "outputs": {
-    "png": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan.png",
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan_eq19.png",
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan_eq19.pdf",
     "csv": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan.csv"
   },
   "pion_range_scale": {
@@ -2328,7 +1874,7 @@
   "canonical": {
     "kind": "nuclear_effective_potential",
     "selected_step": "7.13.8.5",
-    "selected_metrics_json": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan_metrics.json",
+    "selected_metrics_json": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan_metrics_eq19.json",
     "note": "This file is an alias copy of the current best-surviving candidate used downstream."
   }
 }

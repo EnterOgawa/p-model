@@ -1,0 +1,5 @@
+model,shape_params_json,H0_best_km_s_Mpc,delta_mu_best_mag,chi2_sn,chi2_cc,chi2_total,AIC
+flat_LCDM,"{""Omega_m"": 0.3693055555555555}",65.9830846322,-0.206096662178,709.882527947,15.3639375015,725.246465448,731.246465448
+pmodel_heff2_full,"{""alpha_lambda"": 0.0, ""alpha_m"": 0.36936516374588935, ""alpha_r"": 0.0, ""omega_lambda_sq"": 0.0, ""omega_m_sq"": 2412.0180313345636, ""omega_r_sq"": 0.0}",65.9806635779,-0.206157304769,709.881095847,15.3653595142,725.246455361,735.246455361
+
+delta_aic_baseline_minus_pmodel,-3.99998991263

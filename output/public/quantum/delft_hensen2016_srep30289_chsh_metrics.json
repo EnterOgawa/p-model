@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T14:05:02.385463+00:00",
+  "generated_utc": "2026-03-11T09:15:17.942478+00:00",
   "dataset": {
     "profile": "hensen2016_srep30289",
     "source": "Delft second loophole-free Bell test (Hensen et al. 2016; Sci Rep 6, 30289) open data",
@@ -460,6 +460,7 @@
   },
   "outputs": {
     "png": "C:\\develop\\waveP\\output\\public\\quantum\\delft_hensen2016_srep30289_chsh.png",
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\delft_hensen2016_srep30289_chsh.pdf",
     "csv": "C:\\develop\\waveP\\output\\public\\quantum\\delft_hensen2016_srep30289_chsh_sweep_start_offset.csv"
   },
   "notes": [

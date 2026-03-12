@@ -1,0 +1,97 @@
+{
+  "generated_utc": "2026-03-07T05:50:59.601960+00:00",
+  "method": {
+    "description": "high-sensitivity threshold sweep on all-sky summary",
+    "thresholds": [
+      10.0,
+      12.0,
+      15.0,
+      20.0
+    ],
+    "min_sessions_operational": 3
+  },
+  "input": {
+    "allsky_summary_csv": "C:\\develop\\waveP\\output\\vlbi\\vlbi_allsky_beta_consistency_summary_local_source_0814_425_or_time_q1.csv",
+    "n_allsky_rows": 53
+  },
+  "sweep_rows": [
+    {
+      "threshold_ns": 10.0,
+      "n_sessions": 5,
+      "n_valid": 5,
+      "beta_weighted_mean": 1.5030052753637306,
+      "beta_weighted_sigma": 0.04276886888810671,
+      "chi2": 598.6928501107343,
+      "dof": 4.0,
+      "chi2_dof": 149.67321252768357,
+      "status": "reject",
+      "sessions": [
+        "17MAY01XA",
+        "18MAY01XA",
+        "22MAY09XA",
+        "20MAY06XA",
+        "20MAY04XA"
+      ]
+    },
+    {
+      "threshold_ns": 12.0,
+      "n_sessions": 2,
+      "n_valid": 2,
+      "beta_weighted_mean": 1.3181507919978337,
+      "beta_weighted_sigma": 0.04347138310615049,
+      "chi2": 5.84552306659975,
+      "dof": 1.0,
+      "chi2_dof": 5.84552306659975,
+      "status": "reject",
+      "sessions": [
+        "17MAY01XA",
+        "18MAY01XA"
+      ]
+    },
+    {
+      "threshold_ns": 15.0,
+      "n_sessions": 2,
+      "n_valid": 2,
+      "beta_weighted_mean": 1.3181507919978337,
+      "beta_weighted_sigma": 0.04347138310615049,
+      "chi2": 5.84552306659975,
+      "dof": 1.0,
+      "chi2_dof": 5.84552306659975,
+      "status": "reject",
+      "sessions": [
+        "17MAY01XA",
+        "18MAY01XA"
+      ]
+    },
+    {
+      "threshold_ns": 20.0,
+      "n_sessions": 2,
+      "n_valid": 2,
+      "beta_weighted_mean": 1.3181507919978337,
+      "beta_weighted_sigma": 0.04347138310615049,
+      "chi2": 5.84552306659975,
+      "dof": 1.0,
+      "chi2_dof": 5.84552306659975,
+      "status": "reject",
+      "sessions": [
+        "17MAY01XA",
+        "18MAY01XA"
+      ]
+    }
+  ],
+  "recommendation": {
+    "recommended_threshold_ns": 10.0,
+    "recommended_n_sessions": 5,
+    "recommended_chi2_dof": 149.67321252768357,
+    "recommended_status": "reject",
+    "candidate_count": 1,
+    "min_sessions_operational": 3,
+    "reason": "operational_pool"
+  },
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\vlbi\\vlbi_high_sensitivity_threshold_sweep.csv",
+    "metrics_json": "C:\\develop\\waveP\\output\\vlbi\\vlbi_high_sensitivity_threshold_sweep_metrics.json",
+    "plot_pdf": "C:\\develop\\waveP\\output\\vlbi\\vlbi_high_sensitivity_threshold_sweep.pdf",
+    "plot_png": "C:\\develop\\waveP\\output\\vlbi\\vlbi_high_sensitivity_threshold_sweep.png"
+  }
+}

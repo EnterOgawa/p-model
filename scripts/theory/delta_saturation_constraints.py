@@ -46,12 +46,12 @@ def _set_japanese_font() -> None:
             mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
 
         mpl.rcParams["axes.unicode_minus"] = False
-        mpl.rcParams["font.size"] = 13.0
-        mpl.rcParams["axes.titlesize"] = 18.0
-        mpl.rcParams["axes.labelsize"] = 14.0
-        mpl.rcParams["xtick.labelsize"] = 12.0
-        mpl.rcParams["ytick.labelsize"] = 12.0
-        mpl.rcParams["legend.fontsize"] = 12.0
+        mpl.rcParams["font.size"] = 14.2
+        mpl.rcParams["axes.titlesize"] = 19.6
+        mpl.rcParams["axes.labelsize"] = 15.6
+        mpl.rcParams["xtick.labelsize"] = 13.6
+        mpl.rcParams["ytick.labelsize"] = 13.6
+        mpl.rcParams["legend.fontsize"] = 13.2
     except Exception:
         pass
 
@@ -258,24 +258,24 @@ def main() -> int:
         log_gamma_max = math.log10(gamma_max_adopted) if (math.isfinite(gamma_max_adopted) and gamma_max_adopted > 0) else float("nan")
         log_delta_adopted = math.log10(delta_adopted) if (math.isfinite(delta_adopted) and delta_adopted > 0) else float("nan")
 
-        fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(14.8, 8.8))
+        fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(15.6, 9.8))
 
         # Left: gamma
         ax0.bar(x, log_gamma, color="#1f77b4", alpha=0.9)
         # 条件分岐: `math.isfinite(log_gamma_max)` を満たす経路を評価する。
         if math.isfinite(log_gamma_max):
             ax0.axhline(log_gamma_max, color="#d62728", linestyle="--", linewidth=2.0, label=f"γ_max（δ={_fmt_sci(delta_adopted)}）")
-            ax0.legend(loc="lower right")
+            ax0.legend(loc="lower right", fontsize=14.6)
 
         ax0.set_xticks(x)
-        ax0.set_xticklabels(labels_compact, rotation=0, ha="center", fontsize=12.0)
-        ax0.set_ylabel("log10(γ_obs)  [bar height]", fontsize=15.0)
-        ax0.set_title("既存観測で到達しているローレンツ因子 γ", fontsize=19.0, pad=12.0)
+        ax0.set_xticklabels(labels_compact, rotation=0, ha="center", fontsize=14.8)
+        ax0.set_ylabel("log10(γ_obs)  [bar height]", fontsize=18.0)
+        ax0.set_title("既存観測で到達しているローレンツ因子 γ", fontsize=22.6, pad=12.0)
         ax0.grid(True, axis="y", alpha=0.25)
-        ax0.tick_params(axis="both", labelsize=12.5)
+        ax0.tick_params(axis="both", labelsize=14.8)
 
         for i, g in enumerate(gamma_vals):
-            ax0.text(i, log_gamma[i] + 0.22, f"γ≈{_fmt_sci(g, digits=1)}", ha="center", va="bottom", fontsize=11.8)
+            ax0.text(i, log_gamma[i] + 0.22, f"γ≈{_fmt_sci(g, digits=1)}", ha="center", va="bottom", fontsize=14.4)
 
         # Right: delta upper bounds
 
@@ -283,37 +283,29 @@ def main() -> int:
         # 条件分岐: `math.isfinite(log_delta_adopted)` を満たす経路を評価する。
         if math.isfinite(log_delta_adopted):
             ax1.axhline(log_delta_adopted, color="#d62728", linestyle="--", linewidth=2.0, label=f"採用δ={_fmt_sci(delta_adopted)}")
-            ax1.legend(loc="upper right")
+            ax1.legend(loc="upper right", fontsize=14.6)
 
         ax1.set_xticks(x)
-        ax1.set_xticklabels(labels_compact, rotation=0, ha="center", fontsize=12.0)
-        ax1.set_ylabel(r"log10($\delta_{\mathrm{upper}}$),  $\delta < 1/(\gamma^2-1)$", fontsize=15.0)
-        ax1.set_title("既存観測からの δ 上限（概算）", fontsize=19.0, pad=12.0)
+        ax1.set_xticklabels(labels_compact, rotation=0, ha="center", fontsize=14.8)
+        ax1.set_ylabel(r"log10($\delta_{\mathrm{upper}}$),  $\delta < 1/(\gamma^2-1)$", fontsize=18.0)
+        ax1.set_title("既存観測からの δ 上限（概算）", fontsize=22.6, pad=12.0)
         ax1.grid(True, axis="y", alpha=0.25)
-        ax1.tick_params(axis="both", labelsize=12.5)
+        ax1.tick_params(axis="both", labelsize=14.8)
 
         for i, d in enumerate(delta_uppers):
-            ax1.text(i, log_delta_upper[i] + 1.1, _fmt_sci(d, digits=1), ha="center", va="bottom", fontsize=11.8)
+            ax1.text(i, log_delta_upper[i] + 1.1, _fmt_sci(d, digits=1), ha="center", va="bottom", fontsize=14.4)
 
         # 条件分岐: `math.isfinite(log_gamma_max) and math.isfinite(log_delta_adopted)` を満たす経路を評価する。
 
         if math.isfinite(log_gamma_max) and math.isfinite(log_delta_adopted):
-            fig.suptitle("速度項の飽和 δ：既存観測との整合（P-model 差分予測）")
+            fig.suptitle("速度項の飽和 δ：既存観測との整合（P-model 差分予測）", fontsize=23.2)
             ax0.set_ylim(0, max(log_gamma_max, max(v for v in log_gamma if math.isfinite(v))) + 1.0)
             ax1.set_ylim(min(log_delta_adopted, min(v for v in log_delta_upper if math.isfinite(v))) - 5.0, 0.0)
-        fig.text(
-            0.50,
-            0.92,
-            r"変換式：$\gamma_{\mathrm{obs}} \Rightarrow \delta_{\mathrm{upper}} < 1/(\gamma_{\mathrm{obs}}^2-1)$",
-            ha="center",
-            va="center",
-            fontsize=13.0,
-            color="0.28",
-        )
-
         fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.9))
         png_path = out_dir / "delta_saturation_constraints.png"
+        pdf_path = out_dir / "delta_saturation_constraints.pdf"
         fig.savefig(png_path, dpi=220)
+        fig.savefig(pdf_path)
         plt.close(fig)
     except Exception as e:
         print(f"[warn] plot skipped: {e}")
@@ -324,6 +316,7 @@ def main() -> int:
     # 条件分岐: `isinstance(png_path, Path)` を満たす経路を評価する。
     if isinstance(png_path, Path):
         generated_paths.append(png_path)
+        generated_paths.append(pdf_path)
 
     for dst_dir in mirror_dirs:
         for src in generated_paths:
@@ -344,6 +337,7 @@ def main() -> int:
                     "csv": csv_path,
                     "json": json_path,
                     "png": (png_path if isinstance(png_path, Path) else None),
+                    "pdf": (pdf_path if isinstance(png_path, Path) else None),
                 },
                 "metrics": {
                     "delta_adopted": delta_adopted,

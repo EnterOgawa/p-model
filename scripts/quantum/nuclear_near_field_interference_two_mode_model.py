@@ -6,6 +6,10 @@ import math
 from pathlib import Path
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_load_json` の入出力契約と処理意図を定義する。
 def _load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -172,18 +176,21 @@ def main() -> None:
     # Plot
     import matplotlib.pyplot as plt
 
-    fig = plt.figure(figsize=(12.8, 5.2), dpi=160, constrained_layout=True)
+    plt.rcParams["pdf.fonttype"] = 42
+    plt.rcParams["ps.fonttype"] = 42
+
+    fig = plt.figure(figsize=(14.8, 8.2), dpi=170, constrained_layout=False)
     gs = fig.add_gridspec(1, 2, wspace=0.22)
 
     ax0 = fig.add_subplot(gs[0, 0])
     ax0.plot(rs, js, lw=2.2, color="tab:blue", label="J_E(R) (MeV)")
     ax0.axvline(r0_fm, color="0.35", lw=1.2, ls=":", alpha=0.85, label="R0")
     ax0.axhline(j_at_r0_mev, color="tab:blue", lw=1.2, ls="--", alpha=0.65, label="J_E(R0)=E_B/2")
-    ax0.set_xlabel("R (fm)")
-    ax0.set_ylabel("coupling energy J_E (MeV)")
-    ax0.set_title("Near-field interference proxy: coupling envelope")
+    ax0.set_xlabel("R (fm)", fontsize=14.6)
+    ax0.set_ylabel("coupling energy J_E (MeV)", fontsize=14.6)
+    ax0.set_title("Near-field interference proxy: coupling envelope", fontsize=15.8)
     ax0.grid(True, ls=":", lw=0.6, alpha=0.6)
-    ax0.legend(frameon=True, fontsize=9, loc="upper right")
+    ax0.legend(frameon=True, fontsize=12.2, loc="upper right")
     ax0.text(
         0.02,
         0.98,
@@ -198,19 +205,20 @@ def main() -> None:
         transform=ax0.transAxes,
         va="top",
         ha="left",
-        fontsize=9,
+        fontsize=11.8,
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.88, "edgecolor": "0.85"},
     )
+    ax0.tick_params(axis="both", labelsize=12.8)
 
     ax1 = fig.add_subplot(gs[0, 1])
     ax1.plot(rs, splits, lw=2.2, color="tab:orange", label="E_split(R)=2J_E(R)")
     ax1.axvline(r0_fm, color="0.35", lw=1.2, ls=":", alpha=0.85)
     ax1.axhline(b_mev, color="tab:orange", lw=1.2, ls="--", alpha=0.65, label="E_B at R0")
-    ax1.set_xlabel("R (fm)")
-    ax1.set_ylabel("splitting energy E_split (MeV)")
-    ax1.set_title("Binding scale from mode splitting")
+    ax1.set_xlabel("R (fm)", fontsize=14.6)
+    ax1.set_ylabel("splitting energy E_split (MeV)", fontsize=14.6)
+    ax1.set_title("Binding scale from mode splitting", fontsize=15.8)
     ax1.grid(True, ls=":", lw=0.6, alpha=0.6)
-    ax1.legend(frameon=True, fontsize=9, loc="upper right")
+    ax1.legend(frameon=True, fontsize=12.2, loc="upper right")
     ax1.text(
         0.02,
         0.02,
@@ -222,13 +230,17 @@ def main() -> None:
         transform=ax1.transAxes,
         va="bottom",
         ha="left",
-        fontsize=9,
+        fontsize=11.8,
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.88, "edgecolor": "0.85"},
     )
+    ax1.tick_params(axis="both", labelsize=12.8)
 
-    fig.suptitle("Phase 7 / Step 7.13.16: nuclear force as near-field interference (two-mode proxy)", y=1.02)
+    fig.suptitle("nuclear force as near-field interference (two-mode proxy)", y=0.965, fontsize=17.4)
+    fig.subplots_adjust(left=0.07, right=0.98, top=0.86, bottom=0.09, wspace=0.24)
 
+    out_pdf = out_dir / "nuclear_near_field_interference_two_mode_model.pdf"
     out_png = out_dir / "nuclear_near_field_interference_two_mode_model.png"
+    fig.savefig(out_pdf, bbox_inches="tight")
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
@@ -255,7 +267,7 @@ def main() -> None:
             "J_frequency_at_R0_per_s": j_freq_r0,
             "ratio_B_over_mu_c2": ratio_b_to_mu,
         },
-        "outputs": {"png": str(out_png)},
+        "outputs": {"pdf": str(out_pdf), "png": str(out_png)},
         "notes": [
             "This is a scale-indicator/proxy plot: it freezes a minimal I/F for interpreting the coupling J(R) as a near-field interference overlap envelope.",
             "The pn vs nn/pp selection (symmetry) and full falsification conditions are specified separately (ROADMAP: 7.13.16.6–7.13.16.7).",
@@ -263,6 +275,7 @@ def main() -> None:
     }
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    print(f"[ok] pdf : {out_pdf}")
     print(f"[ok] png : {out_png}")
     print(f"[ok] json: {out_json}")
 
@@ -271,4 +284,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

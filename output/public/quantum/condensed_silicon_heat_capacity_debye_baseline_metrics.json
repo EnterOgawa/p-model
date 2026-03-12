@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-01-28T10:41:35.350239+00:00",
+  "generated_utc": "2026-03-11T13:54:48.722674+00:00",
   "phase": 7,
   "step": "7.14.3",
   "inputs": {
@@ -82,8 +82,8 @@
     ]
   },
   "outputs": {
-    "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_heat_capacity_debye_baseline.csv",
-    "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_heat_capacity_debye_baseline.png"
+    "csv": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_heat_capacity_debye_baseline.csv",
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_heat_capacity_debye_baseline.png"
   },
   "notes": [
     "This is a baseline/target for Step 7.14: low-temperature Cp and a 1-parameter Debye fit (θ_D) as a compact summary.",

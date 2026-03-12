@@ -715,7 +715,8 @@ def _plot(
                 tgt2 = limits_total["opt"][label] if k == "budget_opt" else limits_total["cons"][label]
                 tgt2[f"{m}sigma"] = z_lim_total
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6.8))
+    # 図47: 横2列をやめて縦1列（2段）へ変更し、全体を拡大する。
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(15.4, 16.2))
 
     # Left: observational budget components.
     ax1.plot(sn_z, sn_sem, color="#2ca02c", linewidth=2.0, label="SNe Ia: bin平均の誤差（SEM; stat; Pantheon）")
@@ -757,13 +758,14 @@ def _plot(
     if isinstance(r_drag_budget, dict):
         ax1.axhline(rdrag_mu, color="#777777", linestyle="--", linewidth=1.2, alpha=0.7, label="r_drag校正（Planck; 1σ）")
 
-    ax1.set_title("距離指標の誤差予算（1σ; 観測の不確かさの目安）", fontsize=12)
-    ax1.set_xlabel("赤方偏移 z", fontsize=11)
-    ax1.set_ylabel("等価 |Δμ| [mag]", fontsize=11)
+    ax1.set_title("距離指標の誤差予算（1σ; 観測の不確かさの目安）", fontsize=16.4)
+    ax1.set_xlabel("赤方偏移 z", fontsize=14.2)
+    ax1.set_ylabel("等価 |Δμ| [mag]", fontsize=14.2)
+    ax1.tick_params(labelsize=12.2)
     ax1.set_xlim(0.0, float(z_max))
     ax1.set_ylim(0.0, max(0.35, float(np.nanmax(sn_med[np.isfinite(sn_med)]) if np.isfinite(sn_med).any() else 0.3) * 1.2))
     ax1.grid(True, linestyle="--", alpha=0.45)
-    ax1.legend(fontsize=9, loc="upper left")
+    ax1.legend(fontsize=11.8, loc="upper left")
 
     # Right: required correction vs budgets.
     if dm_req_bao is not None and rep_bao:
@@ -821,7 +823,7 @@ def _plot(
             float(np.nanmax(bao_z)) + 0.02,
             0.02,
             f"BAO点の最大z≈{_fmt_float(float(np.nanmax(bao_z)), digits=3)}",
-            fontsize=9,
+            fontsize=11.6,
             color="#333333",
             alpha=0.8,
         )
@@ -834,29 +836,23 @@ def _plot(
             float(sn_max_z) + 0.02,
             0.08,
             f"SNeの有効bin最大z≈{_fmt_float(float(sn_max_z), digits=3)}（n≥{int(sn_min_points)}）",
-            fontsize=9,
+            fontsize=11.6,
             color="#2ca02c",
             alpha=0.8,
         )
 
-    ax2.set_title("静的背景P最小を“隠す”のに必要な補正 vs 誤差予算", fontsize=12)
-    ax2.set_xlabel("赤方偏移 z", fontsize=11)
-    ax2.set_ylabel("等価 |Δμ| [mag]", fontsize=11)
+    ax2.set_title("静的背景P最小を“隠す”のに必要な補正 vs 誤差予算", fontsize=16.4)
+    ax2.set_xlabel("赤方偏移 z", fontsize=14.2)
+    ax2.set_ylabel("等価 |Δμ| [mag]", fontsize=14.2)
+    ax2.tick_params(labelsize=12.2)
     ax2.set_xlim(0.0, float(z_max))
     ax2.set_ylim(0.0, max(0.8, float(np.nanmax(dm_req_bao) if dm_req_bao is not None else 0.8) * 1.05))
     ax2.grid(True, linestyle="--", alpha=0.45)
-    ax2.legend(fontsize=8, loc="upper left")
+    ax2.legend(fontsize=11.6, loc="upper left")
 
-    fig.suptitle("宇宙論（距離指標の誤差予算）：観測の不確かさと“到達限界”の接続", fontsize=14)
-    fig.text(
-        0.5,
-        0.012,
-        f"Pantheon: lcparam の dmb（統計）＋ sys共分散（系統）を使用（SNeはn≥{int(sn_min_points)}のbin）。"
-        " BAO: BOSS DR12 の D_M を使用（3点; Table 8 の reduced covariance で補間誤差の目安も併記）。",
-        ha="center",
-        fontsize=10,
-    )
-    plt.tight_layout(rect=(0.0, 0.04, 1.0, 0.93))
+    fig.suptitle("宇宙論（距離指標の誤差予算）：観測の不確かさと“到達限界”の接続", fontsize=18.4)
+    # 図下注記は論文本文側へ移し、図中の重なりを回避する。
+    plt.tight_layout(rect=(0.0, 0.04, 1.0, 0.955))
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)
     plt.close(fig)

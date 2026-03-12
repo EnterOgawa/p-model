@@ -116,29 +116,36 @@ def main() -> None:
     import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots(figsize=(11.5, 6.5), dpi=150)
+    panel_title_font = 14.8
+    axis_label_font = 13.6
+    tick_font = 12.4
+    legend_font = 11.8
     for sp in specs:
         csv_path = out_dir / f"weihs1998_chsh_sweep__{sp.out_tag}.csv"
         xs, ys = _load_sweep(csv_path)
         ax.plot(xs, ys, marker="o", lw=1.8, label=f"{sp.subdir}/{sp.run}")
 
     ax.axhline(2.0, color="0.25", ls="--", lw=1.0, label="local bound |S|=2")
-    ax.set_xlabel("coincidence window half-width (ns)")
-    ax.set_ylabel("|S| (fixed CHSH variant)")
-    ax.set_title("Weihs 1998 (Zenodo 7185335): coincidence-window sensitivity across runs/subdirs")
+    ax.set_xlabel("coincidence window half-width (ns)", fontsize=axis_label_font)
+    ax.set_ylabel("|S| (fixed CHSH variant)", fontsize=axis_label_font)
+    ax.set_title("Weihs 1998 (Zenodo 7185335): coincidence-window sensitivity across runs/subdirs", fontsize=panel_title_font)
     ax.grid(True, alpha=0.3)
-    ax.legend(ncol=2, fontsize=9, frameon=True)
+    ax.legend(ncol=2, fontsize=legend_font, frameon=True)
+    ax.tick_params(axis="both", labelsize=tick_font)
     fig.tight_layout()
 
     summary_tag = str(args.summary_tag)
     out_png = out_dir / f"weihs1998_chsh_sweep_summary__{summary_tag}.png"
+    out_pdf = out_dir / f"weihs1998_chsh_sweep_summary__{summary_tag}.pdf"
     fig.savefig(out_png)
+    fig.savefig(out_pdf)
     plt.close(fig)
 
     metrics = {
         "generated_utc": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
         "dataset": "Weihs et al. 1998 time-tag (Zenodo 7185335)",
         "series": series,
-        "outputs": {"png": str(out_png)},
+        "outputs": {"png": str(out_png), "pdf": str(out_pdf)},
         "repro": {
             "fetch": "python -B scripts/quantum/fetch_weihs1998_zenodo_7185335.py  (offline cached in this repo)",
             "per_run_sweep": (
@@ -152,6 +159,7 @@ def main() -> None:
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(f"[ok] png : {out_png}")
+    print(f"[ok] pdf : {out_pdf}")
     print(f"[ok] json: {out_json}")
 
 

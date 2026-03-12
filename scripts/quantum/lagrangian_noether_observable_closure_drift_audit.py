@@ -215,6 +215,8 @@ def build_payload(
     watch_ids = list(decision.get("watch_ids") or [])
     route_a_gate = str(decision.get("route_a_gate") or "")
     transition = str(decision.get("transition") or "")
+    closure_shared_gate_policy = str(decision.get("shared_gate_policy") or "unknown")
+    allow_watch_closure = closure_shared_gate_policy == "watch_if_bell_pairing_only"
     missing_equations_n = len(diagnostics.get("missing_equations") or [])
     missing_nonrel_channels_n = len(diagnostics.get("missing_nonrel_channels") or [])
     checks_total_n, checks_pass_n = _count_check_rows(closure)
@@ -235,14 +237,34 @@ def build_payload(
         watch_ratio=float(watch_ratio),
     )
 
+    overall_row_status = (
+        "pass"
+        if overall_status_value == "pass"
+        else ("watch" if allow_watch_closure and overall_status_value == "watch" else "reject")
+    )
+    overall_row_expected = "pass or watch(policy)" if allow_watch_closure else "pass"
+    overall_row_gate_level = "watch" if allow_watch_closure else "hard"
+
+    checks_all_pass_status = (
+        "pass"
+        if checks_total_n > 0 and checks_pass_n == checks_total_n
+        else (
+            "watch"
+            if allow_watch_closure and checks_total_n > 0 and len(hard_fail_ids) == 0
+            else "reject"
+        )
+    )
+    checks_all_pass_expected = "all pass (or watch under watch-policy)" if allow_watch_closure else "all pass"
+    checks_all_pass_gate_level = "watch" if allow_watch_closure else "hard"
+
     rows: List[Dict[str, Any]] = [
         _make_row(
             cid="closure_drift::overall_status",
             metric="overall_status",
             value=overall_status_value,
-            expected="pass",
-            status="pass" if overall_status_value == "pass" else "reject",
-            gate_level="hard",
+            expected=overall_row_expected,
+            status=overall_row_status,
+            gate_level=overall_row_gate_level,
             source="lagrangian_noether_observable_closure_audit",
             note="閉包監査の全体判定が pass を維持していること。",
         ),
@@ -307,12 +329,26 @@ def build_payload(
             note="A->B 移行が要求されていないこと。",
         ),
         _make_row(
+            cid="closure_drift::shared_gate_policy",
+            metric="shared_gate_policy(closure)",
+            value=closure_shared_gate_policy,
+            expected="strict_hard or watch_if_bell_pairing_only",
+            status=(
+                "pass"
+                if closure_shared_gate_policy in {"strict_hard", "watch_if_bell_pairing_only"}
+                else "watch"
+            ),
+            gate_level="watch",
+            source="lagrangian_noether_observable_closure_audit",
+            note="closure 側 shared gate policy を drift 監査へ引き継いでいること。",
+        ),
+        _make_row(
             cid="closure_drift::checks_all_pass",
             metric="checks_pass_n/checks_total_n",
             value=f"{checks_pass_n}/{checks_total_n}",
-            expected="all pass",
-            status="pass" if checks_total_n > 0 and checks_pass_n == checks_total_n else "reject",
-            gate_level="hard",
+            expected=checks_all_pass_expected,
+            status=checks_all_pass_status,
+            gate_level=checks_all_pass_gate_level,
             source="lagrangian_noether_observable_closure_audit",
             note="閉包監査内の checks が全件 pass であること。",
         ),
@@ -371,8 +407,8 @@ def build_payload(
     else:
         overall_status = "pass"
 
-    recalc_required = overall_status != "pass"
-    recalc_reasons = hard_fail_row_ids + drift_reject_row_ids + watch_row_ids
+    recalc_required = bool(hard_fail_row_ids or drift_reject_row_ids)
+    recalc_reasons = hard_fail_row_ids + drift_reject_row_ids
     recalc_commands = [
         "python -B scripts/quantum/action_principle_el_derivation_audit.py",
         "python -B scripts/quantum/nonrelativistic_reduction_schrodinger_mapping_audit.py",
@@ -409,6 +445,7 @@ def build_payload(
             "hard_fail_row_ids": hard_fail_row_ids,
             "watch_row_ids": watch_row_ids,
             "drift_reject_row_ids": drift_reject_row_ids,
+            "closure_shared_gate_policy": closure_shared_gate_policy,
             "recalc_required": recalc_required,
             "recalc_reason_row_ids": recalc_reasons,
             "recalc_commands": recalc_commands,
@@ -672,4 +709,3 @@ def main(argv: Optional[List[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

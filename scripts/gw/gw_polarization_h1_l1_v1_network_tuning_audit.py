@@ -255,11 +255,12 @@ def _plot(rows: List[Dict[str, Any]], out_png: Path) -> None:
     # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         fig, ax = plt.subplots(1, 1, figsize=(10.0, 5.0))
-        ax.text(0.5, 0.5, "No tuning rows", ha="center", va="center", fontsize=14)
+        ax.text(0.5, 0.5, "No tuning rows", ha="center", va="center", fontsize=15.2)
         ax.axis("off")
         fig.tight_layout()
         out_png.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(out_png, dpi=200, bbox_inches="tight")
+        fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight")
         plt.close(fig)
         return
 
@@ -269,27 +270,30 @@ def _plot(rows: List[Dict[str, Any]], out_png: Path) -> None:
     status = [str(r.get("status", "")) for r in rows]
     colors = [{"pass": "#2ca02c", "watch": "#f2c744", "reject": "#d62728", "inconclusive": "#9aa0a6"}.get(_status_bucket(s), "#555555") for s in status]
 
-    fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(12.8, 8.4))
+    fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(13.2, 9.0))
     ax0.scatter(x + 0.02 * prune, y, c=colors, s=36, alpha=0.85, edgecolor="none")
     ax0.axhline(0.0, color="#666666", ls="--", lw=1.0, alpha=0.8)
-    ax0.set_xlabel("n usable events")
-    ax0.set_ylabel("scalar overlap proxy (max)")
-    ax0.set_title("Network gate tuning space")
+    ax0.set_xlabel("n usable events", fontsize=14.2)
+    ax0.set_ylabel("scalar overlap proxy (max)", fontsize=14.2)
+    ax0.set_title("Network gate tuning space", fontsize=15.4)
     ax0.grid(True, alpha=0.25)
+    ax0.tick_params(labelsize=12.4)
 
     status_order = ["pass", "watch", "reject", "inconclusive", "other"]
     counts = [sum(1 for s in status if _status_bucket(s) == k) for k in status_order]
     ax1.bar(np.arange(len(status_order)), counts, color=["#2ca02c", "#f2c744", "#d62728", "#9aa0a6", "#555555"], alpha=0.9)
     ax1.set_xticks(np.arange(len(status_order)))
     ax1.set_xticklabels(status_order)
-    ax1.set_ylabel("trial count")
-    ax1.set_title("Trial status counts")
+    ax1.set_ylabel("trial count", fontsize=14.2)
+    ax1.set_title("Trial status counts", fontsize=15.4)
     ax1.grid(True, axis="y", alpha=0.25)
+    ax1.tick_params(labelsize=12.4)
 
-    fig.suptitle("GW polarization network tuning audit (Step 8.7.32.3 next)", fontsize=14)
-    fig.tight_layout(rect=[0.02, 0.02, 0.98, 0.95])
+    fig.suptitle("GW polarization network tuning audit", fontsize=16.8)
+    fig.tight_layout(rect=[0.02, 0.02, 0.98, 0.96])
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200, bbox_inches="tight")
+    fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight")
     plt.close(fig)
 
 
@@ -456,6 +460,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_json = outdir / f"{args.prefix}.json"
     out_csv = outdir / f"{args.prefix}.csv"
     out_png = outdir / f"{args.prefix}.png"
+    out_pdf = outdir / f"{args.prefix}.pdf"
     _write_csv(out_csv, sorted_rows)
     _plot(sorted_rows, out_png)
 
@@ -498,12 +503,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "audit_json": str(out_json).replace("\\", "/"),
             "audit_csv": str(out_csv).replace("\\", "/"),
             "audit_png": str(out_png).replace("\\", "/"),
+            "audit_pdf": str(out_pdf).replace("\\", "/") if out_pdf.exists() else "",
         },
     }
     out_json.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
     copied: List[str] = []
-    for src in [out_json, out_csv, out_png]:
+    copy_sources = [out_json, out_csv, out_png]
+    if out_pdf.exists():
+        copy_sources.append(out_pdf)
+    for src in copy_sources:
         dst = public_outdir / src.name
         shutil.copy2(src, dst)
         copied.append(str(dst).replace("\\", "/"))

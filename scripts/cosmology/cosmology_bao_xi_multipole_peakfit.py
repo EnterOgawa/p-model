@@ -21,6 +21,7 @@ Phase 16（宇宙論）/ Step 16.4（BAO一次統計の再導出）:
 
 出力（固定名）:
   - output/private/cosmology/cosmology_bao_xi_multipole_peakfit.png
+  - output/private/cosmology/cosmology_bao_xi_multipole_peakfit.pdf
   - output/private/cosmology/cosmology_bao_xi_multipole_peakfit_metrics.json
 """
 
@@ -29,6 +30,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import shutil
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -1096,22 +1098,24 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
+    out_pub_dir = _ROOT / "output" / "public" / "cosmology"
+    out_pub_dir.mkdir(parents=True, exist_ok=True)
     suffix = "" if dataset == "ross_post" else "_pre_recon"
     out_png = out_dir / f"cosmology_bao_xi_multipole_peakfit{suffix}.png"
+    out_pdf = out_dir / f"cosmology_bao_xi_multipole_peakfit{suffix}.pdf"
     out_json = out_dir / f"cosmology_bao_xi_multipole_peakfit{suffix}_metrics.json"
 
     # Plot
     _set_japanese_font()
     import matplotlib.pyplot as plt
 
-    fig, axes = plt.subplots(len(curves_for_plot), 2, figsize=(16, 4.8 * len(curves_for_plot)), sharex=True)
-    # 条件分岐: `len(curves_for_plot) == 1` を満たす経路を評価する。
-    if len(curves_for_plot) == 1:
-        axes = np.array(axes).reshape(1, 2)
+    n_pack = len(curves_for_plot)
+    fig, axes = plt.subplots(2 * n_pack, 1, figsize=(13.8, 7.4 * n_pack), dpi=210, sharex=False)
+    axes = np.atleast_1d(axes).reshape(-1)
 
     for row, pack in enumerate(curves_for_plot):
-        ax0 = axes[row, 0]
-        ax2 = axes[row, 1]
+        ax0 = axes[2 * row]
+        ax2 = axes[2 * row + 1]
 
         # Monopole
         ax0.errorbar(
@@ -1128,9 +1132,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         ax0.plot(pack["s_grid"], pack["xi0_free"], color="#1f77b4", linewidth=2.0, label="fit: α,ε free")
         ax0.plot(pack["s_grid"], pack["xi0_eps0"], color="#777777", linewidth=1.6, linestyle="--", label="fit: ε=0")
         ax0.plot(pack["s_grid"], pack["xi0_pbg"], color="#ff7f0e", linewidth=1.8, linestyle="--", label="fit: ε=ε(P_bg)")
-        ax0.set_ylabel("ξ0", fontsize=11)
+        ax0.set_ylabel("ξ0", fontsize=13.4)
         ax0.grid(True, linestyle="--", alpha=0.5)
-        ax0.set_title(f"ξ0（{pack['label']}）", fontsize=12)
+        ax0.set_title(f"ξ0（{pack['label']}）", fontsize=15.2)
+        ax0.tick_params(labelsize=12.0)
 
         # Quadrupole
         ax2.errorbar(
@@ -1147,9 +1152,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         ax2.plot(pack["s_grid"], pack["xi2_free"], color="#1f77b4", linewidth=2.0, label="fit: α,ε free")
         ax2.plot(pack["s_grid"], pack["xi2_eps0"], color="#777777", linewidth=1.6, linestyle="--", label="fit: ε=0")
         ax2.plot(pack["s_grid"], pack["xi2_pbg"], color="#ff7f0e", linewidth=1.8, linestyle="--", label="fit: ε=ε(P_bg)")
-        ax2.set_ylabel("ξ2", fontsize=11)
+        ax2.set_ylabel("ξ2", fontsize=13.4)
         ax2.grid(True, linestyle="--", alpha=0.5)
-        ax2.set_title(f"ξ2（{pack['label']}）", fontsize=12)
+        ax2.set_title(f"ξ2（{pack['label']}）", fontsize=15.2)
+        ax2.tick_params(labelsize=12.0)
 
         # Annotation box (use the quadrupole panel; focus on anisotropy)
         ann = pack["fit_annot"]
@@ -1171,28 +1177,22 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             transform=ax2.transAxes,
             ha="left",
             va="top",
-            fontsize=9,
+            fontsize=11.0,
             bbox=dict(boxstyle="round,pad=0.35", fc="white", ec="#999999", alpha=0.92),
         )
 
         # 条件分岐: `row == 0` を満たす経路を評価する。
         if row == 0:
-            ax0.legend(fontsize=9, loc="upper right")
-            ax2.legend(fontsize=9, loc="upper right")
+            ax0.legend(fontsize=11.4, loc="upper right")
+            ax2.legend(fontsize=11.4, loc="upper right")
 
-    for ax in axes[-1, :]:
-        ax.set_xlabel("分離 r [Mpc/h]（fid）", fontsize=11)
+        ax2.set_xlabel("分離 r [Mpc/h]（fid）", fontsize=13.2)
 
-    fig.suptitle("宇宙論（BAO一次統計）：BOSS DR12 post-recon ξℓ（ℓ=0,2）のピークfit（smooth+peak）", fontsize=14)
-    fig.text(
-        0.5,
-        0.01,
-        "注：これは圧縮出力（D_M/r_d 等）ではなく ξℓ からの“入口”であり、再導出（ξ(s,μ)/P(k)）の本番は次工程。",
-        ha="center",
-        fontsize=10,
-    )
-    plt.tight_layout(rect=(0.0, 0.03, 1.0, 0.94))
+    fig.suptitle("宇宙論（BAO一次統計）：BOSS DR12 post-recon ξℓ（ℓ=0,2）のピークfit（smooth+peak）", fontsize=17.0)
+    # 図下注記は論文本文側へ移し、図中の重なりを回避する。
+    plt.tight_layout(rect=(0.0, 0.03, 1.0, 0.955))
     fig.savefig(out_png, dpi=200)
+    fig.savefig(out_pdf)
     plt.close(fig)
 
     payload: Dict[str, Any] = {
@@ -1218,12 +1218,22 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "mono-only / quad-only χ² は cross-cov を無視した粗い指標（ℓ=2強調の目安）。",
         ],
         "results": results,
-        "outputs": {"png": str(out_png).replace("\\", "/"), "metrics_json": str(out_json).replace("\\", "/")},
+        "outputs": {
+            "png": str(out_png).replace("\\", "/"),
+            "pdf": str(out_pdf).replace("\\", "/"),
+            "metrics_json": str(out_json).replace("\\", "/"),
+        },
     }
     out_json.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    shutil.copy2(out_png, out_pub_dir / out_png.name)
+    shutil.copy2(out_pdf, out_pub_dir / out_pdf.name)
+    shutil.copy2(out_json, out_pub_dir / out_json.name)
+
     print(f"[ok] png : {out_png}")
+    print(f"[ok] pdf : {out_pdf}")
     print(f"[ok] json: {out_json}")
+    print(f"[ok] public copies: {out_pub_dir}")
 
     try:
         worklog.append_event(
@@ -1231,7 +1241,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "event_type": "cosmology_bao_xi_multipole_peakfit" if dataset == "ross_post" else "cosmology_bao_xi_multipole_peakfit_pre_recon",
                 "argv": list(sys.argv),
                 "inputs": {"dataset": dataset, "data_dir": data_dir, "bincent": bincent, "z_bins": [z.zbin for z in z_meta]},
-                "outputs": {"png": out_png, "metrics_json": out_json},
+                "outputs": {"png": out_png, "pdf": out_pdf, "metrics_json": out_json},
                 "metrics": {"range_mpc_h": [r_min, r_max], "mu_n": mu_n},
             }
         )

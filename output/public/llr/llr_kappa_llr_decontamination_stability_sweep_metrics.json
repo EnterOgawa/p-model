@@ -1,0 +1,57 @@
+{
+  "generated_utc": "2026-03-07T10:26:47.028999+00:00",
+  "phase": {
+    "step": "8.7.47.18"
+  },
+  "input": {
+    "points_csv": "output/private/llr/batch/llr_batch_points.csv",
+    "n_inlier_points": 13079,
+    "fit_modes": [
+      "station_target_year",
+      "station_target",
+      "station",
+      "none"
+    ],
+    "weight_schemes": [
+      "uniform",
+      "inv_station",
+      "inv_target",
+      "inv_station_target",
+      "station_cap_p95"
+    ],
+    "min_orth_std_values": [
+      1e-08,
+      1e-06,
+      0.0001
+    ],
+    "weight_floor": {
+      "station": 180,
+      "target": 180,
+      "station_target": 120
+    },
+    "max_weight_cap": 8.0
+  },
+  "summary": {
+    "n_runs": 60,
+    "n_pairwise": 1770,
+    "beta_min": 1.0006742979447485,
+    "beta_max": 1.0010274679514541,
+    "beta_span": 0.0003531700067056498,
+    "beta_median": 1.0007860854678488,
+    "beta_sigma_median": 0.0007925879696265612,
+    "max_abs_z_beta_minus_1": 1.3916112562587943,
+    "max_abs_z_pairwise": 0.2915069934758609,
+    "span_status": "pass",
+    "pairwise_status": "pass",
+    "beta_minus_1_status": "pass",
+    "decontamination_shift_status": "reject",
+    "stability_status": "pass",
+    "status": "reject"
+  },
+  "outputs": {
+    "sweep_csv": "output/private/llr/llr_kappa_llr_decontamination_stability_sweep.csv",
+    "pairwise_csv": "output/private/llr/llr_kappa_llr_decontamination_pairwise_z.csv",
+    "plot_pdf": "output/private/llr/llr_kappa_llr_decontamination_stability_sweep.pdf",
+    "plot_png": "output/private/llr/llr_kappa_llr_decontamination_stability_sweep.png"
+  }
+}

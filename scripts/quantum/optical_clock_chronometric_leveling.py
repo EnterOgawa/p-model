@@ -8,6 +8,10 @@ from pathlib import Path
 import numpy as np
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # クラス: `Config` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Config:
@@ -83,11 +87,17 @@ def main() -> None:
         ecolor="#1f77b4",
         label="ΔU (m²/s²)",
     )
+    tick_font = 12.4
+    axis_label_font = 13.6
+    panel_title_font = 14.8
+    legend_font = 11.8
+    note_font = 11.2
     ax.set_xticks(x)
-    ax.set_xticklabels(labels)
-    ax.set_ylabel("geopotential difference ΔU (m²/s²)")
-    ax.set_title("Optical clock chronometric leveling (arXiv:2309.14953v3; 87Sr)")
+    ax.set_xticklabels(labels, fontsize=tick_font)
+    ax.set_ylabel("geopotential difference ΔU (m²/s²)", fontsize=axis_label_font)
+    ax.set_title("Optical clock chronometric leveling (arXiv:2309.14953v3; 87Sr)", fontsize=panel_title_font)
     ax.grid(True, ls=":", lw=0.6, alpha=0.7)
+    ax.tick_params(axis="y", labelsize=tick_font)
 
     ax.text(
         0.02,
@@ -100,17 +110,19 @@ def main() -> None:
             f"σ_clock ≈ {height_sigma_m*100:.0f} cm (height-equivalent)"
         ),
         transform=ax.transAxes,
-        fontsize=9,
+        fontsize=note_font,
         va="bottom",
         ha="left",
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.85, "edgecolor": "0.8"},
     )
 
-    ax.legend(loc="upper right", fontsize=9, frameon=True)
+    ax.legend(loc="upper right", fontsize=legend_font, frameon=True)
     fig.tight_layout()
 
     out_png = out_dir / "optical_clock_chronometric_leveling.png"
+    out_pdf = out_dir / "optical_clock_chronometric_leveling.pdf"
     fig.savefig(out_png, bbox_inches="tight")
+    fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
 
     local_pdf = root / "data" / "quantum" / "sources" / "arxiv_2309.14953v3.pdf"
@@ -142,7 +154,7 @@ def main() -> None:
             "sigma_epsilon": sigma_epsilon,
             "height_sigma_m": height_sigma_m,
         },
-        "outputs": {"png": str(out_png)},
+        "outputs": {"png": str(out_png), "pdf": str(out_pdf)},
         "notes": [
             "This script treats the geodetic determination of ΔU as the reference and infers epsilon from the clock-derived ΔU.",
             "P-model (stationary clocks) predicts the same leading redshift relation Δf/f ≈ ΔU/c^2 in the weak field.",
@@ -152,6 +164,7 @@ def main() -> None:
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(f"[ok] png : {out_png}")
+    print(f"[ok] pdf : {out_pdf}")
     print(f"[ok] json: {out_json}")
 
 
@@ -159,4 +172,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

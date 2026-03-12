@@ -1,0 +1,393 @@
+{
+  "generated_utc": "2026-03-07T01:40:03.769631+00:00",
+  "session": "17MAY30XA",
+  "status": "pass",
+  "method": {
+    "description": "drop-one decomposition on all-source mask using same direct-fit nuisance mode",
+    "nuisance_mode": "baseline_intercept_linear",
+    "observable_series": "full",
+    "source_filter_selected": [
+      "0229+131",
+      "0235+164"
+    ]
+  },
+  "counts": {
+    "n_common_raw": 8763,
+    "n_points_all": 7405,
+    "n_points_selected": 325,
+    "n_points_added_by_filter": 7080
+  },
+  "baseline_fit": {
+    "all": {
+      "n_points": 7405,
+      "beta_est": 16.57005778933022,
+      "beta_sigma": 0.7229921805077375,
+      "delta_beta": 15.570057789330221,
+      "chi2": 26318597442.66447,
+      "dof": 7283,
+      "weighted_rmse_s": 1.2884077561632139e-08,
+      "n_params": 122,
+      "nuisance_info": {
+        "requested_mode": "baseline_intercept_linear",
+        "effective_mode": "baseline_intercept_linear",
+        "baseline_groups": 61,
+        "nuisance_columns": 120,
+        "baseline_variable": {
+          "name": "Baseline",
+          "file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\17MAY30XA\\extracted\\17MAY30XA\\Observables\\Baseline.nc"
+        },
+        "time_variable": {
+          "ymdhm_name": "YMDHM",
+          "ymdhm_file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\17MAY30XA\\extracted\\17MAY30XA\\Observables\\TimeUTC.nc",
+          "second_name": "Second",
+          "second_file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\17MAY30XA\\extracted\\17MAY30XA\\Observables\\TimeUTC.nc"
+        }
+      }
+    },
+    "selected": {
+      "n_points": 325,
+      "beta_est": 17.865628772686303,
+      "beta_sigma": 43.444271464780705,
+      "delta_beta": 16.865628772686303,
+      "chi2": 2197240388.574562,
+      "dof": 223,
+      "weighted_rmse_s": 1.1648255728585127e-08,
+      "n_params": 102,
+      "nuisance_info": {
+        "requested_mode": "baseline_intercept_linear",
+        "effective_mode": "baseline_intercept_linear",
+        "baseline_groups": 51,
+        "nuisance_columns": 100,
+        "baseline_variable": {
+          "name": "Baseline",
+          "file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\17MAY30XA\\extracted\\17MAY30XA\\Observables\\Baseline.nc"
+        },
+        "time_variable": {
+          "ymdhm_name": "YMDHM",
+          "ymdhm_file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\17MAY30XA\\extracted\\17MAY30XA\\Observables\\TimeUTC.nc",
+          "second_name": "Second",
+          "second_file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\17MAY30XA\\extracted\\17MAY30XA\\Observables\\TimeUTC.nc"
+        }
+      }
+    },
+    "delta_beta_all_minus_selected": -1.2955709833560825,
+    "sigma_combined_delta_beta": 43.450287004790134,
+    "abs_z_delta_beta": 0.02981731704587483
+  },
+  "decomposition_summary": {
+    "max_abs_z_component": 4.666579337354569,
+    "max_abs_impact_component": 5.0172397671959565,
+    "watch_clear_gate": "pass when abs_z_delta_beta <= 2.0 (same as source-filter sensitivity gate)"
+  },
+  "components": {
+    "source": [
+      {
+        "group_type": "source",
+        "group_label": "0059+581",
+        "n_removed": 569,
+        "beta_drop": 16.983145611520563,
+        "beta_drop_sigma": 0.7439340724205072,
+        "impact_beta_all_minus_drop": -0.41308782219034157,
+        "sigma_combined": 1.0373791964289112,
+        "abs_z_impact": 0.39820330271935367
+      },
+      {
+        "group_type": "source",
+        "group_label": "3C418",
+        "n_removed": 565,
+        "beta_drop": 16.56878712274556,
+        "beta_drop_sigma": 0.7288699960240802,
+        "impact_beta_all_minus_drop": 0.0012706665846593523,
+        "sigma_combined": 1.0266300035453257,
+        "abs_z_impact": 0.0012377064573130337
+      },
+      {
+        "group_type": "source",
+        "group_label": "0202+319",
+        "n_removed": 560,
+        "beta_drop": 18.863706146927075,
+        "beta_drop_sigma": 0.7907020404028811,
+        "impact_beta_all_minus_drop": -2.2936483575968545,
+        "sigma_combined": 1.0714137435055666,
+        "abs_z_impact": 2.1407680940252356
+      },
+      {
+        "group_type": "source",
+        "group_label": "OJ287",
+        "n_removed": 551,
+        "beta_drop": 11.552818022134264,
+        "beta_drop_sigma": 0.8638456128462371,
+        "impact_beta_all_minus_drop": 5.0172397671959565,
+        "sigma_combined": 1.1264754484270945,
+        "abs_z_impact": 4.453927313020061
+      },
+      {
+        "group_type": "source",
+        "group_label": "0955+476",
+        "n_removed": 393,
+        "beta_drop": 16.22035706408306,
+        "beta_drop_sigma": 0.7447779892242021,
+        "impact_beta_all_minus_drop": 0.34970072524716045,
+        "sigma_combined": 1.0379845597638622,
+        "abs_z_impact": 0.3369035906725974
+      },
+      {
+        "group_type": "source",
+        "group_label": "0017+200",
+        "n_removed": 370,
+        "beta_drop": 16.559192715805267,
+        "beta_drop_sigma": 0.7084624258877839,
+        "impact_beta_all_minus_drop": 0.010865073524954028,
+        "sigma_combined": 1.012243400556475,
+        "abs_z_impact": 0.010733657062106817
+      },
+      {
+        "group_type": "source",
+        "group_label": "0727-115",
+        "n_removed": 369,
+        "beta_drop": 15.948963199481215,
+        "beta_drop_sigma": 2.7050545483060683e-15,
+        "impact_beta_all_minus_drop": 0.6210945898490063,
+        "sigma_combined": 0.7229921805077375,
+        "abs_z_impact": 0.859061282533967
+      },
+      {
+        "group_type": "source",
+        "group_label": "0454-234",
+        "n_removed": 364,
+        "beta_drop": 16.194368388654322,
+        "beta_drop_sigma": 0.7452133880139232,
+        "impact_beta_all_minus_drop": 0.37568940067589907,
+        "sigma_combined": 1.0382970127812767,
+        "abs_z_impact": 0.361832304293685
+      },
+      {
+        "group_type": "source",
+        "group_label": "1751+288",
+        "n_removed": 358,
+        "beta_drop": 16.886439750699516,
+        "beta_drop_sigma": 0.0,
+        "impact_beta_all_minus_drop": -0.3163819613692951,
+        "sigma_combined": 0.7229921805077375,
+        "abs_z_impact": 0.4376008066188333
+      },
+      {
+        "group_type": "source",
+        "group_label": "1123+264",
+        "n_removed": 210,
+        "beta_drop": 16.51705640134147,
+        "beta_drop_sigma": 0.0,
+        "impact_beta_all_minus_drop": 0.05300138798875054,
+        "sigma_combined": 0.7229921805077375,
+        "abs_z_impact": 0.07330838343442266
+      },
+      {
+        "group_type": "source",
+        "group_label": "1849+670",
+        "n_removed": 210,
+        "beta_drop": 16.55702404366232,
+        "beta_drop_sigma": 0.7355657215781218,
+        "impact_beta_all_minus_drop": 0.013033745667900831,
+        "sigma_combined": 1.0313945044628055,
+        "abs_z_impact": 0.012637012909710399
+      },
+      {
+        "group_type": "source",
+        "group_label": "2318+049",
+        "n_removed": 176,
+        "beta_drop": 16.49578815460567,
+        "beta_drop_sigma": 0.732166264026347,
+        "impact_beta_all_minus_drop": 0.07426963472455128,
+        "sigma_combined": 1.0289728525348136,
+        "abs_z_impact": 0.07217842000553507
+      }
+    ],
+    "baseline": [
+      {
+        "group_type": "baseline",
+        "group_label": "HOBART12-YARRA12M",
+        "n_removed": 330,
+        "beta_drop": 16.512091563232534,
+        "beta_drop_sigma": 0.7403239158976156,
+        "impact_beta_all_minus_drop": 0.05796622609768676,
+        "sigma_combined": 1.0347933095673323,
+        "abs_z_impact": 0.056017202239086364
+      },
+      {
+        "group_type": "baseline",
+        "group_label": "KATH12M-YARRA12M",
+        "n_removed": 288,
+        "beta_drop": 16.53906038375858,
+        "beta_drop_sigma": 0.7367942445761528,
+        "impact_beta_all_minus_drop": 0.030997405571639547,
+        "sigma_combined": 1.032271016698559,
+        "abs_z_impact": 0.030028359868880566
+      },
+      {
+        "group_type": "baseline",
+        "group_label": "ISHIOKA-KOKEE",
+        "n_removed": 267,
+        "beta_drop": 16.930677468570543,
+        "beta_drop_sigma": 0.7526482574387141,
+        "impact_beta_all_minus_drop": -0.36061967924032245,
+        "sigma_combined": 1.0436460571002344,
+        "abs_z_impact": 0.34553829508282
+      },
+      {
+        "group_type": "baseline",
+        "group_label": "ISHIOKA-NYALES20",
+        "n_removed": 266,
+        "beta_drop": 16.461056841855957,
+        "beta_drop_sigma": 0.748271337510521,
+        "impact_beta_all_minus_drop": 0.10900094747426436,
+        "sigma_combined": 1.0404939632766337,
+        "abs_z_impact": 0.1047588465876419
+      },
+      {
+        "group_type": "baseline",
+        "group_label": "HOBART12-KATH12M",
+        "n_removed": 270,
+        "beta_drop": 16.601073289743177,
+        "beta_drop_sigma": 2.8150590635620732e-15,
+        "impact_beta_all_minus_drop": -0.031015500412955532,
+        "sigma_combined": 0.7229921805077375,
+        "abs_z_impact": 0.04289880478537707
+      },
+      {
+        "group_type": "baseline",
+        "group_label": "NYALES20-WETTZ13N",
+        "n_removed": 267,
+        "beta_drop": 16.42926373172927,
+        "beta_drop_sigma": 0.7416881419839861,
+        "impact_beta_all_minus_drop": 0.14079405760094943,
+        "sigma_combined": 1.0357697586988097,
+        "abs_z_impact": 0.1359318095730296
+      },
+      {
+        "group_type": "baseline",
+        "group_label": "MATERA-WETTZ13N",
+        "n_removed": 252,
+        "beta_drop": 16.557431174839245,
+        "beta_drop_sigma": 0.7360192351094444,
+        "impact_beta_all_minus_drop": 0.012626614490976351,
+        "sigma_combined": 1.0317179883700898,
+        "abs_z_impact": 0.012238435922711692
+      },
+      {
+        "group_type": "baseline",
+        "group_label": "ISHIOKA-SEJONG",
+        "n_removed": 245,
+        "beta_drop": 16.565387088701847,
+        "beta_drop_sigma": 0.7352055502794136,
+        "impact_beta_all_minus_drop": 0.004670700628373936,
+        "sigma_combined": 1.0311376698758454,
+        "abs_z_impact": 0.004529657644004329
+      },
+      {
+        "group_type": "baseline",
+        "group_label": "KOKEE-NYALES20",
+        "n_removed": 235,
+        "beta_drop": 15.946430473718927,
+        "beta_drop_sigma": 0.0,
+        "impact_beta_all_minus_drop": 0.6236273156112944,
+        "sigma_combined": 0.7229921805077375,
+        "abs_z_impact": 0.8625643989307575
+      },
+      {
+        "group_type": "baseline",
+        "group_label": "MATERA-NYALES20",
+        "n_removed": 232,
+        "beta_drop": 16.476440652974524,
+        "beta_drop_sigma": 2.8593727068223098e-15,
+        "impact_beta_all_minus_drop": 0.09361713635569657,
+        "sigma_combined": 0.7229921805077375,
+        "abs_z_impact": 0.12948568308159547
+      },
+      {
+        "group_type": "baseline",
+        "group_label": "MATERA-WETTZELL",
+        "n_removed": 211,
+        "beta_drop": 16.542776337285694,
+        "beta_drop_sigma": 0.0,
+        "impact_beta_all_minus_drop": 0.02728145204452659,
+        "sigma_combined": 0.7229921805077375,
+        "abs_z_impact": 0.03773409004972582
+      },
+      {
+        "group_type": "baseline",
+        "group_label": "NYALES20-WETTZELL",
+        "n_removed": 199,
+        "beta_drop": 16.478203230648198,
+        "beta_drop_sigma": 0.7467908147023516,
+        "impact_beta_all_minus_drop": 0.09185455868202297,
+        "sigma_combined": 1.0394297542398596,
+        "abs_z_impact": 0.08837014556043442
+      }
+    ],
+    "time_quartile": [
+      {
+        "group_type": "time_quartile",
+        "group_label": "Q1",
+        "n_removed": 1862,
+        "beta_drop": 20.56557568586628,
+        "beta_drop_sigma": 0.9007536399580601,
+        "impact_beta_all_minus_drop": -3.9955178965360574,
+        "sigma_combined": 1.155021563856289,
+        "abs_z_impact": 3.45925826977304
+      },
+      {
+        "group_type": "time_quartile",
+        "group_label": "Q2",
+        "n_removed": 1851,
+        "beta_drop": 20.30102847867262,
+        "beta_drop_sigma": 0.8862353939369282,
+        "impact_beta_all_minus_drop": -3.7309706893423993,
+        "sigma_combined": 1.1437354880136732,
+        "abs_z_impact": 3.2620922656006597
+      },
+      {
+        "group_type": "time_quartile",
+        "group_label": "Q3",
+        "n_removed": 1849,
+        "beta_drop": 13.196157418703889,
+        "beta_drop_sigma": 2.5481562401775807e-15,
+        "impact_beta_all_minus_drop": 3.373900370626332,
+        "sigma_combined": 0.7229921805077375,
+        "abs_z_impact": 4.666579337354569
+      },
+      {
+        "group_type": "time_quartile",
+        "group_label": "Q4",
+        "n_removed": 1843,
+        "beta_drop": 17.23368397603113,
+        "beta_drop_sigma": 0.6846615535688949,
+        "impact_beta_all_minus_drop": -0.6636261867009097,
+        "sigma_combined": 0.9957304534916593,
+        "abs_z_impact": 0.6664717187003948
+      }
+    ]
+  },
+  "nuisance_context": {
+    "baseline_variable": {
+      "name": "Baseline",
+      "file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\17MAY30XA\\extracted\\17MAY30XA\\Observables\\Baseline.nc"
+    },
+    "source_variable": {
+      "name": "Source",
+      "file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\17MAY30XA\\extracted\\17MAY30XA\\Observables\\Source.nc"
+    },
+    "time_variable": {
+      "ymdhm_name": "YMDHM",
+      "ymdhm_file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\17MAY30XA\\extracted\\17MAY30XA\\Observables\\TimeUTC.nc",
+      "second_name": "Second",
+      "second_file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\17MAY30XA\\extracted\\17MAY30XA\\Observables\\TimeUTC.nc"
+    }
+  },
+  "outputs": {
+    "summary_csv": "C:\\develop\\waveP\\output\\vlbi\\vlbi_17may30xa_beta_source_filter_decomposition_summary.csv",
+    "components_csv": "C:\\develop\\waveP\\output\\vlbi\\vlbi_17may30xa_beta_source_filter_decomposition_components.csv",
+    "metrics_json": "C:\\develop\\waveP\\output\\vlbi\\vlbi_17may30xa_beta_source_filter_decomposition_metrics.json",
+    "plot_pdf": "C:\\develop\\waveP\\output\\vlbi\\vlbi_17may30xa_beta_source_filter_decomposition.pdf",
+    "plot_png": "C:\\develop\\waveP\\output\\vlbi\\vlbi_17may30xa_beta_source_filter_decomposition.png"
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-20T12:39:04.959049+00:00",
+  "generated_utc": "2026-03-04T11:28:54.360842+00:00",
   "source": {
     "paper_md": "doc/paper/12_part3_quantum.md"
   },
@@ -19,8 +19,65 @@
     "note": "INTERNAL_ONLY blocks are excluded (publish mode behavior)."
   },
   "summary": {
-    "sections_scanned": 28,
-    "missing_sections": 0
+    "sections_scanned": 7,
+    "missing_sections": 3
   },
-  "missing_by_category": {}
+  "missing_by_category": {
+    "熱": [
+      {
+        "section": "5.5.1",
+        "title": "BBN（He-4 25%）の最小導出：背景P熱史 → 凍結 → 質量比",
+        "heading_line": 3155,
+        "category": "熱",
+        "missing": [
+          "Statistic",
+          "Reject",
+          "Output"
+        ],
+        "found": {
+          "Input": true,
+          "Frozen": true,
+          "Statistic": false,
+          "Reject": false,
+          "Output": false
+        }
+      }
+    ],
+    "未分類": [
+      {
+        "section": "5.5.2",
+        "title": "BBN の multi-isotope 監査ゲート（D/H, He-3/He-4, Li-7）",
+        "heading_line": 3308,
+        "category": "未分類",
+        "missing": [
+          "Statistic",
+          "Output"
+        ],
+        "found": {
+          "Input": true,
+          "Frozen": true,
+          "Statistic": false,
+          "Reject": true,
+          "Output": false
+        }
+      },
+      {
+        "section": "5.5.3",
+        "title": "P_μ による V-A 結合の必然性（壁2）",
+        "heading_line": 3386,
+        "category": "未分類",
+        "missing": [
+          "Statistic",
+          "Output"
+        ],
+        "found": {
+          "Input": true,
+          "Frozen": true,
+          "Statistic": false,
+          "Reject": true,
+          "Output": false
+        }
+      }
+    ]
+  }
 }

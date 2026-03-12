@@ -494,49 +494,105 @@ def _plot(
     delay_gamma = delay.gamma_over_h_sorted_desc[::-1]
     delay_dlnh = delay.dlnh_dlnasorted_desc[::-1]
 
-    fig, axes = plt.subplots(1, 3, figsize=(18.0, 5.4), dpi=160)
+    # 図44: 横2列を廃止し、縦1列3段へ変更して全体を拡大する。
+    fig = plt.figure(figsize=(14.4, 18.2), dpi=170)
+    grid = fig.add_gridspec(3, 1, height_ratios=[1.0, 1.0, 1.08], hspace=0.34)
+    ax_friction = fig.add_subplot(grid[0, 0])
+    ax_fs8 = fig.add_subplot(grid[1, 0])
+    ax_growth = fig.add_subplot(grid[2, 0])
 
-    axes[0].plot(z_asc, delay_dlnh, marker="o", color="#4c78a8", label="dlnH_eff/dln a_eff")
-    axes[0].plot(z_asc, delay_gamma, marker="s", color="#f58518", label="Γ_eff/H_eff (delay)")
-    axes[0].axhline(0.0, color="#888", linestyle="--", linewidth=1.0)
-    axes[0].set_title("実効摩擦項の創発（無次元）")
-    axes[0].set_xlabel("z")
-    axes[0].set_ylabel("coefficient")
-    axes[0].grid(True, alpha=0.25)
-    axes[0].legend(loc="best", fontsize=9)
-
-    axes[1].errorbar(z_obs, fs8_obs, yerr=sig_obs, fmt="o", color="#111111", capsize=3, label="BOSS DR12 fσ8")
-    axes[1].plot(z_asc, delay_fs8, marker="o", color="#2ca02c", label="P-model delay branch")
-    axes[1].plot(z_asc, instant_fs8, marker="^", color="#d62728", label="instant branch (τ_eff=0)")
-    axes[1].set_title("fσ8(z): 観測 vs 写像")
-    axes[1].set_xlabel("z")
-    axes[1].set_ylabel("fσ8")
-    axes[1].grid(True, alpha=0.25)
-    axes[1].legend(loc="best", fontsize=9)
-
-    axes[2].plot(z_asc, delay_f, marker="o", color="#1f77b4", label="f=dlnD/dln a_eff (delay)")
-    axes[2].plot(z_asc, instant_f, marker="^", color="#ff7f0e", label="f (instant)")
-    axes[2].set_title("成長率 f のスケーリング")
-    axes[2].set_xlabel("z")
-    axes[2].set_ylabel("f")
-    axes[2].grid(True, alpha=0.25)
-    axes[2].legend(loc="best", fontsize=9)
-
-    fig.suptitle("Step 8.7.18.2: fσ8 growth mapping with delayed P response")
-    fig.text(
-        0.01,
-        -0.02,
-        (
-            f"tau_eff={tau_eff_gyr:.6f} Gyr, "
-            f"chi2/dof(delay)={delay.chi2:.3f}/{delay.dof}, "
-            f"chi2/dof(instant)={instant.chi2:.3f}/{instant.dof}"
-        ),
-        fontsize=9,
-        va="top",
+    ax_friction.plot(
+        z_asc,
+        delay_dlnh,
+        marker="o",
+        markersize=8.6,
+        linewidth=2.4,
+        color="#4c78a8",
+        label="dlnH_eff/dln a_eff",
     )
-    fig.tight_layout()
+    ax_friction.plot(
+        z_asc,
+        delay_gamma,
+        marker="s",
+        markersize=8.2,
+        linewidth=2.4,
+        color="#f58518",
+        label="Γ_eff/H_eff (delay)",
+    )
+    ax_friction.axhline(0.0, color="#888", linestyle="--", linewidth=1.2)
+    ax_friction.set_title("実効摩擦項の創発（無次元）", fontsize=17.8)
+    ax_friction.set_xlabel("z", fontsize=15.8)
+    ax_friction.set_ylabel("coefficient", fontsize=15.8)
+    ax_friction.tick_params(labelsize=13.8)
+    ax_friction.grid(True, alpha=0.28)
+    ax_friction.legend(loc="best", fontsize=14.2)
+
+    ax_fs8.errorbar(
+        z_obs,
+        fs8_obs,
+        yerr=sig_obs,
+        fmt="o",
+        markersize=8.0,
+        color="#111111",
+        capsize=4,
+        label="BOSS DR12 fσ8",
+    )
+    ax_fs8.plot(
+        z_asc,
+        delay_fs8,
+        marker="o",
+        markersize=8.6,
+        linewidth=2.4,
+        color="#2ca02c",
+        label="P-model delay branch",
+    )
+    ax_fs8.plot(
+        z_asc,
+        instant_fs8,
+        marker="^",
+        markersize=8.2,
+        linewidth=2.4,
+        color="#d62728",
+        label="instant branch (τ_eff=0)",
+    )
+    ax_fs8.set_title("fσ8(z): 観測 vs 写像", fontsize=17.8)
+    ax_fs8.set_xlabel("z", fontsize=15.8)
+    ax_fs8.set_ylabel("fσ8", fontsize=15.8)
+    ax_fs8.tick_params(labelsize=13.8)
+    ax_fs8.grid(True, alpha=0.28)
+    ax_fs8.legend(loc="best", fontsize=14.2)
+
+    ax_growth.plot(
+        z_asc,
+        delay_f,
+        marker="o",
+        markersize=8.6,
+        linewidth=2.5,
+        color="#1f77b4",
+        label="f=dlnD/dln a_eff (delay)",
+    )
+    ax_growth.plot(
+        z_asc,
+        instant_f,
+        marker="^",
+        markersize=8.2,
+        linewidth=2.5,
+        color="#ff7f0e",
+        label="f (instant)",
+    )
+    ax_growth.set_title("成長率 f のスケーリング", fontsize=17.8)
+    ax_growth.set_xlabel("z", fontsize=15.8)
+    ax_growth.set_ylabel("f", fontsize=15.8)
+    ax_growth.tick_params(labelsize=13.8)
+    ax_growth.grid(True, alpha=0.28)
+    ax_growth.legend(loc="best", fontsize=14.2)
+
+    fig.suptitle("Step 8.7.18.2: fσ8 growth mapping with delayed P response", fontsize=19.8)
+    # 図下注記は論文本文側へ移し、図中の重なりを回避する。
+    fig.subplots_adjust(left=0.080, right=0.985, top=0.935, bottom=0.060)
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, bbox_inches="tight")
+    fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight")
     plt.close(fig)
 
 
@@ -627,6 +683,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     base = "cosmology_fsigma8_growth_mapping"
     out_png = out_dir / f"{base}.png"
+    out_pdf = out_dir / f"{base}.pdf"
     out_json = out_dir / f"{base}_metrics.json"
     out_fals = out_dir / f"{base}_falsification_pack.json"
     out_csv = out_dir / f"{base}_points.csv"
@@ -708,6 +765,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         },
         "outputs": {
             "png": str(out_png).replace("\\", "/"),
+            "pdf": str(out_pdf).replace("\\", "/"),
             "metrics_json": str(out_json).replace("\\", "/"),
             "falsification_pack_json": str(out_fals).replace("\\", "/"),
             "points_csv": str(out_csv).replace("\\", "/"),
@@ -732,6 +790,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "related_outputs": {
             "metrics_json": str(out_json).replace("\\", "/"),
             "figure_png": str(out_png).replace("\\", "/"),
+            "figure_pdf": str(out_pdf).replace("\\", "/"),
             "points_csv": str(out_csv).replace("\\", "/"),
         },
     }
@@ -740,9 +799,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     copied: Dict[str, str] = {}
     # 条件分岐: `not bool(args.skip_public_copy)` を満たす経路を評価する。
     if not bool(args.skip_public_copy):
-        copied = _copy_to_public([out_png, out_json, out_fals, out_csv], Path(args.public_dir).resolve())
+        copied = _copy_to_public([out_png, out_pdf, out_json, out_fals, out_csv], Path(args.public_dir).resolve())
 
     print(f"[ok] png : {out_png}")
+    print(f"[ok] pdf : {out_pdf}")
     print(f"[ok] json: {out_json}")
     print(f"[ok] fals: {out_fals}")
     print(f"[ok] csv : {out_csv}")
@@ -786,4 +846,3 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

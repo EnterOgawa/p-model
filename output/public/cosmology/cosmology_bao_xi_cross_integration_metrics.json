@@ -1,0 +1,81 @@
+{
+  "generated_utc": "2026-03-12T05:36:21.189966+00:00",
+  "domain": "cosmology",
+  "step": "8.7.35.2 (BAO xi_l cross integration: BOSS+DESI)",
+  "inputs": {
+    "boss_metrics_json": "C:/develop/waveP/output/public/cosmology/cosmology_bao_xi_multipole_peakfit_metrics.json",
+    "desi_metrics_json": "C:/develop/waveP/output/public/cosmology/cosmology_desi_dr1_bao_promotion_check.json"
+  },
+  "integration": {
+    "stage_a_boss": {
+      "source": "C:/develop/waveP/output/public/cosmology/cosmology_bao_xi_multipole_peakfit_metrics.json",
+      "n_bins": 3,
+      "max_abs_z": 1.0626990258553715,
+      "status": "pass",
+      "rows": [
+        {
+          "zbin": 1,
+          "z_eff": 0.38,
+          "eps": 0.008000000000000049,
+          "sigma_eps": 0.0110870494185327,
+          "abs_z": 0.7215625815311643
+        },
+        {
+          "zbin": 2,
+          "z_eff": 0.51,
+          "eps": -0.00199999999999996,
+          "sigma_eps": 0.009301294411111894,
+          "abs_z": 0.21502383556536367
+        },
+        {
+          "zbin": 3,
+          "z_eff": 0.61,
+          "eps": -0.009999999999999967,
+          "sigma_eps": 0.00941000203886601,
+          "abs_z": 1.0626990258553715
+        }
+      ]
+    },
+    "stage_b_desi": {
+      "source": "C:/develop/waveP/output/public/cosmology/cosmology_desi_dr1_bao_promotion_check.json",
+      "promoted": false,
+      "passing_tracers_n": 0,
+      "passing_tracers": [],
+      "status": "watch",
+      "rows": [
+        {
+          "tracer": "LRG3+ELG1",
+          "stable_all_methods": false,
+          "methods_n": 1,
+          "z_min": -11.131552,
+          "z_max": 0.70274849,
+          "sign_flip_any": true
+        },
+        {
+          "tracer": "Lya QSO",
+          "stable_all_methods": false,
+          "methods_n": 1,
+          "z_min": 0.67986384,
+          "z_max": 1.3492322,
+          "sign_flip_any": false
+        }
+      ]
+    },
+    "overall_status": "watch",
+    "decision_rule": {
+      "stage_a": "|z|<=3:pass, 3<|z|<=5:watch, >5:reject",
+      "stage_b": "promoted=true:pass, false:watch",
+      "overall": "stage_a=reject -> reject; stage_a=pass & stage_b=pass -> pass; else watch"
+    },
+    "part4_scoreboard_update": {
+      "recommend_update": false,
+      "reason": "統合判定は watch（DESI promotion 未達）であり、判定表の総数更新は不要。"
+    }
+  },
+  "outputs": {
+    "png": "C:/develop/waveP/output/private/cosmology/cosmology_bao_xi_cross_integration.png",
+    "pdf": "C:/develop/waveP/output/private/cosmology/cosmology_bao_xi_cross_integration.pdf",
+    "metrics_json": "C:/develop/waveP/output/private/cosmology/cosmology_bao_xi_cross_integration_metrics.json",
+    "summary_csv": "C:/develop/waveP/output/private/cosmology/cosmology_bao_xi_cross_integration_summary.csv"
+  }
+}

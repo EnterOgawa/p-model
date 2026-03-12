@@ -40,7 +40,7 @@
       "upsilon_best": 0.5399999999999998
     }
   },
-  "generated_utc": "2026-02-16T18:01:40.739870+00:00",
+  "generated_utc": "2026-03-12T09:05:08.040908+00:00",
   "inputs": {
     "acceleration_floor_m_s2": 1e-14,
     "bulge_to_disk_ml_ratio": 1.4,
@@ -61,6 +61,7 @@
     "This is an operational audit I/F for Part II; it does not by itself establish a fundamental derivation."
   ],
   "outputs": {
+    "figure_pdf": "output/public/cosmology/sparc_rotation_curve_pmodel_audit.pdf",
     "figure_png": "output/public/cosmology/sparc_rotation_curve_pmodel_audit.png",
     "galaxy_summary_csv": "output/public/cosmology/sparc_rotation_curve_pmodel_audit_galaxy_summary.csv",
     "metrics_json": "output/public/cosmology/sparc_rotation_curve_pmodel_audit_metrics.json",

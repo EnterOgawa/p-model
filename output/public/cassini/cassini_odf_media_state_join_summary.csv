@@ -1,0 +1,15 @@
+key,value
+status,pass
+record_level_media_state_extractable,true
+total_rows,421841
+station_mapped_rows,421841
+ion_covered_rows,421841
+tro_covered_rows,0
+both_covered_rows,0
+any_covered_rows,421841
+coverage_any_ratio,1.0
+coverage_both_ratio,0.0
+coverage_on_mapped_ratio,1.0
+threshold_coverage_any,0.95
+threshold_coverage_on_mapped,0.95
+watch_reason,

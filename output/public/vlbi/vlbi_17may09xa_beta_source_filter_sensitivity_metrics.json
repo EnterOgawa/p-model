@@ -1,0 +1,64 @@
+{
+  "generated_utc": "2026-03-07T01:39:17.845955+00:00",
+  "session": "17MAY09XA",
+  "inputs": {
+    "selected_metrics": "C:\\develop\\waveP\\output\\public\\vlbi\\vlbi_17may09xa_beta_nuisance_sensitivity_metrics.json",
+    "all_metrics": "C:\\develop\\waveP\\output\\public\\vlbi\\vlbi_17may09xa_all_beta_nuisance_sensitivity_metrics.json",
+    "best_mode": "baseline_intercept_linear"
+  },
+  "summary": {
+    "shared_modes": [
+      "baseline_intercept",
+      "baseline_intercept_linear",
+      "none"
+    ],
+    "best_mode_status": "pass",
+    "best_mode_abs_z_delta_beta": 1.666979410849931,
+    "best_mode_delta_beta_all_minus_selected": -16.56238923343462,
+    "best_mode_sigma_combined": 9.935569165182473
+  },
+  "rows": [
+    {
+      "mode": "baseline_intercept",
+      "beta_selected": 5.573532102019972,
+      "beta_selected_sigma": 7.3481300487200025,
+      "beta_all": 9.872212777425949,
+      "beta_all_sigma": 0.7066008665608211,
+      "delta_beta_all_minus_selected": 4.2986806754059765,
+      "sigma_combined": 7.382025467141544,
+      "abs_z_delta_beta": 0.5823172372596142,
+      "wrmse_selected_s": 1.3498535494132656e-08,
+      "wrmse_all_s": 1.7509977636885954e-08
+    },
+    {
+      "mode": "baseline_intercept_linear",
+      "beta_selected": 22.895611027443405,
+      "beta_selected_sigma": 9.91490399781796,
+      "beta_all": 6.333221794008785,
+      "beta_all_sigma": 0.6404790005754891,
+      "delta_beta_all_minus_selected": -16.56238923343462,
+      "sigma_combined": 9.935569165182473,
+      "abs_z_delta_beta": 1.666979410849931,
+      "wrmse_selected_s": 6.014790754385549e-09,
+      "wrmse_all_s": 1.5348537828129136e-08
+    },
+    {
+      "mode": "none",
+      "beta_selected": -34.96285695759299,
+      "beta_selected_sigma": 159.89011904179137,
+      "beta_all": 250.2979350373057,
+      "beta_all_sigma": 175.79653439609976,
+      "delta_beta_all_minus_selected": 285.2607919948987,
+      "sigma_combined": 237.63264016729119,
+      "abs_z_delta_beta": 1.2004276508230423,
+      "wrmse_selected_s": 4.238786991051676e-06,
+      "wrmse_all_s": 4.409982005510946e-06
+    }
+  ],
+  "outputs": {
+    "summary_csv": "C:\\develop\\waveP\\output\\vlbi\\vlbi_17may09xa_beta_source_filter_sensitivity_summary.csv",
+    "metrics_json": "C:\\develop\\waveP\\output\\vlbi\\vlbi_17may09xa_beta_source_filter_sensitivity_metrics.json",
+    "plot_pdf": "C:\\develop\\waveP\\output\\vlbi\\vlbi_17may09xa_beta_source_filter_sensitivity.pdf",
+    "plot_png": "C:\\develop\\waveP\\output\\vlbi\\vlbi_17may09xa_beta_source_filter_sensitivity.png"
+  }
+}

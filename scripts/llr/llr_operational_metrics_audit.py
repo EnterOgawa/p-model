@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
@@ -200,30 +201,39 @@ def _write_plot(path: Path, summary_rows: List[Dict[str, Any]]) -> None:
     floor = [float(r.get("model_floor_ns_for_chi2eq1", float("nan"))) for r in summary_rows]
     p95z = [float(r.get("p95_abs_z_np", float("nan"))) for r in summary_rows]
 
-    fig, axes = plt.subplots(1, 3, figsize=(16, 4.8))
+    # 図95: 1列表示を優先し、3パネルを縦並びにする。
+    fig = plt.figure(figsize=(13.8, 15.8))
+    grid = fig.add_gridspec(3, 1, height_ratios=[1.0, 1.0, 1.15], hspace=0.62)
+    ax0 = fig.add_subplot(grid[0, 0])
+    ax1 = fig.add_subplot(grid[1, 0])
+    ax2 = fig.add_subplot(grid[2, 0])
     x = np.arange(len(names), dtype=float)
 
-    axes[0].bar(x, wrms, color="#4e79a7")
-    axes[0].set_title("Weighted RMS (bin-RMS weight)")
-    axes[0].set_ylabel("ns")
-    axes[0].set_xticks(x)
-    axes[0].set_xticklabels(names, rotation=20, ha="right")
+    ax0.bar(x, wrms, color="#4e79a7")
+    ax0.set_title("Weighted RMS (bin-RMS weight)", fontsize=14.6)
+    ax0.set_ylabel("ns", fontsize=13.4)
+    ax0.set_xticks(x)
+    ax0.set_xticklabels(names, rotation=20, ha="right")
 
-    axes[1].bar(x, floor, color="#f28e2b")
-    axes[1].set_title("Model floor for χ²≈1")
-    axes[1].set_ylabel("ns")
-    axes[1].set_xticks(x)
-    axes[1].set_xticklabels(names, rotation=20, ha="right")
+    ax1.bar(x, floor, color="#f28e2b")
+    ax1.set_title("Model floor for χ²≈1", fontsize=14.6)
+    ax1.set_ylabel("ns", fontsize=13.4)
+    ax1.set_xticks(x)
+    ax1.set_xticklabels(names, rotation=20, ha="right")
 
-    axes[2].bar(x, p95z, color="#e15759")
-    axes[2].set_title("p95 |z| (residual / NP bin RMS)")
-    axes[2].set_ylabel("dimensionless")
-    axes[2].set_xticks(x)
-    axes[2].set_xticklabels(names, rotation=20, ha="right")
+    ax2.bar(x, p95z, color="#e15759")
+    ax2.set_title("p95 |z| (residual / NP bin RMS)", fontsize=14.6)
+    ax2.set_ylabel("dimensionless", fontsize=13.4)
+    ax2.set_xticks(x)
+    ax2.set_xticklabels(names, rotation=20, ha="right")
 
-    fig.tight_layout()
+    for axis in (ax0, ax1, ax2):
+        axis.tick_params(labelsize=12.2)
+
+    fig.tight_layout(rect=[0.0, 0.0, 1.0, 0.98], h_pad=3.0)
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, dpi=180)
+    fig.savefig(path.with_suffix(".pdf"))
     plt.close(fig)
 
 
@@ -313,6 +323,7 @@ def main() -> int:
     out_json = out_dir / "llr_operational_metrics_audit.json"
     out_csv = out_dir / "llr_operational_metrics_audit.csv"
     out_png = out_dir / "llr_operational_metrics_audit.png"
+    out_pdf = out_dir / "llr_operational_metrics_audit.pdf"
     out_station_csv = out_dir / "llr_operational_metrics_by_station.csv"
     out_target_csv = out_dir / "llr_operational_metrics_by_target.csv"
 
@@ -344,15 +355,30 @@ def main() -> int:
             "by_station_csv": _safe_rel(out_station_csv, _ROOT),
             "by_target_csv": _safe_rel(out_target_csv, _ROOT),
             "plot_png": _safe_rel(out_png, _ROOT),
+            "plot_pdf": _safe_rel(out_pdf, _ROOT),
         },
     }
     out_json.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+    public_out_dir = _ROOT / "output" / "public" / "llr"
+    summary_fig_dir = _ROOT / "output" / "private" / "summary" / "figures"
+    public_out_dir.mkdir(parents=True, exist_ok=True)
+    summary_fig_dir.mkdir(parents=True, exist_ok=True)
+
+    for src in (out_json, out_csv, out_station_csv, out_target_csv, out_png, out_pdf):
+        shutil.copy2(src, public_out_dir / src.name)
+
+    for src in (out_png, out_pdf):
+        shutil.copy2(src, summary_fig_dir / src.name)
 
     print(f"[ok] {out_json}")
     print(f"[ok] {out_csv}")
     print(f"[ok] {out_station_csv}")
     print(f"[ok] {out_target_csv}")
     print(f"[ok] {out_png}")
+    print(f"[ok] {out_pdf}")
+    print(f"[ok] public copies -> {public_out_dir}")
+    print(f"[ok] summary copies -> {summary_fig_dir}")
     return 0
 
 

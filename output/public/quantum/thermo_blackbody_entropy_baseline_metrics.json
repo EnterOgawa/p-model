@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-01-31T13:47:21.989943+00:00",
+  "generated_utc": "2026-03-11T13:56:35.458155+00:00",
   "phase": 7,
   "step": "7.15.2",
   "inputs": {
@@ -53,7 +53,7 @@
     ]
   },
   "outputs": {
-    "csv": "C:\\develop\\waveP\\output\\quantum\\thermo_blackbody_entropy_baseline.csv",
-    "png": "C:\\develop\\waveP\\output\\quantum\\thermo_blackbody_entropy_baseline.png"
+    "csv": "C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_entropy_baseline.csv",
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_entropy_baseline.png"
   }
 }

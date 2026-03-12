@@ -1,0 +1,82 @@
+{
+  "generated_utc": "2026-03-08T04:41:10.925769+00:00",
+  "phase": 8,
+  "step": "8.7.21.4",
+  "title": "Lagrangian-Noether closure operational cycle (8.7.22 -> 8.7.21.3)",
+  "inputs": {
+    "weak_interaction_beta_decay_route_ab_audit_json": "output/public/quantum/weak_interaction_beta_decay_route_ab_audit.json",
+    "lagrangian_noether_observable_closure_drift_audit_json": "output/public/quantum/lagrangian_noether_observable_closure_drift_audit_watch_policy.json"
+  },
+  "upstream_runs": [],
+  "checks": [
+    {
+      "id": "op_cycle::upstream_rc",
+      "metric": "8.7.22 + 8.7.21.3 command return codes",
+      "value": "skipped",
+      "expected": "all 0",
+      "status": "watch",
+      "score": 0.5,
+      "note": "Operational cycle script return codes."
+    },
+    {
+      "id": "op_cycle::weak_transition",
+      "metric": "weak_interaction transition",
+      "value": "A_stay_B_reject",
+      "expected": "A_stay_B_reject",
+      "status": "pass",
+      "score": 1.0,
+      "note": "Route-A/B transition consistency."
+    },
+    {
+      "id": "op_cycle::shared_gate_policy",
+      "metric": "closure shared_gate_policy alignment",
+      "value": "watch_if_bell_pairing_only",
+      "expected": "watch_if_bell_pairing_only",
+      "status": "pass",
+      "score": 1.0,
+      "note": "Closure drift output must match requested shared gate policy id."
+    },
+    {
+      "id": "op_cycle::ckm_pmns_closure",
+      "metric": "weak_interaction ckm_pmns_closure status",
+      "value": "watch",
+      "expected": "pass or watch",
+      "status": "watch",
+      "score": 0.5,
+      "note": "CKM watch is currently allowed as operational watch."
+    },
+    {
+      "id": "op_cycle::drift_overall",
+      "metric": "closure drift overall_status",
+      "value": "watch",
+      "expected": "pass",
+      "status": "watch",
+      "score": 0.5,
+      "note": "L_total->EL->observables drift gate result."
+    },
+    {
+      "id": "op_cycle::drift_recalc_required",
+      "metric": "closure drift recalc_required",
+      "value": false,
+      "expected": false,
+      "status": "pass",
+      "score": 1.0,
+      "note": "Operational recalc trigger must remain false."
+    }
+  ],
+  "decision": {
+    "overall_status": "watch",
+    "decision": "operational_cycle_stable_with_ckm_watch",
+    "shared_gate_policy": "watch_if_bell_pairing_only",
+    "closure_shared_gate_policy": "watch_if_bell_pairing_only",
+    "watch_is_allowed_only_for": [
+      "op_cycle::ckm_pmns_closure"
+    ],
+    "rule": "Reject if any non-CKM row is reject; watch if only CKM closure is watch; pass if all pass."
+  },
+  "outputs": {
+    "json": "output/public/quantum/lagrangian_noether_closure_operational_cycle_8722_8721_watch_policy.json",
+    "csv": "output/public/quantum/lagrangian_noether_closure_operational_cycle_8722_8721_watch_policy.csv",
+    "png": "output/public/quantum/lagrangian_noether_closure_operational_cycle_8722_8721_watch_policy.png"
+  }
+}

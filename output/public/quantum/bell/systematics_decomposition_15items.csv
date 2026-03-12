@@ -44,21 +44,21 @@ delft_hensen2016_srep30289,Delft (Hensen 2016),CHSH_S,clock_sync,clock synchroni
 delft_hensen2016_srep30289,Delft (Hensen 2016),CHSH_S,dead_time,dead time,0.03679351617699108,0.2,proxy_default,fallback 0.2*sigma_stat
 delft_hensen2016_srep30289,Delft (Hensen 2016),CHSH_S,electronic_noise,electronic noise,0.014584678423472192,0.07927852479939256,proxy_indicator,sigma_stat * relative bootstrap noise
 delft_hensen2016_srep30289,Delft (Hensen 2016),CHSH_S,environmental_variation,environmental variation,0.03370048571271005,0.18318708954369925,proxy_indicator,sigma_stat * relative spread across sweep
-nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,coincidence_window,coincidence window,0.003506711345143672,385.33643210135585,direct,delta_window from sweep summary
-nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,offset,offset,5.601373388832483e-07,0.06155092404481209,direct,delta_offset from sweep summary
-nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,threshold,threshold,2.834127119310309e-05,3.114292351975679,proxy_indicator,local window slope * median step
-nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,detector_efficiency_drift,detector efficiency drift,4.1438627868865964e-07,0.0455350082814142,proxy_indicator,sigma_stat * coefficient of variation of setting counts
-nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,dark_count,dark count,9.106522959576572e-06,1.0006740563211505,proxy_indicator,sigma_stat * accidental fraction
-nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,accidental_correction,accidental correction,0.0007089691802832767,77.9053727300694,direct,raw vs accidental-subtracted at frozen point
-nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,event_ready_definition,event-ready definition,1.8200777569982245e-06,0.2,proxy_default,fallback 0.2*sigma_stat
-nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,trial_definition,trial definition,0.0007056027315694602,77.53544911544662,direct,difference between frozen statistic and trial-based statistic
-nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,setting_switch_timing,setting switch timing,2.7301166354973364e-05,3.0,proxy_indicator,scaled by delay z-signature
-nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,polarization_correction,polarization correction,9.79650400461397e-07,0.10764929099261035,proxy_indicator,sigma_stat * setting-count imbalance
-nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,transmission_loss,transmission loss,2.2750971962477805e-06,0.25,proxy_default,fallback 0.25*sigma_stat
-nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,clock_sync,clock synchronization,3.742787898615915e-07,0.04112778021955209,proxy_indicator,sigma_stat * KS delay proxy
-nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,dead_time,dead time,3.745615499012072e-07,0.04115885142390349,proxy_indicator,sigma_stat * pair-density proxy
-nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,electronic_noise,electronic noise,1.1846507713067164e-07,0.013017584185639516,proxy_indicator,sigma_stat * relative bootstrap noise
-nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,environmental_variation,environmental variation,6.625230625314134e-06,0.7280162179709114,proxy_indicator,sigma_stat * relative spread across sweep
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,coincidence_window,coincidence window,0.0010034215964490737,130.6923264250103,direct,delta_window from sweep summary
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,offset,offset,5.601373388832483e-07,0.07295602585715473,direct,delta_offset from sweep summary
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,threshold,threshold,7.86568105650658e-06,1.0244788031569447,proxy_indicator,local window slope * median step
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,detector_efficiency_drift,detector efficiency drift,2.748317016539593e-07,0.035795915287860004,proxy_indicator,sigma_stat * coefficient of variation of setting counts
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,dark_count,dark count,2.569922491941101e-05,3.3472385923556156,proxy_indicator,sigma_stat * accidental fraction
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,accidental_correction,accidental correction,0.0004245956310936459,55.30216911206411,direct,raw vs accidental-subtracted at frozen point
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,event_ready_definition,event-ready definition,1.535547838035962e-06,0.2,proxy_default,fallback 0.2*sigma_stat
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,trial_definition,trial definition,0.0009890427337645269,128.81952737201067,direct,difference between frozen statistic and trial-based statistic
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,setting_switch_timing,setting switch timing,2.3033217570539426e-05,3.0,proxy_indicator,scaled by delay z-signature
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,polarization_correction,polarization correction,6.205278348688851e-07,0.08082168715271931,proxy_indicator,sigma_stat * setting-count imbalance
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,transmission_loss,transmission loss,1.9194347975449523e-06,0.25,proxy_default,fallback 0.25*sigma_stat
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,clock_sync,clock synchronization,3.15768369996757e-07,0.04112778021955209,proxy_indicator,sigma_stat * KS delay proxy
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,dead_time,dead time,6.464376119153343e-07,0.08419634945950737,proxy_indicator,sigma_stat * pair-density proxy
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,electronic_noise,electronic noise,5.999615345754331e-08,0.007814299492522646,proxy_indicator,sigma_stat * relative bootstrap noise
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,environmental_variation,environmental variation,1.577788271556892e-06,0.20550167601094835,proxy_indicator,sigma_stat * relative spread across sweep
 kwiat2013_prl111_130406_05082013_15,Kwiat/Christensen 2013,CH_J,coincidence_window,coincidence window,0.00012339088413475033,3.1334835552781444,direct,delta_window from sweep summary
 kwiat2013_prl111_130406_05082013_15,Kwiat/Christensen 2013,CH_J,offset,offset,1.1813454446911643e-05,0.3,proxy_default,fallback 0.3*sigma_stat
 kwiat2013_prl111_130406_05082013_15,Kwiat/Christensen 2013,CH_J,threshold,threshold,2.587968960939306e-06,0.06572088560300508,proxy_indicator,local window slope * median step

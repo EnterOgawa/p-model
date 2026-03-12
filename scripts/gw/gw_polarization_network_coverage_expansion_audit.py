@@ -262,9 +262,13 @@ def _plot(rows: List[Dict[str, Any]], gate_scalar_max: float, out_png: Path) -> 
     y_scalar = np.asarray([_safe_float(row.get("best_u2_scalar_overlap_proxy")) for row in rows], dtype=float)
     y_usable = np.asarray([float(row.get("best_coverage_n_usable_events", 0)) for row in rows], dtype=float)
     pass_found = np.asarray([float(row.get("best_gate_found", 0)) for row in rows], dtype=float)
+    title_fs = 18.2
+    label_fs = 16.2
+    legend_fs = 14.6
+    tick_fs = 14.2
 
     x = np.arange(len(rows), dtype=float)
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(15, 9), sharex=True, gridspec_kw={"height_ratios": [2, 1]})
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(15.4, 9.4), sharex=True, gridspec_kw={"height_ratios": [2, 1]})
 
     colors = []
     for value in y_scalar:
@@ -283,25 +287,28 @@ def _plot(rows: List[Dict[str, Any]], gate_scalar_max: float, out_png: Path) -> 
     ax1.bar(x, y_scalar, color=colors, alpha=0.9)
     ax1.axhline(float(gate_scalar_max), color="#2ca02c", linestyle="--", linewidth=1.4, label=f"gate scalar<{_fmt(gate_scalar_max)}")
     ax1.axhline(0.5, color="#f2c744", linestyle=":", linewidth=1.2, label="watch boundary = 0.5")
-    ax1.set_ylabel("best scalar_overlap_proxy (usable>=2)")
-    ax1.set_title("GW polarization coverage expansion audit (subset sweep)")
+    ax1.set_ylabel("best scalar_overlap_proxy (usable>=2)", fontsize=label_fs)
+    ax1.set_title("GW polarization coverage expansion audit (subset sweep)", fontsize=title_fs)
     ax1.grid(True, axis="y", alpha=0.25)
-    ax1.legend(loc="upper right", frameon=True)
+    ax1.legend(loc="upper right", frameon=True, fontsize=legend_fs)
+    ax1.tick_params(axis="y", labelsize=tick_fs)
 
     width = 0.42
     ax2.bar(x - width / 2.0, y_usable, width=width, color="#4c78a8", alpha=0.9, label="best usable events")
     ax2.bar(x + width / 2.0, pass_found, width=width, color="#59a14f", alpha=0.9, label="gate_found(0/1)")
     ax2.axhline(2.0, color="#7f7f7f", linestyle="--", linewidth=1.0, label="coverage target usable>=2")
-    ax2.set_ylabel("coverage / gate")
+    ax2.set_ylabel("coverage / gate", fontsize=label_fs)
     ax2.set_ylim(0.0, max(3.0, float(np.nanmax(y_usable)) + 0.8 if y_usable.size else 3.0))
     ax2.grid(True, axis="y", alpha=0.25)
-    ax2.legend(loc="upper right", frameon=True)
+    ax2.legend(loc="upper right", frameon=True, fontsize=legend_fs)
 
     ax2.set_xticks(x)
-    ax2.set_xticklabels(labels, rotation=35, ha="right")
-    fig.tight_layout()
+    ax2.set_xticklabels(labels, rotation=35, ha="right", fontsize=tick_fs)
+    ax2.tick_params(axis="y", labelsize=tick_fs)
+    fig.tight_layout(h_pad=1.1)
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=180, bbox_inches="tight")
+    fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight")
     plt.close(fig)
 
 
@@ -549,6 +556,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_json = outdir / f"{args.prefix}.json"
     out_csv = outdir / f"{args.prefix}.csv"
     out_png = outdir / f"{args.prefix}.png"
+    out_pdf = out_png.with_suffix(".pdf")
     _write_csv(out_csv, subset_rows)
     _plot(subset_rows, gate_scalar_max=float(args.gate_scalar_max), out_png=out_png)
 
@@ -590,6 +598,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "audit_json": str(out_json).replace("\\", "/"),
             "audit_csv": str(out_csv).replace("\\", "/"),
             "audit_png": str(out_png).replace("\\", "/"),
+            "audit_pdf": str(out_pdf).replace("\\", "/") if out_pdf.exists() else "",
         },
         "falsification": {
             "hard_pass_if": [
@@ -605,8 +614,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     }
     out_json.write_text(json.dumps(payload_out, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    copied_sources = [out_json, out_csv, out_png]
+    if out_pdf.exists():
+        copied_sources.append(out_pdf)
+
     copied: List[str] = []
-    for src in [out_json, out_csv, out_png]:
+    for src in copied_sources:
         dst = public_outdir / src.name
         shutil.copy2(src, dst)
         copied.append(str(dst).replace("\\", "/"))

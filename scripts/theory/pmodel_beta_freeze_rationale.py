@@ -42,12 +42,12 @@ def _set_japanese_font() -> None:
             mpl.rcParams["font.family"] = selected + ["DejaVu Sans"]
 
         mpl.rcParams["axes.unicode_minus"] = False
-        mpl.rcParams["font.size"] = 13.0
-        mpl.rcParams["axes.titlesize"] = 18.0
-        mpl.rcParams["axes.labelsize"] = 14.0
-        mpl.rcParams["xtick.labelsize"] = 12.0
-        mpl.rcParams["ytick.labelsize"] = 12.0
-        mpl.rcParams["legend.fontsize"] = 12.0
+        mpl.rcParams["font.size"] = 15.0
+        mpl.rcParams["axes.titlesize"] = 20.0
+        mpl.rcParams["axes.labelsize"] = 16.0
+        mpl.rcParams["xtick.labelsize"] = 14.0
+        mpl.rcParams["ytick.labelsize"] = 14.0
+        mpl.rcParams["legend.fontsize"] = 14.0
     except Exception:
         return
 
@@ -135,6 +135,8 @@ def _save_figure(fig: Any, public_path: Path, private_path: Path) -> None:
     private_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(public_path, dpi=220, bbox_inches="tight")
     fig.savefig(private_path, dpi=220, bbox_inches="tight")
+    fig.savefig(public_path.with_suffix(".pdf"), bbox_inches="tight")
+    fig.savefig(private_path.with_suffix(".pdf"), bbox_inches="tight")
 
 
 # 関数: `main` の入出力契約と処理意図を定義する。
@@ -155,7 +157,7 @@ def main() -> int:
     freeze_shift = freeze_value - 1.0
     z_scores = np.abs(values - freeze_value) / np.where(errors > 0, errors, 1.0)
 
-    figure, axes = plt.subplots(1, 2, figsize=(16.4, 8.6), dpi=220, gridspec_kw={"width_ratios": [2.45, 1.10]})
+    figure, axes = plt.subplots(2, 1, figsize=(15.2, 11.8), dpi=220, gridspec_kw={"height_ratios": [1.28, 1.00]})
 
     ax0 = axes[0]
     positions = np.arange(len(rows))
@@ -184,11 +186,11 @@ def main() -> int:
     ax0.set_yticks(positions)
     ax0.set_yticklabels(labels)
     ax0.invert_yaxis()
-    ax0.set_xlabel("β - 1 （unity offset）", fontsize=15.0)
-    ax0.set_title("β凍結の根拠（Cassini拘束 + VLBI独立チェック）", fontsize=19.0, pad=12.0)
+    ax0.set_xlabel("β - 1 （unity offset）", fontsize=17.0)
+    ax0.set_title("β凍結の根拠（Cassini拘束 + VLBI独立チェック）", fontsize=21.0, pad=12.0)
     ax0.grid(alpha=0.25, axis="x")
-    ax0.tick_params(axis="both", labelsize=13.0)
-    ax0.legend(loc="upper left", bbox_to_anchor=(-0.02, 1.02), fontsize=12.0, frameon=True)
+    ax0.tick_params(axis="both", labelsize=15.0)
+    ax0.legend(loc="upper left", fontsize=14.5, frameon=True)
     ax0.text(
         0.02,
         0.08,
@@ -196,7 +198,7 @@ def main() -> int:
         transform=ax0.transAxes,
         ha="left",
         va="bottom",
-        fontsize=12.0,
+        fontsize=14.0,
         color="tab:orange",
         bbox={"facecolor": "white", "alpha": 0.85, "edgecolor": "none", "pad": 1.4},
     )
@@ -205,10 +207,10 @@ def main() -> int:
 
     for index, row in enumerate(rows):
         ax0.text(
-            values_shift[index] + max(errors[index], 3.0e-5) * 1.25,
+            values_shift[index] + max(errors[index], 3.0e-5) * 1.15,
             positions[index] - 0.05,
             row["note"],
-            fontsize=11.3,
+            fontsize=13.8,
             color="0.28",
             va="center",
         )
@@ -221,18 +223,18 @@ def main() -> int:
     ax1.set_yticks(positions)
     ax1.set_yticklabels([])
     ax1.invert_yaxis()
-    ax1.set_xlabel(r"$|\beta-\beta_{\mathrm{frozen}}|/\sigma$", fontsize=15.0)
-    ax1.set_title("凍結値との一貫性", fontsize=19.0, pad=12.0)
+    ax1.set_xlabel(r"$|\beta-\beta_{\mathrm{frozen}}|/\sigma$", fontsize=17.0)
+    ax1.set_title("凍結値との一貫性", fontsize=21.0, pad=12.0)
     ax1.grid(alpha=0.25, axis="x")
-    ax1.tick_params(axis="both", labelsize=13.0)
-    ax1.legend(loc="lower right", fontsize=12.0)
+    ax1.tick_params(axis="both", labelsize=15.0)
+    ax1.legend(loc="lower right", fontsize=14.5)
     x_max = max(3.4, float(np.nanmax(z_scores)) + 0.4)
     ax1.set_xlim(0.0, x_max)
 
     for index, score in enumerate(z_scores):
-        ax1.text(score + 0.05, positions[index], f"{score:.2f}σ", va="center", fontsize=12.0, color="0.22")
+        ax1.text(score + 0.05, positions[index], f"{score:.2f}σ", va="center", fontsize=14.2, color="0.22")
 
-    figure.tight_layout(rect=(0.03, 0.01, 1.0, 1.0))
+    figure.tight_layout(rect=(0.04, 0.02, 1.0, 1.0))
     _save_figure(figure, public_path=out_png_public, private_path=out_png_private)
     plt.close(figure)
 
@@ -242,6 +244,8 @@ def main() -> int:
         "outputs": {
             "png_public": str(out_png_public).replace("\\", "/"),
             "png_private": str(out_png_private).replace("\\", "/"),
+            "pdf_public": str(out_png_public.with_suffix(".pdf")).replace("\\", "/"),
+            "pdf_private": str(out_png_private.with_suffix(".pdf")).replace("\\", "/"),
             "metrics_json": str(out_json_private).replace("\\", "/"),
         },
         "rows": rows,
@@ -259,6 +263,8 @@ def main() -> int:
 
     print(f"[ok] png(public) : {out_png_public}")
     print(f"[ok] png(private): {out_png_private}")
+    print(f"[ok] pdf(public) : {out_png_public.with_suffix('.pdf')}")
+    print(f"[ok] pdf(private): {out_png_private.with_suffix('.pdf')}")
     print(f"[ok] json        : {out_json_private}")
     return 0
 

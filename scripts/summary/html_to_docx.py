@@ -685,13 +685,43 @@ def _replace_equation_images_with_word_equations(
 
     n_replaced = 0
     for target, latex in zip(targets, latex_items):
-        try:
-            mathml = convert(latex)
-            omml_doc = transform(etree.fromstring(mathml.encode("utf-8")))
-            omml_str = str(omml_doc)
-            omml_str = re.sub(r"^<\\?xml[^>]*>\\s*", "", omml_str).strip()
-            omml_elem = etree.fromstring(omml_str.encode("utf-8"))
-        except Exception:
+        latex_candidates: List[str] = [latex]
+        unescaped_latex = latex.replace("&amp;", "&")
+        # Some aligned equations keep '&' in MathML and may break OMML XML parsing.
+        aligned_flat = (
+            unescaped_latex.replace("\\begin{aligned}", "").replace("\\end{aligned}", "").replace("&", "")
+        )
+        latex_candidates.extend(
+            [
+                unescaped_latex,
+                unescaped_latex.replace("&", ""),
+                aligned_flat,
+            ]
+        )
+
+        # Preserve order while deduplicating retry candidates.
+        seen_latex: set = set()
+        deduped_candidates: List[str] = []
+        for candidate in latex_candidates:
+            if candidate in seen_latex:
+                continue
+
+            seen_latex.add(candidate)
+            deduped_candidates.append(candidate)
+
+        omml_elem = None
+        for candidate in deduped_candidates:
+            try:
+                mathml = convert(candidate)
+                omml_doc = transform(etree.fromstring(mathml.encode("utf-8")))
+                omml_str = str(omml_doc)
+                omml_str = re.sub(r"^<\\?xml[^>]*>\\s*", "", omml_str).strip()
+                omml_elem = etree.fromstring(omml_str.encode("utf-8"))
+                break
+            except Exception:
+                continue
+
+        if omml_elem is None:
             continue
 
         # 条件分岐: `kind == "inline"` を満たす経路を評価する。

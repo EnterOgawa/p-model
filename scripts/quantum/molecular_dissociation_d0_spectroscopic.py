@@ -8,6 +8,10 @@ from typing import Any
 import matplotlib.pyplot as plt
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
@@ -116,18 +120,22 @@ def main() -> None:
         y.append(float(r["d0_eV"]))
         yerr.append(0.0 if r["d0_unc_eV"] is None else float(r["d0_unc_eV"]))
 
-    fig, ax = plt.subplots(1, 1, figsize=(11.5, 4.6), dpi=180)
+    plt.rcParams["pdf.fonttype"] = 42
+    plt.rcParams["ps.fonttype"] = 42
+
+    fig, ax = plt.subplots(1, 1, figsize=(11.5, 6.4), dpi=190)
     ax.set_title(
-        "Phase 7 / Step 7.12: Spectroscopic dissociation energy D0 (0 K; fixed primary-source baseline)", fontsize=13
+        "Spectroscopic dissociation energy D0 (0 K; fixed primary-source baseline)", fontsize=17.0
     )
     ax.bar(labels, y, color=["#2b6cb0", "#805ad5", "#c53030"], alpha=0.92)
     ax.errorbar(labels, y, yerr=yerr, fmt="none", ecolor="#222222", elinewidth=1.2, capsize=4)
-    ax.set_ylabel("D0 (0 K; spectroscopic) [eV per molecule]")
+    ax.set_ylabel("D0 (0 K; spectroscopic) [eV per molecule]", fontsize=14.6)
     ax.grid(True, axis="y", alpha=0.25)
+    ax.tick_params(axis="both", labelsize=12.8)
 
     for i, r in enumerate(rows):
         d0_cm = float(r["d0_cm^-1"])
-        ax.text(i, y[i] + 0.01, f"{d0_cm:.5f} cm⁻¹", ha="center", va="bottom", fontsize=9.5)
+        ax.text(i, y[i] + 0.01, f"{d0_cm:.5f} cm⁻¹", ha="center", va="bottom", fontsize=12.6)
 
     ax.text(
         0.01,
@@ -136,12 +144,14 @@ def main() -> None:
         "Do not conflate with 298 K thermochemistry dissociation enthalpy.\n"
         "H2 value here is for ortho-H2 (rotational N=1), as stated by the primary source.",
         transform=ax.transAxes,
-        fontsize=9.0,
+        fontsize=12.2,
         bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor="#cccccc"),
     )
     fig.tight_layout()
 
+    out_pdf = out_dir / "molecular_dissociation_d0_spectroscopic.pdf"
     out_png = out_dir / "molecular_dissociation_d0_spectroscopic.png"
+    fig.savefig(out_pdf)
     fig.savefig(out_png)
     plt.close(fig)
 
@@ -156,10 +166,11 @@ def main() -> None:
         ),
         "inputs": {"extracted_values": str(src)},
         "rows": rows,
-        "outputs": {"png": str(out_png)},
+        "outputs": {"pdf": str(out_pdf), "png": str(out_png)},
     }
     out_json = out_dir / "molecular_dissociation_d0_spectroscopic_metrics.json"
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[ok] wrote: {out_pdf}")
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_json}")
 
@@ -168,4 +179,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-27T02:17:42.934335+00:00",
+  "generated_utc": "2026-03-10T04:13:48.106006+00:00",
   "schema": "wavep.theory.pmodel_rotating_sphere_p_distribution_audit.v2",
   "title": "Rotating-sphere P distribution audit (deltaP_rot branches; effective-metric bridge)",
   "equations": {
@@ -193,6 +193,7 @@
   "outputs": {
     "rows_json": "C:/develop/waveP/output/private/theory/pmodel_rotating_sphere_p_distribution_audit.json",
     "rows_csv": "C:/develop/waveP/output/private/theory/pmodel_rotating_sphere_p_distribution_audit.csv",
-    "plot_png": "C:/develop/waveP/output/private/theory/pmodel_rotating_sphere_p_distribution_audit.png"
+    "plot_png": "C:/develop/waveP/output/private/theory/pmodel_rotating_sphere_p_distribution_audit.png",
+    "plot_pdf": "C:/develop/waveP/output/private/theory/pmodel_rotating_sphere_p_distribution_audit.pdf"
   }
 }

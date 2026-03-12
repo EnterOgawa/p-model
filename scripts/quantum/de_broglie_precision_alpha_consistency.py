@@ -8,6 +8,10 @@ from pathlib import Path
 import numpy as np
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # クラス: `Measurement` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Measurement:
@@ -85,12 +89,17 @@ def main() -> None:
     yerr = np.array([recoil.sigma_alpha_inv, g2.sigma_alpha_inv], dtype=float)
 
     fig, ax = plt.subplots(figsize=(10.8, 5.4), dpi=150)
+    axis_label_font = 13.6
+    panel_title_font = 14.8
+    tick_font = 12.4
+    note_font = 11.2
     ax.errorbar(x, y, yerr=yerr, fmt="o", capsize=4, elinewidth=1.8, color="#1f77b4", ecolor="#1f77b4")
     ax.set_xticks(x)
-    ax.set_xticklabels(labels)
-    ax.set_ylabel("alpha^{-1}")
-    ax.set_title("de Broglie precision cross-check via alpha (recoil vs electron g-2)")
+    ax.set_xticklabels(labels, fontsize=tick_font)
+    ax.set_ylabel("alpha^{-1}", fontsize=axis_label_font)
+    ax.set_title("de Broglie precision cross-check via alpha (recoil vs electron g-2)", fontsize=panel_title_font)
     ax.grid(True, ls=":", lw=0.6, alpha=0.7)
+    ax.tick_params(axis="y", labelsize=tick_font)
 
     ax.text(
         0.02,
@@ -101,7 +110,7 @@ def main() -> None:
             f"MC: epsilon = {eps_mu*1e9:+.2f} ± {eps_sigma*1e9:.2f} ppb (1σ)"
         ),
         transform=ax.transAxes,
-        fontsize=9,
+        fontsize=note_font,
         va="bottom",
         ha="left",
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.85, "edgecolor": "0.8"},
@@ -109,7 +118,9 @@ def main() -> None:
 
     fig.tight_layout()
     out_png = out_dir / "de_broglie_precision_alpha_consistency.png"
+    out_pdf = out_dir / "de_broglie_precision_alpha_consistency.pdf"
     fig.savefig(out_png, bbox_inches="tight")
+    fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
 
     metrics = {
@@ -143,7 +154,7 @@ def main() -> None:
             "epsilon_mc_sigma": eps_sigma,
             "epsilon_units": "dimensionless (fractional scaling in recoil-based h/m)",
         },
-        "outputs": {"png": str(out_png)},
+        "outputs": {"png": str(out_png), "pdf": str(out_pdf)},
         "notes": [
             "This treats the electron g-2 based alpha as a reference and maps the discrepancy into an effective recoil epsilon via alpha ∝ sqrt(h/m).",
             "In reality, discrepancies could also come from systematics or theory inputs; epsilon here is an interpretive parameterization.",
@@ -153,6 +164,7 @@ def main() -> None:
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(f"[ok] png : {out_png}")
+    print(f"[ok] pdf : {out_pdf}")
     print(f"[ok] json: {out_json}")
 
 

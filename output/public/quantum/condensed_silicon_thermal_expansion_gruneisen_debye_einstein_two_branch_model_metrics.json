@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T15:18:31.866686+00:00",
+  "generated_utc": "2026-03-11T13:18:08.106338+00:00",
   "phase": 7,
   "step": "7.14.14",
   "inputs": {
@@ -66,6 +66,7 @@
   },
   "outputs": {
     "csv": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_debye_einstein_two_branch_model.csv",
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_debye_einstein_two_branch_model.pdf",
     "png": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_debye_einstein_two_branch_model.png"
   }
 }

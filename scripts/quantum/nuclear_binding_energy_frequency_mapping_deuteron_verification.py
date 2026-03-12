@@ -6,6 +6,10 @@ import math
 from pathlib import Path
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
@@ -248,8 +252,8 @@ def main() -> None:
         delta_mean_keV,
     ]
 
-    fig = plt.figure(figsize=(10.8, 4.2), dpi=160)
-    gs = fig.add_gridspec(1, 2, wspace=0.28)
+    fig = plt.figure(figsize=(10.8, 9.8), dpi=170)
+    gs = fig.add_gridspec(2, 1, hspace=0.30)
 
     ax0 = fig.add_subplot(gs[0, 0])
     ax0.errorbar(x, b_pred_list, yerr=b_err, fmt="o", color="tab:blue", capsize=4, lw=1.2)
@@ -257,20 +261,22 @@ def main() -> None:
     ax0.fill_between([-0.4, 2.4], [b_min, b_min], [b_max, b_max], color="tab:orange", alpha=0.12, label="eq18–eq19 envelope")
     ax0.set_xticks(x)
     ax0.set_xticklabels(labels)
-    ax0.set_ylabel("B (MeV)")
-    ax0.set_title("Deuteron binding from triplet ERE pole (a_t, r_t)")
+    ax0.set_ylabel("B (MeV)", fontsize=13)
+    ax0.set_title("Deuteron binding from triplet ERE pole (a_t, r_t)", fontsize=14)
     ax0.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax0.legend(loc="lower right", fontsize=9)
+    ax0.tick_params(axis="both", labelsize=11.5)
+    ax0.legend(loc="lower right", fontsize=11)
 
-    ax1 = fig.add_subplot(gs[0, 1])
+    ax1 = fig.add_subplot(gs[1, 0])
     ax1.bar([0, 1, 2], delta_keV_list, color=["tab:blue", "tab:blue", "tab:orange"], alpha=0.85)
     ax1.axhline(0.0, color="0.15", lw=1.2, ls="-")
     ax1.axhspan(-1e3 * sys_half_range, 1e3 * sys_half_range, color="tab:orange", alpha=0.12)
     ax1.set_xticks(x)
     ax1.set_xticklabels(labels)
-    ax1.set_ylabel("ΔB = B_pred − B_obs (keV)")
-    ax1.set_title("Residuals vs observation")
+    ax1.set_ylabel("ΔB = B_pred − B_obs (keV)", fontsize=13)
+    ax1.set_title("Residuals vs observation", fontsize=14)
     ax1.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
+    ax1.tick_params(axis="both", labelsize=11.5)
 
     # Summary annotation (avoid unicode in console; figure text can be unicode).
     verdict = "PASS" if envelope_pass else "FAIL"
@@ -281,12 +287,12 @@ def main() -> None:
         transform=ax1.transAxes,
         ha="left",
         va="top",
-        fontsize=9,
+        fontsize=11,
         bbox={"facecolor": "white", "alpha": 0.85, "edgecolor": "0.8"},
     )
 
-    fig.suptitle("Phase 7 / Step 7.13.17.4: deuteron numeric verification (ERE cross-check)", y=1.02)
-    fig.subplots_adjust(left=0.08, right=0.98, top=0.86, bottom=0.20, wspace=0.28)
+    fig.suptitle("deuteron numeric verification (ERE cross-check)", y=0.995, fontsize=15)
+    fig.subplots_adjust(left=0.10, right=0.98, top=0.94, bottom=0.10, hspace=0.35)
 
     out_png = out_dir / "nuclear_binding_energy_frequency_mapping_deuteron_verification.png"
     fig.savefig(out_png, bbox_inches="tight")
@@ -359,4 +365,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

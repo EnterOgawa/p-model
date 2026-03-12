@@ -6,7 +6,7 @@ xrism_integration.py
 Phase 4 / Step 4.13.4（統合）:
 XRISM（X線高分解能スペクトル：Resolve）の固定出力（BH/AGN: v/c, 銀河団: z_xray, σ_v）を統合し、
 Phase 4.3（距離指標と独立な検証）/ Phase 5.2（速度飽和 δ）への接続可否と
-Table 1 への採用可否（screening / not adopted）を「出力として」固定する。
+検証サマリ表への採用可否（screening / not adopted）を「出力として」固定する。
 
 前提:
 - 4.13.2 出力: output/private/xrism/xrism_bh_outflow_velocity_summary.csv
@@ -19,6 +19,7 @@ import argparse
 import csv
 import json
 import math
+import shutil
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -141,6 +142,22 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_sync_public_figure_assets` の入出力契約と処理意図を定義する。
+def _sync_public_figure_assets(root: Path, out_png: Path) -> None:
+    out_pdf = out_png.with_suffix(".pdf")
+    public_dir = root / "output" / "public" / "xrism"
+    summary_dir = root / "output" / "private" / "summary" / "figures"
+    public_dir.mkdir(parents=True, exist_ok=True)
+    summary_dir.mkdir(parents=True, exist_ok=True)
+    for src in (out_png, out_pdf):
+        # 条件分岐: `not src.exists()` を満たす経路を評価する。
+        if not src.exists():
+            continue
+
+        shutil.copy2(src, public_dir / src.name)
+        shutil.copy2(src, summary_dir / src.name)
+
+
 # 関数: `_combine_sigma` の入出力契約と処理意図を定義する。
 
 def _combine_sigma(stat: Optional[float], sys_: Optional[float]) -> Optional[float]:
@@ -221,7 +238,7 @@ def _load_targets_catalog(root: Path) -> List[Dict[str, str]]:
 def _load_event_level_qc_by_obsid(root: Path) -> Dict[str, Dict[str, Any]]:
     """
     Load event-level QC summary (products vs event_cl) keyed by obsid.
-    This is a "procedure robustness" check and does not change the Table 1 gate directly.
+    This is a "procedure robustness" check and does not change the 検証サマリ表 gate directly.
     """
     path = root / "output" / "private" / "xrism" / "xrism_event_level_qc_summary.csv"
     rows = _read_csv_rows(path)
@@ -653,7 +670,7 @@ def _plot_resolve_summary(out_png: Path, bh: Dict[str, Any], cluster: Dict[str, 
             "XRISM Resolve: no detected obsid rows yet",
             ha="center",
             va="center",
-            fontsize=14,
+            fontsize=12,
             weight="bold",
             transform=ax.transAxes,
         )
@@ -664,18 +681,19 @@ def _plot_resolve_summary(out_png: Path, bh: Dict[str, Any], cluster: Dict[str, 
             "To populate this panel, generate XRISM fixed outputs (BH/AGN, clusters, event-level QC) and rerun xrism_integration.py.",
             ha="center",
             va="center",
-            fontsize=10,
+            fontsize=9,
             transform=ax.transAxes,
         )
         out_png.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(out_png, dpi=200)
+        fig.savefig(out_png.with_suffix(".pdf"))
         plt.close(fig)
         return True
 
     bh_rows = sorted(bh_rows, key=lambda r: (str(r.get("target_name", "")), str(r.get("obsid", ""))))
     cl_rows = sorted(cl_rows, key=lambda r: (str(r.get("target_name", "")), str(r.get("obsid", ""))))
 
-    fig, (ax_bh, ax_cl) = plt.subplots(2, 1, figsize=(11, 6.5), constrained_layout=True)
+    fig, (ax_bh, ax_cl) = plt.subplots(2, 1, figsize=(12.4, 9.8), constrained_layout=False)
 
     # Panel A: BH/AGN beta
     if bh_rows:
@@ -696,12 +714,14 @@ def _plot_resolve_summary(out_png: Path, bh: Dict[str, Any], cluster: Dict[str, 
             line_id = str(r.get("line_id", "")).strip()
             labels.append(f"{target}\n{line_id}")
 
-        ax_bh.errorbar(xs, ys, yerr=yerrs, fmt="o", capsize=3, lw=1)
+        ax_bh.errorbar(xs, ys, yerr=yerrs, fmt="o", capsize=4, lw=1.4, markersize=8.8)
         ax_bh.axhline(0.0, color="k", lw=1, alpha=0.4)
-        ax_bh.set_ylabel("β_obs (v/c)")
-        ax_bh.set_title("XRISM Resolve: BH/AGN line centroid → β")
+        ax_bh.set_ylabel("β_obs (v/c)", fontsize=16.8)
+        ax_bh.set_title("XRISM Resolve: BH/AGN line centroid → β", fontsize=19.4)
         ax_bh.set_xticks(xs)
-        ax_bh.set_xticklabels(labels, rotation=0, fontsize=8)
+        ax_bh.set_xticklabels(labels, rotation=0, fontsize=12.8)
+        ax_bh.tick_params(axis="x", pad=13)
+        ax_bh.tick_params(axis="y", labelsize=14.4)
     else:
         ax_bh.set_axis_off()
         ax_bh.text(0.5, 0.5, "BH/AGN: no detected obsid", ha="center", va="center", transform=ax_bh.transAxes)
@@ -729,18 +749,22 @@ def _plot_resolve_summary(out_png: Path, bh: Dict[str, Any], cluster: Dict[str, 
             line_id = str(r.get("line_id", "")).strip()
             labels.append(f"{target}\n{line_id}")
 
-        ax_cl.errorbar(xs, ys, yerr=yerrs, fmt="o", capsize=3, lw=1, color="#d55e00")
+        ax_cl.errorbar(xs, ys, yerr=yerrs, fmt="o", capsize=4, lw=1.4, color="#d55e00", markersize=8.8)
         ax_cl.axhline(0.0, color="k", lw=1, alpha=0.4)
-        ax_cl.set_ylabel("Δv (km/s)\n(X-ray − optical)")
-        ax_cl.set_title("XRISM Resolve: clusters z_xray − z_opt (Δv)")
+        ax_cl.set_ylabel("Δv (km/s)\n(X-ray − optical)", fontsize=16.8)
+        ax_cl.set_title("XRISM Resolve: clusters z_xray − z_opt (Δv)", fontsize=19.4)
         ax_cl.set_xticks(xs)
-        ax_cl.set_xticklabels(labels, rotation=0, fontsize=8)
+        ax_cl.set_xticklabels(labels, rotation=0, fontsize=12.8)
+        ax_cl.tick_params(axis="x", pad=13)
+        ax_cl.tick_params(axis="y", labelsize=14.4)
     else:
         ax_cl.set_axis_off()
         ax_cl.text(0.5, 0.5, "Clusters: no detected obsid", ha="center", va="center", transform=ax_cl.transAxes)
 
     out_png.parent.mkdir(parents=True, exist_ok=True)
+    fig.subplots_adjust(left=0.132, right=0.985, top=0.930, bottom=0.128, hspace=0.56)
     fig.savefig(out_png, dpi=200)
+    fig.savefig(out_png.with_suffix(".pdf"))
     plt.close(fig)
     return True
 
@@ -775,6 +799,7 @@ def build_metrics(root: Path, *, out_dir: Path) -> Dict[str, Any]:
         "outputs": {
             "integration_metrics_json": _rel(out_dir / "xrism_integration_metrics.json"),
             "resolve_summary_png": _rel(out_dir / "xrism_resolve_summary.png"),
+            "resolve_summary_pdf": _rel(out_dir / "xrism_resolve_summary.pdf"),
         },
     }
 
@@ -797,7 +822,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # 条件分岐: `not plot_ok` を満たす経路を評価する。
     if not plot_ok:
         payload["outputs"]["resolve_summary_png"] = None
+        payload["outputs"]["resolve_summary_pdf"] = None
         payload.setdefault("notes", []).append("resolve_summary_png is skipped (matplotlib missing or no detected rows).")
+    else:
+        _sync_public_figure_assets(root, out_png)
 
     out_path = out_dir / "xrism_integration_metrics.json"
     _write_json(out_path, payload)
@@ -810,6 +838,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "outputs": {
                     "integration_metrics_json": str(out_path),
                     "resolve_summary_png": str(out_png) if plot_ok else None,
+                    "resolve_summary_pdf": str(out_png.with_suffix('.pdf')) if plot_ok else None,
                 },
             }
         )
@@ -820,6 +849,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # 条件分岐: `plot_ok` を満たす経路を評価する。
     if plot_ok:
         print(f"[ok] wrote: {out_png}")
+        print(f"[ok] wrote: {out_png.with_suffix('.pdf')}")
 
     return 0
 

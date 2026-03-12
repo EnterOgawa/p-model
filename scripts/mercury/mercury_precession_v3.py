@@ -220,37 +220,43 @@ def main():
     
     # Plot
     _set_japanese_font()
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))
+    fig, (ax1, ax2) = plt.subplots(
+        2,
+        1,
+        figsize=(14.2, 13.6),
+        gridspec_kw={"height_ratios": [1.18, 1.14]},
+    )
 
     # Left: Orbit
-    ax1.plot(0, 0, 'yo', markersize=12, label='太陽', zorder=10)
-    ax1.plot(x_nw, y_nw, 'k--', linewidth=1.0, alpha=0.5, label='ニュートン')
-    ax1.plot(x_gr, y_gr, 'b-', linewidth=1.5, label='P-model 軌道')
+    ax1.plot(0, 0, 'yo', markersize=14, label='太陽', zorder=10)
+    ax1.plot(x_nw, y_nw, 'k--', linewidth=1.2, alpha=0.55, label='ニュートン')
+    ax1.plot(x_gr, y_gr, 'b-', linewidth=1.9, label='P-model 軌道')
     
     ax1.set_title(
         "水星の近日点移動（誇張表示）\n"
         f"参考: 観測残差≈{reference_arcsec_century:.2f} 角秒/世紀, "
         f"P-model(実C)≈{p_arcsec_century:.2f} 角秒/世紀",
-        fontsize=14,
+        fontsize=18.8,
     )
     
     ax1.axis('equal')
     ax1.grid(True, linestyle='--')
-    ax1.legend(loc='lower left', fontsize=12)
+    ax1.tick_params(axis='both', labelsize=14.4)
+    ax1.legend(loc='lower left', fontsize=14.2)
 
     # Right: Physical shift vs orbit count
     ax2.plot(
         p_ph["orbit_nums"],
         p_ph["shift_arcsec"],
         "r-",
-        linewidth=2.0,
+        linewidth=2.3,
         label="P-model（実C）",
     )
     ax2.plot(
         n_ph["orbit_nums"],
         n_ph["shift_arcsec"],
         "k--",
-        linewidth=1.2,
+        linewidth=1.35,
         alpha=0.6,
         label="ニュートン（誤差目安）",
     )
@@ -258,14 +264,14 @@ def main():
         p_ph["orbit_nums"],
         trend_line_p,
         "b--",
-        linewidth=1.5,
+        linewidth=1.8,
         alpha=0.7,
         label="線形フィット（一定性）",
     )
     ax2.scatter(
         p_ph["orbit_nums"],
         reference_line,
-        s=18,
+        s=26,
         color="tab:purple",
         alpha=0.75,
         edgecolors="none",
@@ -273,11 +279,12 @@ def main():
         zorder=3,
     )
 
-    ax2.set_title("近日点移動の累積（周回ごと）\n（実Cでの定量評価）", fontsize=14)
-    ax2.set_xlabel("周回数", fontsize=12)
-    ax2.set_ylabel("移動角 [角秒]", fontsize=12)
+    ax2.set_title("近日点移動の累積（周回ごと）\n（実Cでの定量評価）", fontsize=18.8)
+    ax2.set_xlabel("周回数", fontsize=15.6)
+    ax2.set_ylabel("移動角 [角秒]", fontsize=15.6)
     ax2.grid(True, linestyle='--')
-    ax2.legend(loc='lower right', fontsize=12)
+    ax2.tick_params(axis='both', labelsize=14.4)
+    ax2.legend(loc='lower right', fontsize=14.2)
     
     ax2.text(
         0.05,
@@ -286,15 +293,18 @@ def main():
         f"Einstein近似: {einstein_arcsec_century:.2f} 角秒/世紀\n"
         f"観測代表: {reference_arcsec_century:.2f} 角秒/世紀",
         transform=ax2.transAxes,
-        fontsize=11,
+        fontsize=15.0,
         va="top",
         bbox=dict(facecolor="white", alpha=0.85, edgecolor="gray"),
     )
 
-    plt.tight_layout()
+    plt.tight_layout(h_pad=1.2)
     out_file = out_dir / "mercury_orbit.png"
+    out_pdf = out_dir / "mercury_orbit.pdf"
     plt.savefig(out_file, dpi=300)
+    plt.savefig(out_pdf)
     print(f"Graph saved to {out_file}")
+    print(f"Graph saved to {out_pdf}")
 
     # Save perihelion shifts and metrics for the report
     csv_path = out_dir / "mercury_perihelion_shifts.csv"
@@ -348,6 +358,7 @@ def main():
                 },
                 "outputs": {
                     "mercury_orbit_png": out_file,
+                    "mercury_orbit_pdf": out_pdf,
                     "perihelion_shifts_csv": csv_path,
                     "metrics_json": metrics_path,
                 },

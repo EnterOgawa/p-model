@@ -6,6 +6,10 @@ import math
 from pathlib import Path
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
@@ -232,7 +236,11 @@ def main() -> None:
 
     # Plot
 
+    import matplotlib as mpl
     import matplotlib.pyplot as plt
+
+    mpl.rcParams["pdf.fonttype"] = 42
+    mpl.rcParams["ps.fonttype"] = 42
 
     a_vals = [int(r["A"]) for r in rows_out]
     d_semf = [float(r["abs_Delta_B_P_minus_SEMF_MeV"]) if r["abs_Delta_B_P_minus_SEMF_MeV"] else float("nan") for r in rows_out]
@@ -240,17 +248,25 @@ def main() -> None:
     rel_semf = [float(r["required_relative_precision_SEMF"]) if r["required_relative_precision_SEMF"] else float("nan") for r in rows_out]
     rel_yuk = [float(r["required_relative_precision_Yukawa"]) if r["required_relative_precision_Yukawa"] else float("nan") for r in rows_out]
 
-    fig = plt.figure(figsize=(13.2, 8.4))
+    axis_label_font = 18.0
+    panel_title_font = 19.4
+    legend_font = 15.4
+    tick_font = 15.6
+    compact_tick_font = 15.0
+    suptitle_font = 20.6
+
+    fig = plt.figure(figsize=(14.4, 11.4))
     gs = fig.add_gridspec(2, 2)
 
     ax0 = fig.add_subplot(gs[0, 0])
     ax0.scatter(a_vals, d_semf, s=8, alpha=0.20, color="tab:red", label="abs(P-SEMF)")
     ax0.scatter(a_vals, d_yuk, s=8, alpha=0.20, color="tab:blue", label="abs(P-Yukawa)")
-    ax0.set_xlabel("A")
-    ax0.set_ylabel("abs(Delta B) [MeV]")
-    ax0.set_title("Differential magnitude across all nuclei")
+    ax0.set_xlabel("A", fontsize=axis_label_font)
+    ax0.set_ylabel("abs(Delta B) [MeV]", fontsize=axis_label_font)
+    ax0.set_title("Differential magnitude across all nuclei", fontsize=panel_title_font)
     ax0.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax0.legend(loc="upper left", fontsize=8)
+    ax0.legend(loc="upper left", fontsize=legend_font)
+    ax0.tick_params(axis="both", labelsize=tick_font)
 
     ax1 = fig.add_subplot(gs[0, 1])
     top_semf_for_plot = sorted_semf[:10]
@@ -258,21 +274,23 @@ def main() -> None:
     vals = [float(r["abs_Delta_B_P_minus_SEMF_MeV"]) for r in top_semf_for_plot]
     ax1.bar(range(len(vals)), vals, color="tab:red", alpha=0.85)
     ax1.set_xticks(range(len(vals)))
-    ax1.set_xticklabels(lbls, rotation=30, ha="right")
-    ax1.set_ylabel("abs(Delta B_P-SEMF) [MeV]")
-    ax1.set_title("Top-10 nuclei by differential signal (P vs SEMF)")
+    ax1.set_xticklabels(lbls, rotation=36, ha="right")
+    ax1.set_ylabel("abs(Delta B_P-SEMF) [MeV]", fontsize=axis_label_font)
+    ax1.set_title("Top-10 nuclei by differential signal (P vs SEMF)", fontsize=panel_title_font)
     ax1.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
+    ax1.tick_params(axis="both", labelsize=compact_tick_font)
 
     ax2 = fig.add_subplot(gs[1, 0])
     semf_log = [math.log10(v) for v in rel_semf if math.isfinite(v) and v > 0]
     yuk_log = [math.log10(v) for v in rel_yuk if math.isfinite(v) and v > 0]
     ax2.hist(semf_log, bins=60, alpha=0.55, color="tab:red", label="required rel sigma (P-SEMF)")
     ax2.hist(yuk_log, bins=60, alpha=0.55, color="tab:blue", label="required rel sigma (P-Yukawa)")
-    ax2.set_xlabel("log10(required relative sigma at 3sigma)")
-    ax2.set_ylabel("count")
-    ax2.set_title("Precision requirement distribution")
+    ax2.set_xlabel("log10(required relative sigma at 3sigma)", fontsize=axis_label_font)
+    ax2.set_ylabel("count", fontsize=axis_label_font)
+    ax2.set_title("Precision requirement distribution", fontsize=panel_title_font)
     ax2.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax2.legend(loc="upper left", fontsize=8)
+    ax2.legend(loc="upper left", fontsize=legend_font)
+    ax2.tick_params(axis="both", labelsize=tick_font)
 
     ax3 = fig.add_subplot(gs[1, 1])
     g_labels = ["light<=40", "41<=mid<=120", "heavy>=121"]
@@ -285,16 +303,19 @@ def main() -> None:
     ax3.bar([i + w / 2 for i in x], g_vals_yuk, width=w, color="tab:blue", alpha=0.85, label="median abs(P-Yukawa)")
     ax3.set_xticks(x)
     ax3.set_xticklabels(g_labels)
-    ax3.set_ylabel("median abs(Delta B) [MeV]")
-    ax3.set_title("Differential scale by A category")
+    ax3.set_ylabel("median abs(Delta B) [MeV]", fontsize=axis_label_font)
+    ax3.set_title("Differential scale by A category", fontsize=panel_title_font)
     ax3.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax3.legend(loc="upper left", fontsize=8)
+    ax3.legend(loc="upper left", fontsize=legend_font)
+    ax3.tick_params(axis="both", labelsize=tick_font)
 
-    fig.suptitle("Phase 7 / Step 7.13.17.12: quantitative differential predictions and precision targets", y=1.01)
-    fig.subplots_adjust(left=0.06, right=0.98, top=0.91, bottom=0.09, wspace=0.22, hspace=0.30)
+    fig.suptitle("quantitative differential predictions and precision targets", y=0.99, fontsize=suptitle_font)
+    fig.subplots_adjust(left=0.06, right=0.98, top=0.93, bottom=0.09, wspace=0.22, hspace=0.32)
 
     out_png = out_dir / "nuclear_binding_energy_frequency_mapping_differential_quantification.png"
+    out_pdf = out_dir / "nuclear_binding_energy_frequency_mapping_differential_quantification.pdf"
     fig.savefig(out_png, bbox_inches="tight")
+    fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
 
     group_stats = {}
@@ -327,7 +348,7 @@ def main() -> None:
                 },
                 "group_stats": group_stats,
                 "top20_csv": str(out_top) if top_rows else None,
-                "outputs": {"png": str(out_png), "csv": str(out_csv)},
+                "outputs": {"png": str(out_png), "pdf": str(out_pdf), "csv": str(out_csv)},
                 "notes": [
                     "Current sigma_B_obs comes from AME-side tabulated values in the frozen CSV and is used only as an operational precision indicator.",
                     "This step freezes candidate nuclei and precision scale before introducing any new model freedom.",
@@ -341,6 +362,7 @@ def main() -> None:
 
     print("[ok] wrote:")
     print(f"  {out_png}")
+    print(f"  {out_pdf}")
     print(f"  {out_csv}")
     # 条件分岐: `top_rows` を満たす経路を評価する。
     if top_rows:

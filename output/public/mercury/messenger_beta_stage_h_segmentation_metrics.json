@@ -1,0 +1,125 @@
+{
+  "generated_utc": "2026-03-07T16:21:08.299474+00:00",
+  "phase_step": "8.7.48.8",
+  "overall_status": "pass",
+  "branch_status": {
+    "odf": "pass",
+    "tnf": "pass"
+  },
+  "branch_status_all_types_diagnostic": {
+    "odf": "pass",
+    "tnf": "watch"
+  },
+  "baseline_by_branch": {
+    "odf": {
+      "n_rows": 5120,
+      "n_range_rows": 1833,
+      "n_doppler_rows": 3287,
+      "beta_dyn": 1.027456669475309,
+      "beta_sigma": 0.066109363199233,
+      "beta_z_from_1": 0.4153219475517115,
+      "fit_status": "watch",
+      "rms_range": 206428.10861429782,
+      "rms_doppler": 24020.213363342406
+    },
+    "tnf": {
+      "n_rows": 3176,
+      "n_range_rows": 992,
+      "n_doppler_rows": 2184,
+      "beta_dyn": 332.5464296648328,
+      "beta_sigma": 122.77266866142044,
+      "beta_z_from_1": 2.7004905349020607,
+      "fit_status": "watch",
+      "rms_range": 41649896.522470914,
+      "rms_doppler": 2335.986583068018
+    }
+  },
+  "branch_meta": {
+    "odf": {
+      "n_rows_joint": 5120,
+      "n_rows_range": 1833,
+      "n_rows_doppler": 3287,
+      "n_station_unique": 13,
+      "n_link_type_unique": 3,
+      "n_campaign_unique": 193,
+      "n_rows_doppler_raw": 1885257,
+      "n_rows_range_raw": 7277,
+      "n_rows_doppler_filtered": 1756040,
+      "n_rows_range_filtered": 7277,
+      "n_rows_doppler_removed_by_link_policy": 129217,
+      "n_rows_range_removed_by_link_policy": 0,
+      "operational_link_types": [
+        "unknown",
+        "two-way",
+        "three-way"
+      ]
+    },
+    "tnf": {
+      "n_rows_joint": 3176,
+      "n_rows_range": 992,
+      "n_rows_doppler": 2184,
+      "n_station_unique": 13,
+      "n_link_type_unique": 2,
+      "n_campaign_unique": 115,
+      "n_rows_doppler_raw": 3312694,
+      "n_rows_range_raw": 2255,
+      "n_rows_doppler_filtered": 3312694,
+      "n_rows_range_filtered": 2255,
+      "n_rows_doppler_removed_by_link_policy": 0,
+      "n_rows_range_removed_by_link_policy": 0,
+      "operational_link_types": []
+    }
+  },
+  "segment_policy": {
+    "segment_delta_pass_abs_z": 2.0,
+    "segment_delta_watch_abs_z": 5.0,
+    "segment_min_joint_rows": 60,
+    "segment_min_coverage_rows": 120,
+    "segment_min_consistency_rows": 120,
+    "consistency_pass_chi2_dof": 3.0,
+    "consistency_watch_chi2_dof": 8.0,
+    "top_station_n": 6,
+    "top_campaign_n": 8,
+    "odf_operational_link_types": [
+      "unknown",
+      "two-way",
+      "three-way"
+    ],
+    "tnf_operational_link_types": [],
+    "required_segmentation_types_by_branch": {
+      "odf": [
+        "station",
+        "link_type"
+      ],
+      "tnf": [
+        "station"
+      ]
+    },
+    "diagnostic_segmentation_types_by_branch": {
+      "odf": [
+        "campaign"
+      ],
+      "tnf": [
+        "link_type",
+        "campaign"
+      ]
+    }
+  },
+  "counts": {
+    "n_segment_rows": 33,
+    "n_consistency_rows": 6
+  },
+  "plot": "generated",
+  "outputs_private": [
+    "output/private/mercury/messenger_beta_stage_h_segmentation_summary.csv",
+    "output/private/mercury/messenger_beta_stage_h_segmentation_consistency.csv",
+    "output/private/mercury/messenger_beta_stage_h_segmentation_audit.pdf",
+    "output/private/mercury/messenger_beta_stage_h_segmentation_audit.png"
+  ],
+  "outputs_public": [
+    "output/public/mercury/messenger_beta_stage_h_segmentation_summary.csv",
+    "output/public/mercury/messenger_beta_stage_h_segmentation_consistency.csv",
+    "output/public/mercury/messenger_beta_stage_h_segmentation_audit.pdf",
+    "output/public/mercury/messenger_beta_stage_h_segmentation_audit.png"
+  ]
+}

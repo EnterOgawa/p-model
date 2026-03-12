@@ -178,6 +178,7 @@ def build_payload(
     nonrel_json: Path,
     deriv_pack_json: Path,
     chain_lock_json: Path,
+    expected_shared_gate_policy: str = "strict_hard",
 ) -> Dict[str, Any]:
     action = _read_json(action_json)
     nonrel = _read_json(nonrel_json)
@@ -209,6 +210,7 @@ def build_payload(
 
     chain_decision = chain.get("decision") if isinstance(chain.get("decision"), dict) else {}
     chain_watch_conv = chain_decision.get("watch_convergence") if isinstance(chain_decision.get("watch_convergence"), dict) else {}
+    chain_shared_gate_policy = str(chain_decision.get("shared_gate_policy") or "unknown")
 
     required_equations = [
         "lagrangian_density",
@@ -413,6 +415,16 @@ def build_payload(
             note="導出チェーン全体で hard fail が無い。",
         ),
         CheckRow(
+            cid="chain::shared_gate_policy",
+            metric="shared_gate_policy(chain_lock)",
+            value=chain_shared_gate_policy,
+            expected=expected_shared_gate_policy,
+            passed=(chain_shared_gate_policy == expected_shared_gate_policy),
+            gate_level="watch",
+            source="derivation_observable_chain_lock_audit",
+            note="chain lock が想定どおりの shared gate policy で生成されている。",
+        ),
+        CheckRow(
             cid="chain::watch_convergence",
             metric="remaining_watch_n",
             value=chain_watch_conv.get("remaining_watch_n"),
@@ -461,6 +473,8 @@ def build_payload(
             "action_fail_ids": action_fail_ids,
             "deriv_watchlist": list(deriv_decision.get("watchlist") or []),
             "chain_watchlist": list(chain_decision.get("watchlist") or []),
+            "chain_shared_gate_policy": chain_shared_gate_policy,
+            "expected_shared_gate_policy": expected_shared_gate_policy,
         },
         "decision": {
             "overall_status": overall_status,
@@ -468,6 +482,7 @@ def build_payload(
             "watch_ids": watch_ids,
             "route_a_gate": str(deriv_decision.get("route_a_gate") or ""),
             "transition": str(deriv_decision.get("transition") or ""),
+            "shared_gate_policy": chain_shared_gate_policy,
             "rule": (
                 "Reject if any hard closure check fails; "
                 "watch if only non-hard watch-convergence check fails; otherwise pass."
@@ -543,7 +558,9 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
         unique = bool(row.get("unique_route"))
         obs_values.append(1.0 if present and unique else (0.5 if present else 0.0))
 
-    fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(12.4, 8.2), dpi=180, gridspec_kw={"height_ratios": [3.0, 1.4]})
+    # 上段（閉包監査）の可読性を図8相当に合わせるため、上段比率を拡大する。
+
+    fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(12.4, 9.4), dpi=180, gridspec_kw={"height_ratios": [4.6, 1.4]})
 
     y = np.arange(len(labels))
     ax0.barh(y, scores, color=colors)
@@ -596,6 +613,12 @@ def main(argv: Optional[List[str]] = None) -> int:
         type=str,
         default=str(ROOT / "output" / "public" / "quantum" / "derivation_observable_chain_lock_audit.json"),
         help="Input derivation-observable chain lock audit JSON.",
+    )
+    parser.add_argument(
+        "--shared-gate-policy",
+        choices=["strict_hard", "watch_if_bell_pairing_only"],
+        default="strict_hard",
+        help="Expected shared gate policy id propagated from chain-lock audit.",
     )
     parser.add_argument(
         "--out-json",
@@ -670,6 +693,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         nonrel_json=nonrel_json,
         deriv_pack_json=deriv_pack_json,
         chain_lock_json=chain_lock_json,
+        expected_shared_gate_policy=str(args.shared_gate_policy),
     )
 
     out_json.parent.mkdir(parents=True, exist_ok=True)
@@ -712,4 +736,3 @@ def main(argv: Optional[List[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

@@ -1,0 +1,52 @@
+{
+  "generated_utc": "2026-03-08T05:02:41.394501+00:00",
+  "phase": {
+    "step": "8.7.47.14"
+  },
+  "input": {
+    "points_csv": "output/private/llr/batch/llr_batch_points.csv",
+    "station_meta_dir": "data/llr/stations",
+    "n_points": 13079,
+    "n_station": 5,
+    "n_target": 6,
+    "fit_mode": "station_target_year",
+    "weight_scheme": "inv_station_target",
+    "min_points_cut": 20,
+    "min_gap_years": 3,
+    "min_points_group": 50,
+    "station_cut_overrides": {}
+  },
+  "station_cut": {
+    "n_station_total": 5,
+    "n_station_with_cut": 4,
+    "n_station_single_period": 1,
+    "station_cut_csv": "output/private/llr/llr_kappa_llr_hardware_period_station_cut_summary.csv",
+    "candidate_cut_csv": "output/private/llr/llr_kappa_llr_hardware_period_candidate_cuts.csv"
+  },
+  "hardware_period_fit": {
+    "fit_mode": "station_target_year",
+    "n_groups_total": 32,
+    "n_groups_valid": 21,
+    "weighted_mean_kappa": 1.678599506034696,
+    "weighted_sigma_kappa": 0.03555412928354562,
+    "chi2_dof_cluster": 0.7194522843148609,
+    "status_cluster": "pass",
+    "summary_csv": "output/private/llr/llr_kappa_llr_station_target_hardware_period_summary.csv"
+  },
+  "boundary_discontinuity": {
+    "n_pairs": 8,
+    "max_abs_z_delta": 1.1756148002992028,
+    "status": "pass",
+    "summary_csv": "output/private/llr/llr_kappa_llr_hardware_period_boundary_discontinuity.csv"
+  },
+  "gate_status": {
+    "station_target_hardware_period_gate": "pass",
+    "period_boundary_discontinuity_gate": "pass",
+    "overall_status": "pass"
+  },
+  "outputs": {
+    "metrics_json": "output/private/llr/llr_kappa_llr_hardware_period_metrics.json",
+    "plot_pdf": "output/private/llr/llr_kappa_llr_hardware_period_audit.pdf",
+    "plot_png": "output/private/llr/llr_kappa_llr_hardware_period_audit.png"
+  }
+}

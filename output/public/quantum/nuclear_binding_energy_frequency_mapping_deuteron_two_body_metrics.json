@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T14:11:26.235718+00:00",
+  "generated_utc": "2026-03-11T13:56:13.540779+00:00",
   "phase": 7,
   "step": "7.13.17.2",
   "sources": [
@@ -84,6 +84,7 @@
     ]
   },
   "outputs": {
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_energy_frequency_mapping_deuteron_two_body.pdf",
     "png": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_energy_frequency_mapping_deuteron_two_body.png"
   }
 }

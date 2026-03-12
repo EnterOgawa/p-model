@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-27T02:42:21.801585+00:00",
+  "generated_utc": "2026-03-12T01:15:50.193873+00:00",
   "phase": 7,
   "step": "7.16.12",
   "title": "Atom-interferometer unified audit (gravimeter/gyroscope/clock)",
@@ -58,6 +58,8 @@
   "outputs": {
     "summary_csv": "C:\\develop\\waveP\\output\\public\\quantum\\atom_interferometer_unified_audit_summary.csv",
     "summary_png": "C:\\develop\\waveP\\output\\public\\quantum\\atom_interferometer_unified_audit.png",
-    "legacy_png": "C:\\develop\\waveP\\output\\public\\quantum\\gravity_quantum_interference_delta_predictions.png"
+    "summary_pdf": "C:\\develop\\waveP\\output\\public\\quantum\\atom_interferometer_unified_audit.pdf",
+    "legacy_png": "C:\\develop\\waveP\\output\\public\\quantum\\gravity_quantum_interference_delta_predictions.png",
+    "legacy_pdf": "C:\\develop\\waveP\\output\\public\\quantum\\gravity_quantum_interference_delta_predictions.pdf"
   }
 }

@@ -937,7 +937,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 thr = float(nir_out["threshold_mJy"])
                 ax.errorbar([med], [0], xerr=[sig], fmt="o", color="black", capsize=4, label="median ±1σ")
                 ax.axvline(thr, color="tab:red", linestyle="--", label="threshold (1.0 mJy)")
-                # Context from GRAVITY 2020 percentiles (Table 1): p86/p95 (2017) and p5 (2017-2019 avg).
+                # Context from GRAVITY 2020 percentiles (first table): p86/p95 (2017) and p5 (2017-2019 avg).
                 gby = nir_out.get("gravity2020_percentiles_avg_by_year") if isinstance(nir_out.get("gravity2020_percentiles_avg_by_year"), dict) else None
                 # 条件分岐: `isinstance(gby, dict)` を満たす経路を評価する。
                 if isinstance(gby, dict):

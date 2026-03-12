@@ -1,0 +1,2 @@
+phase_step,overall_status,beta_dyn,beta_sigma,beta_z_from_1,rss,dof,rms_observable,status_data,status_sigma,status_model,dtype_selected,n_rows_raw,n_rows_selected,n_rows_binned,n_station
+8.7.48.3,watch,6776.396818618639,7655.168143725536,0.8850748528851075,77825175337248.42,1813,206334.55144748068,pass,watch,watch,37,7277,7277,1828,13

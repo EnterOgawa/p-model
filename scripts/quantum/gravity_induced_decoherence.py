@@ -8,6 +8,10 @@ from pathlib import Path
 import numpy as np
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # クラス: `Config` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Config:
@@ -115,7 +119,7 @@ def main() -> None:
 
     import matplotlib.pyplot as plt
 
-    fig, axes = plt.subplots(1, 2, figsize=(13.6, 5.4), dpi=150)
+    fig, axes = plt.subplots(2, 1, figsize=(12.8, 10.4), dpi=165)
 
     ax = axes[0]
     for c in curves:
@@ -131,11 +135,12 @@ def main() -> None:
 
     ax.set_xscale("log")
     ax.set_ylim(-0.02, 1.02)
-    ax.set_xlabel("interrogation time T (s)")
-    ax.set_ylabel("visibility V (Ramsey contrast; model)")
-    ax.set_title("Gravity-induced dephasing (optical clock ensemble; Gaussian height spread)")
+    ax.set_xlabel("interrogation time T (s)", fontsize=14.0)
+    ax.set_ylabel("visibility V (Ramsey contrast; model)", fontsize=14.0)
+    ax.set_title("Gravity-induced dephasing (optical clock ensemble; Gaussian height spread)", fontsize=15.2)
     ax.grid(True, which="both", ls=":", lw=0.6, alpha=0.7)
-    ax.legend(fontsize=8, frameon=True, loc="lower left")
+    ax.legend(fontsize=12.0, frameon=True, loc="lower left")
+    ax.tick_params(axis="both", labelsize=12.4)
 
     ax = axes[1]
     colors = {0.9: "#1f77b4", 0.5: "#d62728"}
@@ -147,17 +152,20 @@ def main() -> None:
 
     ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.set_xlabel("interrogation time T (s)")
-    ax.set_ylabel("required σ_y (RMS fractional rate noise)")
-    ax.set_title("P-model time-structure: σ_y needed to mimic decoherence (run-to-run)")
+    ax.set_xlabel("interrogation time T (s)", fontsize=14.0)
+    ax.set_ylabel("required σ_y (RMS fractional rate noise)", fontsize=14.0)
+    ax.set_title("P-model time-structure: σ_y needed to mimic decoherence (run-to-run)", fontsize=15.2)
     ax.grid(True, which="both", ls=":", lw=0.6, alpha=0.7)
-    ax.legend(fontsize=8, frameon=True, loc="upper right")
+    ax.legend(fontsize=12.0, frameon=True, loc="upper right")
+    ax.tick_params(axis="both", labelsize=12.4)
 
-    fig.suptitle("Gravity-induced decoherence: observables and noise budget (Phase 7 / Step 7.6)", y=1.02)
-    fig.tight_layout()
+    fig.suptitle("Gravity-induced decoherence: observables and noise budget", y=0.99, fontsize=16.6)
+    fig.tight_layout(rect=(0, 0, 1, 0.97))
 
     out_png = out_dir / "gravity_induced_decoherence.png"
+    out_pdf = out_dir / "gravity_induced_decoherence.pdf"
     fig.savefig(out_png, bbox_inches="tight")
+    fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
 
     metrics = {
@@ -219,7 +227,7 @@ def main() -> None:
                 "targets": [{"vis": row["vis"], "sr": row["sr"].tolist(), "cs": row["cs"].tolist()} for row in sigma_y_req],
             },
         },
-        "outputs": {"png": str(out_png)},
+        "outputs": {"png": str(out_png), "pdf": str(out_pdf)},
         "notes": [
             "The ensemble model is inhomogeneous dephasing (not dynamical environment-induced decoherence).",
             "The σ_y model is a minimal parametrization of extra time-structure noise (P-model-specific); real experiments may have correlated noise between arms.",
@@ -229,6 +237,7 @@ def main() -> None:
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(f"[ok] png : {out_png}")
+    print(f"[ok] pdf : {out_pdf}")
     print(f"[ok] json: {out_json}")
 
 

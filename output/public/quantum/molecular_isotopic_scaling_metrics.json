@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-27T02:42:20.041643+00:00",
+  "generated_utc": "2026-03-12T01:15:45.801598+00:00",
   "phase": 7,
   "step": "7.12",
   "title": "Isotopic reduced-mass scaling check (WebBook diatomic constants)",
@@ -81,6 +81,7 @@
     "B_e_ref_cm^-1": 60.853
   },
   "outputs": {
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\molecular_isotopic_scaling.pdf",
     "png": "C:\\develop\\waveP\\output\\public\\quantum\\molecular_isotopic_scaling.png"
   }
 }

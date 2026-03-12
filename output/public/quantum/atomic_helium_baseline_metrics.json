@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T14:02:02.615965+00:00",
+  "generated_utc": "2026-03-11T13:53:42.633593+00:00",
   "phase": 7,
   "step": "7.12",
   "title": "Atomic baseline (Helium; NIST ASD)",
@@ -48,5 +48,9 @@
       "Type": null
     }
   ],
-  "note": "This output fixes a small set of observed vacuum wavelengths as a reproducible baseline (multi-electron). P-model derivation of atomic/molecular binding is tracked in Roadmap Step 7.12+."
+  "note": "This output fixes a small set of observed vacuum wavelengths as a reproducible baseline (multi-electron). P-model derivation of atomic/molecular binding is tracked in Roadmap Step 7.12+.",
+  "outputs": {
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\atomic_helium_baseline.pdf",
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\atomic_helium_baseline.png"
+  }
 }

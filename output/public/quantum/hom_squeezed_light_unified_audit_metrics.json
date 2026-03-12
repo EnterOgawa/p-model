@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T14:02:23.312167+00:00",
+  "generated_utc": "2026-03-11T13:56:31.590447+00:00",
   "phase": 7,
   "step": "7.16.14",
   "title": "HOM and squeezed-light unified audit",
@@ -77,7 +77,8 @@
   },
   "outputs": {
     "summary_csv": "C:\\develop\\waveP\\output\\public\\quantum\\hom_squeezed_light_unified_audit_summary.csv",
-    "summary_png": "C:\\develop\\waveP\\output\\public\\quantum\\hom_squeezed_light_unified_audit.png"
+    "summary_png": "C:\\develop\\waveP\\output\\public\\quantum\\hom_squeezed_light_unified_audit.png",
+    "summary_pdf": "C:\\develop\\waveP\\output\\public\\quantum\\hom_squeezed_light_unified_audit.pdf"
   },
   "notes": [
     "HOM significance is measured against the classical 50% reference and delay-stability between 13 ns and 1 us.",

@@ -38,6 +38,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import shutil
 import sys
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
@@ -91,6 +92,19 @@ def _read_json(path: Path) -> Dict[str, Any]:
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+# 関数: `_copy_outputs_to_public` の入出力契約と処理意図を定義する。
+
+def _copy_outputs_to_public(private_paths: Sequence[Path], public_dir: Path) -> Dict[str, str]:
+    public_dir.mkdir(parents=True, exist_ok=True)
+    copied: Dict[str, str] = {}
+    for src in private_paths:
+        dst = public_dir / src.name
+        shutil.copy2(src, dst)
+        copied[src.name] = str(dst).replace("\\", "/")
+
+    return copied
 
 
 # 関数: `_maybe_float` の入出力契約と処理意図を定義する。
@@ -361,6 +375,8 @@ def _plot(
 ) -> Dict[str, Any]:
     _set_japanese_font()
     import matplotlib.pyplot as plt
+    import matplotlib.patches as mpatches
+    from matplotlib import colors as mcolors
 
     eps_obs = float(constraint.epsilon0_obs)
     sig = float(constraint.epsilon0_sigma)
@@ -408,29 +424,67 @@ def _plot(
         y_vals=y3,
     )
 
-    fig, axes = plt.subplots(1, 3, figsize=(18, 5.8))
+    fig = plt.figure(figsize=(14.6, 14.2))
+    # 上段2枚 + 下段中央1枚（上段2枚と同幅）+ 右に色バー。
+    # 注: Figure 48 の下段パネル高さを上段と揃え、Y軸の見かけサイズ差を解消する。
+    grid = fig.add_gridspec(
+        2,
+        3,
+        height_ratios=[1.0, 1.0],
+        width_ratios=[1.0, 1.0, 0.055],
+        hspace=0.21,
+        wspace=0.10,
+    )
+    ax_top_left = fig.add_subplot(grid[0, 0])
+    ax_top_right = fig.add_subplot(grid[0, 1])
+    ax_bottom = fig.add_subplot(grid[1, 0:2])
+    axes = [ax_top_left, ax_top_right, ax_bottom]
+    cax = fig.add_subplot(grid[:, 2])
 
     # 関数: `draw_panel` の入出力契約と処理意図を定義する。
-    def draw_panel(ax, xx, yy, zz, title: str, xlabel: str, ylabel: str) -> None:
-        # Clip to keep colors readable.
+    def draw_panel(
+        ax,
+        xx,
+        yy,
+        zz,
+        title: str,
+        xlabel: str,
+        ylabel: str,
+        *,
+        ylabel_side: str = "left",
+        title_pad: float = 8.0,
+        title_fontsize: float = 15.0,
+    ) -> None:
+        # Clip to keep colors readable. Use contourf instead of imshow so PDF stays vector-friendly.
         z_clip = np.clip(zz, -8.0, 8.0)
-        im = ax.imshow(
+        levels = np.linspace(-8.0, 8.0, 65)
+        im = ax.contourf(
+            xx,
+            yy,
             z_clip,
-            origin="lower",
-            aspect="auto",
-            extent=(float(xx[0]), float(xx[-1]), float(yy[0]), float(yy[-1])),
+            levels=levels,
             cmap="coolwarm",
             vmin=-8.0,
             vmax=8.0,
+            antialiased=True,
         )
         # Contours for |z| = 1 and 3, and z=0.
         cs0 = ax.contour(xx, yy, zz, levels=[0.0], colors=["#111111"], linewidths=1.2)
         cs1 = ax.contour(xx, yy, np.abs(zz), levels=[1.0, 3.0], colors=["#111111"], linestyles=["--", ":"], linewidths=1.0)
-        ax.clabel(cs0, fmt={0.0: "z=0"}, inline=True, fontsize=8)
-        ax.clabel(cs1, fmt={1.0: "|z|=1", 3.0: "|z|=3"}, inline=True, fontsize=8)
-        ax.set_title(title, fontsize=11)
-        ax.set_xlabel(xlabel)
-        ax.set_ylabel(ylabel)
+        ax.clabel(cs0, fmt={0.0: "z=0"}, inline=True, fontsize=11)
+        ax.clabel(cs1, fmt={1.0: "|z|=1", 3.0: "|z|=3"}, inline=True, fontsize=11)
+        ax.set_title(title, fontsize=title_fontsize, pad=title_pad)
+        ax.set_xlabel(xlabel, fontsize=13.2)
+        # 上段右パネルは中央境界で縦軸ラベルが重なりやすいため、
+        # 右側配置にも対応する。
+        if ylabel_side == "right":
+            ax.set_ylabel(ylabel, fontsize=13.2, labelpad=10.0)
+            ax.yaxis.set_label_position("right")
+        elif ylabel_side == "none":
+            ax.set_ylabel("")
+        else:
+            ax.set_ylabel(ylabel, fontsize=13.2)
+        ax.tick_params(labelsize=11.8)
         ax.grid(False)
         return im
 
@@ -439,18 +493,23 @@ def _plot(
         x1,
         y1,
         z1,
-        "Slice A: 標準光源進化なし（s_L=0）\n不透明度 α vs 定規進化 s_R",
+        "Slice A: s_L=0（標準光源進化なし）\n不透明度 α vs 定規進化 s_R",
         "α（灰色不透明度のべき指数）",
         "s_R（標準定規のサイズ進化）",
+        title_pad=8.0,
+        title_fontsize=13.2,
     )
     draw_panel(
         axes[1],
         x2,
         y2,
         z2,
-        "Slice B: 定規進化なし（s_R=0）\n不透明度 α vs 光源進化 s_L",
+        "Slice B: s_R=0（定規進化なし）\n不透明度 α vs 光源進化 s_L",
         "α（灰色不透明度のべき指数）",
         "s_L（標準光源の光度進化）",
+        ylabel_side="right",
+        title_pad=8.0,
+        title_fontsize=13.2,
     )
     draw_panel(
         axes[2],
@@ -460,32 +519,44 @@ def _plot(
         "Slice C: 不透明度なし（α=0）\n定規進化 s_R vs 光源進化 s_L",
         "s_R（標準定規のサイズ進化）",
         "s_L（標準光源の光度進化）",
+        title_pad=10.0,
+        title_fontsize=14.3,
     )
 
-    cbar = fig.colorbar(im1, ax=axes.ravel().tolist(), shrink=0.92, pad=0.02)
-    cbar.set_label("zスコア = (ε0_model - ε0_obs)/σ（赤=大きい, 青=小さい）")
+    # 色バーを画像化せず、矩形パッチでベクター描画する。
+    cmap = plt.get_cmap("coolwarm")
+    norm = mcolors.Normalize(vmin=-8.0, vmax=8.0)
+    color_steps = np.linspace(-8.0, 8.0, 65)
+    for i in range(len(color_steps) - 1):
+        y0 = float(color_steps[i])
+        y1 = float(color_steps[i + 1])
+        yc = 0.5 * (y0 + y1)
+        cax.add_patch(
+            mpatches.Rectangle(
+                (0.0, y0),
+                1.0,
+                y1 - y0,
+                facecolor=cmap(norm(yc)),
+                edgecolor="none",
+            )
+        )
+    cax.set_xlim(0.0, 1.0)
+    cax.set_ylim(-8.0, 8.0)
+    cax.set_xticks([])
+    cax.set_yticks(np.arange(-8, 9, 2))
+    cax.tick_params(labelsize=11.2)
+    cax.yaxis.set_label_position("right")
+    cax.yaxis.tick_right()
+    cax.set_ylabel("zスコア = (ε0_model - ε0_obs)/σ（赤=大きい, 青=小さい）", fontsize=12.2)
 
     fig.suptitle(
-        "宇宙論（Phase 14.2）：静的背景PでDDR（ε0）を回復する“必要補正”のパラメータ空間",
-        fontsize=13,
+        "宇宙論：静的背景PでDDR（ε0）を回復する“必要補正”のパラメータ空間",
+        fontsize=14.2,
+        y=0.978,
     )
-    fig.text(
-        0.5,
-        0.02,
-        (
-            f"入力: {constraint.short_label}（ε0_obs={_fmt_float(eps_obs, digits=3)}±{_fmt_float(sig, digits=3)}"
-            + (
-                f"; σ_cat≈{_fmt_float(constraint.sigma_sys_category, digits=3)}（rawσ={_fmt_float(constraint.epsilon0_sigma_raw, digits=3)}）"
-                if str(getattr(constraint, "sigma_policy", "raw")) == "category_sys"
-                else ""
-            )
-            + "）"
-            f" / 仮定: p_e={_fmt_float(p_e, digits=2)}, p_t={_fmt_float(p_t, digits=2)}（p_t=1はSN時間伸長に整合）"
-        ),
-        ha="center",
-        fontsize=10,
-    )
-    fig.subplots_adjust(left=0.05, right=0.985, bottom=0.12, top=0.86, wspace=0.28)
+    # Figure 48: 上段2枚の長いタイトル同士の重なりを避けるため、上段間隔を広げる。
+    # 図下注記は論文本文側へ移し、図中の重なりを回避する。
+    fig.subplots_adjust(left=0.07, right=0.955, top=0.858, bottom=0.055, wspace=0.16)
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
@@ -596,6 +667,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     out_png = out_dir / "cosmology_reconnection_parameter_space.png"
     out_json = out_dir / "cosmology_reconnection_parameter_space_metrics.json"
+    public_dir = _ROOT / "output" / "public" / "cosmology"
 
     p_e = float(args.p_e)
     p_t = float(args.p_t)
@@ -624,11 +696,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "constraints": [c.__dict__ for c in constraints],
         "primary": metrics,
         "outputs": {"png": str(out_png).replace("\\", "/"), "metrics_json": str(out_json).replace("\\", "/")},
+        "outputs_public": {
+            "png": str(public_dir / out_png.name).replace("\\", "/"),
+            "metrics_json": str(public_dir / out_json.name).replace("\\", "/"),
+        },
     }
     _write_json(out_json, payload)
+    copied_public = _copy_outputs_to_public([out_png, out_json], public_dir)
 
     print(f"[ok] png : {out_png}")
     print(f"[ok] json: {out_json}")
+    print(f"[ok] public png : {copied_public.get(out_png.name)}")
+    print(f"[ok] public json: {copied_public.get(out_json.name)}")
 
     try:
         worklog.append_event(
@@ -636,7 +715,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "event_type": "cosmology_reconnection_parameter_space",
                 "argv": list(sys.argv),
                 "inputs": {"data": data_path},
-                "outputs": {"png": out_png, "metrics_json": out_json},
+                "outputs": {
+                    "png": out_png,
+                    "metrics_json": out_json,
+                    "public_png": public_dir / out_png.name,
+                    "public_metrics_json": public_dir / out_json.name,
+                },
                 "params": {"p_e": p_e, "p_t": p_t, "grid": n_grid, "ranges": ranges},
             }
         )

@@ -1,8 +1,8 @@
 {
-  "generated_utc": "2026-02-21T14:32:01.497325+00:00",
+  "generated_utc": "2026-03-04T08:09:33.826384+00:00",
   "inputs": {
-    "shadow_compare_json": "output\\public\\eht\\eht_shadow_compare.json",
-    "kappa_budget_json": "output\\public\\eht\\eht_kappa_error_budget.json"
+    "shadow_compare_json": "C:\\develop\\waveP\\output\\private\\eht\\eht_shadow_compare.json",
+    "kappa_budget_json": "C:\\develop\\waveP\\output\\private\\eht\\eht_kappa_error_budget.json"
   },
   "equations": {
     "optical_metric": "g_opt_{μν}=g_{μν}(P)+(1-n(P)^{-2})U_μU_ν,  n(P)=(P/P0)^(2β)",
@@ -65,9 +65,9 @@
   ],
   "overall_status": "pass",
   "outputs": {
-    "json": "output\\private\\eht\\eht_kappa_first_principles_transfer.json",
-    "csv": "output\\private\\eht\\eht_kappa_first_principles_transfer.csv",
-    "plot_png": "output\\private\\eht\\eht_kappa_first_principles_transfer.png"
+    "json": "C:\\develop\\waveP\\output\\private\\eht\\eht_kappa_first_principles_transfer.json",
+    "csv": "C:\\develop\\waveP\\output\\private\\eht\\eht_kappa_first_principles_transfer.csv",
+    "plot_png": "C:\\develop\\waveP\\output\\private\\eht\\eht_kappa_first_principles_transfer.png"
   },
   "summary": {
     "n_rows": 2,

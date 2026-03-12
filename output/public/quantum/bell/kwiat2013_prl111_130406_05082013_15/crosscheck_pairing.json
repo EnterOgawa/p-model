@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-20T12:38:33.679948+00:00",
+  "generated_utc": "2026-03-11T13:54:44.573417+00:00",
   "dataset_id": "kwiat2013_prl111_130406_05082013_15",
   "supported": true,
   "baseline": {
@@ -50,15 +50,15 @@
   "inputs": {
     "natural_window_frozen_json": {
       "path": "output/public/quantum/bell/kwiat2013_prl111_130406_05082013_15/natural_window_frozen.json",
-      "sha256": "9099c2618a0591e1483751b42cc71a93b852bc15756cf6c901c4e8b7bff80ffa"
+      "sha256": "98902e8bafd67d227001dadfb91d65eda9135c3cd1b8ff997f8dc4ab6862373d"
     },
     "trial_based_counts_json": {
       "path": "output/public/quantum/bell/kwiat2013_prl111_130406_05082013_15/trial_based_counts.json",
-      "sha256": "132f9d0ebbeb116b8782ba11d5467c3a19dd25fa6d9bdbb41320e9c1f9999967"
+      "sha256": "0398256f1ea2b4c6cdac4c86985d9c665380f304727bf0d145909cdd9366ca25"
     },
     "window_sweep_metrics_json": {
       "path": "output/public/quantum/bell/kwiat2013_prl111_130406_05082013_15/window_sweep_metrics.json",
-      "sha256": "72321ad2de890483d1a8b6833419228bd8c4a1d43213f85f5a3bcd60531c4cf8"
+      "sha256": "3e9558f9c5b61f52e0c64714e8e3eb9c908c7b87ec7c18c32cf8f84ff676d28c"
     }
   },
   "delta": {

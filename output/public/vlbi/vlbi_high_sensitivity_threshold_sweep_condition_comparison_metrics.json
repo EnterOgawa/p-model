@@ -1,0 +1,150 @@
+{
+  "generated_utc": "2026-03-07T05:15:58.256780+00:00",
+  "rows": [
+    {
+      "scenario": "keep_all",
+      "drop_session": "",
+      "recommended_threshold_ns": 10.0,
+      "recommended_n_sessions": 5,
+      "recommended_chi2_dof": 178.59660160292225,
+      "recommended_status": "reject",
+      "candidate_count": 1,
+      "reason": "operational_pool",
+      "delta_recommended_chi2_dof_vs_keep": 0.0
+    },
+    {
+      "scenario": "drop_22MAY09XA",
+      "drop_session": "22MAY09XA",
+      "recommended_threshold_ns": 10.0,
+      "recommended_n_sessions": 4,
+      "recommended_chi2_dof": 203.82507406491536,
+      "recommended_status": "reject",
+      "candidate_count": 1,
+      "reason": "operational_pool",
+      "delta_recommended_chi2_dof_vs_keep": 25.228472461993107
+    },
+    {
+      "scenario": "drop_20MAY04XA",
+      "drop_session": "20MAY04XA",
+      "recommended_threshold_ns": 10.0,
+      "recommended_n_sessions": 4,
+      "recommended_chi2_dof": 53.02268790436338,
+      "recommended_status": "reject",
+      "candidate_count": 1,
+      "reason": "operational_pool",
+      "delta_recommended_chi2_dof_vs_keep": -125.57391369855887
+    }
+  ],
+  "threshold_rows": [
+    {
+      "scenario": "keep_all",
+      "drop_session": "",
+      "threshold_ns": 10.0,
+      "n_sessions": 5,
+      "chi2_dof": 178.59660160292225,
+      "status": "reject"
+    },
+    {
+      "scenario": "keep_all",
+      "drop_session": "",
+      "threshold_ns": 12.0,
+      "n_sessions": 2,
+      "chi2_dof": 5.84552306659975,
+      "status": "reject"
+    },
+    {
+      "scenario": "keep_all",
+      "drop_session": "",
+      "threshold_ns": 15.0,
+      "n_sessions": 2,
+      "chi2_dof": 5.84552306659975,
+      "status": "reject"
+    },
+    {
+      "scenario": "keep_all",
+      "drop_session": "",
+      "threshold_ns": 20.0,
+      "n_sessions": 2,
+      "chi2_dof": 5.84552306659975,
+      "status": "reject"
+    },
+    {
+      "scenario": "drop_22MAY09XA",
+      "drop_session": "22MAY09XA",
+      "threshold_ns": 10.0,
+      "n_sessions": 4,
+      "chi2_dof": 203.82507406491536,
+      "status": "reject"
+    },
+    {
+      "scenario": "drop_22MAY09XA",
+      "drop_session": "22MAY09XA",
+      "threshold_ns": 12.0,
+      "n_sessions": 2,
+      "chi2_dof": 5.84552306659975,
+      "status": "reject"
+    },
+    {
+      "scenario": "drop_22MAY09XA",
+      "drop_session": "22MAY09XA",
+      "threshold_ns": 15.0,
+      "n_sessions": 2,
+      "chi2_dof": 5.84552306659975,
+      "status": "reject"
+    },
+    {
+      "scenario": "drop_22MAY09XA",
+      "drop_session": "22MAY09XA",
+      "threshold_ns": 20.0,
+      "n_sessions": 2,
+      "chi2_dof": 5.84552306659975,
+      "status": "reject"
+    },
+    {
+      "scenario": "drop_20MAY04XA",
+      "drop_session": "20MAY04XA",
+      "threshold_ns": 10.0,
+      "n_sessions": 4,
+      "chi2_dof": 53.02268790436338,
+      "status": "reject"
+    },
+    {
+      "scenario": "drop_20MAY04XA",
+      "drop_session": "20MAY04XA",
+      "threshold_ns": 12.0,
+      "n_sessions": 2,
+      "chi2_dof": 5.84552306659975,
+      "status": "reject"
+    },
+    {
+      "scenario": "drop_20MAY04XA",
+      "drop_session": "20MAY04XA",
+      "threshold_ns": 15.0,
+      "n_sessions": 2,
+      "chi2_dof": 5.84552306659975,
+      "status": "reject"
+    },
+    {
+      "scenario": "drop_20MAY04XA",
+      "drop_session": "20MAY04XA",
+      "threshold_ns": 20.0,
+      "n_sessions": 2,
+      "chi2_dof": 5.84552306659975,
+      "status": "reject"
+    }
+  ],
+  "decision": {
+    "step": "8.7.46.22",
+    "selected_operational_policy": "keep_all",
+    "selected_threshold_ns": 10.0,
+    "selected_chi2_dof": 178.59660160292225,
+    "status": "reject",
+    "note": "threshold-only metric improves for drop_20MAY04XA, but stable/timeband consistency worsens (step 8.7.46.21); keep_all is retained pending dedicated 20MAY04XA watchpack audit"
+  },
+  "outputs": {
+    "comparison_csv": "C:\\develop\\waveP\\output\\public\\vlbi\\vlbi_high_sensitivity_threshold_sweep_condition_comparison.csv",
+    "metrics_json": "C:\\develop\\waveP\\output\\public\\vlbi\\vlbi_high_sensitivity_threshold_sweep_condition_comparison_metrics.json",
+    "plot_pdf": "C:\\develop\\waveP\\output\\public\\vlbi\\vlbi_high_sensitivity_threshold_sweep_condition_comparison.pdf",
+    "plot_png": "C:\\develop\\waveP\\output\\public\\vlbi\\vlbi_high_sensitivity_threshold_sweep_condition_comparison.png"
+  }
+}

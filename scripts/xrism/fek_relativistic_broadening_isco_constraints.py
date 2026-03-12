@@ -26,6 +26,7 @@ import gzip
 import json
 import math
 import re
+import shutil
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -92,6 +93,22 @@ def _read_json(path: Path) -> Dict[str, Any]:
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+# 関数: `_sync_public_figure_assets` の入出力契約と処理意図を定義する。
+def _sync_public_figure_assets(root: Path, out_png: Path) -> None:
+    out_pdf = out_png.with_suffix(".pdf")
+    public_dir = root / "output" / "public" / "xrism"
+    summary_dir = root / "output" / "private" / "summary" / "figures"
+    public_dir.mkdir(parents=True, exist_ok=True)
+    summary_dir.mkdir(parents=True, exist_ok=True)
+    for src in (out_png, out_pdf):
+        # 条件分岐: `not src.exists()` を満たす経路を評価する。
+        if not src.exists():
+            continue
+
+        shutil.copy2(src, public_dir / src.name)
+        shutil.copy2(src, summary_dir / src.name)
 
 
 # 関数: `_as_bool01` の入出力契約と処理意図を定義する。
@@ -361,6 +378,7 @@ def _plot_isco_constraints(rows: List[Dict[str, str]], *, out_png: Path) -> None
             color="#333333",
         )
         fig.savefig(out_png, dpi=160)
+        fig.savefig(out_png.with_suffix(".pdf"))
         plt.close(fig)
         return
 
@@ -428,12 +446,14 @@ def _plot_isco_constraints(rows: List[Dict[str, str]], *, out_png: Path) -> None
         ax.axis("off")
         ax.text(0.5, 0.5, "Fe-Kα broad line / ISCO: no valid rows", ha="center", va="center", fontsize=12)
         fig.savefig(out_png, dpi=160)
+        fig.savefig(out_png.with_suffix(".pdf"))
         plt.close(fig)
         return
 
     n = len(xs)
-    fig_h = max(3.8, 0.55 * n + 1.6)
-    fig, ax = plt.subplots(1, 1, figsize=(12.0, fig_h))
+    # 注: Figure 30 の可読性改善のため、キャンバスと文字を拡大する。
+    fig_h = max(15.2, 1.06 * n + 6.6)
+    fig, ax = plt.subplots(1, 1, figsize=(22.4, fig_h))
     y = np.arange(n)
 
     for i in range(n):
@@ -445,20 +465,25 @@ def _plot_isco_constraints(rows: List[Dict[str, str]], *, out_png: Path) -> None
 
         # 条件分岐: `total > 0` を満たす経路を評価する。
         if total > 0:
-            ax.hlines(float(y[i]), rin - total, rin + total, color=c, alpha=0.22, linewidth=6.0, zorder=1)
+            ax.hlines(float(y[i]), rin - total, rin + total, color=c, alpha=0.22, linewidth=8.6, zorder=1)
 
         # 条件分岐: `s > 0` を満たす経路を評価する。
 
         if s > 0:
-            ax.hlines(float(y[i]), rin - s, rin + s, color=c, alpha=0.9, linewidth=1.8, zorder=2)
+            ax.hlines(float(y[i]), rin - s, rin + s, color=c, alpha=0.9, linewidth=2.9, zorder=2)
 
-        ax.plot(rin, float(y[i]), marker=markers[i], color=c, markersize=8, zorder=3)
+        ax.plot(rin, float(y[i]), marker=markers[i], color=c, markersize=19.4, zorder=3)
 
     ax.set_yticks(y)
-    ax.set_yticklabels(labels, fontsize=9)
+    ax.set_yticklabels(labels, fontsize=22.4)
     ax.invert_yaxis()
-    ax.set_xlabel("inner radius r_in (r_g)")
-    ax.set_title("Fe-Kα broad line (GX 339-4): inner radius proxy constraints (method-dependent)")
+    ax.set_xlabel("inner radius r_in (r_g)", fontsize=24.6)
+    ax.set_title(
+        "Fe-Kα broad line (GX 339-4): inner radius proxy constraints (method-dependent)",
+        fontsize=27.8,
+        x=0.47,
+    )
+    ax.tick_params(labelsize=21.8)
 
     # Reference ISCO lines (to connect with Step 4.13.7 falsifiability).
     try:
@@ -466,22 +491,23 @@ def _plot_isco_constraints(rows: List[Dict[str, str]], *, out_png: Path) -> None
 
         r_isco_gr = _isco_gr_schwarzschild_rg()
         r_isco_p = _isco_pmodel_exponential_metric_rg()
-        ax.axvline(r_isco_gr, color="#444444", linestyle="--", linewidth=1.2, alpha=0.9, zorder=0)
-        ax.axvline(r_isco_p, color="#444444", linestyle=":", linewidth=1.2, alpha=0.9, zorder=0)
+        ax.axvline(r_isco_gr, color="#444444", linestyle="--", linewidth=1.4, alpha=0.9, zorder=0)
+        ax.axvline(r_isco_p, color="#444444", linestyle=":", linewidth=1.4, alpha=0.9, zorder=0)
         ax.legend(
             handles=[
-                Line2D([], [], color="#444444", linestyle="--", linewidth=1.2, label=f"GR ISCO (a*=0): {r_isco_gr:.2f} r_g"),
+                Line2D([], [], color="#444444", linestyle="--", linewidth=1.4, label=f"GR ISCO (a*=0): {r_isco_gr:.2f} r_g"),
                 Line2D(
                     [],
                     [],
                     color="#444444",
                     linestyle=":",
-                    linewidth=1.2,
+                    linewidth=1.4,
                     label=f"P-model ISCO (exp metric): {r_isco_p:.2f} r_g",
                 ),
             ],
-            loc="lower right",
-            fontsize=8,
+            loc="center right",
+            bbox_to_anchor=(0.985, 0.60),
+            fontsize=20.4,
             frameon=False,
         )
     except Exception:
@@ -489,10 +515,11 @@ def _plot_isco_constraints(rows: List[Dict[str, str]], *, out_png: Path) -> None
 
     x_max = max(xs) + max(1.0, 0.15 * max(xs))
     ax.set_xlim(left=0.0, right=float(min(60.0, max(10.0, x_max))))
-    ax.grid(axis="x", color="#dddddd", linewidth=0.8, linestyle="--", alpha=0.8)
+    ax.grid(axis="x", color="#dddddd", linewidth=1.0, linestyle="--", alpha=0.8)
 
-    fig.subplots_adjust(left=0.38, right=0.98, top=0.92, bottom=0.10)
-    fig.savefig(out_png, dpi=160)
+    fig.subplots_adjust(left=0.365, right=0.992, top=0.934, bottom=0.084)
+    fig.savefig(out_png, dpi=220)
+    fig.savefig(out_png.with_suffix(".pdf"))
     plt.close(fig)
 
 
@@ -3821,7 +3848,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if bool(args.plot_only):
         rows = _read_csv_rows(out_csv)
         _plot_isco_constraints(rows, out_png=out_png)
-        print(json.dumps({"png": _rel(out_png), "n_rows": len(rows)}, ensure_ascii=False))
+        _sync_public_figure_assets(_ROOT, out_png)
+        print(json.dumps({"png": _rel(out_png), "pdf": _rel(out_png.with_suffix('.pdf')), "n_rows": len(rows)}, ensure_ascii=False))
         return 0
 
     targets = _read_json(targets_path)
@@ -4273,8 +4301,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         pass
 
     _plot_isco_constraints(rows, out_png=out_png)
+    _sync_public_figure_assets(_ROOT, out_png)
 
-    print(json.dumps({"csv": _rel(out_csv), "n_rows": len(rows)}, ensure_ascii=False))
+    print(json.dumps({"csv": _rel(out_csv), "png": _rel(out_png), "pdf": _rel(out_png.with_suffix('.pdf')), "n_rows": len(rows)}, ensure_ascii=False))
     return 0
 
 

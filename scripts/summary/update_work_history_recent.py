@@ -37,6 +37,16 @@ def _split_history_blocks(text: str) -> tuple[str, list[str]]:
     return header, blocks
 
 
+# 関数: `_extract_recent_work_lines` の入出力契約と処理意図を定義する。
+def _extract_recent_work_lines(text: str, limit: int = 3) -> list[str]:
+    work_lines = [
+        line.rstrip()
+        for line in text.splitlines()
+        if line.startswith("[work] ")
+    ]
+    return work_lines[-limit:]
+
+
 # 関数: `_make_recent_header` の入出力契約と処理意図を定義する。
 
 def _make_recent_header() -> str:
@@ -63,13 +73,17 @@ def main() -> None:
     dst = root / "doc" / "WORK_HISTORY_RECENT.md"
 
     text = src.read_text(encoding="utf-8")
-    _, blocks = _split_history_blocks(text)
-    recent = blocks[-3:]
-
     content = _make_recent_header()
-    # 条件分岐: `recent` を満たす経路を評価する。
-    if recent:
-        content += "\n\n---\n\n".join(block.strip() + "\n" for block in recent).rstrip() + "\n"
+    recent_work_lines = _extract_recent_work_lines(text)
+    # 条件分岐: `recent_work_lines` を満たす経路を評価する。
+    if recent_work_lines:
+        content += "\n".join(recent_work_lines).rstrip() + "\n"
+    else:
+        _, blocks = _split_history_blocks(text)
+        recent = blocks[-3:]
+        # 条件分岐: `recent` を満たす経路を評価する。
+        if recent:
+            content += "\n\n---\n\n".join(block.strip() + "\n" for block in recent).rstrip() + "\n"
 
     dst.write_text(content, encoding="utf-8")
     print(f"[ok] wrote: {dst}")
@@ -79,4 +93,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

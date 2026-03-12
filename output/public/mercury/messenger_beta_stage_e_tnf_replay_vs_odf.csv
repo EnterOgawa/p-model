@@ -1,0 +1,2 @@
+status,reason,z_delta_beta_dyn,delta_beta_dyn,status_beta_dyn,z_delta_beta_lt,delta_beta_lt,status_beta_lt
+pass,componentwise_z_delta_beta,1.9571653261565023,407.2682664827239,pass,2.0446348174405086e-05,-0.005665922826189496,pass

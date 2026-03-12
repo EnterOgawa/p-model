@@ -360,47 +360,50 @@ def _plot(
     status_color = {"pass": "#2ca02c", "watch": "#e6b422", "reject": "#d62728"}
     colors = [status_color.get(str(r.get("status", "watch")), "#808080") for r in rows]
 
-    fig, axes = plt.subplots(2, 2, figsize=(13.8, 8.6))
+    fig, axes = plt.subplots(4, 1, figsize=(12.8, 14.2))
+    ax_tau, ax_branch, ax_consensus, ax_collapse = axes
 
-    axes[0, 0].bar(x, tau50_s * 1000.0, color=colors, alpha=0.9)
-    axes[0, 0].axhline(float(tau50_ref_s) * 1000.0, color="#4c78a8", ls="--", lw=1.2, label="ref tau50")
-    axes[0, 0].axhline(float(tau50_ref_s) * float(tau50_ratio_min) * 1000.0, color="#999999", ls=":", lw=1.0)
-    axes[0, 0].axhline(float(tau50_ref_s) * float(tau50_ratio_max) * 1000.0, color="#999999", ls=":", lw=1.0)
-    axes[0, 0].set_ylabel("tau50 [ms]")
-    axes[0, 0].set_title("Collapse-time median stability")
-    axes[0, 0].grid(True, axis="y", alpha=0.25)
-    axes[0, 0].legend(loc="upper right", fontsize=8)
+    ax_tau.bar(x, tau50_s * 1000.0, color=colors, alpha=0.9)
+    ax_tau.axhline(float(tau50_ref_s) * 1000.0, color="#4c78a8", ls="--", lw=1.2, label="ref tau50")
+    ax_tau.axhline(float(tau50_ref_s) * float(tau50_ratio_min) * 1000.0, color="#999999", ls=":", lw=1.0)
+    ax_tau.axhline(float(tau50_ref_s) * float(tau50_ratio_max) * 1000.0, color="#999999", ls=":", lw=1.0)
+    ax_tau.set_ylabel("tau50 [ms]", fontsize=13.4)
+    ax_tau.set_title("Collapse-time median stability", fontsize=14.8)
+    ax_tau.grid(True, axis="y", alpha=0.25)
+    ax_tau.legend(loc="upper right", fontsize=11.8)
 
-    axes[0, 1].bar(x, branch_reversal, color=colors, alpha=0.9)
-    axes[0, 1].axhline(float(max_branch_reversal), color="#d62728", ls="--", lw=1.2, label="max branch reversal")
-    axes[0, 1].set_ylabel("branch reversal fraction")
-    axes[0, 1].set_title("Branch-stability gate")
-    axes[0, 1].grid(True, axis="y", alpha=0.25)
-    axes[0, 1].legend(loc="upper right", fontsize=8)
+    ax_branch.bar(x, branch_reversal, color=colors, alpha=0.9)
+    ax_branch.axhline(float(max_branch_reversal), color="#d62728", ls="--", lw=1.2, label="max branch reversal")
+    ax_branch.set_ylabel("branch reversal fraction", fontsize=13.4)
+    ax_branch.set_title("Branch-stability gate", fontsize=14.8)
+    ax_branch.grid(True, axis="y", alpha=0.25)
+    ax_branch.legend(loc="upper right", fontsize=11.8)
 
-    axes[1, 0].bar(x, pointer_consensus, color=colors, alpha=0.9)
-    axes[1, 0].axhline(float(min_pointer_consensus), color="#d62728", ls="--", lw=1.2, label="min pointer consensus")
-    axes[1, 0].set_ylabel("pointer consensus")
-    axes[1, 0].set_title("Pointer majority consensus")
-    axes[1, 0].grid(True, axis="y", alpha=0.25)
-    axes[1, 0].legend(loc="upper right", fontsize=8)
+    ax_consensus.bar(x, pointer_consensus, color=colors, alpha=0.9)
+    ax_consensus.axhline(float(min_pointer_consensus), color="#d62728", ls="--", lw=1.2, label="min pointer consensus")
+    ax_consensus.set_ylabel("pointer consensus", fontsize=13.4)
+    ax_consensus.set_title("Pointer majority consensus", fontsize=14.8)
+    ax_consensus.grid(True, axis="y", alpha=0.25)
+    ax_consensus.legend(loc="upper right", fontsize=11.8)
 
-    axes[1, 1].bar(x, collapse_fraction, color=colors, alpha=0.9)
-    axes[1, 1].axhline(float(min_collapse_fraction), color="#d62728", ls="--", lw=1.2, label="min collapse fraction")
-    axes[1, 1].set_ylabel("collapse fraction")
-    axes[1, 1].set_title("Collapse success gate")
-    axes[1, 1].grid(True, axis="y", alpha=0.25)
-    axes[1, 1].legend(loc="upper right", fontsize=8)
+    ax_collapse.bar(x, collapse_fraction, color=colors, alpha=0.9)
+    ax_collapse.axhline(float(min_collapse_fraction), color="#d62728", ls="--", lw=1.2, label="min collapse fraction")
+    ax_collapse.set_ylabel("collapse fraction", fontsize=13.4)
+    ax_collapse.set_title("Collapse success gate", fontsize=14.8)
+    ax_collapse.grid(True, axis="y", alpha=0.25)
+    ax_collapse.legend(loc="upper right", fontsize=11.8)
 
-    for ax in axes.ravel():
+    for ax in axes:
         ax.set_xticks(x)
-        ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=8)
-        ax.set_xlabel("run (seed-env_scale)")
+        ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=11.4)
+        ax.set_xlabel("run (seed-env_scale)", fontsize=12.2)
+        ax.tick_params(axis="y", labelsize=11.4)
 
-    fig.suptitle("Dynamic-collapse env-coupled stability audit (Step 8.7.20)", fontsize=14)
-    fig.tight_layout(rect=[0.01, 0.01, 0.99, 0.95])
+    fig.suptitle("Dynamic-collapse env-coupled stability audit", fontsize=16.4)
+    fig.tight_layout(rect=[0.01, 0.01, 0.99, 0.97])
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200, bbox_inches="tight")
+    fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight")
     plt.close(fig)
 
 
@@ -532,6 +535,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_json = outdir / f"{args.prefix}.json"
     out_csv = outdir / f"{args.prefix}.csv"
     out_png = outdir / f"{args.prefix}.png"
+    out_pdf = out_png.with_suffix(".pdf")
 
     rows_sorted = sorted(rows, key=lambda r: (float(r.get("env_scale", 1.0)), int(r.get("seed", 0))))
     _write_csv(out_csv, rows_sorted)
@@ -600,12 +604,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "audit_json": str(out_json).replace("\\", "/"),
             "audit_csv": str(out_csv).replace("\\", "/"),
             "audit_png": str(out_png).replace("\\", "/"),
+            "audit_pdf": str(out_pdf).replace("\\", "/") if out_pdf.exists() else "",
         },
     }
     out_json.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    copied_sources = [out_json, out_csv, out_png]
+    if out_pdf.exists():
+        copied_sources.append(out_pdf)
+
     copied: List[str] = []
-    for src in [out_json, out_csv, out_png]:
+    for src in copied_sources:
         dst = public_outdir / src.name
         shutil.copy2(src, dst)
         copied.append(str(dst).replace("\\", "/"))

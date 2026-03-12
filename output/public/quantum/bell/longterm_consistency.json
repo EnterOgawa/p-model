@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-20T12:38:30.026400+00:00",
+  "generated_utc": "2026-03-11T13:54:40.769625+00:00",
   "phase": {
     "phase": 7,
     "step": "7.16.9",
@@ -122,7 +122,7 @@
       "selection_class": "time_tag_window_or_offset",
       "statistic_family": "CH",
       "selection_knob": "window_ns",
-      "ratio": 654.1026883136847,
+      "ratio": 187.4790336851017,
       "ratio_threshold": 1.0,
       "ratio_pass": true,
       "delay_z_max": 43.90965148631052,
@@ -131,16 +131,16 @@
       "ks_delay_max_legacy": 0.04112778021955209,
       "natural_window_frozen": {
         "natural_window": {
-          "recommended_window_ns": 1000.0,
-          "frozen_window_ns": 1000.0,
+          "recommended_window_ns": 2000.0,
+          "frozen_window_ns": 2000.0,
           "snap_rule": "min(window in grid where window >= recommended_window_ns); fallback: min grid"
         },
         "baseline": {
           "param_name": "window_ns",
-          "value": 1000.0,
+          "value": 2000.0,
           "statistic_name": "CH J_prob (A1=0,B1=0)",
-          "statistic": -0.0006990843043696472,
-          "sigma_boot": 9.100388784991122e-06
+          "statistic": -0.000982524306564714,
+          "sigma_boot": 7.67773919017981e-06
         },
         "reject": {
           "threshold_sigma": 3.0,
@@ -197,12 +197,12 @@
       "year_max": 2016.0,
       "year_span": 18.0,
       "year_ref": 2011.4,
-      "slope_per_year": 9.395035118355132,
-      "intercept_at_year_ref": 138.09846462962503,
-      "delta_over_span": 169.1106321303924,
-      "pearson_r": 0.24649125742027433,
-      "rmse": 250.09669822521894,
-      "median_abs_residual": 168.26969717107687
+      "slope_per_year": 2.065867768167965,
+      "intercept_at_year_ref": 44.77373370390778,
+      "delta_over_span": 37.18561982702337,
+      "pearson_r": 0.1954626553403436,
+      "rmse": 70.17818642478109,
+      "median_abs_residual": 46.67728248321141
     },
     "delay_z_vs_year": {
       "supported": true,
@@ -235,20 +235,20 @@
         "n": 3,
         "median": 19.316744077961687,
         "p16": 10.1406947689022,
-        "p84": 450.97118615825326,
+        "p84": 133.6671010108169,
         "min": 5.822553917580089,
-        "max": 654.1026883136847
+        "max": 187.4790336851017
       }
     ],
     "selection_ratio_by_statistic_family": [
       {
         "group": "CH",
         "n": 2,
-        "median": 329.9626211156324,
-        "p16": 109.54737542095683,
-        "p84": 550.3778668103079,
+        "median": 96.6507938013409,
+        "p16": 34.88759068038355,
+        "p84": 158.41399692229825,
         "min": 5.822553917580089,
-        "max": 654.1026883136847
+        "max": 187.4790336851017
       },
       {
         "group": "CHSH",
@@ -295,14 +295,14 @@
   "cross_dataset_covariance_summary": {
     "supported": true,
     "rank_eps_1e-10": 5,
-    "condition_number_abs": 555947201.1978604,
-    "largest_eigenvalue": 0.2227459297786455,
-    "largest_mode_explained_ratio": 0.94812987091292,
+    "condition_number_abs": 556045022.7163571,
+    "largest_eigenvalue": 0.22274533847333117,
+    "largest_mode_explained_ratio": 0.9481312917232276,
     "strongest_profile_corr_pair": {
       "dataset_i": "weihs1998_longdist_longdist1",
       "dataset_j": "nist_03_43_afterfixingModeLocking_s3600",
-      "corr": -0.8875010557695602,
-      "abs_corr": 0.8875010557695602
+      "corr": -0.8907975257870273,
+      "abs_corr": 0.8907975257870273
     }
   },
   "covariance_index": [
@@ -832,19 +832,19 @@
           1.0
         ],
         "y": [
-          -0.0014067091362638773,
-          -0.0014062982817353705,
-          -0.001405514017614914,
-          -0.001404207129411682,
-          -0.0014003605693556265,
-          -0.001391397545550262,
-          -0.0013703360176160642,
-          -0.0013347097949876082,
-          -0.0012626746177863313,
-          -0.001050974332037448,
-          -0.0006990843043696472,
-          1.1823337703917888e-05,
-          0.0021000022088797947
+          -0.0014069705805686468,
+          -0.0014067465023333513,
+          -0.001406485133149337,
+          -0.0014061865090027204,
+          -0.0014055514909662161,
+          -0.0014026387047625898,
+          -0.0013968877944803663,
+          -0.0013852741332796915,
+          -0.001363128890841755,
+          -0.0012962852207825085,
+          -0.0011901170897702313,
+          -0.000982524306564714,
+          -0.00040354898411957315
         ]
       }
     },

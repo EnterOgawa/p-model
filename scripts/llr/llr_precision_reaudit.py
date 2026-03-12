@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import shutil
 import sys
 from collections import Counter
 from datetime import datetime, timezone
@@ -1181,7 +1182,7 @@ def _write_root_cause_plot(path: Path, root_cause: Dict[str, Any]) -> None:
     station_rows = list(root_cause.get("station_breakdown") or [])[:5]
     top_groups = list(root_cause.get("top_group_sse_contributors") or [])[:5]
 
-    fig, ax = plt.subplots(2, 2, figsize=(14, 9))
+    fig, ax = plt.subplots(4, 1, figsize=(13.8, 16.2))
 
     labels_ab = ["SR", "SR+Tropo", "SR+Tropo+Tide", "Tropo no Shapiro"]
     vals_ab = [
@@ -1190,48 +1191,51 @@ def _write_root_cause_plot(path: Path, root_cause: Dict[str, Any]) -> None:
         _to_float(ab_m.get("station_reflector_tropo_tide")),
         _to_float(ab_m.get("station_reflector_tropo_no_shapiro")),
     ]
-    ax[0, 0].bar(labels_ab, vals_ab, color=["#4e79a7", "#f28e2b", "#59a14f", "#e15759"])
-    ax[0, 0].set_ylabel("median RMS [ns]")
-    ax[0, 0].set_title("Ablation chain (median RMS)")
-    ax[0, 0].tick_params(axis="x", rotation=18)
+    ax[0].bar(labels_ab, vals_ab, color=["#4e79a7", "#f28e2b", "#59a14f", "#e15759"])
+    ax[0].set_ylabel("median RMS [ns]", fontsize=13.6)
+    ax[0].set_title("Ablation chain (median RMS)", fontsize=15.0)
+    ax[0].tick_params(axis="x", rotation=18, labelsize=11.8)
 
     labels_gain = ["tropo", "tide"]
     vals_gain = [
         _to_float(gain_share.get("tropo_from_sr")),
         _to_float(gain_share.get("tide_from_tropo")),
     ]
-    ax[0, 1].bar(labels_gain, vals_gain, color=["#f28e2b", "#59a14f"])
-    ax[0, 1].set_ylim(0.0, max(1.0, np.nanmax(vals_gain) * 1.15 if np.any(np.isfinite(vals_gain)) else 1.0))
-    ax[0, 1].set_ylabel("share of total gain")
-    ax[0, 1].set_title("Gain-share split (median)")
+    ax[1].bar(labels_gain, vals_gain, color=["#f28e2b", "#59a14f"])
+    ax[1].set_ylim(0.0, max(1.0, np.nanmax(vals_gain) * 1.15 if np.any(np.isfinite(vals_gain)) else 1.0))
+    ax[1].set_ylabel("share of total gain", fontsize=13.6)
+    ax[1].set_title("Gain-share split (median)", fontsize=15.0)
+    ax[1].tick_params(axis="x", labelsize=11.8)
 
     # 条件分岐: `station_rows` を満たす経路を評価する。
     if station_rows:
         st_labels = [str(r.get("station")) for r in station_rows]
         st_vals = [_to_float(r.get("sse_share")) for r in station_rows]
-        ax[1, 0].bar(st_labels, st_vals, color="#76b7b2")
-        ax[1, 0].set_ylabel("SSE share")
-        ax[1, 0].set_title("Station contribution (top)")
-        ax[1, 0].tick_params(axis="x", rotation=20)
+        ax[2].bar(st_labels, st_vals, color="#76b7b2")
+        ax[2].set_ylabel("SSE share", fontsize=13.6)
+        ax[2].set_title("Station contribution (top)", fontsize=15.0)
+        ax[2].tick_params(axis="x", rotation=20, labelsize=11.8)
     else:
-        ax[1, 0].text(0.5, 0.5, "no station rows", ha="center", va="center")
-        ax[1, 0].set_axis_off()
+        ax[2].text(0.5, 0.5, "no station rows", ha="center", va="center", fontsize=12.8)
+        ax[2].set_axis_off()
 
     # 条件分岐: `top_groups` を満たす経路を評価する。
 
     if top_groups:
         gp_labels = [f"{r.get('station')}/{r.get('target')}" for r in top_groups]
         gp_vals = [_to_float(r.get("sse_share")) for r in top_groups]
-        ax[1, 1].bar(gp_labels, gp_vals, color="#edc948")
-        ax[1, 1].set_ylabel("SSE share")
-        ax[1, 1].set_title("Top group contributors")
-        ax[1, 1].tick_params(axis="x", rotation=30)
+        ax[3].bar(gp_labels, gp_vals, color="#edc948")
+        ax[3].set_ylabel("SSE share", fontsize=13.6)
+        ax[3].set_title("Top group contributors", fontsize=15.0)
+        ax[3].tick_params(axis="x", rotation=30, labelsize=11.8)
     else:
-        ax[1, 1].text(0.5, 0.5, "no group rows", ha="center", va="center")
-        ax[1, 1].set_axis_off()
+        ax[3].text(0.5, 0.5, "no group rows", ha="center", va="center", fontsize=12.8)
+        ax[3].set_axis_off()
 
-    fig.suptitle("LLR residual root-cause decomposition", fontsize=13)
-    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    for axis in ax:
+        axis.tick_params(axis="y", labelsize=11.8)
+    fig.suptitle("LLR residual root-cause decomposition", fontsize=16.6)
+    plt.tight_layout(rect=[0, 0, 1, 0.975])
     plt.savefig(path, dpi=180)
     plt.close(fig)
 
@@ -1258,51 +1262,54 @@ def _write_root_cause_over4_plot(path: Path, root_cause: Dict[str, Any]) -> None
     scenarios = root_cause.get("bottleneck_scenarios") or {}
     ranking = list(root_cause.get("bottleneck_ranking") or [])
 
-    fig, ax = plt.subplots(2, 2, figsize=(15, 9))
+    fig, ax = plt.subplots(4, 1, figsize=(13.8, 16.4))
 
-    ax[0, 0].bar(stage_labels, stage_vals, color=["#4e79a7", "#f28e2b", "#59a14f"])
-    ax[0, 0].axhline(threshold, color="black", linestyle="--", linewidth=1.2, label=f"threshold {threshold:.1f} ns")
+    ax[0].bar(stage_labels, stage_vals, color=["#4e79a7", "#f28e2b", "#59a14f"])
+    ax[0].axhline(threshold, color="black", linestyle="--", linewidth=1.2, label=f"threshold {threshold:.1f} ns")
     for i, v in enumerate(stage_vals):
         # 条件分岐: `np.isfinite(v)` を満たす経路を評価する。
         if np.isfinite(v):
-            ax[0, 0].text(i, v + 0.04, f"+{max(v - threshold, 0.0):.2f} ns", ha="center", va="bottom", fontsize=9)
+            ax[0].text(i, v + 0.04, f"+{max(v - threshold, 0.0):.2f} ns", ha="center", va="bottom", fontsize=12.0)
 
-    ax[0, 0].set_ylabel("median RMS [ns]")
-    ax[0, 0].set_title("Ablation vs 4 ns threshold")
-    ax[0, 0].legend(loc="upper right", fontsize=8)
+    ax[0].set_ylabel("median RMS [ns]", fontsize=13.6)
+    ax[0].set_title("Ablation vs 4 ns threshold", fontsize=15.0)
+    ax[0].legend(loc="upper right", fontsize=12.0)
+    ax[0].tick_params(axis="x", labelsize=11.8)
 
     # 条件分岐: `station_ex` を満たす経路を評価する。
     if station_ex:
         st_labels = [str(r.get("station")) for r in station_ex][::-1]
         st_vals = [_to_float(r.get("excess_share_over4ns")) for r in station_ex][::-1]
-        ax[0, 1].barh(st_labels, st_vals, color="#76b7b2")
-        ax[0, 1].set_xlabel("share of >4ns excess (SSE-based)")
-        ax[0, 1].set_title("Station bottleneck share")
+        ax[1].barh(st_labels, st_vals, color="#76b7b2")
+        ax[1].set_xlabel("share of >4ns excess (SSE-based)", fontsize=13.6)
+        ax[1].set_title("Station bottleneck share", fontsize=15.0)
+        ax[1].tick_params(axis="x", labelsize=11.8)
     else:
-        ax[0, 1].text(0.5, 0.5, "no station excess rows", ha="center", va="center")
-        ax[0, 1].set_axis_off()
+        ax[1].text(0.5, 0.5, "no station excess rows", ha="center", va="center", fontsize=12.8)
+        ax[1].set_axis_off()
 
     # 条件分岐: `group_ex` を満たす経路を評価する。
 
     if group_ex:
         gp_labels = [f"{r.get('station')}/{r.get('target')}" for r in group_ex][::-1]
         gp_vals = [_to_float(r.get("excess_share_over4ns")) for r in group_ex][::-1]
-        ax[1, 0].barh(gp_labels, gp_vals, color="#edc948")
-        ax[1, 0].set_xlabel("share of >4ns excess (SSE-based)")
-        ax[1, 0].set_title("Top group bottlenecks")
+        ax[2].barh(gp_labels, gp_vals, color="#edc948")
+        ax[2].set_xlabel("share of >4ns excess (SSE-based)", fontsize=13.6)
+        ax[2].set_title("Top group bottlenecks", fontsize=15.0)
+        ax[2].tick_params(axis="x", labelsize=11.8)
     else:
-        ax[1, 0].text(0.5, 0.5, "no group excess rows", ha="center", va="center")
-        ax[1, 0].set_axis_off()
+        ax[2].text(0.5, 0.5, "no group excess rows", ha="center", va="center", fontsize=12.8)
+        ax[2].set_axis_off()
 
     # 条件分岐: `ranking` を満たす経路を評価する。
 
     if ranking:
         r_labels = [str(r.get("id", "")).replace("_", "\n") for r in ranking]
         r_vals = [_to_float(r.get("estimated_gain_ns")) for r in ranking]
-        ax[1, 1].bar(r_labels, r_vals, color="#e15759")
-        ax[1, 1].set_ylabel("estimated gain [ns]")
-        ax[1, 1].set_title("Expected gain by bottleneck fix")
-        ax[1, 1].tick_params(axis="x", labelsize=8)
+        ax[3].bar(r_labels, r_vals, color="#e15759")
+        ax[3].set_ylabel("estimated gain [ns]", fontsize=13.6)
+        ax[3].set_title("Expected gain by bottleneck fix", fontsize=15.0)
+        ax[3].tick_params(axis="x", labelsize=11.6)
     else:
         scenario_labels = ["current", "apol_cap", "bias_corrected", "exclude_nglr1"]
         scenario_vals = [
@@ -1311,13 +1318,17 @@ def _write_root_cause_over4_plot(path: Path, root_cause: Dict[str, Any]) -> None
             _to_float(scenarios.get("bias_corrected_global_est_rms_ns")),
             _to_float(scenarios.get("exclude_nglr1_group_weighted_rms_ns")),
         ]
-        ax[1, 1].bar(scenario_labels, scenario_vals, color="#e15759")
-        ax[1, 1].axhline(threshold, color="black", linestyle="--", linewidth=1.2)
-        ax[1, 1].set_ylabel("group-weighted RMS [ns]")
-        ax[1, 1].set_title("What-if scenarios")
+        ax[3].bar(scenario_labels, scenario_vals, color="#e15759")
+        ax[3].axhline(threshold, color="black", linestyle="--", linewidth=1.2)
+        ax[3].set_ylabel("group-weighted RMS [ns]", fontsize=13.6)
+        ax[3].set_title("What-if scenarios", fontsize=15.0)
+        ax[3].tick_params(axis="x", labelsize=11.6)
 
-    fig.suptitle("LLR residual bottlenecks (>4 ns) systematic audit", fontsize=13)
-    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    for axis in ax:
+        axis.tick_params(axis="y", labelsize=11.8)
+
+    fig.suptitle("LLR residual bottlenecks (>4 ns) systematic audit", fontsize=16.6)
+    plt.tight_layout(rect=[0, 0, 1, 0.975])
     plt.savefig(path, dpi=180)
     plt.close(fig)
 
@@ -2515,6 +2526,12 @@ def main() -> int:
         help="Output directory.",
     )
     ap.add_argument(
+        "--public-out-dir",
+        type=str,
+        default=str(root / "output" / "public" / "llr"),
+        help="Public output directory.",
+    )
+    ap.add_argument(
         "--modern-start-year",
         type=int,
         default=2023,
@@ -2553,6 +2570,7 @@ def main() -> int:
     coverage_csv_path = Path(str(args.coverage_csv))
     station_meta_path = Path(str(args.station_metadata))
     out_dir = Path(str(args.out_dir))
+    public_out_dir = Path(str(args.public_out_dir))
     # 条件分岐: `not manifest_path.is_absolute()` を満たす経路を評価する。
     if not manifest_path.is_absolute():
         manifest_path = (root / manifest_path).resolve()
@@ -2587,7 +2605,12 @@ def main() -> int:
     if not out_dir.is_absolute():
         out_dir = (root / out_dir).resolve()
 
+    # 条件分岐: `not public_out_dir.is_absolute()` を満たす経路を評価する。
+    if not public_out_dir.is_absolute():
+        public_out_dir = (root / public_out_dir).resolve()
+
     out_dir.mkdir(parents=True, exist_ok=True)
+    public_out_dir.mkdir(parents=True, exist_ok=True)
 
     # 条件分岐: `not manifest_path.exists()` を満たす経路を評価する。
     if not manifest_path.exists():
@@ -2626,13 +2649,17 @@ def main() -> int:
     out_json = out_dir / "llr_precision_reaudit.json"
     out_csv = out_dir / "llr_precision_reaudit.csv"
     out_png = out_dir / "llr_precision_reaudit.png"
+    out_pdf = out_png.with_suffix(".pdf")
     root_cause_json = out_dir / "llr_systematics_root_cause.json"
     root_cause_csv = out_dir / "llr_systematics_root_cause.csv"
     root_cause_png = out_dir / "llr_systematics_root_cause.png"
+    root_cause_pdf = root_cause_png.with_suffix(".pdf")
     root_cause_over4_png = out_dir / "llr_systematics_root_cause_over4ns.png"
+    root_cause_over4_pdf = root_cause_over4_png.with_suffix(".pdf")
     deep_json = out_dir / "llr_bottleneck_deepdive.json"
     deep_csv = out_dir / "llr_bottleneck_deepdive.csv"
     deep_png = out_dir / "llr_bottleneck_deepdive.png"
+    deep_pdf = deep_png.with_suffix(".pdf")
 
     root_cause = _build_root_cause_decomposition(
         summary=summary,
@@ -2677,13 +2704,17 @@ def main() -> int:
             "llr_precision_reaudit_json": _safe_rel(out_json, root),
             "llr_precision_reaudit_csv": _safe_rel(out_csv, root),
             "llr_precision_reaudit_png": _safe_rel(out_png, root),
+            "llr_precision_reaudit_pdf": _safe_rel(out_pdf, root) if out_pdf.exists() else "",
             "llr_systematics_root_cause_json": _safe_rel(root_cause_json, root),
             "llr_systematics_root_cause_csv": _safe_rel(root_cause_csv, root),
             "llr_systematics_root_cause_png": _safe_rel(root_cause_png, root),
+            "llr_systematics_root_cause_pdf": _safe_rel(root_cause_pdf, root) if root_cause_pdf.exists() else "",
             "llr_systematics_root_cause_over4ns_png": _safe_rel(root_cause_over4_png, root),
+            "llr_systematics_root_cause_over4ns_pdf": _safe_rel(root_cause_over4_pdf, root) if root_cause_over4_pdf.exists() else "",
             "llr_bottleneck_deepdive_json": _safe_rel(deep_json, root),
             "llr_bottleneck_deepdive_csv": _safe_rel(deep_csv, root),
             "llr_bottleneck_deepdive_png": _safe_rel(deep_png, root),
+            "llr_bottleneck_deepdive_pdf": _safe_rel(deep_pdf, root) if deep_pdf.exists() else "",
         },
     }
     out_json.write_text(json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -2697,6 +2728,28 @@ def main() -> int:
     _write_bottleneck_deepdive_csv(deep_csv, deep)
     _write_bottleneck_deepdive_plot(deep_png, deep)
 
+    copied: List[str] = []
+    copy_sources = [
+        out_json,
+        out_csv,
+        out_png,
+        root_cause_json,
+        root_cause_csv,
+        root_cause_png,
+        root_cause_over4_png,
+        deep_json,
+        deep_csv,
+        deep_png,
+    ]
+    for opt_pdf in [out_pdf, root_cause_pdf, root_cause_over4_pdf, deep_pdf]:
+        if opt_pdf.exists():
+            copy_sources.append(opt_pdf)
+
+    for src in copy_sources:
+        dst = public_out_dir / src.name
+        shutil.copy2(src, dst)
+        copied.append(_safe_rel(dst, root))
+
     print(f"[ok] re-audit json: {out_json}")
     print(f"[ok] re-audit csv : {out_csv}")
     print(f"[ok] re-audit plot: {out_png}")
@@ -2707,6 +2760,7 @@ def main() -> int:
     print(f"[ok] deep-dive json: {deep_json}")
     print(f"[ok] deep-dive csv : {deep_csv}")
     print(f"[ok] deep-dive plot: {deep_png}")
+    print(f"[ok] public copies: {len(copied)} -> {public_out_dir}")
     print(f"[ok] overall={overall} decision={decision}")
     return 0
 

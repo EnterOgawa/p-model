@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-20T12:38:33.706116+00:00",
+  "generated_utc": "2026-03-11T13:54:44.585407+00:00",
   "phase": {
     "phase": 7,
     "step": "7.20.3",
@@ -16,7 +16,7 @@
       "supported": true,
       "crosscheck_pairing_json": {
         "path": "output/public/quantum/bell/weihs1998_longdist_longdist1/crosscheck_pairing.json",
-        "sha256": "3be895c797c65e0beac3b1cb6533bb05aa553176bf5e20db955d6fc5646e7b99"
+        "sha256": "48a48fb3b42800e5b44d0f1108adda3833b844adb507cf03e3196dcd5bed6716"
       },
       "delta": {
         "abs_delta_statistic_abs": 0.002181156390948402,
@@ -30,7 +30,7 @@
       "supported": false,
       "crosscheck_pairing_json": {
         "path": "output/public/quantum/bell/delft_hensen2015/crosscheck_pairing.json",
-        "sha256": "ea4e447fb1e1b1725ca49b184c6ca148e105a6c10ecbfbae38ae06007693b1d4"
+        "sha256": "19de55e4edf0b6fab10a81e4b7d04083c4b57b0163a9487c9e6158c1df71e3b5"
       },
       "delta": null
     },
@@ -40,7 +40,7 @@
       "supported": false,
       "crosscheck_pairing_json": {
         "path": "output/public/quantum/bell/delft_hensen2016_srep30289/crosscheck_pairing.json",
-        "sha256": "0b845f7cccbb5a5937d6c6523b039de5741303ea131cec4db902cdc1aec78c78"
+        "sha256": "dc6b7941a35f6e906b2bfba532064e40cd1844295dc7b86d883ac42335f894a1"
       },
       "delta": null
     },
@@ -50,11 +50,11 @@
       "supported": true,
       "crosscheck_pairing_json": {
         "path": "output/public/quantum/bell/nist_03_43_afterfixingModeLocking_s3600/crosscheck_pairing.json",
-        "sha256": "eec9f0837f19581546c835394ec869b138461ac68ec7cb855d659a0967631a07"
+        "sha256": "8321fd69c7b976502872bf3a68a13c05178ec1883cc3ac364333dd0403ebc417"
       },
       "delta": {
-        "abs_delta_statistic": 1.867090885505733e-07,
-        "delta_over_sigma_boot": 0.020516605714527774,
+        "abs_delta_statistic": 0.0009936753741595044,
+        "delta_over_sigma_boot": 129.42291337930078,
         "note": "Treat this pairing-choice delta as an implementation/systematic sensitivity (not an optimizer)."
       }
     },
@@ -64,7 +64,7 @@
       "supported": true,
       "crosscheck_pairing_json": {
         "path": "output/public/quantum/bell/kwiat2013_prl111_130406_05082013_15/crosscheck_pairing.json",
-        "sha256": "be247e641229b1ed2d212bbfa76d94d161c8c8199e92a7cd78c70d1df20202f7"
+        "sha256": "62b64d5217e13637a83cd3fe49bb96a7911ea4d753c0ddbc772a108f00546d79"
       },
       "delta": {
         "abs_delta_statistic": 0.0,

@@ -1,0 +1,90 @@
+{
+  "generated_utc": "2026-03-07T05:55:46.997487+00:00",
+  "step": "8.7.46.27",
+  "combos": [
+    {
+      "top_sources": 3,
+      "top_time_quartiles": 2
+    },
+    {
+      "top_sources": 5,
+      "top_time_quartiles": 4
+    }
+  ],
+  "rows": [
+    {
+      "combo_tag": "ts3_tq2",
+      "top_sources": 3,
+      "top_time_quartiles": 2,
+      "selected_scenario": "local_source_2000_472",
+      "selected_policy": "local_mask:local_source_2000_472",
+      "selected_removed_fraction": 0.034820892535521314,
+      "selected_allsky_relative_improvement": 0.0935698470691394,
+      "selected_stable_chi2_dof": 4.23615028197059,
+      "selected_timeband_chi2_dof": 4.23615028197059,
+      "selected_threshold_chi2_dof": 161.8853449038688,
+      "n_candidates": 12,
+      "n_pass_candidates": 5
+    },
+    {
+      "combo_tag": "ts5_tq4",
+      "top_sources": 5,
+      "top_time_quartiles": 4,
+      "selected_scenario": "local_source_2000_472",
+      "selected_policy": "local_mask:local_source_2000_472",
+      "selected_removed_fraction": 0.034820892535521314,
+      "selected_allsky_relative_improvement": 0.0935698470691394,
+      "selected_stable_chi2_dof": 4.23615028197059,
+      "selected_timeband_chi2_dof": 4.23615028197059,
+      "selected_threshold_chi2_dof": 161.8853449038688,
+      "n_candidates": 30,
+      "n_pass_candidates": 16
+    }
+  ],
+  "robustness": {
+    "reference_combo": "ts3_tq2",
+    "reference_selected_scenario": "local_source_2000_472",
+    "reference_selected_policy": "local_mask:local_source_2000_472",
+    "selection_invariant": true,
+    "policy_invariant": true,
+    "robust_pass": true
+  },
+  "snapshots": {
+    "ts3_tq2": {
+      "summary_csv": "C:\\develop\\waveP\\output\\public\\vlbi\\vlbi_beta_local_mask_two_stage_sweep_ts3_tq2_summary.csv",
+      "metrics_json": "C:\\develop\\waveP\\output\\public\\vlbi\\vlbi_beta_local_mask_two_stage_sweep_ts3_tq2_metrics.json",
+      "plot_pdf": "C:\\develop\\waveP\\output\\public\\vlbi\\vlbi_beta_local_mask_two_stage_sweep_ts3_tq2.pdf",
+      "plot_png": "C:\\develop\\waveP\\output\\public\\vlbi\\vlbi_beta_local_mask_two_stage_sweep_ts3_tq2.png"
+    },
+    "ts5_tq4": {
+      "summary_csv": "C:\\develop\\waveP\\output\\public\\vlbi\\vlbi_beta_local_mask_two_stage_sweep_ts5_tq4_summary.csv",
+      "metrics_json": "C:\\develop\\waveP\\output\\public\\vlbi\\vlbi_beta_local_mask_two_stage_sweep_ts5_tq4_metrics.json",
+      "plot_pdf": "C:\\develop\\waveP\\output\\public\\vlbi\\vlbi_beta_local_mask_two_stage_sweep_ts5_tq4.pdf",
+      "plot_png": "C:\\develop\\waveP\\output\\public\\vlbi\\vlbi_beta_local_mask_two_stage_sweep_ts5_tq4.png"
+    }
+  },
+  "runs": [],
+  "restore_chain": {
+    "enabled": true,
+    "gate_metrics_used": "C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_local_mask_two_stage_sweep_metrics_pre_robustness.json",
+    "result": {
+      "cmd": [
+        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-B",
+        "C:\\develop\\waveP\\scripts\\vlbi\\vlbi_beta_watchpack_apply_chain.py",
+        "--gate-metrics",
+        "C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_local_mask_two_stage_sweep_metrics_pre_robustness.json"
+      ],
+      "returncode": 0,
+      "ok": true,
+      "stdout_tail": "Wrote: C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_watchpack_apply_chain_metrics.json\nSynced: C:\\develop\\waveP\\output\\public\\vlbi\\vlbi_beta_watchpack_apply_chain_metrics.json",
+      "stderr_tail": ""
+    }
+  },
+  "outputs": {
+    "summary_csv": "C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_local_mask_robustness_audit_summary.csv",
+    "metrics_json": "C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_local_mask_robustness_audit_metrics.json",
+    "plot_pdf": "C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_local_mask_robustness_audit.pdf",
+    "plot_png": "C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_local_mask_robustness_audit.png"
+  }
+}

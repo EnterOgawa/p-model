@@ -1,15 +1,15 @@
 {
-  "generated_utc": "2026-02-11T14:10:13.154337+00:00",
+  "generated_utc": "2026-03-11T13:56:14.287153+00:00",
   "phase": 7,
   "step": "7.13.17.4",
   "inputs": {
     "deuteron_binding_metrics": {
       "path": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_deuteron_metrics.json",
-      "sha256": "cc4b3a6b785e3fb91dddc674def43367aae48f6b29f99c3c18d1d78a4b3e0651"
+      "sha256": "0df0224bf61324c62f3c70bfad7b82332785e3e23c20653afbe2703228532fc4"
     },
     "np_scattering_metrics": {
       "path": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_np_scattering_baseline_metrics.json",
-      "sha256": "6e670270efa8d09b9183e1bc1bcac980e3df62c82bc0806058550b3b720a28b9"
+      "sha256": "e9d9c7a59b26109187cd725ea98b643a11532a8424f86e2ceaaae1b6d6d954e1"
     }
   },
   "constants": {

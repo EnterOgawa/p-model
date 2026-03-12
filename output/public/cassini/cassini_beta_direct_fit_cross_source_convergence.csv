@@ -1,0 +1,8 @@
+gate,status,value,threshold,note
+if_manifest_all_pass,watch,False,True,ODF raw I/F 4項目（band/sign/media/time）が全てpass
+external_csp_payload_gate,pass,True,True,IONCAL/TROPCAL/PLSMCAL payload available locally for record-level media join
+odf_sign_terminal_gate,watch,False,True,record-level contiguous-arc sign/corr gate with minimum coverage is closed
+tdf_internal_delta_beta,pass,0.07704642612508986,0.1,|Δβ(tdf_plasma)-Δβ(tdf_raw)| <= 0.10
+odf_vs_tdf_z_best,watch,45.10416076554982,3.0,min z-score between ODF raw and TDF branches <= 3
+odf_corr_floor,watch,0.06927530305470708,0.25,ODF raw corr >= 0.25
+recommended_status,watch,False,all gates pass,"if_manifest_not_closed,odf_sign_terminal_gate_not_closed,odf_delta_beta_not_converged,odf_shape_corr_too_low"

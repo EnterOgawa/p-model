@@ -11,6 +11,10 @@ from typing import Any
 import numpy as np
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # クラス: `Config` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Config:
@@ -256,23 +260,27 @@ def main() -> None:
     import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots(figsize=(10.8, 5.4), dpi=150)
+    panel_title_font = 14.8
+    axis_label_font = 13.6
+    tick_font = 12.4
+    legend_font = 11.8
+    note_font = 11.6
+    suptitle_font = 16.0
     ax.plot(theta_deg, phi / (2.0 * math.pi), lw=2.0, label="Δφ / 2π (cycles)")
     ax.axhline(0.0, color="0.25", lw=1.0)
-    ax.set_xlabel("tilt angle θ (deg)")
-    ax.set_ylabel("phase shift (cycles)")
-    ax.set_title("COW (gravity-induced quantum interference): phase shift scaling")
+    ax.set_xlabel("tilt angle θ (deg)", fontsize=axis_label_font)
+    ax.set_ylabel("phase shift (cycles)", fontsize=axis_label_font)
+    ax.set_title("COW (gravity-induced quantum interference): phase shift scaling", fontsize=panel_title_font)
     ax.grid(True, ls=":", lw=0.6, alpha=0.7)
-    ax.legend(frameon=True, fontsize=9, loc="upper left")
+    ax.legend(frameon=True, fontsize=legend_font, loc="upper right")
+    ax.tick_params(axis="both", labelsize=tick_font)
 
-    note = (
-        f"Model: Δφ = -m g H²/(ħ v0) × sinθ.  "
-        f"H={cfg.H_m:.3f} m, v0={cfg.v0_m_per_s:.0f} m/s, |Δφ|max≈{abs(phi0)/(2*math.pi):.2f} cycles."
-    )
-    fig.text(0.01, -0.02, note, fontsize=9)
     fig.tight_layout()
 
     out_png = out_dir / "cow_phase_shift.png"
+    out_pdf = out_dir / "cow_phase_shift.pdf"
     fig.savefig(out_png, bbox_inches="tight")
+    fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
 
     # Complete-analysis figure: scaling + H-v map + source/readiness + residual audit.
@@ -294,10 +302,11 @@ def main() -> None:
 
     ax0.plot(theta_deg, phi / (2.0 * math.pi), lw=2.0, color="#1f77b4")
     ax0.axhline(0.0, color="0.25", lw=1.0)
-    ax0.set_title("COW phase scaling vs tilt (representative)")
-    ax0.set_xlabel("tilt angle θ (deg)")
-    ax0.set_ylabel("Δφ / 2π (cycles)")
+    ax0.set_title("COW phase scaling vs tilt (representative)", fontsize=panel_title_font)
+    ax0.set_xlabel("tilt angle θ (deg)", fontsize=axis_label_font)
+    ax0.set_ylabel("Δφ / 2π (cycles)", fontsize=axis_label_font)
     ax0.grid(True, ls=":", lw=0.6, alpha=0.7)
+    ax0.tick_params(axis="both", labelsize=tick_font)
 
     im = ax1.imshow(
         grid,
@@ -306,18 +315,21 @@ def main() -> None:
         cmap="viridis",
         extent=[min(v_unique), max(v_unique), min(h_unique), max(h_unique)],
     )
-    ax1.set_title("H-v sweep: |Δφ|/2π (cycles)")
-    ax1.set_xlabel("v0 (m/s)")
-    ax1.set_ylabel("H (m)")
+    ax1.set_title("H-v sweep: |Δφ|/2π (cycles)", fontsize=panel_title_font)
+    ax1.set_xlabel("v0 (m/s)", fontsize=axis_label_font)
+    ax1.set_ylabel("H (m)", fontsize=axis_label_font)
     cbar = fig2.colorbar(im, ax=ax1)
-    cbar.set_label("|Δφ| / 2π")
+    cbar.set_label("|Δφ| / 2π", fontsize=axis_label_font)
+    cbar.ax.tick_params(labelsize=tick_font)
+    ax1.tick_params(axis="both", labelsize=tick_font)
 
     keys = list(type_counts.keys())
     vals = [type_counts[k] for k in keys]
     ax2.bar(keys, vals, color="#7f7f7f")
-    ax2.set_title("Source coverage by record type")
-    ax2.set_ylabel("count")
-    ax2.tick_params(axis="x", rotation=16)
+    ax2.set_title("Source coverage by record type", fontsize=panel_title_font)
+    ax2.set_ylabel("count", fontsize=axis_label_font)
+    ax2.tick_params(axis="x", rotation=16, labelsize=tick_font)
+    ax2.tick_params(axis="y", labelsize=tick_font)
 
     # 条件分岐: `observed_rows` を満たす経路を評価する。
     if observed_rows:
@@ -334,10 +346,11 @@ def main() -> None:
         ax3.plot([lo, hi], [lo, hi], ls="--", color="0.3", lw=1.0)
         ax3.set_xlim(lo, hi)
         ax3.set_ylim(lo, hi)
-        ax3.set_title("Observed vs predicted (available rows)")
-        ax3.set_xlabel("predicted phase (cycles)")
-        ax3.set_ylabel("observed phase (cycles)")
+        ax3.set_title("Observed vs predicted (available rows)", fontsize=panel_title_font)
+        ax3.set_xlabel("predicted phase (cycles)", fontsize=axis_label_font)
+        ax3.set_ylabel("observed phase (cycles)", fontsize=axis_label_font)
         ax3.grid(True, ls=":", lw=0.6, alpha=0.7)
+        ax3.tick_params(axis="both", labelsize=tick_font)
         abs_res = np.abs(obs - pred)
         ax3.text(
             0.03,
@@ -346,7 +359,7 @@ def main() -> None:
             transform=ax3.transAxes,
             va="top",
             ha="left",
-            fontsize=9,
+            fontsize=note_font,
             bbox={"facecolor": "white", "alpha": 0.7, "edgecolor": "0.8"},
         )
     else:
@@ -357,13 +370,15 @@ def main() -> None:
             "No quantitative observed rows in this pack.\nAdd raw fringe-shift tables to enable full residual audit.",
             ha="center",
             va="center",
-            fontsize=10,
+            fontsize=note_font,
         )
 
-    fig2.suptitle("Phase 7 / Step 7.16.11: COW integrated audit (initial freeze)", y=1.02)
+    fig2.suptitle("Phase 7 / Step 7.16.11: COW integrated audit (initial freeze)", y=1.02, fontsize=suptitle_font)
     fig2.tight_layout()
     out_complete_png = out_dir / "cow_experiment_complete_analysis.png"
+    out_complete_pdf = out_dir / "cow_experiment_complete_analysis.pdf"
     fig2.savefig(out_complete_png, bbox_inches="tight")
+    fig2.savefig(out_complete_pdf, bbox_inches="tight")
     plt.close(fig2)
 
     # 条件分岐: `observed_rows` を満たす経路を評価する。
@@ -437,9 +452,11 @@ def main() -> None:
         },
         "outputs": {
             "png": str(out_png),
+            "pdf": str(out_pdf),
             "integration_csv": str(out_catalog_csv),
             "hv_sweep_csv": str(out_hv_csv),
             "complete_analysis_png": str(out_complete_png),
+            "complete_analysis_pdf": str(out_complete_pdf),
         },
         "notes": [
             "This script focuses on reproducing the scaling and magnitude of the COW phase shift.",
@@ -472,6 +489,7 @@ def main() -> None:
                 },
                 "outputs": {
                     "complete_analysis_png": str(out_complete_png),
+                    "complete_analysis_pdf": str(out_complete_pdf),
                     "cow_phase_shift_metrics_json": str(out_json),
                 },
             },
@@ -482,10 +500,12 @@ def main() -> None:
     )
 
     print(f"[ok] png : {out_png}")
+    print(f"[ok] pdf : {out_pdf}")
     print(f"[ok] json: {out_json}")
     print(f"[ok] csv : {out_catalog_csv}")
     print(f"[ok] csv : {out_hv_csv}")
     print(f"[ok] png : {out_complete_png}")
+    print(f"[ok] pdf : {out_complete_pdf}")
     print(f"[ok] json: {out_complete_json}")
 
 

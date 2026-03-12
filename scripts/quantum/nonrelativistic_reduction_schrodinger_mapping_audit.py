@@ -272,26 +272,38 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]], criteria: List[Dict[str, 
 
 def _plot(path: Path, rows: List[Dict[str, Any]], threshold: float) -> None:
     labels = [str(r.get("channel") or "") for r in rows]
-    eps_v2 = [float(r.get("epsilon_v2", math.nan)) for r in rows]
-    eps_phi = [float(r.get("epsilon_phi", math.nan)) for r in rows]
-    eps_env = [float(r.get("epsilon_env", math.nan)) for r in rows]
-    eps_max = [float(r.get("epsilon_max", math.nan)) for r in rows]
+    eps_v2 = np.asarray([float(r.get("epsilon_v2", math.nan)) for r in rows], dtype=float)
+    eps_phi = np.asarray([float(r.get("epsilon_phi", math.nan)) for r in rows], dtype=float)
+    eps_env = np.asarray([float(r.get("epsilon_env", math.nan)) for r in rows], dtype=float)
+    eps_max = np.asarray([float(r.get("epsilon_max", math.nan)) for r in rows], dtype=float)
+
+    all_eps = np.concatenate([eps_v2, eps_phi, eps_env, eps_max, np.asarray([threshold], dtype=float)])
+    positive_eps = all_eps[np.isfinite(all_eps) & (all_eps > 0.0)]
+    eps_floor = float(np.min(positive_eps) / 10.0) if positive_eps.size else 1.0e-30
+    eps_floor = max(eps_floor, 1.0e-30)
+    x_max = float(max(np.max(positive_eps) if positive_eps.size else threshold, threshold) * 5.0)
+
+    def _safe_width(values: np.ndarray) -> np.ndarray:
+        clamped = np.where(np.isfinite(values) & (values > eps_floor), values, eps_floor)
+        return clamped - eps_floor
 
     y = np.arange(len(labels))
     h = 0.22
 
-    fig, ax = plt.subplots(figsize=(11.5, 4.8), dpi=180)
-    ax.barh(y - h, eps_v2, height=h, color="#1d4ed8", label="epsilon_v2")
-    ax.barh(y, eps_phi, height=h, color="#f59e0b", label="epsilon_phi")
-    ax.barh(y + h, eps_env, height=h, color="#2f9e44", label="epsilon_env")
-    ax.scatter(eps_max, y, marker="D", color="#111827", s=24, label="epsilon_max")
+    fig, ax = plt.subplots(figsize=(12.0, 5.1), dpi=180)
+    ax.barh(y - h, _safe_width(eps_v2), left=eps_floor, height=h, color="#1d4ed8", label="epsilon_v2")
+    ax.barh(y, _safe_width(eps_phi), left=eps_floor, height=h, color="#f59e0b", label="epsilon_phi")
+    ax.barh(y + h, _safe_width(eps_env), left=eps_floor, height=h, color="#2f9e44", label="epsilon_env")
+    ax.scatter(np.clip(eps_max, eps_floor, None), y, marker="D", color="#111827", s=24, label="epsilon_max")
     ax.axvline(threshold, linestyle="--", color="#6b7280", linewidth=1.2, label="gate threshold")
     ax.set_xscale("log")
-    ax.set_yticks(y, labels)
-    ax.set_xlabel("dimensionless scale (log)")
-    ax.set_title("Nonrelativistic reduction audit (2.6 -> 2.5 Schr mapping)")
+    ax.set_xlim(eps_floor, x_max)
+    ax.set_yticks(y, labels, fontsize=12.0)
+    ax.set_xlabel("dimensionless scale (log)", fontsize=14.0)
+    ax.set_title("Nonrelativistic reduction audit (2.6 -> 2.5 Schr mapping)", fontsize=15.0, pad=10.0)
+    ax.tick_params(axis="x", labelsize=12.0)
     ax.grid(axis="x", alpha=0.25, linestyle=":")
-    ax.legend(loc="lower right", fontsize=8)
+    ax.legend(loc="lower right", fontsize=11.5)
     fig.tight_layout()
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, bbox_inches="tight")

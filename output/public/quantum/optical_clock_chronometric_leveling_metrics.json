@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T14:02:02.963565+00:00",
+  "generated_utc": "2026-03-11T13:56:29.340702+00:00",
   "source": {
     "reference": "arXiv:2309.14953v3, 'Long-distance chronometric leveling with a portable optical clock'",
     "url": "https://arxiv.org/abs/2309.14953",
@@ -27,7 +27,8 @@
     "height_sigma_m": 0.26512621537426134
   },
   "outputs": {
-    "png": "C:\\develop\\waveP\\output\\public\\quantum\\optical_clock_chronometric_leveling.png"
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\optical_clock_chronometric_leveling.png",
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\optical_clock_chronometric_leveling.pdf"
   },
   "notes": [
     "This script treats the geodetic determination of ΔU as the reference and infers epsilon from the clock-derived ΔU.",

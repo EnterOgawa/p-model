@@ -1,0 +1,244 @@
+{
+  "generated_utc": "2026-03-08T01:13:12.499097+00:00",
+  "phase_step": "8.7.48.9",
+  "overall_status": "pass",
+  "branch_status": {
+    "odf": "pass",
+    "tnf": "pass"
+  },
+  "base_by_branch": {
+    "odf": {
+      "beta_dyn": -5.060246961220375,
+      "beta_sigma": 0.41980943834498585
+    },
+    "tnf": {
+      "beta_dyn": 333.6397193344582,
+      "beta_sigma": 122.68717453561317
+    }
+  },
+  "branch_meta": {
+    "odf": {
+      "n_rows_joint": 5215,
+      "n_rows_range": 1828,
+      "n_rows_doppler": 3387,
+      "n_station_unique": 13
+    },
+    "tnf": {
+      "n_rows_joint": 3160,
+      "n_rows_range": 986,
+      "n_rows_doppler": 2174,
+      "n_station_unique": 13
+    }
+  },
+  "branch_summary": [
+    {
+      "branch": "odf",
+      "n_scenarios": 8,
+      "n_core_scenarios": 4,
+      "n_diagnostic_scenarios": 4,
+      "beta_base": -5.060246961220375,
+      "beta_sigma_base": 0.41980943834498585,
+      "beta_min": -6.875901657592261,
+      "beta_max": -4.91307861868076,
+      "beta_span": 1.9628230389115018,
+      "max_abs_z_delta_core": 0.2489524423524144,
+      "max_abs_z_delta_all": 2.637280137935102,
+      "max_abs_z_delta": 0.2489524423524144,
+      "median_beta_sigma": 0.42450368631302604,
+      "status": "pass",
+      "sigma_status_diagnostic": "watch",
+      "status_all_diagnostic": "watch",
+      "note": "ok"
+    },
+    {
+      "branch": "tnf",
+      "n_scenarios": 8,
+      "n_core_scenarios": 4,
+      "n_diagnostic_scenarios": 4,
+      "beta_base": 333.6397193344582,
+      "beta_sigma_base": 122.68717453561317,
+      "beta_min": -239.31955078789676,
+      "beta_max": 475.70441019058825,
+      "beta_span": 715.023960978485,
+      "max_abs_z_delta_core": 0.7743401639183614,
+      "max_abs_z_delta_all": 3.110946467252994,
+      "max_abs_z_delta": 0.7743401639183614,
+      "median_beta_sigma": 132.1611574314497,
+      "status": "pass",
+      "sigma_status_diagnostic": "watch",
+      "status_all_diagnostic": "watch",
+      "note": "ok"
+    }
+  ],
+  "beta_dyn_decomposition": [
+    {
+      "branch": "odf",
+      "baseline": {
+        "scenario_id": "baseline",
+        "beta_dyn": -5.060246961220375,
+        "beta_sigma": 0.41980943834498585,
+        "abs_z_beta_minus_1": 14.435709175838632
+      },
+      "best_abs_z": {
+        "scenario_id": "all_proxies_on",
+        "scenario_group": "combined",
+        "beta_dyn": -6.875901657592261,
+        "beta_sigma": 0.6625376290651948,
+        "abs_z_beta_minus_1": 11.887478253431036,
+        "delta_vs_baseline_z": 2.3148693225465355
+      },
+      "max_shift_vs_baseline": {
+        "scenario_id": "plasma_proxy_on",
+        "scenario_group": "plasma_residual",
+        "beta_dyn": -6.729704877858718,
+        "beta_sigma": 0.4737907146069242,
+        "abs_z_beta_minus_1": 16.31459764734223,
+        "delta_vs_baseline_z": 2.637280137935102
+      }
+    },
+    {
+      "branch": "tnf",
+      "baseline": {
+        "scenario_id": "baseline",
+        "beta_dyn": 333.6397193344582,
+        "beta_sigma": 122.68717453561317,
+        "abs_z_beta_minus_1": 2.7112835599445715
+      },
+      "best_abs_z": {
+        "scenario_id": "all_proxies_on",
+        "scenario_group": "combined",
+        "beta_dyn": 318.4440334583099,
+        "beta_sigma": 201.98042601068073,
+        "abs_z_beta_minus_1": 1.5716574112063881,
+        "delta_vs_baseline_z": 0.06430068210139746
+      },
+      "max_shift_vs_baseline": {
+        "scenario_id": "transponder_quad_on",
+        "scenario_group": "transponder_drift",
+        "beta_dyn": -239.31955078789676,
+        "beta_sigma": 137.36219002103277,
+        "abs_z_beta_minus_1": 1.7495320273439092,
+        "delta_vs_baseline_z": 3.110946467252994
+      }
+    }
+  ],
+  "scenario_policy": {
+    "delta_pass_abs_z": 2.0,
+    "delta_watch_abs_z": 5.0,
+    "sigma_watch_threshold": 0.1,
+    "sigma_gate_role": "diagnostic_only",
+    "beta_split_mode": "coupled",
+    "core_scenario_ids": [
+      "baseline",
+      "station_bias_lowcap",
+      "station_bias_highcap",
+      "sunq_proxy_on"
+    ],
+    "diagnostic_scenario_ids": [
+      "transponder_quad_on",
+      "plasma_proxy_on",
+      "srp_proxy_on",
+      "all_proxies_on"
+    ],
+    "scenarios": [
+      {
+        "scenario_id": "baseline",
+        "scenario_group": "baseline",
+        "station_bias_cap": 8,
+        "use_sun_quad_proxy": false,
+        "use_transponder_quad": false,
+        "use_plasma_proxy": false,
+        "use_srp_proxy": false,
+        "note": "stage_d_style_baseline"
+      },
+      {
+        "scenario_id": "station_bias_lowcap",
+        "scenario_group": "station_bias",
+        "station_bias_cap": 2,
+        "use_sun_quad_proxy": false,
+        "use_transponder_quad": false,
+        "use_plasma_proxy": false,
+        "use_srp_proxy": false,
+        "note": "station_bias_cap_2"
+      },
+      {
+        "scenario_id": "station_bias_highcap",
+        "scenario_group": "station_bias",
+        "station_bias_cap": 12,
+        "use_sun_quad_proxy": false,
+        "use_transponder_quad": false,
+        "use_plasma_proxy": false,
+        "use_srp_proxy": false,
+        "note": "station_bias_cap_12"
+      },
+      {
+        "scenario_id": "sunq_proxy_on",
+        "scenario_group": "sun_quadrupole",
+        "station_bias_cap": 8,
+        "use_sun_quad_proxy": true,
+        "use_transponder_quad": false,
+        "use_plasma_proxy": false,
+        "use_srp_proxy": false,
+        "note": "add_sun_quadrupole_like_proxy"
+      },
+      {
+        "scenario_id": "transponder_quad_on",
+        "scenario_group": "transponder_drift",
+        "station_bias_cap": 8,
+        "use_sun_quad_proxy": false,
+        "use_transponder_quad": true,
+        "use_plasma_proxy": false,
+        "use_srp_proxy": false,
+        "note": "add_quadratic_transponder_drift_proxy"
+      },
+      {
+        "scenario_id": "plasma_proxy_on",
+        "scenario_group": "plasma_residual",
+        "station_bias_cap": 8,
+        "use_sun_quad_proxy": false,
+        "use_transponder_quad": false,
+        "use_plasma_proxy": true,
+        "use_srp_proxy": false,
+        "note": "add_annual_plasma_proxy"
+      },
+      {
+        "scenario_id": "srp_proxy_on",
+        "scenario_group": "srp_like",
+        "station_bias_cap": 8,
+        "use_sun_quad_proxy": false,
+        "use_transponder_quad": false,
+        "use_plasma_proxy": false,
+        "use_srp_proxy": true,
+        "note": "add_srp_like_proxy_orbital_phase"
+      },
+      {
+        "scenario_id": "all_proxies_on",
+        "scenario_group": "combined",
+        "station_bias_cap": 8,
+        "use_sun_quad_proxy": true,
+        "use_transponder_quad": true,
+        "use_plasma_proxy": true,
+        "use_srp_proxy": true,
+        "note": "combined_high_correlation_nuisance"
+      }
+    ]
+  },
+  "counts": {
+    "n_rows": 16,
+    "n_branches": 2,
+    "n_scenarios_per_branch": 8
+  },
+  "plot": "generated",
+  "outputs_private": [
+    "output/private/mercury/messenger_beta_stage_i_nuisance_sensitivity_summary.csv",
+    "output/private/mercury/messenger_beta_stage_i_nuisance_sensitivity_branch_summary.csv",
+    "output/private/mercury/messenger_beta_stage_i_nuisance_sensitivity_audit.pdf",
+    "output/private/mercury/messenger_beta_stage_i_nuisance_sensitivity_audit.png"
+  ],
+  "outputs_public": [
+    "output/public/mercury/messenger_beta_stage_i_nuisance_sensitivity_summary.csv",
+    "output/public/mercury/messenger_beta_stage_i_nuisance_sensitivity_branch_summary.csv",
+    "output/public/mercury/messenger_beta_stage_i_nuisance_sensitivity_audit.pdf",
+    "output/public/mercury/messenger_beta_stage_i_nuisance_sensitivity_audit.png"
+  ]
+}

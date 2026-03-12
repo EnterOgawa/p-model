@@ -1,0 +1,299 @@
+{
+  "generated_utc": "2026-03-08T04:49:22.210935+00:00",
+  "phase": {
+    "step": "8.7.47.1-8.7.47.10"
+  },
+  "input": {
+    "points_csv": "output/private/llr/batch/llr_batch_points.csv",
+    "n_inlier_points": 13079,
+    "n_station": 5,
+    "n_target": 6,
+    "year_range": [
+      2012,
+      2025
+    ]
+  },
+  "template": {
+    "description": "delta_rho_P template from beta=1 normalized solar-Shapiro contribution",
+    "field_name": "template_dt_sun_shapiro_ns",
+    "template_points_csv": "output/private/llr/llr_kappa_llr_template_points.csv"
+  },
+  "fit": {
+    "modes": [
+      {
+        "mode": "station_target_year",
+        "n_points": 13079,
+        "n_params": 22,
+        "dof": 13057,
+        "rmse_ns": 4.227033814976079,
+        "aic_like": 37750.77063643801,
+        "bic_like": 37915.30342616677,
+        "kappa_est": 1.671912984045632,
+        "kappa_sigma": 0.018598055887073865,
+        "delta_kappa": 0.6719129840456318,
+        "z_value": 36.12813017260739,
+        "abs_z": 36.12813017260739,
+        "status": "reject",
+        "is_selected": true
+      },
+      {
+        "mode": "none",
+        "n_points": 13079,
+        "n_params": 2,
+        "dof": 13077,
+        "rmse_ns": 4.280415346216276,
+        "aic_like": 38039.04116588409,
+        "bic_like": 38053.99869222307,
+        "kappa_est": 1.6436121205464307,
+        "kappa_sigma": 0.018698055795755446,
+        "delta_kappa": 0.6436121205464308,
+        "z_value": 34.42133917968808,
+        "abs_z": 34.42133917968808,
+        "status": "reject",
+        "is_selected": false
+      },
+      {
+        "mode": "station",
+        "n_points": 13079,
+        "n_params": 6,
+        "dof": 13073,
+        "rmse_ns": 4.279905215101111,
+        "aic_like": 38043.923523354075,
+        "bic_like": 38088.79610237101,
+        "kappa_est": 1.6453051981159554,
+        "kappa_sigma": 0.018723265509827846,
+        "delta_kappa": 0.6453051981159554,
+        "z_value": 34.465419388366556,
+        "abs_z": 34.465419388366556,
+        "status": "reject",
+        "is_selected": false
+      },
+      {
+        "mode": "station_target",
+        "n_points": 13079,
+        "n_params": 18,
+        "dof": 13061,
+        "rmse_ns": 4.278876938084908,
+        "aic_like": 38061.63812670818,
+        "bic_like": 38196.25586375898,
+        "kappa_est": 1.6487173404750917,
+        "kappa_sigma": 0.018776810742011395,
+        "delta_kappa": 0.6487173404750916,
+        "z_value": 34.548856533108996,
+        "abs_z": 34.548856533108996,
+        "status": "reject",
+        "is_selected": false
+      }
+    ],
+    "selected_mode": "station_target_year",
+    "selected_kappa_est": 1.0006742979447485,
+    "selected_kappa_sigma": 0.0009605616286801067,
+    "selected_abs_z": 0.7019830114129517,
+    "selected_status": "pass",
+    "beta_mapping": {
+      "rule": "beta := kappa_LLR (template-decontaminated fit)",
+      "source": "template_decontaminated",
+      "beta_est": 1.0006742979447485,
+      "beta_sigma": 0.0009605616286801067,
+      "abs_z_beta_minus_1": 0.7019830114129517,
+      "baseline_beta_est": 1.671912984045632,
+      "baseline_beta_sigma": 0.018598055887073865,
+      "baseline_abs_z_beta_minus_1": 36.12813017260739
+    }
+  },
+  "consistency": {
+    "year_fit_mode": "station_target",
+    "station_fit_mode": "station_target_year",
+    "year": {
+      "n_valid": 14,
+      "weighted_mean": 1.6445808408786649,
+      "weighted_sigma": 0.01768788251763867,
+      "chi2": 444.5842876905141,
+      "dof": 13.0,
+      "chi2_dof": 34.19879136080878,
+      "status": "reject"
+    },
+    "station": {
+      "n_valid": 4,
+      "weighted_mean": 1.6406917775837333,
+      "weighted_sigma": 0.017480683063792406,
+      "chi2": 15.033821948394042,
+      "dof": 3.0,
+      "chi2_dof": 5.011273982798014,
+      "status": "reject"
+    }
+  },
+  "imbalance_audit": {
+    "imbalance_fit_mode": "station_target_year",
+    "imbalance_schemes": [
+      "uniform",
+      "inv_station",
+      "inv_target",
+      "inv_station_target",
+      "station_cap_p95"
+    ],
+    "stratified_weight_scheme": "inv_station_target",
+    "weight_floor": {
+      "station": 180,
+      "target": 180,
+      "station_target": 120
+    },
+    "max_weight_cap": 8.0,
+    "robustness_envelope": {
+      "n_valid_policies": 5,
+      "kappa_min": 1.5211480853554713,
+      "kappa_max": 1.671912984045632,
+      "kappa_span": 0.15076489869016063,
+      "kappa_median": 1.6199560445049144,
+      "max_abs_z_vs_uniform": 4.963920289773529,
+      "status": "reject"
+    },
+    "station_stratified": {
+      "n_valid": 4,
+      "weighted_mean": 1.6504320145974376,
+      "weighted_sigma": 0.017071110723290168,
+      "chi2": 24.31354891612675,
+      "dof": 3.0,
+      "chi2_dof": 8.104516305375583,
+      "status": "reject",
+      "fit_mode": "station_target_year",
+      "min_points": 180
+    },
+    "target_stratified": {
+      "n_valid": 5,
+      "weighted_mean": 1.7270910891735654,
+      "weighted_sigma": 0.019575957221413188,
+      "chi2": 16.97453105167858,
+      "dof": 4.0,
+      "chi2_dof": 4.243632762919645,
+      "status": "watch",
+      "fit_mode": "station_target_year",
+      "min_points": 180
+    },
+    "outputs": {
+      "imbalance_policy_csv": "output/private/llr/llr_kappa_llr_imbalance_policy_summary.csv",
+      "station_stratified_csv": "output/private/llr/llr_kappa_llr_station_stratified_refit.csv",
+      "target_stratified_csv": "output/private/llr/llr_kappa_llr_target_stratified_refit.csv",
+      "imbalance_plot_pdf": "output/private/llr/llr_kappa_llr_imbalance_audit.pdf",
+      "imbalance_plot_png": "output/private/llr/llr_kappa_llr_imbalance_audit.png"
+    }
+  },
+  "template_null_test": {
+    "fit_mode": "station_target_year",
+    "scales": [
+      -1.0,
+      0.0,
+      1.0
+    ],
+    "ref_scale": 1.0,
+    "ref_kappa_est": 1.671912984045632,
+    "ref_kappa_sigma": 0.018598055887073865,
+    "max_abs_z_vs_ref": 51.092891673282004,
+    "status": "reject",
+    "weight_scheme": "uniform",
+    "outputs": {
+      "template_null_csv": "output/private/llr/llr_kappa_llr_template_nulltest_summary.csv",
+      "template_null_pdf": "output/private/llr/llr_kappa_llr_template_nulltest.pdf",
+      "template_null_png": "output/private/llr/llr_kappa_llr_template_nulltest.png"
+    }
+  },
+  "template_decontamination": {
+    "fit_mode": "station_target_year",
+    "baseline_mode": "station_target_year|baseline",
+    "decontaminated_mode": "station_target_year|decontaminated",
+    "baseline_kappa_est": 1.5287267089537062,
+    "baseline_kappa_sigma": 0.025866102236093938,
+    "baseline_abs_z": 20.440911588755462,
+    "decontaminated_kappa_est": 1.0006742979447485,
+    "decontaminated_kappa_sigma": 0.0009605616286801067,
+    "decontaminated_abs_z": 0.7019830114129517,
+    "kappa_minus_1_status": "pass",
+    "kappa_shift_decont_minus_base": -0.5280524110089577,
+    "abs_z_shift": 20.400780524245242,
+    "status": "reject",
+    "nuisance_input_count": 21,
+    "nuisance_orth_kept_count": 21,
+    "nuisance_orth_dropped_count": 0,
+    "max_abs_corr_before": 0.9992751816245602,
+    "max_abs_corr_after": 2.6667583831371214e-15,
+    "min_orth_std": 1e-06,
+    "orth_design_n_params": 22,
+    "fit_weight_scheme": "inv_station_target",
+    "outputs": {
+      "decontamination_summary_csv": "output/private/llr/llr_kappa_llr_template_decontamination_summary.csv",
+      "decontamination_projection_csv": "output/private/llr/llr_kappa_llr_template_decontamination_projection.csv",
+      "decontamination_pdf": "output/private/llr/llr_kappa_llr_template_decontamination.pdf",
+      "decontamination_png": "output/private/llr/llr_kappa_llr_template_decontamination.png"
+    }
+  },
+  "bias_audit": {
+    "components": {
+      "imbalance_policy_gate": "reject",
+      "station_stratified_gate": "reject",
+      "target_stratified_gate": "watch",
+      "template_null_gate": "reject",
+      "template_decontamination_gate": "reject"
+    },
+    "status": "reject"
+  },
+  "gate": {
+    "kappa_gate": {
+      "rule": "|z(kappa-1)| <= 2(pass), <=3(watch), >3(reject)",
+      "status": "pass"
+    },
+    "year_consistency_gate": {
+      "rule": "chi2/dof <=2(pass), <=5(watch), >5(reject)",
+      "status": "reject"
+    },
+    "station_consistency_gate": {
+      "rule": "chi2/dof <=2(pass), <=5(watch), >5(reject)",
+      "status": "reject"
+    },
+    "imbalance_policy_gate": {
+      "rule": "max |z(policy-uniform)| <=2(pass), <=3(watch), >3(reject)",
+      "status": "reject"
+    },
+    "station_stratified_gate": {
+      "rule": "chi2/dof <=2(pass), <=5(watch), >5(reject)",
+      "status": "reject"
+    },
+    "target_stratified_gate": {
+      "rule": "chi2/dof <=2(pass), <=5(watch), >5(reject)",
+      "status": "watch"
+    },
+    "template_null_gate": {
+      "rule": "max |z(scale-ref)| <=2(pass), <=3(watch), >3(reject)",
+      "status": "reject"
+    },
+    "template_decontamination_gate": {
+      "rule": "|z(kappa_decont-kappa_base)| <=2(pass), <=3(watch), >3(reject)",
+      "status": "reject"
+    },
+    "bias_audit_gate": {
+      "rule": "all bias components pass/watch with no reject",
+      "status": "reject"
+    }
+  },
+  "overall_status": "reject",
+  "outputs": {
+    "template_points_csv": "output/private/llr/llr_kappa_llr_template_points.csv",
+    "mode_summary_csv": "output/private/llr/llr_kappa_llr_fit_mode_summary.csv",
+    "selected_points_csv": "output/private/llr/llr_kappa_llr_fit_selected_points.csv",
+    "year_consistency_csv": "output/private/llr/llr_kappa_llr_year_consistency.csv",
+    "station_consistency_csv": "output/private/llr/llr_kappa_llr_station_consistency.csv",
+    "plot_pdf": "output/private/llr/llr_kappa_llr_fit.pdf",
+    "plot_png": "output/private/llr/llr_kappa_llr_fit.png",
+    "imbalance_policy_csv": "output/private/llr/llr_kappa_llr_imbalance_policy_summary.csv",
+    "station_stratified_csv": "output/private/llr/llr_kappa_llr_station_stratified_refit.csv",
+    "target_stratified_csv": "output/private/llr/llr_kappa_llr_target_stratified_refit.csv",
+    "imbalance_plot_pdf": "output/private/llr/llr_kappa_llr_imbalance_audit.pdf",
+    "imbalance_plot_png": "output/private/llr/llr_kappa_llr_imbalance_audit.png",
+    "template_null_csv": "output/private/llr/llr_kappa_llr_template_nulltest_summary.csv",
+    "template_null_pdf": "output/private/llr/llr_kappa_llr_template_nulltest.pdf",
+    "template_null_png": "output/private/llr/llr_kappa_llr_template_nulltest.png",
+    "decontamination_summary_csv": "output/private/llr/llr_kappa_llr_template_decontamination_summary.csv",
+    "decontamination_projection_csv": "output/private/llr/llr_kappa_llr_template_decontamination_projection.csv",
+    "decontamination_pdf": "output/private/llr/llr_kappa_llr_template_decontamination.pdf",
+    "decontamination_png": "output/private/llr/llr_kappa_llr_template_decontamination.png"
+  }
+}

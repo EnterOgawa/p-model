@@ -10,6 +10,10 @@ from typing import Any
 import matplotlib.pyplot as plt
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
@@ -173,7 +177,7 @@ def main() -> None:
     ax.set_xlabel("Temperature T (K)")
     ax.set_ylabel("Bulk modulus B (GPa)")
     ax.grid(True, alpha=0.25)
-    ax.legend(loc="best", fontsize=9)
+    ax.legend(loc="best", fontsize=11.8)
     fig.tight_layout()
     out_png = out_dir / "condensed_silicon_bulk_modulus_baseline.png"
     fig.savefig(out_png, dpi=180)

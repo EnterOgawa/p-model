@@ -5,10 +5,10 @@ REM build_materials.bat
 REM
 REM Default (full): run the full offline pipeline (heavy).
 REM Optional: pass "quick" to rebuild paper/public materials from what is already computed.
-REM Optional: pass "quick-nodocx" to rebuild HTML only (skip DOCX exports).
+REM Optional: pass "quick-nodocx" to rebuild HTML/PDF only (alias of quick).
 REM Note: outputs are written under output\private\summary by default.
-REM Note: full also rebuilds all paper HTML/DOCX (pmodel_paper + part2/part3 + part4).
-REM Note: all modes also emit LaTeX (.tex) for available paper profiles.
+REM Note: DOCX auto-generation is disabled by policy; this script rebuilds HTML/PDF only.
+REM Note: all modes emit LaTeX (.tex) and PDF for available paper profiles.
 REM
 REM Usage:
 REM   build_materials.bat
@@ -19,6 +19,7 @@ REM   build_materials.bat 1  (Part I only)
 REM   build_materials.bat 2  (Part II only)
 REM   build_materials.bat 3  (Part III only)
 REM   build_materials.bat 4  (Part IV only)
+REM   build_materials.bat 5  (Part V only)
 REM
 REM Console log:
 REM   - Every run writes full console output to:
@@ -72,6 +73,7 @@ set "MODE=%~1"
 if "%MODE%"=="" set "MODE=full"
 
 set "DOCX_TIMEOUT=600"
+set "PDF_COMMON_ARGS=--engine auto --require-engine --sync-papers --papers-dir papers"
 
 echo.
 echo === sync_public_readme ===
@@ -87,6 +89,7 @@ if "%MODE%"=="1" goto mode1
 if "%MODE%"=="2" goto mode2
 if "%MODE%"=="3" goto mode3
 if "%MODE%"=="4" goto mode4
+if "%MODE%"=="5" goto mode5
 goto dispatch
 
 :mode1
@@ -115,6 +118,12 @@ set "HTML_NAME=pmodel_paper_part4_verification.html"
 set "DOCX_NAME=pmodel_paper_part4_verification.docx"
 goto single_profile
 
+:mode5
+set "PROFILE=part5_future_predictions"
+set "HTML_NAME=pmodel_paper_part5_future_predictions.html"
+set "DOCX_NAME=pmodel_paper_part5_future_predictions.docx"
+goto single_profile
+
 :dispatch
 
 if /I "%MODE%"=="full" goto full
@@ -123,7 +132,7 @@ if /I "%MODE%"=="quick-nodocx" goto quick_nodocx
 
 echo [err] Unknown mode: "%MODE%"
 echo [hint] Usage: build_materials.bat [full^|quick^|quick-nodocx]
-echo [hint]        build_materials.bat [1^|2^|3^|4]
+echo [hint]        build_materials.bat [1^|2^|3^|4^|5]
 goto fail
 
 :single_profile
@@ -144,35 +153,15 @@ echo.
 echo === paper_tex_audit (%PROFILE%) ===
 python -B scripts\summary\paper_tex_audit.py --profile %PROFILE% --outdir output\private\summary
 if errorlevel 1 goto fail
+echo.
+echo === paper_pdf (%PROFILE%) ===
+python -B scripts\summary\paper_pdf.py --profile %PROFILE% --outdir output\private\summary %PDF_COMMON_ARGS%
+if errorlevel 1 goto fail
 
 set "DOCX_HTML_IN=output\private\summary\%HTML_NAME%"
-if /I "%PROFILE%"=="part2_astrophysics" (
-  echo.
-  echo === paper_html docx-friendly %PROFILE% ===
-  python -B scripts\summary\paper_html.py --profile %PROFILE% --mode publish --outdir output\private\summary --out-name %DOCX_HTML_NAME% --no-embed-images
-  set "DOCX_HTML_IN=output\private\summary\%DOCX_HTML_NAME%"
-)
-if /I "%PROFILE%"=="part3_quantum" (
-  echo.
-  echo === paper_html docx-friendly %PROFILE% ===
-  python -B scripts\summary\paper_html.py --profile %PROFILE% --mode publish --outdir output\private\summary --out-name %DOCX_HTML_NAME% --no-embed-images
-  set "DOCX_HTML_IN=output\private\summary\%DOCX_HTML_NAME%"
-)
-
 echo.
-echo === docx_paper (%PROFILE%) ===
-python -B scripts\summary\html_to_docx.py --in %DOCX_HTML_IN% --out output\private\summary\%DOCX_NAME% --paper-equations --orientation landscape --margin-mm 7 --timeout-s %DOCX_TIMEOUT%
-set "RC=%ERRORLEVEL%"
-if "%RC%"=="0" goto :single_docx_done
-if "%RC%"=="3" (
-  echo [warn] DOCX export skipped: Microsoft Word not available.
-  goto :single_docx_done
-)
-echo [warn] DOCX export failed (%PROFILE%). Continuing with HTML only.
-:single_docx_done
-if exist output\private\summary\pmodel_paper_part3_quantum__tmp.docx (
-  echo [note] pmodel_paper_part3_quantum.docx was locked; updated file is: output\private\summary\pmodel_paper_part3_quantum__tmp.docx
-)
+echo [info] DOCX auto-generation is disabled by policy. Skipping DOCX export for %PROFILE%.
+:single_profile_after_docx
 
 echo.
 echo [ok] Done (profile=%PROFILE%)
@@ -240,7 +229,12 @@ python -B scripts\summary\paper_build.py --profile part4_verification --mode pub
 if errorlevel 1 goto fail
 
 echo.
-echo === latex_paper (paper/part2/part3/part4) ===
+echo === paper_build (part5_future_predictions) ===
+python -B scripts\summary\paper_build.py --profile part5_future_predictions --mode publish --outdir output\private\summary --skip-docx --skip-lint
+if errorlevel 1 goto fail
+
+echo.
+echo === latex_paper (paper/part2/part3/part4/part5) ===
 python -B scripts\summary\paper_latex.py --profile paper --outdir output\private\summary
 if errorlevel 1 goto fail
 python -B scripts\summary\paper_latex.py --profile part2_astrophysics --outdir output\private\summary
@@ -249,65 +243,20 @@ python -B scripts\summary\paper_latex.py --profile part3_quantum --outdir output
 if errorlevel 1 goto fail
 python -B scripts\summary\paper_latex.py --profile part4_verification --outdir output\private\summary
 if errorlevel 1 goto fail
+python -B scripts\summary\paper_latex.py --profile part5_future_predictions --outdir output\private\summary
+if errorlevel 1 goto fail
 echo.
-echo === paper_tex_audit (paper/part2/part3/part4) ===
-python -B scripts\summary\paper_tex_audit.py --profile paper --profile part2_astrophysics --profile part3_quantum --profile part4_verification --outdir output\private\summary
+echo === paper_tex_audit (paper/part2/part3/part4/part5) ===
+python -B scripts\summary\paper_tex_audit.py --profile paper --profile part2_astrophysics --profile part3_quantum --profile part4_verification --profile part5_future_predictions --outdir output\private\summary
+if errorlevel 1 goto fail
+echo.
+echo === paper_pdf (paper/part2/part3/part4/part5) ===
+python -B scripts\summary\paper_pdf.py --profile paper --profile part2_astrophysics --profile part3_quantum --profile part4_verification --profile part5_future_predictions --outdir output\private\summary %PDF_COMMON_ARGS%
 if errorlevel 1 goto fail
 
 echo.
-echo === docx_paper (paper) ===
-python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper.html --out output\private\summary\pmodel_paper.docx --paper-equations --orientation landscape --margin-mm 7 --timeout-s %DOCX_TIMEOUT%
-set "RC=%ERRORLEVEL%"
-if "%RC%"=="0" goto :full_paper_docx_done
-if "%RC%"=="3" (
-  echo [warn] DOCX export skipped: Microsoft Word not available.
-  goto :full_paper_docx_done
-)
-echo [warn] DOCX export failed (paper). Continuing with HTML only.
-:full_paper_docx_done
-
-echo.
-echo === docx_paper (part2_astrophysics) ===
-echo === paper_html docx-friendly part2_astrophysics ===
-python -B scripts\summary\paper_html.py --profile part2_astrophysics --mode publish --outdir output\private\summary --out-name pmodel_paper_part2_astrophysics_docx.html --no-embed-images
-python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part2_astrophysics_docx.html --out output\private\summary\pmodel_paper_part2_astrophysics.docx --paper-equations --orientation landscape --margin-mm 7 --timeout-s %DOCX_TIMEOUT%
-set "RC=%ERRORLEVEL%"
-if "%RC%"=="0" goto :full_part2_docx_done
-if "%RC%"=="3" (
-  echo [warn] DOCX export skipped: Microsoft Word not available.
-  goto :full_part2_docx_done
-)
-echo [warn] DOCX export failed (part2_astrophysics). Continuing with HTML only.
-:full_part2_docx_done
-
-echo.
-echo === docx_paper (part3_quantum) ===
-echo === paper_html docx-friendly part3_quantum ===
-python -B scripts\summary\paper_html.py --profile part3_quantum --mode publish --outdir output\private\summary --out-name pmodel_paper_part3_quantum_docx.html --no-embed-images
-python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part3_quantum_docx.html --out output\private\summary\pmodel_paper_part3_quantum.docx --paper-equations --orientation landscape --margin-mm 7 --timeout-s %DOCX_TIMEOUT%
-set "RC=%ERRORLEVEL%"
-if "%RC%"=="0" goto :full_part3_docx_done
-if "%RC%"=="3" (
-  echo [warn] DOCX export skipped: Microsoft Word not available.
-  goto :full_part3_docx_done
-)
-echo [warn] DOCX export failed (part3_quantum). Continuing with HTML only.
-:full_part3_docx_done
-if exist output\private\summary\pmodel_paper_part3_quantum__tmp.docx (
-  echo [note] pmodel_paper_part3_quantum.docx was locked; updated file is: output\private\summary\pmodel_paper_part3_quantum__tmp.docx
-)
-
-echo.
-echo === docx_paper (part4_verification) ===
-python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part4_verification.html --out output\private\summary\pmodel_paper_part4_verification.docx --paper-equations --orientation landscape --margin-mm 7 --timeout-s %DOCX_TIMEOUT%
-set "RC=%ERRORLEVEL%"
-if "%RC%"=="0" goto :full_part4_docx_done
-if "%RC%"=="3" (
-  echo [warn] DOCX export skipped: Microsoft Word not available.
-  goto :full_part4_docx_done
-)
-echo [warn] DOCX export failed (part4_verification). Continuing with HTML only.
-:full_part4_docx_done
+echo [info] DOCX auto-generation is disabled by policy. Skipping DOCX exports (full mode).
+:full_after_docx
 
 echo.
 echo [ok] Done (full)
@@ -346,7 +295,12 @@ python -B scripts\summary\paper_build.py --profile part4_verification --mode pub
 if errorlevel 1 goto fail
 
 echo.
-echo === latex_paper (paper/part2/part3/part4) ===
+echo === paper_build (part5_future_predictions) ===
+python -B scripts\summary\paper_build.py --profile part5_future_predictions --mode publish --outdir output\private\summary --skip-docx --skip-lint
+if errorlevel 1 goto fail
+
+echo.
+echo === latex_paper (paper/part2/part3/part4/part5) ===
 python -B scripts\summary\paper_latex.py --profile paper --outdir output\private\summary
 if errorlevel 1 goto fail
 python -B scripts\summary\paper_latex.py --profile part2_astrophysics --outdir output\private\summary
@@ -355,72 +309,27 @@ python -B scripts\summary\paper_latex.py --profile part3_quantum --outdir output
 if errorlevel 1 goto fail
 python -B scripts\summary\paper_latex.py --profile part4_verification --outdir output\private\summary
 if errorlevel 1 goto fail
+python -B scripts\summary\paper_latex.py --profile part5_future_predictions --outdir output\private\summary
+if errorlevel 1 goto fail
 echo.
-echo === paper_tex_audit (paper/part2/part3/part4) ===
-python -B scripts\summary\paper_tex_audit.py --profile paper --profile part2_astrophysics --profile part3_quantum --profile part4_verification --outdir output\private\summary
+echo === paper_tex_audit (paper/part2/part3/part4/part5) ===
+python -B scripts\summary\paper_tex_audit.py --profile paper --profile part2_astrophysics --profile part3_quantum --profile part4_verification --profile part5_future_predictions --outdir output\private\summary
+if errorlevel 1 goto fail
+echo.
+echo === paper_pdf (paper/part2/part3/part4/part5) ===
+python -B scripts\summary\paper_pdf.py --profile paper --profile part2_astrophysics --profile part3_quantum --profile part4_verification --profile part5_future_predictions --outdir output\private\summary %PDF_COMMON_ARGS%
 if errorlevel 1 goto fail
 
 echo.
-echo === docx_paper (paper) ===
-python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper.html --out output\private\summary\pmodel_paper.docx --paper-equations --orientation landscape --margin-mm 7 --timeout-s %DOCX_TIMEOUT%
-set "RC=%ERRORLEVEL%"
-if "%RC%"=="0" goto :quick_paper_docx_done
-if "%RC%"=="3" (
-  echo [warn] DOCX export skipped: Microsoft Word not available.
-  goto :quick_paper_docx_done
-)
-echo [warn] DOCX export failed (paper). Continuing with HTML only.
-:quick_paper_docx_done
-
-echo.
-echo === docx_paper (part2_astrophysics) ===
-echo === paper_html docx-friendly part2_astrophysics ===
-python -B scripts\summary\paper_html.py --profile part2_astrophysics --mode publish --outdir output\private\summary --out-name pmodel_paper_part2_astrophysics_docx.html --no-embed-images
-python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part2_astrophysics_docx.html --out output\private\summary\pmodel_paper_part2_astrophysics.docx --paper-equations --orientation landscape --margin-mm 7 --timeout-s %DOCX_TIMEOUT%
-set "RC=%ERRORLEVEL%"
-if "%RC%"=="0" goto :quick_part2_docx_done
-if "%RC%"=="3" (
-  echo [warn] DOCX export skipped: Microsoft Word not available.
-  goto :quick_part2_docx_done
-)
-echo [warn] DOCX export failed (part2_astrophysics). Continuing with HTML only.
-:quick_part2_docx_done
-
-echo.
-echo === docx_paper (part3_quantum) ===
-echo === paper_html docx-friendly part3_quantum ===
-python -B scripts\summary\paper_html.py --profile part3_quantum --mode publish --outdir output\private\summary --out-name pmodel_paper_part3_quantum_docx.html --no-embed-images
-python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part3_quantum_docx.html --out output\private\summary\pmodel_paper_part3_quantum.docx --paper-equations --orientation landscape --margin-mm 7 --timeout-s %DOCX_TIMEOUT%
-set "RC=%ERRORLEVEL%"
-if "%RC%"=="0" goto :quick_part3_docx_done
-if "%RC%"=="3" (
-  echo [warn] DOCX export skipped: Microsoft Word not available.
-  goto :quick_part3_docx_done
-)
-echo [warn] DOCX export failed (part3_quantum). Continuing with HTML only.
-:quick_part3_docx_done
-if exist output\private\summary\pmodel_paper_part3_quantum__tmp.docx (
-  echo [note] pmodel_paper_part3_quantum.docx was locked; updated file is: output\private\summary\pmodel_paper_part3_quantum__tmp.docx
-)
-
-echo.
-echo === docx_paper (part4_verification) ===
-python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part4_verification.html --out output\private\summary\pmodel_paper_part4_verification.docx --paper-equations --orientation landscape --margin-mm 7 --timeout-s %DOCX_TIMEOUT%
-set "RC=%ERRORLEVEL%"
-if "%RC%"=="0" goto :quick_part4_docx_done
-if "%RC%"=="3" (
-  echo [warn] DOCX export skipped: Microsoft Word not available.
-  goto :quick_part4_docx_done
-)
-echo [warn] DOCX export failed (part4_verification). Continuing with HTML only.
-:quick_part4_docx_done
+echo [info] DOCX auto-generation is disabled by policy. Skipping DOCX exports (quick mode).
+:quick_after_docx
 
 echo.
 echo [ok] Done (quick)
 goto ok
 
 :quick_nodocx
-echo [info] Mode=quick-nodocx (paper_build only; HTML only)
+echo [info] Mode=quick-nodocx (paper_build only; HTML/PDF only)
 echo [info] ROOT=%ROOT%
 
 echo.
@@ -444,7 +353,12 @@ python -B scripts\summary\paper_build.py --profile part4_verification --mode pub
 if errorlevel 1 goto fail
 
 echo.
-echo === latex_paper (paper/part2/part3/part4) ===
+echo === paper_build (part5_future_predictions) ===
+python -B scripts\summary\paper_build.py --profile part5_future_predictions --mode publish --outdir output\private\summary --skip-docx --skip-lint
+if errorlevel 1 goto fail
+
+echo.
+echo === latex_paper (paper/part2/part3/part4/part5) ===
 python -B scripts\summary\paper_latex.py --profile paper --outdir output\private\summary
 if errorlevel 1 goto fail
 python -B scripts\summary\paper_latex.py --profile part2_astrophysics --outdir output\private\summary
@@ -452,6 +366,18 @@ if errorlevel 1 goto fail
 python -B scripts\summary\paper_latex.py --profile part3_quantum --outdir output\private\summary
 if errorlevel 1 goto fail
 python -B scripts\summary\paper_latex.py --profile part4_verification --outdir output\private\summary
+if errorlevel 1 goto fail
+python -B scripts\summary\paper_latex.py --profile part5_future_predictions --outdir output\private\summary
+if errorlevel 1 goto fail
+
+echo.
+echo === paper_tex_audit (paper/part2/part3/part4/part5) ===
+python -B scripts\summary\paper_tex_audit.py --profile paper --profile part2_astrophysics --profile part3_quantum --profile part4_verification --profile part5_future_predictions --outdir output\private\summary
+if errorlevel 1 goto fail
+
+echo.
+echo === paper_pdf (paper/part2/part3/part4/part5) ===
+python -B scripts\summary\paper_pdf.py --profile paper --profile part2_astrophysics --profile part3_quantum --profile part4_verification --profile part5_future_predictions --outdir output\private\summary %PDF_COMMON_ARGS%
 if errorlevel 1 goto fail
 
 echo.

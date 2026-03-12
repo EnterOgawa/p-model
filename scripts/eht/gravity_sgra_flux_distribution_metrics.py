@@ -251,7 +251,7 @@ def _parse_percentiles_table(lines: Sequence[str], tex_path: Path) -> Dict[str, 
 # 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Extract GRAVITY (2020) Sgr A* NIR flux distribution percentiles (Table 1).")
+    ap = argparse.ArgumentParser(description="Extract GRAVITY (2020) Sgr A* NIR flux distribution percentiles (first table).")
     ap.add_argument(
         "--tex",
         type=str,

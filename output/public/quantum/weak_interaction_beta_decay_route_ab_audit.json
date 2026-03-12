@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-20T01:36:21.194953+00:00",
+  "generated_utc": "2026-03-08T04:41:00.853170+00:00",
   "phase": 8,
   "step": "8.7.22.8",
   "title": "Weak-interaction beta-decay Route A/B quantitative audit (DoF-equalized + holdout + CKM update watchpack)",
@@ -808,7 +808,7 @@
       "status": "watch",
       "source": {
         "path": "output/public/quantum/weak_interaction_ckm_first_row_audit.json",
-        "sha256": "ab36fe790687e17372fee1a54ee93564d9d70490e6ea85e67fd513903785a882"
+        "sha256": "44b8eb18107088f1d4d93c9d67a484f15ce95952c06b09d0ba6b530d43021ec6"
       },
       "hard_pass": true,
       "watch_pass": false,
@@ -841,7 +841,7 @@
       "status": "pass",
       "source": {
         "path": "output/public/quantum/weak_interaction_pmns_first_row_audit.json",
-        "sha256": "9994c08e6a215f784720e6252269f65a4da1987d62ab8c4805cc012cefddd06a"
+        "sha256": "6d9a7af3f95dd49777727330752b64258ab5abdb0e9b7d14acbb0825db3db785"
       },
       "dataset": "with_sk_atm",
       "hard_pass": true,
@@ -872,22 +872,22 @@
         "exists": true,
         "path": "output/public/quantum/weak_interaction_ckm_first_row_audit.json",
         "size_bytes": 2358,
-        "mtime_utc": "2026-02-19T15:03:53.992439+00:00",
-        "sha256": "AB36FE790687E17372FEE1A54EE93564D9D70490E6EA85E67FD513903785A882"
+        "mtime_utc": "2026-03-08T04:26:26.675735+00:00",
+        "sha256": "44B8EB18107088F1D4D93C9D67A484F15CE95952C06B09D0BA6B530D43021EC6"
       },
       "previous_input_signature": {
         "exists": true,
         "path": "output/public/quantum/weak_interaction_ckm_first_row_audit.json",
         "size_bytes": 2358,
-        "mtime_utc": "2026-02-19T15:03:53.992439+00:00",
-        "sha256": "AB36FE790687E17372FEE1A54EE93564D9D70490E6EA85E67FD513903785A882"
+        "mtime_utc": "2026-03-08T04:26:26.675735+00:00",
+        "sha256": "44B8EB18107088F1D4D93C9D67A484F15CE95952C06B09D0BA6B530D43021EC6"
       },
       "update_event_detected": false,
       "update_event_type": "no_change",
       "input_hash_changed": false,
       "input_metadata_changed_without_hash_change": false,
       "baseline_initialized_now": false,
-      "event_counter": 0,
+      "event_counter": 1,
       "next_action": "wait_for_ckm_primary_input_hash_change_then_rerun_step_8_7_22",
       "note": "CKM+PMNS closure rerun trigger is CKM primary-input hash change. Metadata-only changes are logged and do not increment the event counter."
     }

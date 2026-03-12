@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-16T16:06:27.283187+00:00",
+  "generated_utc": "2026-03-12T09:03:09.912404+00:00",
   "phase": {
     "phase": 8,
     "step": "8.7.2",
@@ -86,7 +86,7 @@
       },
       {
         "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
-        "ratio": 654.1026883136847,
+        "ratio": 187.4790336851017,
         "delay_z_alice": 34.795228665969034,
         "delay_z_bob": 43.90965148631052,
         "delay_z_max": 43.90965148631052

@@ -1,0 +1,2 @@
+n_valid,intercept,slope,intercept_sigma,slope_sigma,z_slope_minus_1,z_intercept,status
+5,0.0,1.0,0.0013324267237545854,0.0012612792100391023,0.0,0.0,pass

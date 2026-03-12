@@ -1,0 +1,9 @@
+key,value
+session_label,17MAY01XA
+expected_internal_id,AUA020
+status,pass
+alias_confirmed,true
+n_netcdf_scanned,206
+observed_session_values,AUA020
+count[AUA020],206
+rationale,expected internal id found in Session metadata across netCDF files

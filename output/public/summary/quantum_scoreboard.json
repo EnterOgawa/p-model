@@ -1,0 +1,258 @@
+{
+  "generated_utc": "2026-03-12T09:03:06.312957+00:00",
+  "profile": "part3_quantum",
+  "inputs": {
+    "paper_table1_quantum_results_json": "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
+  },
+  "rows": [
+    {
+      "id": "bell_selection__1",
+      "label": "Bell（公開一次データ; selection感度）",
+      "status": "ng",
+      "score": 3.0,
+      "metric": "Weihs1998 Δ|S|≈0.423 / Delft2015 ΔS≈0.788 / Delft2016 ΔS≈1.44 / NIST ΔJ≈0.001 / Kwiat2013 ΔJ≈0.000123",
+      "detail": "統計量の選別依存（window/offset sweep）",
+      "sources": [
+        "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
+      ],
+      "score_kind": "table1_quantum_proxy"
+    },
+    {
+      "id": "cow__2",
+      "label": "重力×量子干渉：COW",
+      "status": "ng",
+      "score": 3.0,
+      "metric": "|Δφ|≈11.155 cycles / H=3 cm / v0=2000 m/s / source=cow_phase_shift_metrics.json",
+      "detail": "COW位相（スケール）",
+      "sources": [
+        "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
+      ],
+      "score_kind": "table1_quantum_proxy"
+    },
+    {
+      "id": "row_3__3",
+      "label": "重力×量子干渉：原子干渉計",
+      "status": "ok",
+      "score": 0.5,
+      "metric": "φ≈2.31e+07 rad / T=0.4 s / source=atom_interferometer_gravimeter_phase_metrics.json",
+      "detail": "原子干渉計重力計位相（スケール）",
+      "sources": [
+        "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
+      ],
+      "score_kind": "table1_quantum_proxy"
+    },
+    {
+      "id": "row_4__4",
+      "label": "量子時計（赤方偏移）",
+      "status": "ok",
+      "score": 0.848,
+      "metric": "z=0.848 / ε=5.67e-04±6.68e-04 / source=optical_clock_chronometric_leveling_metrics.json",
+      "detail": "公表偏差 ε*（弱場比較）",
+      "sources": [
+        "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
+      ],
+      "score_kind": "table1_quantum_proxy"
+    },
+    {
+      "id": "row_5__5",
+      "label": "物質波干渉",
+      "status": "ok",
+      "score": 0.5,
+      "metric": "λ=50.054 pm / 縞間隔=0.179 mrad / source=electron_double_slit_interference_metrics.json",
+      "detail": "de Broglie（電子二重スリット）",
+      "sources": [
+        "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
+      ],
+      "score_kind": "table1_quantum_proxy"
+    },
+    {
+      "id": "row_6__6",
+      "label": "物質波干渉（精密）",
+      "status": "ok",
+      "score": 0.588,
+      "metric": "z=0.588 / ε=-5.33e-09±9.08e-09（解釈パラメータ） / source=de_broglie_precision_alpha_consistency_metrics.json",
+      "detail": "de Broglie 精密（α整合）",
+      "sources": [
+        "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
+      ],
+      "score_kind": "table1_quantum_proxy"
+    },
+    {
+      "id": "row_7__7",
+      "label": "重力誘起デコヒーレンス",
+      "status": "mixed",
+      "score": 1.5,
+      "metric": "V=0.5: σz→t1/2 = 0.1 mm→4.00e+04 s / 1 mm→4.00e+03 s / 10 mm→4.00e+02 s / source=gravity_induced_decoherence_metrics.json",
+      "detail": "可視度Vの低下スケール",
+      "sources": [
+        "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
+      ],
+      "score_kind": "table1_quantum_proxy"
+    },
+    {
+      "id": "row_8__8",
+      "label": "光の量子干渉",
+      "status": "mixed",
+      "score": 1.5,
+      "metric": "単一光子: σL≈164.801 nm / HOM: D=13 ns: V=0.982(+0.013/-0.013); D=1000 ns: V=0.987(+0.013/-0.02) / スクイーズド（10 dB）: η≥0.9（loss-only） / source=photon_quantum_interference_metrics.json",
+      "detail": "可視度/干渉指標（入口）",
+      "sources": [
+        "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
+      ],
+      "score_kind": "table1_quantum_proxy"
+    },
+    {
+      "id": "qed__9",
+      "label": "真空・QED精密",
+      "status": "ok",
+      "score": 0.59,
+      "metric": "Casimir: closestで相対精度~1% / sphere diam=201.7 μm / Lamb: Z^4/Z^6 スケーリング固定（入口） / H 1S–2S: f=2,466,061,413,187,035 Hz (σ=10 Hz)（4.06e-15） / α^-1: Δ=+3.660e-07±6.221e-07 (z=+0.59, ε≈-5.34 ppb) / source=qed_vacuum_precision_metrics.json",
+      "detail": "Casimir/Lamb の精度入口",
+      "sources": [
+        "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
+      ],
+      "score_kind": "table1_quantum_proxy"
+    },
+    {
+      "id": "h_i__10",
+      "label": "原子・分子（基準値）：H I",
+      "status": "mixed",
+      "score": 1.5,
+      "metric": "Lyα=121.567 nm / Hγ=434.169 nm / Hβ=486.266 nm / Hα=656.466 nm / Hα multiplet=656.452–656.466 nm (N=5) / Hβ multiplet=486.264–486.27 nm (N=3) / source=atomic_hydrogen_baseline_metrics.json",
+      "detail": "H I 遷移波長（vacuum）",
+      "sources": [
+        "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
+      ],
+      "score_kind": "table1_quantum_proxy"
+    },
+    {
+      "id": "he_i__11",
+      "label": "原子・分子（基準値）：He I",
+      "status": "mixed",
+      "score": 1.5,
+      "metric": "447.273=447.273 nm / 501.708=501.708 nm / 587.725=587.725 nm / 668.000=668 nm / source=atomic_helium_baseline_metrics.json",
+      "detail": "He I 遷移波長（vacuum）",
+      "sources": [
+        "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
+      ],
+      "score_kind": "table1_quantum_proxy"
+    },
+    {
+      "id": "h2__12",
+      "label": "原子・分子（基準値）：H2",
+      "status": "mixed",
+      "score": 1.5,
+      "metric": "ωe=4401.213 cm^-1 / ωexe=121.336 cm^-1 / Be=60.853 cm^-1 / αe=3.0622 cm^-1 / D(dist)=0.0471 cm^-1 / re=0.74144 Å / D0(Morse,derived)≈4.6793 eV / source=molecular_h2_baseline_metrics.json",
+      "detail": "H2 分子定数（ground state）",
+      "sources": [
+        "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
+      ],
+      "score_kind": "table1_quantum_proxy"
+    },
+    {
+      "id": "hd__13",
+      "label": "原子・分子（基準値）：HD",
+      "status": "mixed",
+      "score": 1.5,
+      "metric": "ωe=3813.15 cm^-1 / ωexe=91.65 cm^-1 / Be=45.655 cm^-1 / αe=1.986 cm^-1 / D(dist)=0.02605 cm^-1 / re=0.74142 Å / D0(Morse,derived)≈4.6839 eV / source=molecular_hd_baseline_metrics.json",
+      "detail": "HD 分子定数（ground state）",
+      "sources": [
+        "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
+      ],
+      "score_kind": "table1_quantum_proxy"
+    },
+    {
+      "id": "d2__14",
+      "label": "原子・分子（基準値）：D2",
+      "status": "mixed",
+      "score": 1.5,
+      "metric": "ωe=3115.5 cm^-1 / ωexe=61.82 cm^-1 / Be=30.4436 cm^-1 / αe=1.0786 cm^-1 / D(dist)=0.01141 cm^-1 / re=0.74152 Å / D0(Morse,derived)≈4.6755 eV / source=molecular_d2_baseline_metrics.json",
+      "detail": "D2 分子定数（ground state）",
+      "sources": [
+        "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
+      ],
+      "score_kind": "table1_quantum_proxy"
+    },
+    {
+      "id": "d0__15",
+      "label": "原子・分子（基準値）：D0",
+      "status": "mixed",
+      "score": 1.5,
+      "metric": "H2(N=1)=4.4634 eV (35999.6 cm^-1) / HD(N=0)=4.5137 eV (36405.8 cm^-1) / D2(N=0)=4.5562 eV (36748.4 cm^-1) / source=molecular_dissociation_d0_spectroscopic_metrics.json",
+      "detail": "分光学的解離エネルギー D0（0 K）",
+      "sources": [
+        "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
+      ],
+      "score_kind": "table1_quantum_proxy"
+    },
+    {
+      "id": "lines__16",
+      "label": "原子・分子（基準値）：lines",
+      "status": "mixed",
+      "score": 1.5,
+      "metric": "H2(RACPPK): top10, A_max=5.5060e-06 s^-1, ν̃=2778.364537–2970.994204 cm^-1 / HD(ADJSAAM): top10, A_max=1.1879e-03 s^-1, ν̃=1287.580183–4996.782991 cm^-1 / D2(ARLSJ1999 (FUV; B/C/B′/D→X)): top10, A_max=5.2740e+08 s^-1, ν̃=79203.7–80262.5 cm^-1 / D2 #1: C−(v=11,J=1) → X(v=17,J=1) (ν̃=7.93e+04 cm^-1, A=5.2740e+08 s^-1) / H2 #1: v=0,J=28 → v=0,J=26 (ν̃=2903.823 cm^-1, A=5.5060e-06 s^-1) / HD #1: v=9,J=23,qb → v=7,J=22,b (ν̃=3246.098 cm^-1, A=1.1879e-03 s^-1) / source=molecular_transitions_exomol_baseline_metrics.json",
+      "detail": "分子 遷移（一次線リスト；代表遷移）",
+      "sources": [
+        "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
+      ],
+      "score_kind": "table1_quantum_proxy"
+    },
+    {
+      "id": "deuteron_np__17",
+      "label": "原子核（波動干渉＋deuteron+np散乱）",
+      "status": "ng",
+      "score": 3.0,
+      "metric": "B≈2.224566 MeV / eq18 (GWU/SAID): Rc≈0.531 fm, Vc≈100 MeV, R1≈0.731 fm, R2≈2.35 fm, V1t≈251.8 MeV, V2t≈21.4 MeV, V1s≈554.1 MeV, V2s≈121.268 MeV, v2t≈0.17 (Δ≈0.007), r_s(fit)≈2.8079 (Δ≈0.1819), v2s(pred)≈1.191 (Δ≈1.196) / eq19 (Nijmegen): Rc≈0.274 fm, Vc≈858.5 MeV, R1≈0.488 fm, R2≈2.746 fm, V1t≈608.8 MeV, V2t≈13.7 MeV, V1s≈350.8 MeV, V2s≈10.769 MeV, v2t≈0.047 (Δ≈0.007), r_s(fit)≈2.6771 (Δ≈-0.000882), v2s(pred)≈0.52 (Δ≈1) / envelope_ok(r_s)=no / envelope_ok(v2s)=no / P-SEMF: median abs(ΔB)≈75.15 MeV, median σ_req,rel≈2.7% / P-Yukawa proxy: median abs(ΔB)≈1150.06 MeV, median σ_req,rel≈33.43% / AME2020(all): N=3554, median(B_pred/B_obs)≈0.064, p16–p84≈0.033–0.181 / falsification: global-R: z_median≈-3.22, z_ΔA≈-2.61 / local-spacing: z_median≈5.63, z_ΔA≈2.39 / source=nuclear_effective_potential_repulsive_core_two_range_metrics.json",
+      "detail": "結合エネルギー B.E. + (a_t,r_t,v2)（低エネルギー）",
+      "sources": [
+        "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
+      ],
+      "score_kind": "table1_quantum_proxy"
+    },
+    {
+      "id": "bell_time_tag__18",
+      "label": "Bell（計画）：time-tag",
+      "status": "ok",
+      "score": 0.5,
+      "metric": "入手できたものから統合（追加time-tag）",
+      "detail": "photon time-tag 追加データ統合",
+      "sources": [
+        "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
+      ],
+      "score_kind": "table1_quantum_proxy"
+    },
+    {
+      "id": "bell_cov_sys__19",
+      "label": "Bell（計画）：cov+sys",
+      "status": "mixed",
+      "score": 1.5,
+      "metric": "共分散/系統/長期整合を固定（横断）",
+      "detail": "共分散＋系統分解＋長期統合＋反証条件",
+      "sources": [
+        "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
+      ],
+      "score_kind": "table1_quantum_proxy"
+    },
+    {
+      "id": "row_20__20",
+      "label": "量子（計画）",
+      "status": "mixed",
+      "score": 1.5,
+      "metric": "Part II 同様に、共分散＋系統分解＋cross-check＋棄却条件を固定出力",
+      "detail": "干渉・時計・QED の精密化",
+      "sources": [
+        "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
+      ],
+      "score_kind": "table1_quantum_proxy"
+    }
+  ],
+  "notes": [
+    "これは Part III（量子）検証サマリ表 を『1枚で俯瞰』するための要約スコアボード。",
+    "OK/要改善/不一致 は、z/σ/手続き感度（Δ）の粗い proxy に基づく“目安”。厳密な判定は各節の棄却条件を正とする。"
+  ],
+  "outputs": {
+    "scoreboard_png": "C:/develop/waveP/output/public/summary/quantum_scoreboard.png",
+    "scoreboard_pdf": "C:/develop/waveP/output/private/summary/quantum_scoreboard.pdf",
+    "scoreboard_json": "C:/develop/waveP/output/public/summary/quantum_scoreboard.json"
+  }
+}

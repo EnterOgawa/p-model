@@ -1,0 +1,58 @@
+{
+  "generated_utc": "2026-02-16T17:26:42.150350+00:00",
+  "domain": "summary",
+  "step": "8.7.16.2 (public manifest continuity)",
+  "params": {
+    "release_ref": "v0.1.2",
+    "release_ref_exists": true,
+    "snapshot_label": "v0.1.2_head-58587b5"
+  },
+  "status": "pass_tree_stable",
+  "ok": true,
+  "baseline": {
+    "path": "output/private/summary/public_manifest_snapshots/public_outputs_manifest_snapshot_v0.1.2_head-58587b5.json",
+    "available": true,
+    "generated_utc": "2026-02-16T17:26:26.585881+00:00",
+    "release_ref": "v0.1.2"
+  },
+  "current": {
+    "snapshot_path": "output/private/summary/public_manifest_snapshots/public_outputs_manifest_snapshot_v0.1.2_head-58587b5.json",
+    "manifest_path": "output/public/summary/public_outputs_manifest.json",
+    "manifest_generated_utc": "2026-02-16T17:26:42.061612+00:00",
+    "summary": {
+      "file_count": 879,
+      "total_size_bytes": 160012227,
+      "topics_count": 14,
+      "public_tree_sha256": "c6560f8ea99155eaf9e93f3ee6e9660f2be6ac4f87407996d953319d97a7e4ef",
+      "ok": true
+    }
+  },
+  "deltas": {
+    "tree_hash_changed": false,
+    "previous_tree_sha256": "c6560f8ea99155eaf9e93f3ee6e9660f2be6ac4f87407996d953319d97a7e4ef",
+    "current_tree_sha256": "c6560f8ea99155eaf9e93f3ee6e9660f2be6ac4f87407996d953319d97a7e4ef",
+    "file_count_delta": 0,
+    "total_size_bytes_delta": 0,
+    "topics_count_delta": 0,
+    "required_core_changed_count": 0,
+    "required_core_missing_regression_count": 0,
+    "required_core_missing_regression": [],
+    "required_core_changed": [],
+    "topic_status_counts": {
+      "added": 0,
+      "removed": 0,
+      "changed": 0,
+      "unchanged": 14
+    }
+  },
+  "outputs": {
+    "json": "output/private/summary/public_outputs_manifest_continuity.json",
+    "topic_delta_csv": "output/private/summary/public_outputs_manifest_continuity_topics.csv",
+    "snapshot_json": "output/private/summary/public_manifest_snapshots/public_outputs_manifest_snapshot_v0.1.2_head-58587b5.json"
+  },
+  "repro_commands": {
+    "public_outputs_manifest": "python -B scripts/summary/public_outputs_manifest.py",
+    "public_outputs_manifest_continuity": "python -B scripts/summary/public_outputs_manifest_continuity.py",
+    "release_manifest": "python -B scripts/summary/release_manifest.py"
+  }
+}

@@ -279,18 +279,23 @@ def main() -> int:
     metrics["beta_source"] = beta_source
 
     _set_japanese_font()
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12.8, 5.5), gridspec_kw={"width_ratios": [1.25, 1.0]})
+    fig, (ax1, ax2) = plt.subplots(
+        2,
+        1,
+        figsize=(11.4, 10.8),
+        gridspec_kw={"height_ratios": [1.18, 1.0]},
+    )
 
     # Left: alpha(b)
-    ax1.plot(b_over, alpha_arcsec, label=f"P-model（β={metrics.get('beta', 1.0):g}）")
-    ax1.scatter([1.0], [float(metrics.get("alpha_pmodel_arcsec_limb", float("nan")))], color="black", s=18, zorder=3)
+    ax1.plot(b_over, alpha_arcsec, linewidth=2.2, label=f"P-model（β={metrics.get('beta', 1.0):g}）")
+    ax1.scatter([1.0], [float(metrics.get("alpha_pmodel_arcsec_limb", float("nan")))], color="black", s=32, zorder=3)
     ax1.axhline(
         float(metrics.get("reference_arcsec_limb", 1.75)),
         color="gray",
         linestyle="--",
-        linewidth=1.0,
-        label=f"標準理論（GR, γ=1）: {float(metrics.get('reference_arcsec_limb', 1.75)):.3f} 角秒（太陽縁）",
-    )
+            linewidth=1.25,
+            label=f"標準理論（GR, γ=1）: {float(metrics.get('reference_arcsec_limb', 1.75)):.3f} 角秒（太陽縁）",
+        )
     # 条件分岐: `metrics.get("observed_alpha_arcsec_limb_best") is not None and metrics.get("o...` を満たす経路を評価する。
     if metrics.get("observed_alpha_arcsec_limb_best") is not None and metrics.get("observed_alpha_sigma_arcsec_limb_best") is not None:
         label = str(metrics.get("observed_best_label") or metrics.get("observed_best_id") or "観測")
@@ -301,26 +306,27 @@ def main() -> int:
             fmt="o",
             color="tab:red",
             capsize=3,
-            markersize=4,
+            markersize=5.2,
             label=f"観測（代表: {label}）",
         )
 
     ax1.set_xlim(1.0, 10.0)
-    ax1.set_xlabel("インパクトパラメータ b [太陽半径 R_sun]")
-    ax1.set_ylabel("偏向角 α [角秒]")
-    ax1.set_title("太陽重力による光の偏向（弱場）")
+    ax1.set_xlabel("インパクトパラメータ b [太陽半径 R_sun]", fontsize=15.0)
+    ax1.set_ylabel("偏向角 α [角秒]", fontsize=15.0)
+    ax1.set_title("太陽重力による光の偏向（弱場）", fontsize=18.0)
     ax1.grid(True, alpha=0.3)
-    ax1.legend(fontsize=9, loc="upper right")
+    ax1.tick_params(axis="both", labelsize=13.4)
+    ax1.legend(fontsize=12.4, loc="upper right")
 
     # Right: observed gamma
-    ax2.axhline(1.0, color="gray", linestyle="--", linewidth=1.0, label="標準理論（GR）: γ=1")
+    ax2.axhline(1.0, color="gray", linestyle="--", linewidth=1.25, label="標準理論（GR）: γ=1")
     # 条件分岐: `metrics.get("gamma_pmodel") is not None` を満たす経路を評価する。
     if metrics.get("gamma_pmodel") is not None:
         ax2.axhline(
             float(metrics["gamma_pmodel"]),
             color="tab:blue",
             linestyle="-",
-            linewidth=1.0,
+            linewidth=1.25,
             label=f"P-model 予測: γ=2β-1 = {float(metrics['gamma_pmodel']):.6f}",
         )
 
@@ -338,23 +344,26 @@ def main() -> int:
                 yerr=[float(r["sigma"])],
                 fmt="o",
                 capsize=3,
-                markersize=4,
+                markersize=5.2,
                 label=str(r.get("short_label") or r.get("id") or "obs"),
             )
     else:
-        ax2.text(0.5, 0.5, "観測データなし", ha="center", va="center", transform=ax2.transAxes)
+        ax2.text(0.5, 0.5, "観測データなし", ha="center", va="center", transform=ax2.transAxes, fontsize=14.0)
 
-    ax2.set_xlabel("年")
-    ax2.set_ylabel("PPN γ（光偏向の強さ）")
-    ax2.set_title("光偏向パラメータ γ（観測）")
+    ax2.set_xlabel("年", fontsize=15.0)
+    ax2.set_ylabel("PPN γ（光偏向の強さ）", fontsize=15.0)
+    ax2.set_title("光偏向パラメータ γ（観測）", fontsize=18.0)
     ax2.grid(True, alpha=0.3)
-    ax2.legend(fontsize=9, loc="lower right")
+    ax2.tick_params(axis="both", labelsize=13.4)
+    ax2.legend(fontsize=12.4, loc="lower right")
 
-    fig.suptitle("太陽重力による光の偏向：曲線（理論）と γ（観測）", y=0.98)
-    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.95))
+    fig.suptitle("太陽重力による光の偏向：曲線（理論）と γ（観測）", y=0.992, fontsize=16.8)
+    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.968), h_pad=2.1)
 
     png_path = outdir / "solar_light_deflection.png"
+    pdf_path = outdir / "solar_light_deflection.pdf"
     fig.savefig(png_path, dpi=200)
+    fig.savefig(pdf_path)
     plt.close(fig)
 
     out_rows_csv = outdir / "solar_light_deflection_measurements.csv"
@@ -371,12 +380,13 @@ def main() -> int:
         "input": {"measurements_json": str(Path(args.measurements)) if args.measurements else None},
         "metrics": metrics,
         "observations": obs_rows,
-        "outputs": {"plot_png": str(png_path), "measurements_csv": str(out_rows_csv)},
+        "outputs": {"plot_png": str(png_path), "plot_pdf": str(pdf_path), "measurements_csv": str(out_rows_csv)},
     }
     json_path = outdir / "solar_light_deflection_metrics.json"
     _write_json(json_path, payload)
 
     print(f"[ok] plot : {png_path}")
+    print(f"[ok] plot : {pdf_path}")
     print(f"[ok] metrics: {json_path}")
     return 0
 

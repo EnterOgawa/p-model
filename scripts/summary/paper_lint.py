@@ -91,8 +91,8 @@ def _resolve_output_path(root: Path, rel: str) -> Path:
 
 _REF_KEY_RE = re.compile(r"^\s*-\s+\[([A-Za-z][A-Za-z0-9_-]{0,40})\]")
 _CITE_RE = re.compile(r"\[([A-Za-z][A-Za-z0-9_-]{0,40})\]")
-_PNG_CODE_RE = re.compile(r"`(output/[^`]+?\.png)`")
-_FIG_INDEX_PNG_RE = re.compile(r"`(output/[^`]+?\.png)`\s*(?:（(.{0,200})）|\((.{0,200})\))?")
+_IMAGE_CODE_RE = re.compile(r"`(output/[^`]+?\.(?:png|pdf))`")
+_FIG_INDEX_IMAGE_RE = re.compile(r"`(output/[^`]+?\.(?:png|pdf))`\s*(?:（(.{0,200})）|\((.{0,200})\))?")
 _UNFIXED_GH_MAIN_RE = re.compile(r"https://github\.com/EnterOgawa/p-model/(?:blob|tree)/main/")
 _DELTA_UNIT_BLOCK_RE = re.compile(
     r"<!--\s*DELTA_UNIT:START\s+([A-Za-z0-9_.:-]+)\s*-->(.*?)<!--\s*DELTA_UNIT:END\s+\1\s*-->",
@@ -135,21 +135,21 @@ def _extract_used_citations(md_text: str) -> Set[str]:
     return set(_CITE_RE.findall(md_text))
 
 
-# 関数: `_extract_png_refs` の入出力契約と処理意図を定義する。
+# 関数: `_extract_image_refs` の入出力契約と処理意図を定義する。
 
-def _extract_png_refs(md_text: str) -> Set[str]:
-    return set(_PNG_CODE_RE.findall(md_text))
+def _extract_image_refs(md_text: str) -> Set[str]:
+    return set(_IMAGE_CODE_RE.findall(md_text))
 
 
-# 関数: `_extract_fig_index_pngs` の入出力契約と処理意図を定義する。
+# 関数: `_extract_fig_index_images` の入出力契約と処理意図を定義する。
 
-def _extract_fig_index_pngs(fig_index_md: str) -> List[Tuple[str, str]]:
+def _extract_fig_index_images(fig_index_md: str) -> List[Tuple[str, str]]:
     """
-    Return list of (png_path, caption) in appearance order (de-duplicated).
+    Return list of (image_path, caption) in appearance order (de-duplicated).
     """
     found: List[Tuple[str, str]] = []
     for line in fig_index_md.splitlines():
-        m = _FIG_INDEX_PNG_RE.search(line)
+        m = _FIG_INDEX_IMAGE_RE.search(line)
         # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
@@ -290,7 +290,7 @@ def _lint(
         warnings.append("no reference keys found in references (expected '- [KEY]' bullets)")
 
     used_keys: Set[str] = set()
-    used_pngs: Set[str] = set()
+    used_images: Set[str] = set()
     for md_path in manuscript_paths:
         # 条件分岐: `not md_path.exists()` を満たす経路を評価する。
         if not md_path.exists():
@@ -299,7 +299,7 @@ def _lint(
 
         md_text = _read_text(md_path)
         used_keys |= _extract_used_citations(md_text)
-        used_pngs |= _extract_png_refs(md_text)
+        used_images |= _extract_image_refs(md_text)
         unresolved_section_refs = _find_unresolved_section_refs(md_text)
         # 条件分岐: `unresolved_section_refs` を満たす経路を評価する。
         if unresolved_section_refs:
@@ -337,11 +337,11 @@ def _lint(
                     f"delta-unit '{unit_id}' should contain exactly 1 markdown table (separator lines={table_count})"
                 )
 
-            png_count = len(_PNG_CODE_RE.findall(unit_body))
-            # 条件分岐: `png_count != 1` を満たす経路を評価する。
-            if png_count != 1:
+            image_count = len(_IMAGE_CODE_RE.findall(unit_body))
+            # 条件分岐: `image_count != 1` を満たす経路を評価する。
+            if image_count != 1:
                 warnings.append(
-                    f"delta-unit '{unit_id}' should contain exactly 1 figure reference (png refs={png_count})"
+                    f"delta-unit '{unit_id}' should contain exactly 1 figure reference (image refs={image_count})"
                 )
 
             fals_lines = _count_falsification_lines(unit_body)
@@ -365,20 +365,20 @@ def _lint(
         return _LintResult(errors=errors, warnings=warnings)
 
     fig_idx_md = _read_text(figures_index_path)
-    fig_items = _extract_fig_index_pngs(fig_idx_md)
+    fig_items = _extract_fig_index_images(fig_idx_md)
     # 条件分岐: `not fig_items` を満たす経路を評価する。
     if not fig_items:
-        warnings.append("no PNG entries found in figures index (expected backticked output/...png)")
+        warnings.append("no figure entries found in figures index (expected backticked output/...png or .pdf)")
 
     for rel, caption in fig_items:
         # Only enforce existence/caption for figures actually referenced by the manuscript.
         # The index may contain optional/planned figures that are not generated in a minimal build.
-        if rel not in used_pngs:
+        if rel not in used_images:
             continue
 
-        png_path = _resolve_output_path(root, rel)
-        # 条件分岐: `not png_path.exists()` を満たす経路を評価する。
-        if not png_path.exists():
+        image_path = _resolve_output_path(root, rel)
+        # 条件分岐: `not image_path.exists()` を満たす経路を評価する。
+        if not image_path.exists():
             warnings.append(f"missing figure file referenced by manuscript (listed in index): {rel}")
             continue
 
@@ -387,16 +387,16 @@ def _lint(
         if not caption:
             warnings.append(f"no caption in figures index (referenced): {rel}")
 
-    # --- Manuscript png refs must be in the figures index for stable (図N) linking
+    # --- Manuscript image refs must be in the figures index for stable (図N) linking
 
-    idx_pngs = {rel for rel, _ in fig_items}
+    idx_images = {rel for rel, _ in fig_items}
 
-    missing_pngs = sorted(used_pngs - idx_pngs)
-    # 条件分岐: `missing_pngs` を満たす経路を評価する。
-    if missing_pngs:
+    missing_images = sorted(used_images - idx_images)
+    # 条件分岐: `missing_images` を満たす経路を評価する。
+    if missing_images:
         warnings.append(
-            "png referenced in manuscript but not listed in figures index (図番号リンクが不安定): "
-            + ", ".join(missing_pngs)
+            "figure referenced in manuscript but not listed in figures index (図番号リンクが不安定): "
+            + ", ".join(missing_images)
         )
 
     return _LintResult(errors=errors, warnings=warnings)

@@ -5,11 +5,11 @@ jwst_spectra_integration.py
 
 Phase 4 / Step 4.6（JWST/MAST：スペクトル一次データ）:
 JWST x1d（MAST）パイプラインの固定出力（manifest_all / release_waitlist / z_confirmed 等）を集約し、
-Table 1 への扱い（参考/screening）と、公開待ち（proprietary）の次回解放日時を「出力として」固定する。
+検証サマリ表への扱い（参考/screening）と、公開待ち（proprietary）の次回解放日時を「出力として」固定する。
 
 注意:
 - JWST x1d は距離指標と独立な一次データ入口だが、現時点では GN-z11 が未公開であり、
-  解析の completeness が将来に依存するため、Table 1 では σ評価の対象にしない（info/screening）。
+  解析の completeness が将来に依存するため、検証サマリ表では σ評価の対象にしない（info/screening）。
 """
 
 from __future__ import annotations
@@ -223,7 +223,7 @@ def build_metrics(root: Path) -> Dict[str, Any]:
         },
         "table1": {
             "status": table1_status,
-            "policy": "JWST/MAST は距離指標と独立な一次データ入口だが、現時点は公開待ち（例：GN-z11）が残るため Table 1 では参考（σ評価は除外）として扱う。",
+            "policy": "JWST/MAST は距離指標と独立な一次データ入口だが、現時点は公開待ち（例：GN-z11）が残るため検証サマリ表では参考（σ評価は除外）として扱う。",
             "reasons": reasons,
         },
         "outputs": {
@@ -235,7 +235,7 @@ def build_metrics(root: Path) -> Dict[str, Any]:
 # 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
-    ap = argparse.ArgumentParser(description="Integrate JWST/MAST x1d pipeline outputs and freeze Table 1 policy.")
+    ap = argparse.ArgumentParser(description="Integrate JWST/MAST x1d pipeline outputs and freeze 検証サマリ表 policy.")
     ap.add_argument("--out-path", default="", help="Override output path (default: output/private/cosmology/jwst_spectra_integration_metrics.json).")
     args = ap.parse_args(list(argv) if argv is not None else None)
 

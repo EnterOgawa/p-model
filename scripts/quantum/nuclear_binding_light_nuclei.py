@@ -6,6 +6,10 @@ import math
 from pathlib import Path
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
@@ -195,10 +199,14 @@ def main() -> None:
 
     # Plot
 
+    import matplotlib as mpl
     import matplotlib.pyplot as plt
 
-    fig = plt.figure(figsize=(12.8, 7.2), dpi=160)
-    gs = fig.add_gridspec(2, 2, wspace=0.30, hspace=0.32)
+    mpl.rcParams["pdf.fonttype"] = 42
+    mpl.rcParams["ps.fonttype"] = 42
+
+    fig = plt.figure(figsize=(18.8, 8.8), dpi=190)
+    gs = fig.add_gridspec(2, 3, height_ratios=[1.0, 0.34], wspace=0.28, hspace=0.22)
 
     labels = [r["key"] for r in rows]
     x = list(range(len(labels)))
@@ -211,19 +219,21 @@ def main() -> None:
     ax0.errorbar(x, b_vals, yerr=b_sig, fmt="o", capsize=4, lw=1.6)
     ax0.set_xticks(x)
     ax0.set_xticklabels(labels)
-    ax0.set_ylabel("binding energy B (MeV)")
-    ax0.set_title("Mass defect baseline (CODATA via NIST)")
+    ax0.set_ylabel("binding energy B (MeV)", fontsize=20.4)
+    ax0.set_title("Mass defect baseline (CODATA via NIST)", fontsize=21.4)
     ax0.grid(True, ls=":", lw=0.6, alpha=0.6)
+    ax0.tick_params(axis="both", labelsize=17.2)
 
     ax1 = fig.add_subplot(gs[0, 1])
     ax1.errorbar(x, ba_vals, yerr=ba_sig, fmt="o", capsize=4, lw=1.6, color="tab:green")
     ax1.set_xticks(x)
     ax1.set_xticklabels(labels)
-    ax1.set_ylabel("B/A (MeV per nucleon)")
-    ax1.set_title("Binding energy per nucleon")
+    ax1.set_ylabel("B/A (MeV per nucleon)", fontsize=20.4)
+    ax1.set_title("Binding energy per nucleon", fontsize=21.4)
     ax1.grid(True, ls=":", lw=0.6, alpha=0.6)
+    ax1.tick_params(axis="both", labelsize=17.2)
 
-    ax2 = fig.add_subplot(gs[1, 0])
+    ax2 = fig.add_subplot(gs[0, 2])
     r_labels = ["p", "d", "t", "h", "alpha"]
     rx = list(range(len(r_labels)))
     r_vals = [rp_fm, rd_fm, rt_fm, rh_fm, ral_fm]
@@ -231,15 +241,16 @@ def main() -> None:
     ax2.errorbar(rx, r_vals, yerr=r_sig, fmt="o", capsize=4, lw=1.6, color="tab:purple")
     ax2.set_xticks(rx)
     ax2.set_xticklabels(r_labels)
-    ax2.set_ylabel("charge rms radius (fm)")
-    ax2.set_title("Charge radii (CODATA + IAEA compilation)")
+    ax2.set_ylabel("charge rms radius (fm)", fontsize=20.4)
+    ax2.set_title("Charge radii (CODATA + IAEA compilation)", fontsize=21.4)
     ax2.grid(True, ls=":", lw=0.6, alpha=0.6)
+    ax2.tick_params(axis="both", labelsize=17.2)
 
-    ax3 = fig.add_subplot(gs[1, 1])
+    ax3 = fig.add_subplot(gs[1, :])
     ax3.axis("off")
     ax3.text(
-        0.0,
-        1.0,
+        0.02,
+        0.90,
         (
             "Definitions:\n"
             "  B = (Z m_p + N m_n − m_nucleus) c²\n"
@@ -250,13 +261,17 @@ def main() -> None:
         ),
         va="top",
         ha="left",
-        fontsize=9,
-        family="monospace",
+        fontsize=18.2,
+        linespacing=1.32,
+        wrap=True,
     )
 
-    fig.suptitle("Phase 7 / Step 7.13.10: light nuclei baselines (A=2,3,4) incl. A=3 charge radii", y=1.02)
+    fig.suptitle("light nuclei baselines (A=2,3,4) incl. A=3 charge radii", y=0.975, fontsize=22.8)
+    fig.subplots_adjust(left=0.055, right=0.995, top=0.88, bottom=0.08, wspace=0.28, hspace=0.22)
 
+    out_pdf = out_dir / "nuclear_binding_light_nuclei.pdf"
     out_png = out_dir / "nuclear_binding_light_nuclei.png"
+    fig.savefig(out_pdf, format="pdf", bbox_inches="tight")
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
@@ -354,13 +369,14 @@ def main() -> None:
                 "Charge radii for A=3 are fixed from a dedicated compilation; extension to broader A (nuclear chart) remains a next step.",
             ],
         },
-        "outputs": {"png": str(out_png), "csv": str(out_csv)},
+        "outputs": {"pdf": str(out_pdf), "png": str(out_png), "csv": str(out_csv)},
     }
 
     out_json = out_dir / "nuclear_binding_light_nuclei_metrics.json"
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print("[ok] wrote:")
+    print(f"  {out_pdf}")
     print(f"  {out_png}")
     print(f"  {out_csv}")
     print(f"  {out_json}")

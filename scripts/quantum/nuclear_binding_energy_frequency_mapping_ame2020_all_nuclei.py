@@ -7,6 +7,10 @@ import math
 from pathlib import Path
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
@@ -601,7 +605,11 @@ def main(argv: list[str] | None = None) -> int:
 
     # Plot
 
+    import matplotlib as mpl
     import matplotlib.pyplot as plt
+
+    mpl.rcParams["pdf.fonttype"] = 42
+    mpl.rcParams["ps.fonttype"] = 42
     from matplotlib.colors import TwoSlopeNorm
 
     ratios = [float(r["ratio_collective"]) for r in out_rows if math.isfinite(float(r["ratio_collective"])) and float(r["ratio_collective"]) > 0]
@@ -621,7 +629,7 @@ def main(argv: list[str] | None = None) -> int:
         and float(r["ratio_collective"]) > 0
     ]
 
-    fig = plt.figure(figsize=(13.6, 8.2), dpi=160)
+    fig = plt.figure(figsize=(14.6, 10.8), dpi=170)
     gs = fig.add_gridspec(2, 2, wspace=0.28, hspace=0.30)
 
     # (0,0) ratio vs A
@@ -634,11 +642,12 @@ def main(argv: list[str] | None = None) -> int:
 
     ax0.axhline(1.0, color="0.2", lw=1.2, ls="--")
     ax0.set_yscale("log")
-    ax0.set_xlabel("A")
-    ax0.set_ylabel("B_pred/B_obs (baseline; log)")
-    ax0.set_title("Baseline residuals vs A (color=parity; ee/eo/oe/oo)")
+    ax0.set_xlabel("A", fontsize=14.6)
+    ax0.set_ylabel("B_pred/B_obs (baseline; log)", fontsize=14.6)
+    ax0.set_title("Baseline residuals vs A (color=parity; ee/eo/oe/oo)", fontsize=15.8)
     ax0.grid(True, which="both", axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax0.legend(loc="upper right", fontsize=9)
+    ax0.legend(loc="upper right", fontsize=12.0)
+    ax0.tick_params(axis="both", labelsize=12.8)
 
     # (0,1) C_required / (A-1) vs A
     ax1 = fig.add_subplot(gs[0, 1])
@@ -651,10 +660,11 @@ def main(argv: list[str] | None = None) -> int:
     ax1.scatter(xs, ys, s=8, alpha=0.35, color="tab:purple")
     ax1.axhline(1.0, color="0.2", lw=1.2, ls="--")
     ax1.set_yscale("log")
-    ax1.set_xlabel("A")
-    ax1.set_ylabel("C_required/(A-1) (log)")
-    ax1.set_title("Implied coherence factor vs A (needs >1 for extra binding)")
+    ax1.set_xlabel("A", fontsize=14.6)
+    ax1.set_ylabel("C_required/(A-1) (log)", fontsize=14.6)
+    ax1.set_title("Implied coherence factor vs A (needs >1 for extra binding)", fontsize=15.8)
     ax1.grid(True, which="both", axis="y", ls=":", lw=0.6, alpha=0.6)
+    ax1.tick_params(axis="both", labelsize=12.8)
 
     # (1,0) histogram of log10 ratios (measured vs model radii)
     ax2 = fig.add_subplot(gs[1, 0])
@@ -662,11 +672,12 @@ def main(argv: list[str] | None = None) -> int:
     ax2.hist(log_ratios_model, bins=bins, alpha=0.55, color="0.6", label="radius law (no measured radii)")
     ax2.hist(log_ratios_meas, bins=bins, alpha=0.70, color="tab:blue", label="measured radii subset")
     ax2.axvline(0.0, color="0.2", lw=1.2, ls="--")
-    ax2.set_xlabel("log10(B_pred/B_obs)  (baseline)")
-    ax2.set_ylabel("count")
-    ax2.set_title("Residual distribution (baseline)")
+    ax2.set_xlabel("log10(B_pred/B_obs)  (baseline)", fontsize=14.6)
+    ax2.set_ylabel("count", fontsize=14.6)
+    ax2.set_title("Residual distribution (baseline)", fontsize=15.8)
     ax2.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax2.legend(loc="upper left", fontsize=9)
+    ax2.legend(loc="upper left", fontsize=12.0)
+    ax2.tick_params(axis="both", labelsize=12.8)
 
     # (1,1) group medians (parity + magic)
     ax3 = fig.add_subplot(gs[1, 1])
@@ -684,19 +695,22 @@ def main(argv: list[str] | None = None) -> int:
     ax3.set_yscale("log")
     ax3.set_xticks(range(len(groups)))
     ax3.set_xticklabels(groups, rotation=20, ha="right")
-    ax3.set_ylabel("median(B_pred/B_obs) (log)")
-    ax3.set_title("Group medians (baseline): parity & magic flags")
+    ax3.set_ylabel("median(B_pred/B_obs) (log)", fontsize=14.6)
+    ax3.set_title("Group medians (baseline): parity & magic flags", fontsize=15.8)
     ax3.grid(True, which="both", axis="y", ls=":", lw=0.6, alpha=0.6)
+    ax3.tick_params(axis="both", labelsize=12.8)
 
-    suptitle = "Phase 7 / Step 7.13.17.7: AME2020 all-nuclei residuals (Δω→B.E. mapping I/F preview)"
+    suptitle = "AME2020 all-nuclei residuals (Δω→B.E. mapping I/F preview)"
     # 条件分岐: `subset != "all"` を満たす経路を評価する。
     if subset != "all":
-        suptitle = f"Phase 7 / Step 7.18.5 (gate): AME2020 subset residuals ({subset}; Δω→B.E. mapping)"
+        suptitle = f"AME2020 subset residuals ({subset}; Δω→B.E. mapping)"
 
-    fig.suptitle(suptitle, y=1.02)
-    fig.subplots_adjust(left=0.07, right=0.98, top=0.90, bottom=0.12, wspace=0.28, hspace=0.30)
+    fig.suptitle(suptitle, y=0.99, fontsize=17.4)
+    fig.subplots_adjust(left=0.07, right=0.98, top=0.93, bottom=0.12, wspace=0.28, hspace=0.32)
 
+    out_pdf = out_dir / f"{out_stem}.pdf"
     out_png = out_dir / f"{out_stem}.png"
+    fig.savefig(out_pdf, bbox_inches="tight")
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
@@ -722,7 +736,8 @@ def main(argv: list[str] | None = None) -> int:
         linewidths=0.0,
     )
     cbar = fig_zn.colorbar(scatter, ax=ax_zn, fraction=0.04, pad=0.02)
-    cbar.set_label("log10(B_pred/B_obs) [collective baseline]")
+    cbar.set_label("log10(B_pred/B_obs) [collective baseline]", fontsize=13.2)
+    cbar.ax.tick_params(labelsize=11.8)
 
     # Magic overlays.
     for mz in sorted(magic_z):
@@ -764,13 +779,16 @@ def main(argv: list[str] | None = None) -> int:
         label="magic N/Z involved",
     )
 
-    ax_zn.set_xlabel("Z")
-    ax_zn.set_ylabel("N")
-    ax_zn.set_title("AME2020 residual map on Z-N plane (baseline collective mapping)")
+    ax_zn.set_xlabel("Z", fontsize=13.4)
+    ax_zn.set_ylabel("N", fontsize=13.4)
+    ax_zn.set_title("AME2020 residual map on Z-N plane (baseline collective mapping)", fontsize=14.8)
     ax_zn.grid(True, ls=":", lw=0.5, alpha=0.5)
-    ax_zn.legend(loc="upper left", fontsize=8)
+    ax_zn.tick_params(axis="both", labelsize=11.4)
+    ax_zn.legend(loc="upper left", fontsize=9.6)
 
+    out_zn_pdf = out_dir / f"{out_stem}_zn_residual_map.pdf"
     out_zn_png = out_dir / f"{out_stem}_zn_residual_map.png"
+    fig_zn.savefig(out_zn_pdf, bbox_inches="tight")
     fig_zn.savefig(out_zn_png, bbox_inches="tight")
     plt.close(fig_zn)
 
@@ -834,7 +852,9 @@ def main(argv: list[str] | None = None) -> int:
         "stats": stats,
         "a_band_stats": a_band_stats,
         "outputs": {
+            "pdf": str(out_pdf),
             "png": str(out_png),
+            "zn_residual_map_pdf": str(out_zn_pdf),
             "zn_residual_map_png": str(out_zn_png),
             "csv": str(out_csv),
             "a_band_stats_csv": str(out_a_band_csv),
@@ -854,7 +874,9 @@ def main(argv: list[str] | None = None) -> int:
     out_json.write_text(json.dumps(metrics_payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print("[ok] wrote:")
+    print(f"  {out_pdf}")
     print(f"  {out_png}")
+    print(f"  {out_zn_pdf}")
     print(f"  {out_zn_png}")
     print(f"  {out_csv}")
     print(f"  {out_a_band_csv}")

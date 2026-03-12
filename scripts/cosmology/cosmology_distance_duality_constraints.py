@@ -306,7 +306,8 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path, z_max: float) -> Non
     eta_frw = np.ones_like(z)
     eta_pbg = 1.0 / one_p_z
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6.5))
+    # 図36: 横2列をやめて縦1列（2段）へ変更し、全体を拡大する。
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14.2, 14.8))
 
     # Panel 1: eta(z) curves + observational band from epsilon0 constraint(s).
     ax1.plot(z, eta_frw, label="標準（FRW + 光子保存）: η=1", linewidth=2.0)
@@ -369,12 +370,13 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path, z_max: float) -> Non
         ax1.fill_between(z, eta_lo, eta_hi, alpha=0.18, color=color, label=f"{label_prefix}: {short}")
         ax1.plot(z, eta_mid, color=color, linewidth=1.2, alpha=0.85)
 
-    ax1.set_title("距離二重性 η(z) の観測制約（ε0パラメータ化）", fontsize=13)
-    ax1.set_xlabel("赤方偏移 z", fontsize=11)
-    ax1.set_ylabel("η(z)=d_L/((1+z)^2 d_A)", fontsize=11)
+    ax1.set_title("距離二重性 η(z) の観測制約（ε0パラメータ化）", fontsize=15.6)
+    ax1.set_xlabel("赤方偏移 z", fontsize=13.5)
+    ax1.set_ylabel("η(z)=d_L/((1+z)^2 d_A)", fontsize=13.5)
     ax1.set_ylim(0.0, 1.15)
     ax1.grid(True, linestyle="--", alpha=0.5)
-    ax1.legend(fontsize=9, loc="upper right")
+    ax1.tick_params(labelsize=12.3)
+    ax1.legend(fontsize=11.2, loc="lower left")
 
     # Panel 2: epsilon0 summary
     y = np.arange(len(rows), dtype=float)
@@ -407,51 +409,17 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path, z_max: float) -> Non
         )
 
     ax2.set_yticks(y)
-    ax2.set_yticklabels(labels)
-    ax2.set_xlabel("ε0", fontsize=11)
-    ax2.set_title("ε0（DDRの破れ）の観測値とモデル予測", fontsize=13)
+    ax2.set_yticklabels(labels, fontsize=11.8)
+    ax2.set_xlabel("ε0", fontsize=13.5)
+    ax2.set_title("ε0（DDRの破れ）の観測値とモデル予測", fontsize=15.6)
     ax2.grid(True, linestyle="--", alpha=0.5, axis="x")
-    ax2.legend(fontsize=9, loc="upper right")
+    ax2.tick_params(labelsize=12.3)
+    ax2.legend(fontsize=11.2, loc="lower left")
 
-    fig.suptitle("宇宙論（棄却条件）：距離二重性（DDR）で背景P（静的）を判別", fontsize=14)
+    fig.suptitle("宇宙論（棄却条件）：距離二重性（DDR）で背景P（静的）を判別", fontsize=17.0)
 
-    # Add a concise reconciliation hint (based on the first constraint, if present).
-    if rows:
-        r0 = rows[0] if isinstance(rows[0], dict) else {}
-        delta_eps = _safe_float(r0.get("epsilon0_extra_needed_to_match_obs"))
-        extra_eta_z1 = _safe_float(r0.get("extra_eta_factor_needed_z1"))
-        delta_mu = _safe_float(r0.get("delta_distance_modulus_mag_z1"))
-        flux_dim = _safe_float(r0.get("flux_dimming_factor_needed_z1"))
-        # 条件分岐: `delta_eps is not None and extra_eta_z1 is not None` を満たす経路を評価する。
-        if delta_eps is not None and extra_eta_z1 is not None:
-            extra_txt = ""
-            # 条件分岐: `delta_mu is not None and flux_dim is not None` を満たす経路を評価する。
-            if delta_mu is not None and flux_dim is not None:
-                extra_txt = (
-                    f"（Δμ≈{_fmt_float(delta_mu, digits=2)} mag, "
-                    f"追加減光≈1/{_fmt_float(flux_dim, digits=2)}）"
-                )
-
-            fig.text(
-                0.5,
-                0.015,
-                (
-                    "静的背景P最小（ε0=-1）→ 観測ε0へ寄せるには有効Δε≈"
-                    f"{_fmt_float(delta_eps, digits=3)}（z=1でD_Lを約{_fmt_float(extra_eta_z1, digits=2)}倍補正）"
-                    f"{extra_txt}"
-                ),
-                ha="center",
-                fontsize=10,
-            )
-
-    fig.text(
-        0.5,
-        0.005,
-        "棄却条件（例）：|ε_obs - ε_model| > 3σ ならそのモデルは棄却（統計的な目安）。",
-        ha="center",
-        fontsize=10,
-    )
-    plt.tight_layout(rect=(0.0, 0.03, 1.0, 0.92))
+    # 図下注記は論文本文側へ移し、図中の重なりを回避する。
+    plt.tight_layout(rect=(0.0, 0.03, 1.0, 0.94))
 
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)
@@ -474,7 +442,8 @@ def _plot_eta_pmodel(rows: Sequence[Dict[str, Any]], *, out_png: Path, z_max: fl
     eta_frw = one_p_z
     eta_pbg = np.ones_like(z)
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6.5))
+    # 図37: 横2列をやめて縦1列（2段）へ変更し、全体を拡大する。
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14.2, 14.8))
 
     ax1.plot(z, eta_pbg, label="背景P（静的）: η^(P)=1", linewidth=2.0)
     ax1.plot(z, eta_frw, label="標準（FRW + 光子保存）: η^(P)=(1+z)", linewidth=2.0)
@@ -502,12 +471,13 @@ def _plot_eta_pmodel(rows: Sequence[Dict[str, Any]], *, out_png: Path, z_max: fl
         ax1.fill_between(z, eta_lo, eta_hi, alpha=0.18, color=color, label=f"{label_prefix}: {short}")
         ax1.plot(z, eta_mid, color=color, linewidth=1.2, alpha=0.85)
 
-    ax1.set_title("P-model固有DDR指標 η^(P)(z) の観測制約（ε0パラメータ化）", fontsize=13)
-    ax1.set_xlabel("赤方偏移 z", fontsize=11)
-    ax1.set_ylabel("η^(P)(z)=d_L/((1+z) d_A)", fontsize=11)
+    ax1.set_title("P-model固有DDR指標 η^(P)(z) の観測制約（ε0パラメータ化）", fontsize=15.6)
+    ax1.set_xlabel("赤方偏移 z", fontsize=13.5)
+    ax1.set_ylabel("η^(P)(z)=d_L/((1+z) d_A)", fontsize=13.5)
     ax1.set_ylim(0.0, max(3.0, float(1.0 + z_max) * 1.15))
     ax1.grid(True, linestyle="--", alpha=0.5)
-    ax1.legend(fontsize=9, loc="upper left")
+    ax1.tick_params(labelsize=12.3)
+    ax1.legend(fontsize=11.2, loc="upper left")
 
     # Right panel: exponent p = 1+ε0 summary.
     y = np.arange(len(rows), dtype=float)
@@ -539,21 +509,16 @@ def _plot_eta_pmodel(rows: Sequence[Dict[str, Any]], *, out_png: Path, z_max: fl
         )
 
     ax2.set_yticks(y)
-    ax2.set_yticklabels(labels)
-    ax2.set_xlabel("p = 1+ε0", fontsize=11)
-    ax2.set_title("η^(P) の指数 p（=1+ε0）の観測値とモデル", fontsize=13)
+    ax2.set_yticklabels(labels, fontsize=11.8)
+    ax2.set_xlabel("p = 1+ε0", fontsize=13.5)
+    ax2.set_title("η^(P) の指数 p（=1+ε0）の観測値とモデル", fontsize=15.6)
     ax2.grid(True, linestyle="--", alpha=0.5, axis="x")
-    ax2.legend(fontsize=9, loc="upper right")
+    ax2.tick_params(labelsize=12.3)
+    ax2.legend(fontsize=11.2, loc="lower left")
 
-    fig.suptitle("DDR追補：η^(P)=d_L/((1+z)d_A) による再評価（前提依存）", fontsize=14)
-    fig.text(
-        0.5,
-        0.005,
-        "注意：ここでのη^(P)は、一次ソースが採用するε0パラメータ化（距離指標推定の前提を含む）をそのまま写像した“条件付き”の可視化である。",
-        ha="center",
-        fontsize=10,
-    )
-    plt.tight_layout(rect=(0.0, 0.03, 1.0, 0.92))
+    fig.suptitle("DDR追補：η^(P)=d_L/((1+z)d_A) による再評価（前提依存）", fontsize=17.0)
+    # 図下注記は論文本文側へ移し、図中の重なりを回避する。
+    plt.tight_layout(rect=(0.0, 0.03, 1.0, 0.94))
 
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)
@@ -711,7 +676,8 @@ def _plot_reach_limit(
     z = np.linspace(0.0, float(z_max), 700)
     one_p_z = 1.0 + z
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6.5))
+    # 図46: 横2列をやめて縦1列（2段）へ変更し、全体を拡大する。
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(15.4, 16.2))
 
     styles = [
         ("bao", "#1f77b4", "代表（BAO含む: 最小σ）"),
@@ -758,27 +724,23 @@ def _plot_reach_limit(
     ax1.axvline(1.0, color="#333333", linewidth=1.2, alpha=0.25)
     ax2.axvline(1.0, color="#333333", linewidth=1.2, alpha=0.25)
 
-    ax1.set_title("必要な距離モジュラス補正 |Δμ(z)|", fontsize=13)
-    ax1.set_xlabel("赤方偏移 z", fontsize=11)
-    ax1.set_ylabel("|Δμ(z)| [mag]", fontsize=11)
+    ax1.set_title("必要な距離モジュラス補正 |Δμ(z)|", fontsize=16.8)
+    ax1.set_xlabel("赤方偏移 z", fontsize=14.2)
+    ax1.set_ylabel("|Δμ(z)| [mag]", fontsize=14.2)
+    ax1.tick_params(labelsize=12.2)
     ax1.grid(True, linestyle="--", alpha=0.5)
-    ax1.legend(fontsize=9, loc="upper left")
+    ax1.legend(fontsize=12.0, loc="upper left")
 
-    ax2.set_title("等価減光 τ（|τ(z)|）", fontsize=13)
-    ax2.set_xlabel("赤方偏移 z", fontsize=11)
-    ax2.set_ylabel("|τ(z)|（dimming; τ=ln(extra_dl^2)）", fontsize=11)
+    ax2.set_title("等価減光 τ（|τ(z)|）", fontsize=16.8)
+    ax2.set_xlabel("赤方偏移 z", fontsize=14.2)
+    ax2.set_ylabel("|τ(z)|（dimming; τ=ln(extra_dl^2)）", fontsize=14.2)
+    ax2.tick_params(labelsize=12.2)
     ax2.grid(True, linestyle="--", alpha=0.5)
-    ax2.legend(fontsize=9, loc="upper left")
+    ax2.legend(fontsize=12.0, loc="upper left")
 
-    fig.suptitle("宇宙論（到達限界の整理）：静的背景P最小を観測ε0へ寄せる“必要補正”のz依存", fontsize=14)
-    fig.text(
-        0.5,
-        0.01,
-        "Δε_needed=ε0_obs-(-1), extra_dl_factor=(1+z)^Δε_needed, Δμ=5 log10(extra_dl_factor), τ=ln(extra_dl_factor^2)=2Δε ln(1+z)",
-        ha="center",
-        fontsize=10,
-    )
-    plt.tight_layout(rect=(0.0, 0.03, 1.0, 0.92))
+    fig.suptitle("宇宙論（到達限界の整理）：静的背景P最小を観測ε0へ寄せる“必要補正”のz依存", fontsize=18.4)
+    # 図下注記は論文本文側へ移し、図中の重なりを回避する。
+    plt.tight_layout(rect=(0.0, 0.04, 1.0, 0.955))
 
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)

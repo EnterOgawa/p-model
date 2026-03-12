@@ -6,6 +6,10 @@ import math
 from pathlib import Path
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
@@ -374,7 +378,11 @@ def main() -> None:
 
     # Plot
 
+    import matplotlib as mpl
     import matplotlib.pyplot as plt
+
+    mpl.rcParams["pdf.fonttype"] = 42
+    mpl.rcParams["ps.fonttype"] = 42
 
     # Baseline method for B/A comparison
     baseline_method = "collective"
@@ -391,7 +399,7 @@ def main() -> None:
         b_over_a_obs.append(float(r_obs["B_obs_MeV"]) / float(a))
         b_over_a_pred.append(float(r_obs["B_pred_MeV"]) / float(a))
 
-    fig = plt.figure(figsize=(12.0, 4.8), dpi=160)
+    fig = plt.figure(figsize=(13.6, 5.8), dpi=170)
     gs = fig.add_gridspec(1, 2, wspace=0.30)
 
     ax0 = fig.add_subplot(gs[0, 0])
@@ -400,11 +408,12 @@ def main() -> None:
     ax0.bar([v - w / 2 for v in x], b_over_a_obs, width=w, color="0.7", label="obs (AME2020)")
     ax0.bar([v + w / 2 for v in x], b_over_a_pred, width=w, color="tab:blue", alpha=0.85, label=f"pred ({baseline_method})")
     ax0.set_xticks(x)
-    ax0.set_xticklabels(labels)
-    ax0.set_ylabel("B/A (MeV per nucleon)")
-    ax0.set_title("Observed vs predicted (baseline) B/A")
+    ax0.set_xticklabels(labels, fontsize=13.8)
+    ax0.set_ylabel("B/A (MeV per nucleon)", fontsize=15.8)
+    ax0.set_title("Observed vs predicted (baseline) B/A", fontsize=16.8, pad=8)
     ax0.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax0.legend(loc="upper right", fontsize=9)
+    ax0.tick_params(axis="y", labelsize=13.8)
+    ax0.legend(loc="upper right", fontsize=13.0)
 
     # Ratio plot (all methods)
     ax1 = fig.add_subplot(gs[0, 1])
@@ -418,11 +427,12 @@ def main() -> None:
 
     ax1.axhline(1.0, color="0.2", lw=1.2, ls="--")
     ax1.set_xticks(x)
-    ax1.set_xticklabels(labels)
-    ax1.set_ylabel("B_pred / B_obs")
-    ax1.set_title("Multi-body reduction sensitivity (C choices)")
+    ax1.set_xticklabels(labels, fontsize=13.8)
+    ax1.set_ylabel("B_pred / B_obs", fontsize=15.8)
+    ax1.set_title("Multi-body reduction sensitivity (C choices)", fontsize=16.8, pad=8)
     ax1.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax1.legend(loc="upper left", fontsize=9)
+    ax1.tick_params(axis="y", labelsize=13.8)
+    ax1.legend(loc="upper left", fontsize=13.0)
 
     ax1.text(
         0.02,
@@ -432,14 +442,16 @@ def main() -> None:
         transform=ax1.transAxes,
         ha="left",
         va="bottom",
-        fontsize=8.5,
+        fontsize=12.0,
         bbox={"facecolor": "white", "alpha": 0.85, "edgecolor": "0.85"},
     )
 
-    fig.suptitle("Phase 7 / Step 7.13.17.6: representative nuclei (A=2,4,12,16) — A-dependence preview", y=1.02)
-    fig.subplots_adjust(left=0.07, right=0.98, top=0.86, bottom=0.18, wspace=0.30)
+    fig.suptitle("representative nuclei (A=2,4,12,16) — A-dependence preview", y=1.02, fontsize=18.0)
+    fig.subplots_adjust(left=0.07, right=0.985, top=0.86, bottom=0.20, wspace=0.30)
 
+    out_pdf = out_dir / "nuclear_binding_energy_frequency_mapping_representative_nuclei.pdf"
     out_png = out_dir / "nuclear_binding_energy_frequency_mapping_representative_nuclei.png"
+    fig.savefig(out_pdf, bbox_inches="tight")
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
@@ -475,7 +487,7 @@ def main() -> None:
                 "anchor_values": {"B_d_MeV": b_d, "R_ref_fm": r_ref, "J_ref_MeV": j_ref_mev, "L_fm": l_range},
                 "nuclei": nucleus_summary,
                 "rows": rows,
-                "outputs": {"png": str(out_png), "csv": str(out_csv)},
+                "outputs": {"pdf": str(out_pdf), "png": str(out_png), "csv": str(out_csv)},
                 "notes": [
                     "This step is a pre-diagnostic: it freezes a small representative dataset and compares the simplest A-scaling choices before committing to an AME2020 all-nuclei run.",
                     "The main output is the sensitivity to the multi-body reduction factor C and the implied C_required trend with A.",
@@ -488,6 +500,7 @@ def main() -> None:
     )
 
     print("[ok] wrote:")
+    print(f"  {out_pdf}")
     print(f"  {out_png}")
     print(f"  {out_csv}")
     print(f"  {out_json}")
@@ -497,4 +510,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

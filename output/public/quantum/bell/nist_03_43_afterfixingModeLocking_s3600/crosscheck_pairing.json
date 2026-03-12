@@ -1,50 +1,50 @@
 {
-  "generated_utc": "2026-02-20T12:38:32.568824+00:00",
+  "generated_utc": "2026-03-11T13:54:43.468488+00:00",
   "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
   "supported": true,
   "baseline": {
     "param_name": "window_ns",
-    "value": 1000.0,
+    "value": 2000.0,
     "statistic_name": "CH J_prob (A1=0,B1=0)",
-    "statistic": -0.0006990843043696472,
-    "sigma_boot": 9.100388784991122e-06
+    "statistic": -0.000982524306564714,
+    "sigma_boot": 7.67773919017981e-06
   },
   "methods": [
     {
       "id": "greedy_time_order_1to1",
       "pairing": "greedy 1:1 pairing by time order within |dt|<=window",
-      "window_ns": 1000.0,
-      "window_counts": 12800,
+      "window_ns": 2000.0,
+      "window_counts": 25600,
       "statistic_name": "CH J_prob (A1=0,B1=0)",
-      "statistic": -0.0006990843043696472,
-      "pairs_total": 40056,
+      "statistic": -0.000982524306564714,
+      "pairs_total": 23756,
       "coinc_by_setting_pair": [
         [
-          9470,
-          10165
+          5713,
+          6024
         ],
         [
-          9873,
-          10548
+          5826,
+          6193
         ]
       ]
     },
     {
       "id": "mutual_nearest_neighbor_1to1",
       "pairing": "mutual nearest-neighbor pairing within |dt|<=window",
-      "window_ns": 1000.0,
-      "window_counts": 12800,
+      "window_ns": 2000.0,
+      "window_counts": 25600,
       "statistic_name": "CH J_prob (A1=0,B1=0)",
-      "statistic": -0.0006992710134581978,
-      "pairs_total": 40055,
+      "statistic": 1.1151067594790593e-05,
+      "pairs_total": 79731,
       "coinc_by_setting_pair": [
         [
-          9469,
-          10162
+          19097,
+          20056
         ],
         [
-          9874,
-          10550
+          19702,
+          20876
         ]
       ]
     }
@@ -52,15 +52,15 @@
   "inputs": {
     "natural_window_frozen_json": {
       "path": "output/public/quantum/bell/nist_03_43_afterfixingModeLocking_s3600/natural_window_frozen.json",
-      "sha256": "da16bf5704e3f0682da145f6cdd03e4db4d40b98f6f9c61e53bb707f98e31708"
+      "sha256": "8ca258b5f4a117252043121e76963d9f7b19bc40eeec52a3d8f45ef27a2b22d5"
     },
     "trial_based_counts_json": {
       "path": "output/public/quantum/bell/nist_03_43_afterfixingModeLocking_s3600/trial_based_counts.json",
-      "sha256": "5e6c9d60a95ed45f560cc2d5758fbd269aab5fa75d9b3a0f9356df8280390e2a"
+      "sha256": "0d4b5dfe58096b33a2e29d66faae1bdfa4ae59909f14e7e8bc720fab4cbf9e85"
     },
     "window_sweep_metrics_json": {
       "path": "output/public/quantum/bell/nist_03_43_afterfixingModeLocking_s3600/window_sweep_metrics.json",
-      "sha256": "79b617058a8572b147012c8704bd6569ae61b9803781cb3ea8adc92eb41af204"
+      "sha256": "e14c79f3449f49fbdd52e13c8cd077d89b064d24e99c858f33b375dcc0b1c7ff"
     },
     "normalized_events_npz": {
       "path": "output/public/quantum/bell/nist_03_43_afterfixingModeLocking_s3600/normalized_events.npz",
@@ -68,12 +68,12 @@
     },
     "normalized_events_json": {
       "path": "output/public/quantum/bell/nist_03_43_afterfixingModeLocking_s3600/normalized_events.json",
-      "sha256": "a20d9e877cf89074b87be2cca334ed3c7f56362fa64593d4ea269ab0cb26e1dd"
+      "sha256": "d86a8f00a037ad6387cc4bc403986b83a559647fd2a391ca95a8c4052650f484"
     }
   },
   "delta": {
-    "abs_delta_statistic": 1.867090885505733e-07,
-    "delta_over_sigma_boot": 0.020516605714527774,
+    "abs_delta_statistic": 0.0009936753741595044,
+    "delta_over_sigma_boot": 129.42291337930078,
     "note": "Treat this pairing-choice delta as an implementation/systematic sensitivity (not an optimizer)."
   }
 }

@@ -690,7 +690,12 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     lambda_rot_legacy = _to_float(legacy_fit.get("lambda_rot_fit"))
     lambda_sigma_legacy = _to_float(legacy_fit.get("lambda_sigma_fit"))
 
-    fig, (ax0, ax1, ax2) = plt.subplots(1, 3, figsize=(15.0, 4.8), dpi=180)
+    # 図11: 下段（Operational checks）のY軸可読性を優先して縦比率を拡大する。
+    fig = plt.figure(figsize=(13.8, 16.9), dpi=180)
+    grid = fig.add_gridspec(3, 1, height_ratios=[0.80, 0.80, 2.80], hspace=0.36)
+    ax0 = fig.add_subplot(grid[0, 0])
+    ax1 = fig.add_subplot(grid[1, 0])
+    ax2 = fig.add_subplot(grid[2, 0])
 
     # 条件分岐: `lambda_rot is not None` を満たす経路を評価する。
     if lambda_rot is not None:
@@ -706,30 +711,30 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     ax0.axhline(0.0, linestyle="--", color="#6b7280", linewidth=1.0)
     ax0.set_xlim(-0.4, 0.65)
     ax0.set_xticks([0.0, 0.25], ["prior", "legacy"])
-    ax0.set_ylabel("coupling value")
-    ax0.set_title("L_rot coupling freeze")
+    ax0.set_ylabel("coupling value", fontsize=13.2)
+    ax0.set_title("L_rot coupling freeze", fontsize=14.2)
     # 条件分岐: `kappa_rot is not None` を満たす経路を評価する。
     if kappa_rot is not None:
-        ax0.text(0.02, 0.92, f"kappa_rot={kappa_rot:.6f}", transform=ax0.transAxes, fontsize=9)
+        ax0.text(0.02, 0.92, f"kappa_rot={kappa_rot:.6f}", transform=ax0.transAxes, fontsize=11.6)
 
     # 条件分岐: `lambda_rot is not None` を満たす経路を評価する。
 
     if lambda_rot is not None:
-        ax0.text(0.02, 0.84, f"lambda_rot={lambda_rot:.6f}", transform=ax0.transAxes, fontsize=9)
+        ax0.text(0.02, 0.84, f"lambda_rot={lambda_rot:.6f}", transform=ax0.transAxes, fontsize=11.6)
 
     ax0.grid(axis="y", alpha=0.25, linestyle=":")
 
     x = np.arange(len(labels), dtype=float)
-    width = 0.36
+    width = 0.48
     ax1.bar(x - width / 2.0, z_static, width=width, color="#d62728", alpha=0.88, label="static (deltaP_rot=0)")
     ax1.bar(x + width / 2.0, z_lrot, width=width, color="#2ca02c", alpha=0.88, label="L_rot prior-pred")
     ax1.axhline(3.0, linestyle="--", color="#6b7280", linewidth=1.0)
     ax1.axhline(-3.0, linestyle="--", color="#6b7280", linewidth=1.0)
     ax1.axhline(0.0, linestyle="-", color="#9ca3af", linewidth=0.9)
     ax1.set_xticks(x, labels, rotation=10, ha="right")
-    ax1.set_ylabel("z = (obs - pred) / sigma")
-    ax1.set_title("Frame-dragging gate: static vs holdout prediction")
-    ax1.legend(loc="best", fontsize=8.8)
+    ax1.set_ylabel("z = (obs - pred) / sigma", fontsize=13.2)
+    ax1.set_title("Frame-dragging gate: static vs holdout prediction", fontsize=14.2)
+    ax1.legend(loc="best", fontsize=11.6)
     ax1.grid(axis="y", alpha=0.25, linestyle=":")
 
     check_labels = [str(c.get("id") or "") for c in checks if isinstance(c, dict)]
@@ -754,17 +759,22 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
             check_colors.append("#94a3b8")
 
     y = np.arange(len(check_labels), dtype=float)
-    ax2.barh(y, check_scores, color=check_colors)
+    ax2.barh(y, check_scores, color=check_colors, height=0.9)
     ax2.axvline(1.0, linestyle="--", color="#6b7280", linewidth=1.0)
     ax2.set_yticks(y, check_labels)
     ax2.set_xlim(0.0, 1.05)
-    ax2.set_xlabel("gate score")
-    ax2.set_title("Operational checks")
+    ax2.set_xlabel("gate score", fontsize=13.2)
+    ax2.set_title("Operational checks", fontsize=14.2)
     ax2.grid(axis="x", alpha=0.25, linestyle=":")
 
-    fig.tight_layout()
+    for axis in (ax0, ax1, ax2):
+        axis.tick_params(labelsize=11.4)
+
+    fig.tight_layout(rect=[0.0, 0.0, 1.0, 0.98])
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, bbox_inches="tight")
+    # PDF版も同時に保存し、論文側でのベクター優先読込を保証する。
+    fig.savefig(path.with_suffix(".pdf"), bbox_inches="tight")
     plt.close(fig)
 
 

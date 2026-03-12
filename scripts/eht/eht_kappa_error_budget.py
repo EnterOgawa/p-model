@@ -107,24 +107,26 @@ def _plot_budget(*, title: str, items: Dict[str, float], required: Optional[floa
     y = np.arange(len(labels), dtype=float)
 
     # Dynamic height: make long label lists readable in paper figures.
-    fig_h = max(5.0, 0.34 * len(labels) + 1.4)
-    fig = plt.figure(figsize=(11.8, fig_h))
+    fig_h = max(5.8, 0.40 * len(labels) + 1.8)
+    fig = plt.figure(figsize=(12.8, fig_h))
     ax = fig.add_subplot(1, 1, 1)
     ax.barh(y, vals, color="#1f77b4", alpha=0.82)
     ax.set_yticks(y)
-    ax.set_yticklabels(labels)
+    ax.set_yticklabels(labels, fontsize=12.8)
     ax.invert_yaxis()
-    ax.set_xlabel("σ(κ) [1σ]")
-    ax.set_title(title)
+    ax.set_xlabel("σ(κ) [1σ]", fontsize=14.2)
+    ax.set_title(title, fontsize=16.2)
+    ax.tick_params(axis="x", labelsize=12.8)
     ax.grid(True, axis="x", alpha=0.25)
     # 条件分岐: `required is not None and math.isfinite(required) and required > 0` を満たす経路を評価する。
     if required is not None and math.isfinite(required) and required > 0:
         ax.axvline(required, color="#d62728", linewidth=2.0, label=f"target σ(κ) ≈ {required:.4f}")
-        ax.legend(loc="lower right")
+        ax.legend(loc="lower right", fontsize=12.2)
 
     fig.tight_layout(pad=0.6)
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)
+    fig.savefig(out_png.with_suffix(".pdf"))
     plt.close(fig)
 
 
@@ -204,6 +206,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_json = outdir / "eht_kappa_error_budget.json"
     out_png = outdir / "eht_kappa_error_budget.png"
 
+    out_pdf = outdir / "eht_kappa_error_budget.pdf"
+
     payload: Dict[str, Any] = {
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "inputs": {
@@ -222,7 +226,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         },
         "ok": True,
         "rows": {},
-        "outputs": {"json": str(out_json), "plot_png": str(out_png)},
+        "outputs": {"json": str(out_json), "plot_png": str(out_png), "plot_pdf": str(out_pdf)},
     }
 
     # 条件分岐: `not shadow_path.exists()` を満たす経路を評価する。

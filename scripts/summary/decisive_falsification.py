@@ -419,8 +419,8 @@ def _render_figure(payload: Dict[str, Any], *, out_png: Path) -> None:
     delta = payload.get("delta") if isinstance(payload.get("delta"), dict) else {}
     delta_rows = delta.get("rows") if isinstance(delta.get("rows"), list) else []
 
-    fig = plt.figure(figsize=(12.5, 8.2), dpi=180)
-    gs = fig.add_gridspec(2, 1, height_ratios=[1.05, 1.0], hspace=0.35)
+    fig = plt.figure(figsize=(13.8, 11.2), dpi=180)
+    gs = fig.add_gridspec(2, 1, height_ratios=[1.12, 1.22], hspace=0.42)
 
     # Panel A: EHT required precision
     ax1 = fig.add_subplot(gs[0, 0])
@@ -462,19 +462,38 @@ def _render_figure(payload: Dict[str, Any], *, out_png: Path) -> None:
         alpha=0.75,
     )
     ax1.bar([i + 1.5 * width for i in x], sigma_need, width=width, label="3σ判別に必要な σ_obs（影直径）", color="#ff7f0e")
+    sigma_annotation_specs: List[Tuple[int, float, str]] = []
     for i, (d, s0, sk, sks, s1) in enumerate(zip(diffs, sigma_now, sigma_now_kappa, sigma_now_kappa_scatt, sigma_need, strict=False)):
         # 条件分岐: `math.isfinite(d)` を満たす経路を評価する。
         if math.isfinite(d):
             top = _max_finite(s0, sk, sks, s1)
             # 条件分岐: `math.isfinite(top)` を満たす経路を評価する。
             if math.isfinite(top):
-                ax1.text(i, top + 0.12, f"|Δ|={_format_num(d, digits=3)} μas", ha="center", va="bottom", fontsize=10)
+                sigma_annotation_specs.append((i, top, f"|Δ|={_format_num(d, digits=3)} μas"))
 
     ax1.set_xticks(x, names)
-    ax1.set_ylabel("観測誤差（1σ）[μas]")
-    ax1.set_title("EHT（ブラックホール影）：差分予測を3σで判別するための必要精度（κ/散乱は参考）")
+    ax1.tick_params(labelsize=12.8)
+    ax1.set_ylabel("観測誤差（1σ）[μas]", fontsize=15.0)
+    ax1.set_title("EHT（ブラックホール影）：差分予測を3σで判別するための必要精度（κ/散乱は参考）", fontsize=16.4)
     ax1.grid(True, axis="y", alpha=0.25)
-    ax1.legend(loc="upper left")
+    ax1.legend(loc="upper left", fontsize=12.4)
+    finite_sigma = [v for v in sigma_now + sigma_now_kappa + sigma_now_kappa_scatt + sigma_need if math.isfinite(v)]
+    if finite_sigma:
+        y_max = max(finite_sigma) * 1.28 + 0.45
+        ax1.set_ylim(0.0, y_max)
+        ann_drop = max(0.55, 0.08 * y_max)
+        ann_floor = 0.18 * y_max
+        for xi, top, txt in sigma_annotation_specs:
+            text_y = max(ann_floor, top - ann_drop)
+            ax1.text(
+                xi,
+                text_y,
+                txt,
+                ha="center",
+                va="bottom",
+                fontsize=15.6,
+                bbox={"facecolor": "white", "alpha": 0.74, "edgecolor": "none", "pad": 0.22},
+            )
 
     ratio = eht.get("shadow_diameter_coeff_ratio_p_over_gr")
     diff_pct = eht.get("shadow_diameter_coeff_diff_percent")
@@ -485,7 +504,7 @@ def _render_figure(payload: Dict[str, Any], *, out_png: Path) -> None:
             0.02,
             f"係数差（β固定）: 係数比 P/GR={float(ratio):.4f}（差 {float(diff_pct):.2f}%）",
             transform=ax1.transAxes,
-            fontsize=10,
+            fontsize=13.0,
             color="#444",
         )
 
@@ -508,7 +527,7 @@ def _render_figure(payload: Dict[str, Any], *, out_png: Path) -> None:
     for i, g in enumerate(gamma_obs):
         # 条件分岐: `math.isfinite(g) and g > 0` を満たす経路を評価する。
         if math.isfinite(g) and g > 0:
-            ax2.text(i, log10_upper[i] + 0.6, f"γ≈1e{math.log10(g):.1f}", ha="center", va="bottom", fontsize=9)
+            ax2.text(i, log10_upper[i] + 0.6, f"γ≈1e{math.log10(g):.1f}", ha="center", va="bottom", fontsize=13.2)
 
     delta_adopted = float(delta.get("delta_adopted", float("nan")))
     # 条件分岐: `math.isfinite(delta_adopted) and delta_adopted > 0` を満たす経路を評価する。
@@ -517,16 +536,19 @@ def _render_figure(payload: Dict[str, Any], *, out_png: Path) -> None:
         ax2.axhline(y, color="#d62728", linestyle="--", linewidth=1.8, label=f"採用 δ = 1e{y:.0f}")
 
     ax2.set_xticks(range(len(labels)), labels, rotation=0)
-    ax2.set_ylabel("log10(δの上限)   ※観測が許す最大δ（小さいほど厳しい）")
-    ax2.set_title("速度飽和 δ：既知の高γ観測が与える上限（δ < 1/γ^2）")
+    ax2.tick_params(labelsize=12.8)
+    ax2.set_ylabel("log10(δの上限)   ※観測が許す最大δ（小さいほど厳しい）", fontsize=14.8)
+    ax2.set_title("速度飽和 δ：既知の高γ観測が与える上限（δ < 1/γ^2）", fontsize=16.2)
     ax2.grid(True, axis="y", alpha=0.25)
     # 条件分岐: `math.isfinite(delta_adopted) and delta_adopted > 0` を満たす経路を評価する。
     if math.isfinite(delta_adopted) and delta_adopted > 0:
-        ax2.legend(loc="upper right")
+        ax2.legend(loc="upper right", fontsize=12.4)
 
-    fig.suptitle("反証条件（差分予測）パック：必要精度と棄却条件の要点", fontsize=14, y=0.98)
+    fig.suptitle("反証条件（差分予測）パック：必要精度と棄却条件の要点", fontsize=17.2, y=0.98)
     out_png.parent.mkdir(parents=True, exist_ok=True)
+    fig.subplots_adjust(top=0.90, bottom=0.08, left=0.08, right=0.98, hspace=0.42)
     fig.savefig(out_png, bbox_inches="tight")
+    fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight")
     plt.close(fig)
 
 

@@ -9,6 +9,10 @@ from typing import Any
 import matplotlib.pyplot as plt
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
@@ -178,41 +182,37 @@ def main() -> None:
     omega_ratios = [r["omega_e_ratio_meas_over_pred"] for r in rows]
     be_ratios = [r["B_e_ratio_meas_over_pred"] for r in rows]
 
-    fig, axes = plt.subplots(1, 2, figsize=(11.5, 4.6), dpi=180)
-    fig.suptitle("Phase 7 / Step 7.12: Isotopic reduced-mass scaling (WebBook diatomic constants)", fontsize=13)
+    plt.rcParams["pdf.fonttype"] = 42
+    plt.rcParams["ps.fonttype"] = 42
+
+    fig, axes = plt.subplots(2, 1, figsize=(11.2, 11.8), dpi=190)
+    fig.suptitle("Isotopic reduced-mass scaling (WebBook diatomic constants)", fontsize=19.0, y=0.995)
 
     ax = axes[0]
-    ax.set_title("ωe scaling: ωe ∝ μ^{-1/2} (ratio vs prediction)", fontsize=11)
+    ax.set_title("ωe scaling: ωe ∝ μ^{-1/2} (ratio vs prediction)", fontsize=15.8)
     ax.axhline(1.0, color="#666666", lw=1.2, alpha=0.8)
     ax.plot(x, omega_ratios, "o-", color="#2b6cb0", lw=2)
     ax.set_xticks(x, labels)
-    ax.set_ylabel("measured / predicted")
+    ax.set_ylabel("measured / predicted", fontsize=14.6)
     ax.set_ylim(0.98, 1.02)
     ax.grid(True, axis="y", alpha=0.25)
+    ax.tick_params(axis="both", labelsize=13.2)
 
     ax = axes[1]
-    ax.set_title("Be scaling: Be ∝ μ^{-1} (ratio vs prediction)", fontsize=11)
+    ax.set_title("Be scaling: Be ∝ μ^{-1} (ratio vs prediction)", fontsize=15.8)
     ax.axhline(1.0, color="#666666", lw=1.2, alpha=0.8)
     ax.plot(x, be_ratios, "o-", color="#c53030", lw=2)
     ax.set_xticks(x, labels)
-    ax.set_ylabel("measured / predicted")
+    ax.set_ylabel("measured / predicted", fontsize=14.6)
     ax.set_ylim(0.98, 1.02)
     ax.grid(True, axis="y", alpha=0.25)
+    ax.tick_params(axis="both", labelsize=13.2)
 
-    fig.text(
-        0.01,
-        0.02,
-        (
-            ("NIST isotope masses used for μ (relative atomic masses in u). " if mass_model["kind"] != "mass_number_approx" else "")
-            + ("Mass-number approximation used for μ (H=1, D=2). " if mass_model["kind"] == "mass_number_approx" else "")
-            + "Reference: H2.\n"
-            + "This is a consistency check for Step 7.12 baselines; not a P-model derivation."
-        ),
-        fontsize=9.3,
-    )
-    fig.tight_layout(rect=(0, 0.05, 1, 0.95))
+    fig.tight_layout(rect=(0, 0.0, 1, 0.985))
 
+    out_pdf = out_dir / "molecular_isotopic_scaling.pdf"
     out_png = out_dir / "molecular_isotopic_scaling.png"
+    fig.savefig(out_pdf)
     fig.savefig(out_png)
     plt.close(fig)
 
@@ -228,10 +228,11 @@ def main() -> None:
         ),
         "rows": rows,
         "reference": {"slug": "h2", "mu_ref": mu_ref, "omega_e_ref_cm^-1": omega_ref, "B_e_ref_cm^-1": be_ref},
-        "outputs": {"png": str(out_png)},
+        "outputs": {"pdf": str(out_pdf), "png": str(out_png)},
     }
     out_json = out_dir / "molecular_isotopic_scaling_metrics.json"
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[ok] wrote: {out_pdf}")
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_json}")
 

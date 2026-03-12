@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T15:18:56.274915+00:00",
+  "generated_utc": "2026-03-11T13:54:59.253115+00:00",
   "phase": 7,
   "step": "7.14.18",
   "inputs": {
@@ -509,6 +509,7 @@
   },
   "outputs": {
     "csv": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_ioffe_phonon_anchors_model.csv",
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_ioffe_phonon_anchors_model.pdf",
     "png": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_ioffe_phonon_anchors_model.png"
   }
 }

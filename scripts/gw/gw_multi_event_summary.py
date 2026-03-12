@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -316,7 +317,9 @@ def _plot_summary(
     ev_index = {ev: i for i, ev in enumerate(events)}
 
     # Layout: two panels (R^2 and match)
-    figsize = (13.5, 7.2) if public else (12.5, 6.2)
+    # 注: 下部注記を複数行で維持しつつ、プロット領域が小さくならないよう縦横を拡大する。
+    # 図27: Y方向の可読性を優先して縦寸を拡大する。
+    figsize = (17.8, 16.0) if public else (16.8, 15.6)
     fig, axes = plt.subplots(2, 1, figsize=figsize, sharex=True)
     ax_r2, ax_m = axes[0], axes[1]
 
@@ -363,69 +366,70 @@ def _plot_summary(
         # 条件分岐: `xs_r2` を満たす経路を評価する。
 
         if xs_r2:
-            ax_r2.plot(xs_r2, ys_r2, marker="o", linestyle="None", color=col, label=det)
+            ax_r2.plot(
+                xs_r2,
+                ys_r2,
+                marker="o",
+                linestyle="None",
+                color=col,
+                label=det,
+                markersize=10.8 if public else 9.6,
+            )
 
         # 条件分岐: `xs_m` を満たす経路を評価する。
 
         if xs_m:
-            ax_m.plot(xs_m, ys_m, marker="o", linestyle="None", color=col, label=det)
+            ax_m.plot(
+                xs_m,
+                ys_m,
+                marker="o",
+                linestyle="None",
+                color=col,
+                label=det,
+                markersize=10.8 if public else 9.6,
+            )
 
     for ax in (ax_r2, ax_m):
         ax.grid(True, alpha=0.35)
         ax.set_axisbelow(True)
 
-    ax_r2.set_ylabel("R^2（1に近いほど良い）")
+    ax_r2.set_ylabel("R^2（1に近いほど良い）", fontsize=19.6 if public else 18.2)
     ax_r2.set_ylim(-0.05, 1.05)
     # 条件分岐: `wave_frange_hz is not None` を満たす経路を評価する。
     if wave_frange_hz is not None:
-        ax_m.set_ylabel(f"match（{wave_frange_hz[0]:g}..{wave_frange_hz[1]:g} Hz, 1に近いほど良い）")
+        ax_m.set_ylabel(
+            f"match（{wave_frange_hz[0]:g}..{wave_frange_hz[1]:g} Hz, 1に近いほど良い）",
+            fontsize=19.6 if public else 18.2,
+        )
     else:
-        ax_m.set_ylabel("match（窓内, 1に近いほど良い）")
+        ax_m.set_ylabel("match（窓内, 1に近いほど良い）", fontsize=19.6 if public else 18.2)
 
     ax_m.set_ylim(-0.05, 1.05)
+    ax_r2.margins(x=0.03)
+    ax_m.margins(x=0.03)
 
     ax_m.set_xticks(x_base)
     xlabels = tick_labels if (isinstance(tick_labels, list) and len(tick_labels) == len(events)) else events
-    ax_m.set_xticklabels(xlabels, rotation=0)
+    if public:
+        ax_m.set_xticklabels(xlabels, rotation=0, ha="center")
+    else:
+        ax_m.set_xticklabels(xlabels, rotation=20, ha="right", rotation_mode="anchor")
     for lab in ax_m.get_xticklabels():
-        lab.set_fontsize(9.0 if public else 8.5)
+        lab.set_fontsize(15.8 if public else 14.4)
+        lab.set_linespacing(1.05 if public else 1.0)
+    ax_m.tick_params(axis="x", pad=12 if public else 10)
 
-    fig.suptitle(title, y=0.98)
+    for ax in (ax_r2, ax_m):
+        ax.tick_params(axis="y", labelsize=16.4 if public else 14.8)
+
+    fig.suptitle(title, y=0.985, fontsize=22.0 if public else 20.0)
 
     # Legend: show once (top panel)
     if dets:
-        ax_r2.legend(loc="upper right", frameon=True, fontsize=10 if public else 9)
+        ax_r2.legend(loc="upper right", frameon=True, fontsize=16.6 if public else 15.0)
 
-    foot_parts = [
-        "R^2: t=t_c−A f^(−8/3)（四重極チャープ則, Newton近似）への当てはめの決定係数。",
-        "match: 観測波形と単純テンプレートの一致度（正規化内積, 参考）。",
-    ]
-    # 条件分岐: `wave_frange_hz is not None` を満たす経路を評価する。
-    if wave_frange_hz is not None:
-        foot_parts.append(f"match窓: 周波数帯 {wave_frange_hz[0]:g}..{wave_frange_hz[1]:g} Hz に対応する時刻範囲。")
-    else:
-        foot_parts.append("※イベント/検出器により前処理（bandpass/whiten）や窓が異なる。")
-
-    # 条件分岐: `public` を満たす経路を評価する。
-
-    if public:
-        foot_parts.append("SNR: GWOSC公開メタ情報（network matched-filter SNR）。")
-    else:
-        foot_parts.append("SNR/FAR: GWOSC公開メタ情報（SNR=network matched-filter, FAR=誤警報率[1/yr]）。")
-
-    # 条件分岐: `match_omitted_by_reason` を満たす経路を評価する。
-
-    if match_omitted_by_reason:
-        n_omit = int(sum(int(v) for v in match_omitted_by_reason.values()))
-        # 条件分岐: `n_omit > 0` を満たす経路を評価する。
-        if n_omit > 0:
-            foot_parts.append(f"※短窓などでmatchを省略: {n_omit}件（過大評価防止）。")
-
-    foot_parts.append("※公式テンプレート解析の代替ではない。")
-    foot = " ".join(foot_parts)
-    fig.text(0.5, 0.02, foot, ha="center", va="bottom", fontsize=10 if public else 9)
-
-    bottom = 0.05
+    # 図下注記は論文本文側へ移し、図中の重なりを回避する。
+    bottom = 0.125
     # 条件分岐: `isinstance(xlabels, list)` を満たす経路を評価する。
     if isinstance(xlabels, list):
         try:
@@ -433,11 +437,15 @@ def _plot_summary(
         except Exception:
             max_lines = 1
 
-        bottom = min(0.2, 0.05 + 0.03 * max(0, max_lines - 1))
+        bottom = min(0.265, 0.128 + (0.044 if public else 0.036) * max(0, max_lines - 1))
 
-    fig.tight_layout(rect=(0.02, bottom, 0.98, 0.95))
+    if public:
+        bottom = min(0.285, bottom + 0.03)
+
+    fig.tight_layout(rect=(0.02, bottom, 0.985, 0.964))
     out_png.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_png, dpi=200, bbox_inches="tight", pad_inches=0.05)
+    fig.savefig(out_png, dpi=220)
+    fig.savefig(out_png.with_suffix(".pdf"))
     plt.close(fig)
 
 
@@ -461,6 +469,7 @@ def _plot_placeholder(out_png: Path, *, title: str) -> None:
     fig.tight_layout()
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=180, bbox_inches="tight", pad_inches=0.05)
+    fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight", pad_inches=0.05)
     plt.close(fig)
 
 
@@ -528,16 +537,23 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             lines.append(f"SNR={_fmt_g(snr, digits=3)}")
 
         # 条件分岐: `far is not None` を満たす経路を評価する。
-
         if far is not None:
             lines.append(f"FAR={_fmt_g(far, digits=2)}/yr")
 
         tick_labels.append("\n".join(lines))
 
-        lines_pub = [name]
-        # 条件分岐: `snr is not None` を満たす経路を評価する。
-        if snr is not None:
-            lines_pub.append(f"SNR={_fmt_g(snr, digits=3)}")
+        # public版は2行固定にして、論文縮小時の重なりを避ける。
+        if "_" in name:
+            head, tail = name.split("_", 1)
+            if snr is not None:
+                lines_pub = [head, f"{tail} ({_fmt_g(snr, digits=3)})"]
+            else:
+                lines_pub = [head, tail]
+        else:
+            lines_pub = [name]
+            # 条件分岐: `snr is not None` を満たす経路を評価する。
+            if snr is not None:
+                lines_pub.append(f"SNR {_fmt_g(snr, digits=3)}")
 
         tick_labels_public.append("\n".join(lines_pub))
 
@@ -553,6 +569,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_png = out_dir / f"{args.prefix}.png"
     out_png_public = out_dir / f"{args.prefix}_public.png"
     out_json = out_dir / f"{args.prefix}_metrics.json"
+    public_dir = root / "output" / "public" / "gw"
+    summary_dir = root / "output" / "private" / "summary" / "figures"
 
     points, used_paths, wave_franges, match_omitted_by_reason = _collect_points(root, ev_pairs)
     fr_unique = {fr for fr in wave_franges if fr is not None}
@@ -593,6 +611,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         _plot_placeholder(out_png, title="重力波（複数イベント）要約")
         _plot_placeholder(out_png_public, title="重力波（複数イベント）要約")
 
+    out_pdf = out_png.with_suffix(".pdf")
+    out_pdf_public = out_png_public.with_suffix(".pdf")
+    canonical_public_png = public_dir / f"{args.prefix}.png"
+    canonical_public_pdf = public_dir / f"{args.prefix}.pdf"
+    canonical_summary_png = summary_dir / f"{args.prefix}.png"
+    canonical_summary_pdf = summary_dir / f"{args.prefix}.pdf"
+    public_dir.mkdir(parents=True, exist_ok=True)
+    summary_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(out_png_public, canonical_public_png)
+    shutil.copy2(out_pdf_public, canonical_public_pdf)
+    shutil.copy2(out_png_public, canonical_summary_png)
+    shutil.copy2(out_pdf_public, canonical_summary_pdf)
+
     payload: Dict[str, Any] = {
         "generated_utc": _iso_utc_now(),
         "inputs": {
@@ -603,7 +634,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         },
         "outputs": {
             "png": str(out_png).replace("\\", "/"),
+            "pdf": str(out_pdf).replace("\\", "/"),
             "public_png": str(out_png_public).replace("\\", "/"),
+            "public_pdf": str(out_pdf_public).replace("\\", "/"),
+            "canonical_public_png": str(canonical_public_png).replace("\\", "/"),
+            "canonical_public_pdf": str(canonical_public_pdf).replace("\\", "/"),
+            "summary_png": str(canonical_summary_png).replace("\\", "/"),
+            "summary_pdf": str(canonical_summary_pdf).replace("\\", "/"),
             "metrics_json": str(out_json).replace("\\", "/"),
         },
         **({"event_meta": event_meta_rows} if event_meta_rows else {}),
@@ -618,7 +655,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "event_type": "gw_multi_event_summary",
                 "argv": list(sys.argv),
                 "inputs": {"source_metrics": used_paths},
-                "outputs": {"png": out_png, "public_png": out_png_public, "metrics_json": out_json},
+                "outputs": {
+                    "png": out_png,
+                    "pdf": out_pdf,
+                    "public_png": out_png_public,
+                    "public_pdf": out_pdf_public,
+                    "canonical_public_png": canonical_public_png,
+                    "canonical_public_pdf": canonical_public_pdf,
+                    "summary_png": canonical_summary_png,
+                    "summary_pdf": canonical_summary_pdf,
+                    "metrics_json": out_json,
+                },
             }
         )
     except Exception:
@@ -626,6 +673,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     print(f"[ok] png : {out_png}")
     print(f"[ok] pub : {out_png_public}")
+    print(f"[ok] public canonical : {canonical_public_png}")
+    print(f"[ok] summary canonical: {canonical_summary_png}")
     print(f"[ok] json: {out_json}")
     return 0
 

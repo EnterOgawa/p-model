@@ -3,6 +3,7 @@ import csv
 import json
 import math
 import re
+import shutil
 import struct
 import sys
 from bisect import bisect_left
@@ -1146,6 +1147,226 @@ def mae(values: Sequence[float]) -> float:
     return sum(abs(v) for v in values) / len(values)
 
 
+# 関数: `fit_delta_beta_from_tdf_series` の入出力契約と処理意図を定義する。
+
+def fit_delta_beta_from_tdf_series(
+    series: Sequence[Dict[str, float]],
+    *,
+    model_t_days_unit: Sequence[float],
+    model_y_unit: Sequence[float],
+    beta_ref: float,
+    window_days: Optional[float],
+    use_bin_count_weights: bool,
+) -> Dict[str, object]:
+    """
+    Fit delta_beta directly from TDF pseudo-residual series without using published PPN gamma.
+
+    Model:
+      y_obs(t) = a0 + delta_beta * y_unit(t) + epsilon
+    where y_unit(t) is the P-model template at beta=1.
+
+    Notes:
+    - For TDF pseudo-residuals (observed - reference prediction), delta_beta is directly identifiable.
+    - Absolute beta needs a declared beta_ref: beta_est = beta_ref + delta_beta.
+    """
+    fit_rows: List[Dict[str, float]] = []
+    for row in series:
+        t_days = float(row.get("t_days", math.nan))
+        y_obs = float(row.get("y_detrended", row.get("y_mean", math.nan)))
+        n_bin = float(row.get("n", 1.0))
+        # 条件分岐: `not math.isfinite(t_days) or not math.isfinite(y_obs)` を満たす経路を評価する。
+        if not math.isfinite(t_days) or not math.isfinite(y_obs):
+            continue
+
+        # 条件分岐: `window_days is not None and abs(t_days) > float(window_days)` を満たす経路を評価する。
+
+        if window_days is not None and abs(t_days) > float(window_days):
+            continue
+
+        y_unit = interp_linear(model_t_days_unit, model_y_unit, t_days)
+        # 条件分岐: `y_unit is None` を満たす経路を評価する。
+        if y_unit is None:
+            continue
+
+        weight = max(float(n_bin), 1.0) if use_bin_count_weights else 1.0
+        fit_rows.append(
+            {
+                "t_days": float(t_days),
+                "y_obs": float(y_obs),
+                "y_unit": float(y_unit),
+                "weight": float(weight),
+                "n_bin": float(n_bin),
+            }
+        )
+
+    # 条件分岐: `len(fit_rows) < 3` を満たす経路を評価する。
+
+    if len(fit_rows) < 3:
+        raise RuntimeError("Insufficient points for delta_beta fit (need >= 3).")
+
+    s_w = sum(r["weight"] for r in fit_rows)
+    s_wx = sum(r["weight"] * r["y_unit"] for r in fit_rows)
+    s_wy = sum(r["weight"] * r["y_obs"] for r in fit_rows)
+    s_wxx = sum(r["weight"] * (r["y_unit"] ** 2) for r in fit_rows)
+    s_wxy = sum(r["weight"] * r["y_unit"] * r["y_obs"] for r in fit_rows)
+
+    det = (s_w * s_wxx) - (s_wx * s_wx)
+    # 条件分岐: `not math.isfinite(det) or abs(det) <= 0.0` を満たす経路を評価する。
+    if not math.isfinite(det) or abs(det) <= 0.0:
+        raise RuntimeError("delta_beta fit failed: singular normal matrix.")
+
+    delta_beta = ((s_w * s_wxy) - (s_wx * s_wy)) / det
+    intercept = (s_wy - (delta_beta * s_wx)) / s_w
+
+    residuals: List[float] = []
+    weighted_res2_sum = 0.0
+    for r in fit_rows:
+        y_fit = intercept + (delta_beta * r["y_unit"])
+        resid = r["y_obs"] - y_fit
+        r["y_fit"] = float(y_fit)
+        r["residual"] = float(resid)
+        residuals.append(float(resid))
+        weighted_res2_sum += float(r["weight"] * (resid * resid))
+
+    dof = int(len(fit_rows) - 2)
+    sigma2 = (weighted_res2_sum / float(dof)) if dof > 0 else math.nan
+    var_delta = (sigma2 * (s_w / det)) if (math.isfinite(sigma2) and det != 0.0) else math.nan
+    sigma_delta = math.sqrt(var_delta) if (math.isfinite(var_delta) and var_delta >= 0.0) else math.nan
+
+    beta_est = float(beta_ref + delta_beta)
+    gamma_est = float((2.0 * beta_est) - 1.0)
+    sigma_beta = float(sigma_delta) if math.isfinite(sigma_delta) else math.nan
+    sigma_gamma = float(2.0 * sigma_delta) if math.isfinite(sigma_delta) else math.nan
+
+    ys_obs = [r["y_obs"] for r in fit_rows]
+    ys_fit = [r["y_fit"] for r in fit_rows]
+    result = {
+        "n_points": int(len(fit_rows)),
+        "window_days": None if window_days is None else float(window_days),
+        "use_bin_count_weights": bool(use_bin_count_weights),
+        "beta_ref": float(beta_ref),
+        "delta_beta": float(delta_beta),
+        "delta_beta_sigma_proxy": float(sigma_delta) if math.isfinite(sigma_delta) else math.nan,
+        "beta_est": float(beta_est),
+        "beta_est_sigma_proxy": float(sigma_beta) if math.isfinite(sigma_beta) else math.nan,
+        "gamma_est": float(gamma_est),
+        "gamma_est_sigma_proxy": float(sigma_gamma) if math.isfinite(sigma_gamma) else math.nan,
+        "intercept": float(intercept),
+        "chi2_weighted": float(weighted_res2_sum),
+        "dof": int(dof),
+        "sigma2_proxy": float(sigma2) if math.isfinite(sigma2) else math.nan,
+        "weighted_rms": float(math.sqrt(weighted_res2_sum / s_w)) if s_w > 0 else math.nan,
+        "rmse": float(rmse(residuals)),
+        "mae": float(mae(residuals)),
+        "corr_obs_fit": float(pearson_corr(ys_obs, ys_fit)),
+        "normal_matrix_det": float(det),
+    }
+    return {"fit_result": result, "fit_rows": fit_rows}
+
+
+# 関数: `fit_delta_beta_from_observed_pairs` の入出力契約と処理意図を定義する。
+
+def fit_delta_beta_from_observed_pairs(
+    observed_pairs: Sequence[Tuple[float, float]],
+    *,
+    model_t_days_unit: Sequence[float],
+    model_y_unit: Sequence[float],
+    beta_ref: float,
+    window_days: Optional[float],
+) -> Dict[str, object]:
+    """
+    Fit delta_beta from direct observed series (e.g., ODF raw y) without published PPN gamma.
+
+    Model:
+      y_obs(t) = a0 + delta_beta * y_unit(t) + epsilon
+    """
+    series = [{"t_days": float(t), "y_detrended": float(y), "n": 1.0} for t, y in observed_pairs]
+    return fit_delta_beta_from_tdf_series(
+        series,
+        model_t_days_unit=model_t_days_unit,
+        model_y_unit=model_y_unit,
+        beta_ref=beta_ref,
+        window_days=window_days,
+        use_bin_count_weights=False,
+    )
+
+
+# 関数: `write_delta_beta_fit_csv` の入出力契約と処理意図を定義する。
+
+def write_delta_beta_fit_csv(path: Path, fit_rows: Sequence[Dict[str, float]]) -> None:
+    with path.open("w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["t_days", "y_obs", "y_unit_beta1", "y_fit", "residual", "weight", "n_bin"])
+        for r in fit_rows:
+            w.writerow(
+                [
+                    f"{float(r['t_days']):.15g}",
+                    f"{float(r['y_obs']):.15e}",
+                    f"{float(r['y_unit']):.15e}",
+                    f"{float(r['y_fit']):.15e}",
+                    f"{float(r['residual']):.15e}",
+                    f"{float(r['weight']):.15g}",
+                    f"{float(r['n_bin']):.15g}",
+                ]
+            )
+
+
+# 関数: `try_plot_delta_beta_fit` の入出力契約と処理意図を定義する。
+
+def try_plot_delta_beta_fit(
+    out_dir: Path,
+    *,
+    fit_rows: Sequence[Dict[str, float]],
+    beta_ref: float,
+    beta_est: float,
+    delta_beta: float,
+    title_prefix: str = "Cassini TDF 直接fit",
+    plot_basename: str = "cassini_tdf_delta_beta_fit",
+) -> None:
+    try:
+        import matplotlib.pyplot as plt  # type: ignore
+    except Exception as e:
+        print("matplotlib not available; skipping delta-beta fit plot:", e)
+        return
+
+    _set_japanese_font()
+    ordered = sorted(fit_rows, key=lambda r: float(r["t_days"]))
+    xs = [float(r["t_days"]) for r in ordered]
+    ys_obs = [float(r["y_obs"]) for r in ordered]
+    ys_fit = [float(r["y_fit"]) for r in ordered]
+    ys_res = [float(r["residual"]) for r in ordered]
+
+    fig, (ax0, ax1) = plt.subplots(
+        2,
+        1,
+        figsize=(10.5, 7.0),
+        sharex=True,
+        gridspec_kw={"height_ratios": [2.2, 1.0]},
+    )
+    ax0.scatter(xs, ys_obs, s=18, color="tab:orange", alpha=0.85, label="TDF疑似残差（デトレンド後）")
+    ax0.plot(xs, ys_fit, color="tab:blue", linewidth=2.0, label="線形fit: a0 + Δβ·y_unit")
+    ax0.set_ylabel("y（周波数比）", fontsize=12.4)
+    ax0.set_title(
+        f"{title_prefix}（β_ref={beta_ref:.9f}, β_est={beta_est:.9f}, Δβ={delta_beta:+.3e}）",
+        fontsize=13.6,
+    )
+    ax0.grid(True, alpha=0.3)
+    ax0.legend(loc="best", fontsize=10.8)
+    ax0.tick_params(labelsize=11.2)
+
+    ax1.axhline(0.0, color="black", linewidth=1.0, alpha=0.6)
+    ax1.scatter(xs, ys_res, s=14, color="tab:green", alpha=0.85)
+    ax1.set_xlabel("t（日, b_min からの相対）", fontsize=12.4)
+    ax1.set_ylabel("residual", fontsize=12.4)
+    ax1.grid(True, alpha=0.3)
+    ax1.tick_params(labelsize=11.2)
+
+    fig.tight_layout()
+    fig.savefig(out_dir / f"{plot_basename}.png", dpi=180)
+    fig.savefig(out_dir / f"{plot_basename}.pdf")
+    plt.close(fig)
+
+
 # 関数: `pearson_corr` の入出力契約と処理意図を定義する。
 
 def pearson_corr(xs: Sequence[float], ys: Sequence[float]) -> float:
@@ -1566,6 +1787,52 @@ def main() -> None:
         help="PDS TDF: 参照Shapiro復元で使う β。省略時は --beta と同じ（凍結β→fallback=1.0）。",
     )
     parser.add_argument(
+        "--tdf-direct-beta-fit",
+        action="store_true",
+        help=(
+            "PDS TDF（疑似残差）に対して y_obs=a0+Δβ·y_unit の直接fitを実行し、"
+            "Δβ（および β_ref を与えた β_est）を出力する。"
+        ),
+    )
+    parser.add_argument(
+        "--tdf-direct-beta-ref",
+        type=float,
+        default=1.0,
+        help="直接fitで Δβ から絶対値へ変換する参照 β_ref（beta_est = beta_ref + Δβ）。Default: 1.0",
+    )
+    parser.add_argument(
+        "--tdf-direct-beta-window-days",
+        type=float,
+        default=10.0,
+        help="直接fitに使う |t| 窓（日）。負値で全区間。Default: 10.0",
+    )
+    parser.add_argument(
+        "--tdf-direct-beta-use-bin-count-weights",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="直接fitでビン件数 n を重みとして使う。Default: enabled",
+    )
+    parser.add_argument(
+        "--odf-direct-beta-fit",
+        action="store_true",
+        help=(
+            "PDS ODF raw y(t) に対して y_obs=a0+Δβ·y_unit の直接fitを実行し、"
+            "Δβ（および β_ref を与えた β_est）を出力する。"
+        ),
+    )
+    parser.add_argument(
+        "--odf-direct-beta-ref",
+        type=float,
+        default=1.0,
+        help="ODF直接fitで Δβ から絶対値へ変換する参照 β_ref（beta_est = beta_ref + Δβ）。Default: 1.0",
+    )
+    parser.add_argument(
+        "--odf-direct-beta-window-days",
+        type=float,
+        default=10.0,
+        help="ODF直接fitに使う |t| 窓（日）。負値で全区間。Default: 10.0",
+    )
+    parser.add_argument(
         "--odf-stations",
         type=str,
         default="",
@@ -1638,6 +1905,13 @@ def main() -> None:
 
     obs_label = "観測（一次データ: PDS ODF）"
     observed_pairs: List[Tuple[float, float]] = []
+    tdf_fit_series: List[Dict[str, float]] = []
+    tdf_direct_fit_payload: Dict[str, object] = {}
+    tdf_direct_fit_metrics_path: Optional[Path] = None
+    tdf_direct_fit_points_path: Optional[Path] = None
+    odf_direct_fit_payload: Dict[str, object] = {}
+    odf_direct_fit_metrics_path: Optional[Path] = None
+    odf_direct_fit_points_path: Optional[Path] = None
     generated_pds_series = False
     recon_tag = "（疑似残差+参照Shapiro復元）" if tdf_reconstruct_shapiro else ""
 
@@ -1756,6 +2030,13 @@ def main() -> None:
             t_ref = find_bmin_time(rows)
             for r in tdf_obs:
                 observed_pairs.append((t_days_from_ref(r.time_utc, t_ref), float(r.y)))
+                tdf_fit_series.append(
+                    {
+                        "t_days": float(t_days_from_ref(r.time_utc, t_ref)),
+                        "y_detrended": float(r.y),
+                        "n": 1.0,
+                    }
+                )
 
             obs_out = out_dir / "cassini_sce1_tdf_extracted.csv"
             with obs_out.open("w", newline="", encoding="utf-8") as f:
@@ -2244,6 +2525,14 @@ def main() -> None:
             proc_out = out_dir / "cassini_sce1_tdf_paperlike.csv"
             ref_model_t_days: Optional[List[float]] = None
             ref_model_y: Optional[List[float]] = None
+            tdf_fit_series = [
+                {
+                    "t_days": float(r.get("t_days", math.nan)),
+                    "y_detrended": float(r.get("y_detrended", r.get("y_mean", math.nan))),
+                    "n": float(r.get("n", 1.0)),
+                }
+                for r in detrended
+            ]
             # 条件分岐: `tdf_reconstruct_shapiro` を満たす経路を評価する。
             if tdf_reconstruct_shapiro:
                 ref_model_t_days, ref_model_y = build_model_series(rows, beta=tdf_reconstruct_beta, mode=args.model)
@@ -2295,10 +2584,164 @@ def main() -> None:
 
     observed_pairs.sort(key=lambda p: p[0])
 
+    # 条件分岐: `bool(args.odf_direct_beta_fit)` を満たす経路を評価する。
+    if bool(args.odf_direct_beta_fit):
+        # 条件分岐: `effective_source != "pds_odf_raw"` を満たす経路を評価する。
+        if effective_source != "pds_odf_raw":
+            print("[warn] --odf-direct-beta-fit requested, but effective source is not pds_odf_raw; skipping.")
+        # 条件分岐: 前段条件が不成立で、`not observed_pairs` を追加評価する。
+        elif not observed_pairs:
+            print("[warn] --odf-direct-beta-fit requested, but no ODF observed series is available for fitting.")
+        else:
+            odf_direct_window_days: Optional[float] = (
+                None if float(args.odf_direct_beta_window_days) < 0.0 else float(args.odf_direct_beta_window_days)
+            )
+            unit_t_days, unit_y = build_model_series(rows, beta=1.0, mode=args.model)
+            fit_pack = fit_delta_beta_from_observed_pairs(
+                observed_pairs,
+                model_t_days_unit=unit_t_days,
+                model_y_unit=unit_y,
+                beta_ref=float(args.odf_direct_beta_ref),
+                window_days=odf_direct_window_days,
+            )
+            fit_result = dict(fit_pack["fit_result"])
+            fit_rows = list(fit_pack["fit_rows"])
+
+            odf_direct_fit_points_path = out_dir / "cassini_odf_beta_direct_fit_points.csv"
+            odf_direct_fit_metrics_path = out_dir / "cassini_odf_beta_direct_fit_metrics.json"
+            write_delta_beta_fit_csv(odf_direct_fit_points_path, fit_rows)
+
+            odf_direct_fit_payload = {
+                "generated_utc": datetime.now(timezone.utc).isoformat(),
+                "inputs": {
+                    "source_effective": str(effective_source),
+                    "model_csv": str(model_csv),
+                    "model_mode": str(args.model),
+                    "window_days": None if odf_direct_window_days is None else float(odf_direct_window_days),
+                    "beta_ref": float(args.odf_direct_beta_ref),
+                    "note": (
+                        "ODF raw observed y(t) is directly fitted against unit template y_unit(beta=1). "
+                        "No published PPN gamma value is used."
+                    ),
+                },
+                "fit_result": fit_result,
+                "outputs": {
+                    "points_csv": str(odf_direct_fit_points_path),
+                    "fit_plot_png": str(out_dir / "cassini_odf_beta_direct_fit.png"),
+                    "fit_plot_pdf": str(out_dir / "cassini_odf_beta_direct_fit.pdf"),
+                },
+            }
+            odf_direct_fit_metrics_path.write_text(
+                json.dumps(odf_direct_fit_payload, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+            print("Wrote:", odf_direct_fit_points_path)
+            print("Wrote:", odf_direct_fit_metrics_path)
+
+            # 条件分岐: `not args.no_plots` を満たす経路を評価する。
+            if not args.no_plots:
+                try_plot_delta_beta_fit(
+                    out_dir,
+                    fit_rows=fit_rows,
+                    beta_ref=float(args.odf_direct_beta_ref),
+                    beta_est=float(fit_result.get("beta_est", math.nan)),
+                    delta_beta=float(fit_result.get("delta_beta", math.nan)),
+                    title_prefix="Cassini ODF raw 直接fit",
+                    plot_basename="cassini_odf_beta_direct_fit",
+                )
+                print("Wrote:", out_dir / "cassini_odf_beta_direct_fit.png")
+                print("Wrote:", out_dir / "cassini_odf_beta_direct_fit.pdf")
+
+            public_dir = _ROOT / "output" / "public" / "cassini"
+            public_dir.mkdir(parents=True, exist_ok=True)
+            for artifact_name in (
+                "cassini_odf_beta_direct_fit_points.csv",
+                "cassini_odf_beta_direct_fit_metrics.json",
+                "cassini_odf_beta_direct_fit.png",
+                "cassini_odf_beta_direct_fit.pdf",
+            ):
+                artifact_path = out_dir / artifact_name
+                if artifact_path.exists():
+                    shutil.copy2(artifact_path, public_dir / artifact_name)
+
+    # 条件分岐: `bool(args.tdf_direct_beta_fit)` を満たす経路を評価する。
+
+    if bool(args.tdf_direct_beta_fit):
+        # 条件分岐: `not tdf_fit_series` を満たす経路を評価する。
+        if not tdf_fit_series:
+            print("[warn] --tdf-direct-beta-fit requested, but no TDF series is available for fitting.")
+        else:
+            direct_window_days: Optional[float] = (
+                None if float(args.tdf_direct_beta_window_days) < 0.0 else float(args.tdf_direct_beta_window_days)
+            )
+            # 条件分岐: `tdf_reconstruct_shapiro` を満たす経路を評価する。
+            if tdf_reconstruct_shapiro:
+                print(
+                    "[info] direct beta fit uses y_detrended (pseudo-residual branch) and does not use reconstructed y(t)."
+                )
+
+            unit_t_days, unit_y = build_model_series(rows, beta=1.0, mode=args.model)
+            fit_pack = fit_delta_beta_from_tdf_series(
+                tdf_fit_series,
+                model_t_days_unit=unit_t_days,
+                model_y_unit=unit_y,
+                beta_ref=float(args.tdf_direct_beta_ref),
+                window_days=direct_window_days,
+                use_bin_count_weights=bool(args.tdf_direct_beta_use_bin_count_weights),
+            )
+            fit_result = dict(fit_pack["fit_result"])
+            fit_rows = list(fit_pack["fit_rows"])
+
+            tdf_direct_fit_points_path = out_dir / "cassini_tdf_delta_beta_fit_points.csv"
+            tdf_direct_fit_metrics_path = out_dir / "cassini_tdf_delta_beta_fit_metrics.json"
+            write_delta_beta_fit_csv(tdf_direct_fit_points_path, fit_rows)
+
+            tdf_direct_fit_payload = {
+                "generated_utc": datetime.now(timezone.utc).isoformat(),
+                "inputs": {
+                    "source_effective": str(effective_source),
+                    "model_csv": str(model_csv),
+                    "model_mode": str(args.model),
+                    "window_days": None if direct_window_days is None else float(direct_window_days),
+                    "use_bin_count_weights": bool(args.tdf_direct_beta_use_bin_count_weights),
+                    "beta_ref": float(args.tdf_direct_beta_ref),
+                    "tdf_reconstruct_shapiro_runtime": bool(tdf_reconstruct_shapiro),
+                    "note": (
+                        "TDF is pseudo-residual (observed-reference). "
+                        "delta_beta is directly fitted; beta_est uses declared beta_ref."
+                    ),
+                },
+                "fit_result": fit_result,
+                "outputs": {
+                    "points_csv": str(tdf_direct_fit_points_path),
+                    "fit_plot_png": str(out_dir / "cassini_tdf_delta_beta_fit.png"),
+                    "fit_plot_pdf": str(out_dir / "cassini_tdf_delta_beta_fit.pdf"),
+                },
+            }
+            tdf_direct_fit_metrics_path.write_text(
+                json.dumps(tdf_direct_fit_payload, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+            print("Wrote:", tdf_direct_fit_points_path)
+            print("Wrote:", tdf_direct_fit_metrics_path)
+
+            # 条件分岐: `not args.no_plots` を満たす経路を評価する。
+            if not args.no_plots:
+                try_plot_delta_beta_fit(
+                    out_dir,
+                    fit_rows=fit_rows,
+                    beta_ref=float(args.tdf_direct_beta_ref),
+                    beta_est=float(fit_result.get("beta_est", math.nan)),
+                    delta_beta=float(fit_result.get("delta_beta", math.nan)),
+                )
+                print("Wrote:", out_dir / "cassini_tdf_delta_beta_fit.png")
+                print("Wrote:", out_dir / "cassini_tdf_delta_beta_fit.pdf")
+
     # Sanity check: compare our PDS-derived y(t) against the published digitized curve.
     # This helps validate that the PDS decoding + smoothing/detrend produces a paper-like y(t).
     # Note: PDS TDF provides Doppler pseudo-residual (observed - predicted); we add back a reference Shapiro model unless disabled.
     # comparable to what is typically shown in Cassini γ (Shapiro) analyses.
+
     if generated_pds_series:
         try:
             digitized_csv = (root / args.digitized_csv).resolve()
@@ -2527,6 +2970,13 @@ def main() -> None:
                 "tdf_reconstruct_shapiro": bool(tdf_reconstruct_shapiro),
                 "tdf_reconstruct_beta": float(tdf_reconstruct_beta),
                 "tdf_reconstruct_beta_source": str(tdf_reconstruct_beta_source),
+                "tdf_direct_beta_fit": bool(args.tdf_direct_beta_fit),
+                "tdf_direct_beta_ref": float(args.tdf_direct_beta_ref),
+                "tdf_direct_beta_window_days": float(args.tdf_direct_beta_window_days),
+                "tdf_direct_beta_use_bin_count_weights": bool(args.tdf_direct_beta_use_bin_count_weights),
+                "odf_direct_beta_fit": bool(args.odf_direct_beta_fit),
+                "odf_direct_beta_ref": float(args.odf_direct_beta_ref),
+                "odf_direct_beta_window_days": float(args.odf_direct_beta_window_days),
             },
             "inputs": {
                 "model_csv": str(model_csv),
@@ -2544,6 +2994,14 @@ def main() -> None:
                 "pds_dual_binned_csv": str(dual_binned_out) if dual_binned_out is not None else None,
                 "pds_binned_merged_csv": str(merged_binned_out) if merged_binned_out is not None else None,
                 "pds_vs_digitized_metrics_csv": str(out_dir / "cassini_pds_vs_digitized_metrics.csv"),
+                "tdf_direct_fit_points_csv": str(tdf_direct_fit_points_path) if tdf_direct_fit_points_path else None,
+                "tdf_direct_fit_metrics_json": str(tdf_direct_fit_metrics_path) if tdf_direct_fit_metrics_path else None,
+                "tdf_direct_fit_plot_png": str(out_dir / "cassini_tdf_delta_beta_fit.png"),
+                "tdf_direct_fit_plot_pdf": str(out_dir / "cassini_tdf_delta_beta_fit.pdf"),
+                "odf_direct_fit_points_csv": str(odf_direct_fit_points_path) if odf_direct_fit_points_path else None,
+                "odf_direct_fit_metrics_json": str(odf_direct_fit_metrics_path) if odf_direct_fit_metrics_path else None,
+                "odf_direct_fit_plot_png": str(out_dir / "cassini_odf_beta_direct_fit.png"),
+                "odf_direct_fit_plot_pdf": str(out_dir / "cassini_odf_beta_direct_fit.pdf"),
             },
             "counts": {
                 "n_observed_points": int(len(observed_pairs)),
@@ -2626,11 +3084,28 @@ def main() -> None:
                     "tdf_reconstruct_shapiro": bool(tdf_reconstruct_shapiro),
                     "tdf_reconstruct_beta": float(tdf_reconstruct_beta),
                     "tdf_reconstruct_beta_source": str(tdf_reconstruct_beta_source),
+                    "tdf_direct_beta_fit": bool(args.tdf_direct_beta_fit),
+                    "tdf_direct_beta_ref": float(args.tdf_direct_beta_ref),
+                    "tdf_direct_beta_window_days": float(args.tdf_direct_beta_window_days),
+                    "tdf_direct_beta_use_bin_count_weights": bool(args.tdf_direct_beta_use_bin_count_weights),
+                    "odf_direct_beta_fit": bool(args.odf_direct_beta_fit),
+                    "odf_direct_beta_ref": float(args.odf_direct_beta_ref),
+                    "odf_direct_beta_window_days": float(args.odf_direct_beta_window_days),
                 },
                 "metrics": {
                     "all": m_all,
                     "pm10d": m_10,
                     "pm3d": m_3,
+                    "odf_direct_fit": (
+                        dict(odf_direct_fit_payload.get("fit_result", {}))
+                        if isinstance(odf_direct_fit_payload.get("fit_result"), dict)
+                        else {}
+                    ),
+                    "tdf_direct_fit": (
+                        dict(tdf_direct_fit_payload.get("fit_result", {}))
+                        if isinstance(tdf_direct_fit_payload.get("fit_result"), dict)
+                        else {}
+                    ),
                 },
                 "outputs": {
                     "out_dir": out_dir,
@@ -2642,6 +3117,14 @@ def main() -> None:
                     "pds_processed_csv": out_dir / "cassini_sce1_tdf_paperlike.csv",
                     "pds_dual_binned_csv": dual_binned_out,
                     "pds_binned_merged_csv": merged_binned_out,
+                    "odf_direct_fit_points_csv": odf_direct_fit_points_path,
+                    "odf_direct_fit_metrics_json": odf_direct_fit_metrics_path,
+                    "odf_direct_fit_plot_png": out_dir / "cassini_odf_beta_direct_fit.png",
+                    "odf_direct_fit_plot_pdf": out_dir / "cassini_odf_beta_direct_fit.pdf",
+                    "tdf_direct_fit_points_csv": tdf_direct_fit_points_path,
+                    "tdf_direct_fit_metrics_json": tdf_direct_fit_metrics_path,
+                    "tdf_direct_fit_plot_png": out_dir / "cassini_tdf_delta_beta_fit.png",
+                    "tdf_direct_fit_plot_pdf": out_dir / "cassini_tdf_delta_beta_fit.pdf",
                     "run_metadata_json": out_dir / "cassini_fig2_run_metadata.json",
                 },
             }

@@ -12,6 +12,10 @@ from typing import Any, Optional
 import matplotlib.pyplot as plt
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
@@ -547,6 +551,8 @@ def main() -> None:
 
     # Figure
 
+    legend_font = 11.8
+
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10.5, 6.8), sharex=True, gridspec_kw={"height_ratios": [2, 1]})
 
     ax1.plot(temps, alpha_obs_1e8, color="#d62728", lw=2.0, label="NIST TRC fit (obs) α(T)")
@@ -557,7 +563,7 @@ def main() -> None:
     ax1.set_ylabel("α(T) (10^-8 / K)")
     ax1.set_title("Silicon thermal expansion: minimal γ(T) (Grüneisen) extension (tanh interpolation)")
     ax1.grid(True, alpha=0.25)
-    ax1.legend(loc="best")
+    ax1.legend(loc="best", fontsize=legend_font)
 
     ax2.plot(temps, a_eff_obs, color="#000000", lw=1.2, alpha=0.9, label="A_eff(T)=α/Cv (obs)")
     ax2.plot(temps, a_eff_model, color="#1f77b4", lw=2.0, alpha=0.9, label="A_eff(T)=A_inf·tanh((T-T0)/ΔT)")
@@ -566,7 +572,7 @@ def main() -> None:
     ax2.set_xlabel("Temperature T (K)")
     ax2.set_ylabel("A_eff (mol/J)")
     ax2.grid(True, alpha=0.25)
-    ax2.legend(loc="best")
+    ax2.legend(loc="best", fontsize=legend_font)
 
     fig.tight_layout()
     out_png = out_dir / "condensed_silicon_thermal_expansion_gruneisen_gammaT_model.png"

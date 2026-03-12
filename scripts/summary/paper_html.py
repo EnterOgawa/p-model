@@ -10,6 +10,7 @@ Phase 8 向けに、Markdown草稿（doc/paper/*.md）をHTMLで読める形に�
   - profile=part2_astrophysics: output/private/summary/pmodel_paper_part2_astrophysics.html
   - profile=part3_quantum: output/private/summary/pmodel_paper_part3_quantum.html
   - profile=part4_verification: output/private/summary/pmodel_paper_part4_verification.html
+  - profile=part5_future_predictions: output/private/summary/pmodel_paper_part5_future_predictions.html
 
 方針:
   - 公開レポート（pmodel_public_report.html）と同じ “カード” スタイルの単一HTMLにまとめる。
@@ -64,7 +65,7 @@ class FigureItem:
 def _resolve_repo_asset(rel: str, *, root: Path) -> Path:
     """
     Resolve repo-relative paths, remapping legacy output/<topic>/... to
-    output/private/<topic>/... (or output/public for quantum) when needed.
+    modern roots only (output/public first, then output/private fallback).
     """
     rel_norm = rel.replace("\\", "/")
     # 条件分岐: `not rel_norm.startswith("output/")` を満たす経路を評価する。
@@ -79,35 +80,31 @@ def _resolve_repo_asset(rel: str, *, root: Path) -> Path:
     # 条件分岐: `parts[1] in ("private", "public")` を満たす経路を評価する。
 
     if parts[1] in ("private", "public"):
+        try:
+            _paper_latex._sync_public_mirror_for_output_reference(rel_norm, root=root)
+        except Exception:
+            pass
         return root / Path(rel_norm)
 
     topic = parts[1]
     tail = Path(*parts[2:]) if len(parts) > 2 else Path()
-    cand_public = (root / "output" / "public" / topic / tail).resolve()
     cand_private = (root / "output" / "private" / topic / tail).resolve()
-
-    # 条件分岐: `topic == "quantum"` を満たす経路を評価する。
-    if topic == "quantum":
-        # 条件分岐: `cand_public.exists()` を満たす経路を評価する。
-        if cand_public.exists():
-            return cand_public
-
-        # 条件分岐: `cand_private.exists()` を満たす経路を評価する。
-
-        if cand_private.exists():
-            return cand_private
-
-    # 条件分岐: `cand_private.exists()` を満たす経路を評価する。
-
-    if cand_private.exists():
-        return cand_private
+    cand_public = (root / "output" / "public" / topic / tail).resolve()
+    try:
+        _paper_latex._sync_public_mirror_for_output_reference(rel_norm, root=root)
+    except Exception:
+        pass
 
     # 条件分岐: `cand_public.exists()` を満たす経路を評価する。
-
     if cand_public.exists():
         return cand_public
 
-    return root / Path(rel_norm)
+    # 条件分岐: `cand_private.exists()` を満たす経路を評価する。
+    if cand_private.exists():
+        return cand_private
+
+    # Do not fall back to legacy output/<topic>/... to avoid stale-asset mixing.
+    return cand_public
 
 # 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 
@@ -162,6 +159,9 @@ _TABLE_OPEN_NO_BORDER_RE = re.compile(r"<table(?![^>]*\bborder=)([^>]*)>", flags
 _ASSET_URL_ATTR_RE = re.compile(
     r"""(?P<attr>\b(?:src|href))=(?P<q>["'])(?P<url>[^"']+)(?P=q)"""
 )
+_MD_ATX_HEADING_RE = re.compile(r"^\s*(#{1,6})\s+(.+?)\s*$")
+_LATEX_REF_RE = re.compile(r"\\ref\{((?:sec|fig):[^{}]+)\}")
+_LATEX_FIG_REF_WITH_PREFIX_RE = re.compile(r"図\s*\\ref\{(fig:[^{}]+)\}")
 _INLINE_FIGURE_LABEL_P_RE = re.compile(
     r"<p>\s*<strong>(?:図|要約図)</strong>[：:]\s*(<figure class='inline-figure'.*?</figure>)\s*</p>",
     flags=re.S,
@@ -174,6 +174,146 @@ _INLINE_FIGURE_P_RE = re.compile(
     r"<p>\s*(<figure class='inline-figure'.*?</figure>)\s*</p>",
     flags=re.S,
 )
+
+
+# 関数: `_normalize_ref_slug` の入出力契約と処理意図を定義する。
+def _normalize_ref_slug(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", (text or "").lower())
+
+
+# 関数: `_build_section_ref_map` の入出力契約と処理意図を定義する。
+def _build_section_ref_map(*, md_text: str, profile: str) -> Dict[str, str]:
+    """
+    Build a mapping from LaTeX section labels (`sec:...`) to display section numbers.
+    """
+    used_labels: Dict[str, int] = {}
+    out: Dict[str, str] = {}
+    top_h1_seen = False
+    for line in (md_text or "").splitlines():
+        m = _MD_ATX_HEADING_RE.match(line)
+        if not m:
+            continue
+
+        level = len(m.group(1))
+        raw_title = (m.group(2) or "").strip()
+        if not raw_title:
+            continue
+
+        if level == 1 and not top_h1_seen:
+            top_h1_seen = True
+            continue
+
+        stripped_title = _paper_latex._strip_heading_prefix(raw_title)  # noqa: SLF001
+        label_suffix = _paper_latex._build_section_label(  # noqa: SLF001
+            raw_title,
+            stripped_title,
+            used_labels=used_labels,
+        )
+        section_number = _paper_latex._extract_heading_number(raw_title)  # noqa: SLF001
+        label = f"sec:p4:{label_suffix}" if profile == "part4_verification" else f"sec:{label_suffix}"
+        out[label] = section_number if section_number else stripped_title
+
+    return out
+
+
+# 関数: `_build_figure_ref_map` の入出力契約と処理意図を定義する。
+def _build_figure_ref_map(*, fig_map: Optional[Dict[str, Dict[str, Any]]]) -> Dict[str, Tuple[str, str]]:
+    """
+    Build a normalized map from figure label slug -> (anchor, display label).
+    """
+    out: Dict[str, Tuple[str, str]] = {}
+    if not isinstance(fig_map, dict):
+        return out
+
+    for rel, info in fig_map.items():
+        fig_id = str(info.get("id", "")).strip()
+        fig_label = str(info.get("label", "")).strip()
+        if (not fig_id) or (not fig_label):
+            continue
+
+        anchor = f"#{fig_id}"
+        stems: List[str] = []
+        rel_stem = Path(str(rel).replace("\\", "/")).stem
+        if rel_stem:
+            stems.append(rel_stem)
+
+        raw_path = info.get("path")
+        if isinstance(raw_path, Path):
+            stems.append(raw_path.stem)
+        elif isinstance(raw_path, str) and raw_path.strip():
+            stems.append(Path(raw_path).stem)
+
+        for stem in stems:
+            norm = _normalize_ref_slug(stem.replace("_", "-"))
+            if norm and (norm not in out):
+                out[norm] = (anchor, fig_label)
+
+    return out
+
+
+# 関数: `_replace_latex_refs_in_html` の入出力契約と処理意図を定義する。
+def _replace_latex_refs_in_html(
+    rendered_html: str,
+    *,
+    section_ref_map: Dict[str, str],
+    figure_ref_map: Dict[str, Tuple[str, str]],
+) -> str:
+    """
+    Replace literal `\ref{...}` that survived Markdown rendering with readable text.
+    """
+    text = rendered_html or ""
+    if not text:
+        return text
+
+    def _resolve_section(label: str) -> str:
+        disp = section_ref_map.get(label, "")
+        if not disp:
+            return ""
+
+        return html.escape(disp)
+
+    def _resolve_figure(label: str) -> Optional[Tuple[str, str]]:
+        slug = label.split(":", 1)[1] if ":" in label else label
+        norm = _normalize_ref_slug(slug.replace("_", "-"))
+        if not norm:
+            return None
+
+        return figure_ref_map.get(norm)
+
+    # 関数: `repl_fig_with_prefix` の入出力契約と処理意図を定義する。
+    def repl_fig_with_prefix(m: re.Match[str]) -> str:
+        label = m.group(1)
+        resolved = _resolve_figure(label)
+        if not resolved:
+            return "図"
+
+        anchor, fig_label = resolved
+        return f"<a href='{html.escape(anchor)}'>{html.escape(fig_label)}</a>"
+
+    text = _LATEX_FIG_REF_WITH_PREFIX_RE.sub(repl_fig_with_prefix, text)
+
+    # 関数: `repl_any_ref` の入出力契約と処理意図を定義する。
+    def repl_any_ref(m: re.Match[str]) -> str:
+        label = m.group(1)
+        if label.startswith("sec:"):
+            resolved = _resolve_section(label)
+            if resolved:
+                return resolved
+
+            # Fallback: keep readable slug without LaTeX escape.
+            return html.escape(label.split(":", 1)[1])
+
+        if label.startswith("fig:"):
+            resolved = _resolve_figure(label)
+            if not resolved:
+                return "図"
+
+            anchor, fig_label = resolved
+            return f"<a href='{html.escape(anchor)}'>{html.escape(fig_label)}</a>"
+
+        return html.escape(label)
+
+    return _LATEX_REF_RE.sub(repl_any_ref, text)
 
 
 # 関数: `_rewrite_repo_relative_asset_urls` の入出力契約と処理意図を定義する。
@@ -339,7 +479,7 @@ def _strip_internal_source_tokens(text: str) -> str:
 
 def _table1_metric_score_norm_astrophysics(metric_public: str, metric_fallback: str) -> Optional[float]:
     """
-    Return a normalized discrepancy score in [0,3] (smaller is better) for Part II Table 1.
+    Return a normalized discrepancy score in [0,3] (smaller is better) for Part II 検証サマリ表.
     """
     text = (metric_public or "").strip() or (metric_fallback or "").strip()
     # 条件分岐: `not text` を満たす経路を評価する。
@@ -457,7 +597,7 @@ def _table1_metric_score_norm_astrophysics(metric_public: str, metric_fallback: 
 
 def _table1_metric_score_norm_quantum(metric_public: str, metric_fallback: str, pmodel: str) -> Optional[float]:
     """
-    Return a normalized discrepancy score in [0,3] (smaller is better) for Part III Table 1.
+    Return a normalized discrepancy score in [0,3] (smaller is better) for Part III 検証サマリ表.
 
     Quantum rows are heterogeneous: some have explicit σ / z-scores, while others are
     "same-in-weak-field" mappings or "entrance constraints". For heatmap usability, we:
@@ -527,14 +667,14 @@ def _table1_metric_score_norm_quantum(metric_public: str, metric_fallback: str, 
 
 def _render_table1_html_from_json(table1_json: Path, *, profile: str) -> str:
     """
-    Render Table 1 (validation summary) as an HTML table with:
+    Render 検証サマリ表 (validation summary) as an HTML table with:
     - colored header row
     - colored "差/指標" cells based on discrepancy magnitude
     """
     try:
         payload = json.loads(table1_json.read_text(encoding="utf-8", errors="replace"))
     except Exception:
-        return "<p class='muted'>[err] Table 1 JSON not readable.</p>"
+        return "<p class='muted'>[err] 検証サマリ表 JSON not readable.</p>"
 
     table1 = payload.get("table1") if isinstance(payload.get("table1"), dict) else {}
     rows = table1.get("rows") if isinstance(table1.get("rows"), list) else []
@@ -608,14 +748,14 @@ def _render_table1_html_from_json(table1_json: Path, *, profile: str) -> str:
 
 def _inject_table1_after_h3(body_html: str, *, insert_html: str) -> str:
     """
-    Insert Table 1 right after "4.1 Table 1（検証サマリ）" heading inside the manuscript HTML.
+    Insert 検証サマリ表 right after "4.1 検証サマリ表" heading inside the manuscript HTML.
     """
     # 条件分岐: `not body_html or not insert_html` を満たす経路を評価する。
     if not body_html or not insert_html:
         return body_html
 
     pat = re.compile(
-        r'(<h3[^>]*id=\"section-4-1\"[^>]*>.*?Table 1（検証サマリ）.*?</h3>)',
+        r'(<h3[^>]*id=\"section-4-1\"[^>]*>.*?検証サマリ表.*?</h3>)',
         flags=re.S,
     )
     m = pat.search(body_html)
@@ -1765,9 +1905,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--outdir", default=None, help="Output directory (default: output/private/summary).")
     ap.add_argument(
         "--profile",
-        choices=["paper", "part2_astrophysics", "part3_quantum", "part4_verification"],
+        choices=["paper", "part2_astrophysics", "part3_quantum", "part4_verification", "part5_future_predictions"],
         default="paper",
-        help="render profile: paper (Part I) / part2_astrophysics / part3_quantum / part4_verification",
+        help="render profile: paper (Part I) / part2_astrophysics / part3_quantum / part4_verification / part5_future_predictions",
     )
     ap.add_argument(
         "--mode",
@@ -1815,6 +1955,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         # 条件分岐: 前段条件が不成立で、`profile == "part4_verification"` を追加評価する。
         elif profile == "part4_verification":
             manuscript_md = root / "doc" / "paper" / "13_part4_verification.md"
+        elif profile == "part5_future_predictions":
+            manuscript_md = root / "doc" / "paper" / "14_part5_future_predictions.md"
 
     quantum_appendix_a_md = root / "doc" / "paper" / "12_part3_quantum_appendix_a.md"
     definitions_md = root / "doc" / "paper" / "05_definitions.md"
@@ -1846,7 +1988,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     include_quantum_appendix_a = False
     enable_citation_links = profile != "paper"
     # Keep anchors stable across all paper profiles so intra-doc links and TOC are consistent.
-    standardize_numbered_anchors = profile in {"paper", "part2_astrophysics", "part3_quantum", "part4_verification"}
+    standardize_numbered_anchors = profile in {
+        "paper",
+        "part2_astrophysics",
+        "part3_quantum",
+        "part4_verification",
+        "part5_future_predictions",
+    }
 
     # Used to tailor "データ出典/参考文献" per Part in publish mode.
     used_cite_keys: set[str] = set()
@@ -1965,10 +2113,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         publish_inlined = set()
         publish_img_cache = {}
 
+    section_ref_map: Dict[str, str] = {}
+    if manuscript_md.exists():
+        manuscript_ref_text = _read_text(manuscript_md)
+        manuscript_ref_text = _strip_internal_blocks(manuscript_ref_text, mode=mode)
+        section_ref_map = _build_section_ref_map(md_text=manuscript_ref_text, profile=profile)
+
+    figure_ref_map = _build_figure_ref_map(fig_map=(publish_fig_map if mode == "publish" else None))
+
     sections: List[Dict[str, Any]] = []
 
     # NOTE:
-    # For Part II / Part III, Table 1 is injected under "4.1 Table 1（検証サマリ）" inside the manuscript
+    # For Part II / Part III, 検証サマリ表 is injected under "4.1 検証サマリ表" inside the manuscript
     # to avoid duplicating the title as a standalone section.
 
     if include_uncertainty and uncertainty_md.exists():
@@ -1992,6 +2148,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         if enable_citation_links:
             body = _linkify_citations(body, ref_keys=ref_keys)
+
+        if mode == "publish":
+            body = _replace_latex_refs_in_html(body, section_ref_map=section_ref_map, figure_ref_map=figure_ref_map)
 
         body = _inline_png_code_snippets(
             body,
@@ -2029,6 +2188,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         if enable_citation_links:
             body = _linkify_citations(body, ref_keys=ref_keys)
+
+        if mode == "publish":
+            body = _replace_latex_refs_in_html(body, section_ref_map=section_ref_map, figure_ref_map=figure_ref_map)
 
         # 条件分岐: `include_table1 and table1_md.exists()` を満たす経路を評価する。
 
@@ -2092,6 +2254,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if enable_citation_links:
             body = _linkify_citations(body, ref_keys=ref_keys)
 
+        if mode == "publish":
+            body = _replace_latex_refs_in_html(body, section_ref_map=section_ref_map, figure_ref_map=figure_ref_map)
+
         body = _inline_png_code_snippets(
             body,
             root=root,
@@ -2137,6 +2302,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if enable_citation_links:
             body = _linkify_citations(body, ref_keys=ref_keys)
 
+        if mode == "publish":
+            body = _replace_latex_refs_in_html(body, section_ref_map=section_ref_map, figure_ref_map=figure_ref_map)
+
         body = _inline_png_code_snippets(
             body,
             root=root,
@@ -2171,6 +2339,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         if enable_citation_links:
             body = _linkify_citations(body, ref_keys=ref_keys)
+
+        if mode == "publish":
+            body = _replace_latex_refs_in_html(body, section_ref_map=section_ref_map, figure_ref_map=figure_ref_map)
 
         body = _inline_png_code_snippets(
             body,
@@ -2247,6 +2418,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if enable_citation_links:
             body = _linkify_citations(body, ref_keys=ref_keys)
 
+        if mode == "publish":
+            body = _replace_latex_refs_in_html(body, section_ref_map=section_ref_map, figure_ref_map=figure_ref_map)
+
         body = _inline_png_code_snippets(
             body,
             root=root,
@@ -2298,6 +2472,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         # 条件分岐: 前段条件が不成立で、`profile == "part4_verification"` を追加評価する。
         elif profile == "part4_verification":
             out_name = "pmodel_paper_part4_verification.html"
+        elif profile == "part5_future_predictions":
+            out_name = "pmodel_paper_part5_future_predictions.html"
         else:  # pragma: no cover (guarded by argparse choices)
             raise ValueError(f"unknown profile: {profile}")
 
@@ -2317,6 +2493,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         title = "P-model Part III（量子物理編）"
         subtitle = "応用検証：量子物理（公開体裁）"
         header_badge = "Part III"
+    elif profile == "part5_future_predictions":
+        title = "P-model Part V（未来予測編）"
+        subtitle = "差分予測と将来観測の決着条件（公開体裁）"
+        header_badge = "Part V"
     else:
         title = "P-model Part I（コア理論）"
         subtitle = "記号規約・最小仮定・写像（公開体裁）"

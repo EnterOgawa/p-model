@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-27T02:42:20.794175+00:00",
+  "generated_utc": "2026-03-12T01:15:48.012792+00:00",
   "measurements": [
     {
       "label": "Recoil (Rb; Bloch+AI)",
@@ -30,7 +30,8 @@
     "epsilon_units": "dimensionless (fractional scaling in recoil-based h/m)"
   },
   "outputs": {
-    "png": "C:\\develop\\waveP\\output\\public\\quantum\\de_broglie_precision_alpha_consistency.png"
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\de_broglie_precision_alpha_consistency.png",
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\de_broglie_precision_alpha_consistency.pdf"
   },
   "notes": [
     "This treats the electron g-2 based alpha as a reference and maps the discrepancy into an effective recoil epsilon via alpha ∝ sqrt(h/m).",

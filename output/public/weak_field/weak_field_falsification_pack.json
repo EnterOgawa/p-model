@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-13T06:32:12.131051+00:00",
+  "generated_utc": "2026-03-04T08:18:08.375319+00:00",
   "domain": "weak_field",
   "version": 1,
   "intent": "Promote weak-field verification outputs into tracked public artifacts and provide an integrated falsification pack.",
@@ -15,8 +15,8 @@
     },
     "llr_public_pack": {
       "path": "output/public/llr/llr_falsification_pack.json",
-      "sha256": "233525ae3d3722df48dee4571a60fc83b9f57d30489a83385a6bbc295b57965e",
-      "bytes": 6706
+      "sha256": "7c5933861bef3e8e8a8c0fbc0d83f42c061d9cd806754cc3c7ffa5b2cfabccbd",
+      "bytes": 17349
     },
     "public_summaries": {
       "weak_field_test_matrix_json": {
@@ -331,13 +331,13 @@
         },
         "delta_saturation_constraints.json": {
           "path": "output/public/theory/delta_saturation_constraints.json",
-          "sha256": "61bd20c6c9acf5bef8ff5ce3b19d8bb0fab1b7c9ecb244c0da7f442788d7fd44",
-          "bytes": 2819
+          "sha256": "71c90b052282ae1d019f96abdf47a98961773fb3d60e2b5baa24893bcc112d6b",
+          "bytes": 2803
         },
         "delta_saturation_constraints.png": {
           "path": "output/public/theory/delta_saturation_constraints.png",
-          "sha256": "b0828667c48d5b668a1b19a15299db99a26c038621bfbf1b9e8a0c0154293351",
-          "bytes": 171677
+          "sha256": "0c34207f01081a92d2a240ac71e8c00656960ac52819278373352a5e07c1ad7d",
+          "bytes": 221666
         }
       },
       "cassini": {
@@ -390,8 +390,8 @@
         },
         "viking_p_model_vs_measured_no_arrow.png": {
           "path": "output/public/viking/viking_p_model_vs_measured_no_arrow.png",
-          "sha256": "3589dc90a6763ebaa684bcf7a5f98bdea0d936261e6d33f8070de2652c855fc3",
-          "bytes": 175023
+          "sha256": "636c6dac691f07a8756fd14e7ea6bffecf438b15a0b011068dafd66cefc50d03",
+          "bytes": 182840
         }
       },
       "mercury": {

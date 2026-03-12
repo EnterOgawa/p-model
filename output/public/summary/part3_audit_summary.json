@@ -1,444 +1,13 @@
 {
-  "generated_utc": "2026-02-20T12:39:04.984493+00:00",
+  "generated_utc": "2026-03-04T15:34:43.868868+00:00",
   "phase": 7,
   "step": "7.20.7",
   "script": "scripts/summary/part3_audit.py",
-  "regenerated": true,
-  "commands": [
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\bell_primary_products.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 60.98278546333313,
-      "stdout_tail": "[run] weihs1998_longdist_longdist1\n[run] delft (2015/2016)\n[run] nist_03_43_afterfixingModeLocking_s3600\n[run] kwiat2013_prl111_130406_05082013_15\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\bell\\table1_row.json\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\bell\\falsification_pack.json\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\bell\\selection_loophole_quantification.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\nuclear_binding_energy_frequency_mapping_falsification_pack.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.7337238788604736,
-      "stdout_tail": "[ok] wrote:\n  C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_energy_frequency_mapping_falsification_pack.png\n  C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_energy_frequency_mapping_falsification_table.csv\n  C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_energy_frequency_mapping_falsification_pack.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\nuclear_binding_energy_frequency_mapping_minimal_additional_physics.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.7037429809570312,
-      "stdout_tail": "[ok] wrote:\n  C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_energy_frequency_mapping_minimal_additional_physics.png\n  C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_energy_frequency_mapping_minimal_additional_physics.csv\n  C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_energy_frequency_mapping_minimal_additional_physics_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\nuclear_binding_energy_frequency_mapping_theory_diff.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 1.0469732284545898,
-      "stdout_tail": "[ok] wrote:\n  C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_energy_frequency_mapping_theory_diff.png\n  C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_energy_frequency_mapping_theory_diff.csv\n  C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_energy_frequency_mapping_theory_diff_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\nuclear_holdout_audit.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.7204427719116211,
-      "stdout_tail": "[ok] wrote:\n- C:\\develop\\waveP\\output\\public\\quantum\\nuclear_holdout_audit_summary.json\n- C:\\develop\\waveP\\output\\public\\quantum\\nuclear_holdout_audit_groups.csv\n- C:\\develop\\waveP\\output\\public\\quantum\\nuclear_holdout_audit_outliers.csv\n- C:\\develop\\waveP\\output\\public\\quantum\\nuclear_holdout_audit.png\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\nuclear_condensed_cross_check_matrix.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.8350627422332764,
-      "stdout_tail": "[ok] wrote: output/public/quantum/nuclear_condensed_cross_check_matrix.json\n[ok] wrote: output/public/quantum/nuclear_condensed_cross_check_matrix.csv\n[ok] wrote: output/public/quantum/nuclear_condensed_cross_check_matrix.png\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\condensed_silicon_thermal_expansion_gruneisen_holdout_splits.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 4.188596725463867,
-      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_holdout_splits_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_model.py",
-        "--groups",
-        "4",
-        "--enforce-signs",
-        "--use-bulk-modulus",
-        "--mode-softening",
-        "kim2015_fig2_features",
-        "--gamma-omega-model",
-        "pwlinear_split_leaky",
-        "--gamma-omega-pwlinear-leak",
-        "0.24",
-        "--gamma-omega-pwlinear-warp-power",
-        "1.32",
-        "--ridge-factor",
-        "1e-06"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 2.2293944358825684,
-      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_gamma_omega_pwlinear_split_leaky_mode_softening_kim2015_fig2_bulkmodulus_ridge1e-06_leak2p40e-01_warp1p32_model.csv\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_gamma_omega_pwlinear_split_leaky_mode_softening_kim2015_fig2_bulkmodulus_ridge1e-06_leak2p40e-01_warp1p32_model.png\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_gamma_omega_pwlinear_split_leaky_mode_softening_kim2015_fig2_bulkmodulus_ridge1e-06_leak2p40e-01_warp1p32_model_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\condensed_silicon_heat_capacity_holdout_splits.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.7661099433898926,
-      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_heat_capacity_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_heat_capacity_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_heat_capacity_holdout_splits_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\condensed_silicon_bulk_modulus_holdout_splits.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.5823745727539062,
-      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_bulk_modulus_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_bulk_modulus_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_bulk_modulus_holdout_splits_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\condensed_ofhc_copper_thermal_conductivity_holdout_splits.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.5837829113006592,
-      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\condensed_ofhc_copper_thermal_conductivity_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\condensed_ofhc_copper_thermal_conductivity_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\condensed_ofhc_copper_thermal_conductivity_holdout_splits_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\thermo_blackbody_momentum_density_holdout_splits.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.5777392387390137,
-      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_momentum_density_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_momentum_density_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_momentum_density_holdout_splits_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\thermo_blackbody_photon_flux_holdout_splits.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.5687777996063232,
-      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_photon_flux_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_photon_flux_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_photon_flux_holdout_splits_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\thermo_blackbody_entropy_flux_holdout_splits.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.5800662040710449,
-      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_entropy_flux_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_entropy_flux_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_entropy_flux_holdout_splits_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\thermo_blackbody_enthalpy_flux_holdout_splits.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.5795266628265381,
-      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_enthalpy_flux_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_enthalpy_flux_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_enthalpy_flux_holdout_splits_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\thermo_blackbody_enthalpy_energy_ratio_holdout_splits.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.5796809196472168,
-      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_enthalpy_energy_ratio_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_enthalpy_energy_ratio_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_enthalpy_energy_ratio_holdout_splits_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\thermo_blackbody_enthalpy_pressure_ratio_holdout_splits.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.5729250907897949,
-      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_enthalpy_pressure_ratio_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_enthalpy_pressure_ratio_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_enthalpy_pressure_ratio_holdout_splits_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\thermo_blackbody_enthalpy_entropy_ratio_holdout_splits.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.5821757316589355,
-      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_enthalpy_entropy_ratio_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_enthalpy_entropy_ratio_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_enthalpy_entropy_ratio_holdout_splits_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\thermo_blackbody_helmholtz_free_energy_density_holdout_splits.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.579613208770752,
-      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_helmholtz_free_energy_density_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_helmholtz_free_energy_density_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_helmholtz_free_energy_density_holdout_splits_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\thermo_blackbody_helmholtz_entropy_ratio_holdout_splits.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.5711708068847656,
-      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_helmholtz_entropy_ratio_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_helmholtz_entropy_ratio_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_helmholtz_entropy_ratio_holdout_splits_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\thermo_blackbody_helmholtz_energy_ratio_holdout_splits.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.5695362091064453,
-      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_helmholtz_energy_ratio_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_helmholtz_energy_ratio_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_helmholtz_energy_ratio_holdout_splits_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\thermo_blackbody_helmholtz_enthalpy_ratio_holdout_splits.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.5847647190093994,
-      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_helmholtz_enthalpy_ratio_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_helmholtz_enthalpy_ratio_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_helmholtz_enthalpy_ratio_holdout_splits_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\thermo_blackbody_helmholtz_pressure_ratio_holdout_splits.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.5966899394989014,
-      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_helmholtz_pressure_ratio_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_helmholtz_pressure_ratio_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_helmholtz_pressure_ratio_holdout_splits_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\thermo_blackbody_pressure_entropy_ratio_holdout_splits.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.5743319988250732,
-      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_pressure_entropy_ratio_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_pressure_entropy_ratio_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_pressure_entropy_ratio_holdout_splits_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\thermo_blackbody_pressure_flux_ratio_holdout_splits.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.5689761638641357,
-      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_pressure_flux_ratio_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_pressure_flux_ratio_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_pressure_flux_ratio_holdout_splits_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\thermo_blackbody_momentum_flux_ratio_holdout_splits.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.5861811637878418,
-      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_momentum_flux_ratio_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_momentum_flux_ratio_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_momentum_flux_ratio_holdout_splits_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\thermo_blackbody_helmholtz_free_energy_flux_holdout_splits.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.5706405639648438,
-      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_helmholtz_free_energy_flux_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_helmholtz_free_energy_flux_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_helmholtz_free_energy_flux_holdout_splits_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\thermo_blackbody_entropy_per_photon_holdout_splits.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.5995140075683594,
-      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_entropy_per_photon_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_entropy_per_photon_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_entropy_per_photon_holdout_splits_metrics.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\condensed_holdout_audit.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 8.41240406036377,
-      "stdout_tail": "[ok] wrote:\n- C:\\develop\\waveP\\output\\public\\quantum\\condensed_holdout_audit_summary.json\n- C:\\develop\\waveP\\output\\public\\quantum\\condensed_holdout_audit.csv\n- C:\\develop\\waveP\\output\\public\\quantum\\condensed_holdout_audit.png\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\condensed_falsification_pack.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.11738038063049316,
-      "stdout_tail": "[ok] wrote: output/public/quantum/condensed_falsification_pack.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\quantum\\frozen_parameters_quantum.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.09823966026306152,
-      "stdout_tail": "[ok] wrote: output/public/quantum/frozen_parameters_quantum.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "C:\\develop\\waveP\\scripts\\summary\\part3_completion_inventory.py"
-      ],
-      "cwd": "C:\\develop\\waveP",
-      "ok": true,
-      "returncode": 0,
-      "seconds": 0.06905198097229004,
-      "stdout_tail": "[ok] wrote: output/public/summary/part3_completion_inventory.json\n[ok] wrote: output/public/summary/part3_completion_inventory.md\n",
-      "stderr_tail": ""
-    }
-  ],
+  "regenerated": false,
+  "commands": [],
   "gates": {
     "bell": {
-      "ok": true,
+      "ok": false,
       "inputs": {
         "falsification_pack_json": {
           "path": "output/public/quantum/bell/falsification_pack.json",
@@ -459,7 +28,7 @@
       },
       "pack": {
         "version": "1.4",
-        "generated_utc": "2026-02-20T12:38:33.711601+00:00",
+        "generated_utc": "2026-03-04T15:30:40.520234+00:00",
         "thresholds": {
           "selection_origin_ratio_min": 1.0,
           "delay_signature_z_min": 3.0,
@@ -510,7 +79,7 @@
           "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
           "selection_knob": "window_ns",
           "statistic": "CH_J",
-          "ratio_sys_stat": 654.1026883136847,
+          "ratio_sys_stat": 187.4790336851017,
           "ratio_ge_threshold": true,
           "delay_z": 43.90965148631052,
           "delay_z_ge_threshold": true
@@ -526,9 +95,9 @@
         }
       ],
       "pairing_crosscheck_gate": {
-        "ok": true,
+        "ok": false,
         "supported_n": 3,
-        "max_delta_over_sigma_boot": 0.08612854215724108,
+        "max_delta_over_sigma_boot": 129.42291337930078,
         "threshold": 1.0,
         "details": [
           {
@@ -537,7 +106,7 @@
           },
           {
             "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
-            "delta_over_sigma_boot": 0.020516605714527774
+            "delta_over_sigma_boot": 129.42291337930078
           },
           {
             "dataset_id": "kwiat2013_prl111_130406_05082013_15",
@@ -646,7 +215,7 @@
       "notes": []
     },
     "condensed_and_thermal": {
-      "ok": true,
+      "ok": false,
       "inputs": {
         "condensed_falsification_pack_json": {
           "path": "output/public/quantum/condensed_falsification_pack.json",
@@ -661,7 +230,7 @@
         "present": true,
         "summary_json": "output/public/quantum/condensed_holdout_audit_summary.json",
         "summary_exists": true,
-        "summary_sha256_ok": true,
+        "summary_sha256_ok": false,
         "summary_matches_expected": true,
         "step": "7.20.6"
       },
@@ -672,7 +241,7 @@
             "path": "output/public/quantum/condensed_silicon_lattice_baseline_metrics.json",
             "exists": true
           },
-          "metrics_sha256_ok": true,
+          "metrics_sha256_ok": false,
           "gate_ok": true,
           "gate_reason": "targets_by_code",
           "targets": [
@@ -696,7 +265,7 @@
             "path": "output/public/quantum/condensed_silicon_heat_capacity_baseline_metrics.json",
             "exists": true
           },
-          "metrics_sha256_ok": true,
+          "metrics_sha256_ok": false,
           "gate_ok": true,
           "gate_reason": "targets_by_cp_keypoints",
           "targets": [
@@ -750,7 +319,7 @@
             "path": "output/public/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json",
             "exists": true
           },
-          "metrics_sha256_ok": true,
+          "metrics_sha256_ok": false,
           "gate_ok": true,
           "gate_reason": "baseline_freeze_fit_target_self",
           "targets": [
@@ -769,7 +338,7 @@
             "path": "output/public/quantum/condensed_silicon_resistivity_temperature_coefficient_baseline_metrics.json",
             "exists": true
           },
-          "metrics_sha256_ok": true,
+          "metrics_sha256_ok": false,
           "gate_ok": true,
           "gate_reason": "necessary_conditions",
           "targets": [
@@ -786,7 +355,7 @@
             "path": "output/public/quantum/condensed_silicon_thermal_expansion_baseline_metrics.json",
             "exists": true
           },
-          "metrics_sha256_ok": true,
+          "metrics_sha256_ok": false,
           "gate_ok": true,
           "gate_reason": "targets_by_alpha_samples",
           "targets": [
@@ -846,7 +415,7 @@
             "path": "output/public/quantum/condensed_ofhc_copper_thermal_conductivity_baseline_metrics.json",
             "exists": true
           },
-          "metrics_sha256_ok": true,
+          "metrics_sha256_ok": false,
           "gate_ok": true,
           "gate_reason": "targets_by_rrr_selected_T",
           "targets": [
@@ -1103,7 +672,7 @@
             "path": "output/public/quantum/thermo_blackbody_entropy_baseline_metrics.json",
             "exists": true
           },
-          "metrics_sha256_ok": true,
+          "metrics_sha256_ok": false,
           "gate_ok": true,
           "gate_reason": "baseline_note_only",
           "targets": []
@@ -1114,7 +683,7 @@
             "path": "output/public/quantum/thermo_blackbody_radiation_baseline_metrics.json",
             "exists": true
           },
-          "metrics_sha256_ok": true,
+          "metrics_sha256_ok": false,
           "gate_ok": true,
           "gate_reason": "baseline_note_only",
           "targets": []
@@ -1126,10 +695,12 @@
         "tests_unknown": 0,
         "tests_failed": 0
       },
-      "notes": []
+      "notes": [
+        "holdout_audit summary sha256 mismatch"
+      ]
     },
     "completion_inventory": {
-      "ok": true,
+      "ok": false,
       "inputs": {
         "inventory_json": {
           "path": "output/public/summary/part3_completion_inventory.json",
@@ -1137,11 +708,11 @@
         }
       },
       "summary": {
-        "sections_scanned": 28,
-        "missing_sections": 0
+        "sections_scanned": 7,
+        "missing_sections": 3
       },
       "notes": []
     }
   },
-  "ok": true
+  "ok": false
 }

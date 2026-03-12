@@ -1,0 +1,2 @@
+candidate_session,drop_scenario,allsky_relative_improvement,stable_delta_chi2_dof,timeband_delta_chi2_dof,stage1_pass,stage2_pass,status_regression,overall_pass,selected_scenario,selected_policy,selected_allsky_summary_csv,selected_threshold_ns
+20MAY04XA,drop_20MAY04XA,7.0311479933840015e-01,1.3023871977234478e+00,1.3023871977234478e+00,true,false,true,false,keep_all,keep_all,C:\develop\waveP\output\vlbi\vlbi_allsky_beta_consistency_summary_keep_all.csv,1.0000000000000000e+01

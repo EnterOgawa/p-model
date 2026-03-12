@@ -6,6 +6,10 @@ import math
 from pathlib import Path
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
@@ -232,27 +236,29 @@ def main() -> None:
     b_sig = [float(r["sigma_B_pred_from_r_alpha_MeV"]) for r in rows]
     d_b = [float(r["Delta_B_pred_minus_obs_MeV"]) for r in rows]
 
-    fig = plt.figure(figsize=(10.8, 4.2), dpi=160)
-    gs = fig.add_gridspec(1, 2, wspace=0.28)
+    fig = plt.figure(figsize=(10.8, 9.8), dpi=170)
+    gs = fig.add_gridspec(2, 1, hspace=0.30)
 
     ax0 = fig.add_subplot(gs[0, 0])
     ax0.errorbar(x, b_preds, yerr=b_sig, fmt="o", color="tab:blue", capsize=4, lw=1.2)
     ax0.axhline(b_alpha_obs, color="0.15", lw=1.2, ls="-", label="B_obs (alpha; CODATA via NIST)")
     ax0.set_xticks(x)
     ax0.set_xticklabels(labels)
-    ax0.set_ylabel("B (MeV)")
-    ax0.set_title("He-4 binding: multi-body reduction candidates")
+    ax0.set_ylabel("B (MeV)", fontsize=13)
+    ax0.set_title("He-4 binding: multi-body reduction candidates", fontsize=14)
     ax0.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax0.legend(loc="lower right", fontsize=9)
+    ax0.tick_params(axis="both", labelsize=11.5)
+    ax0.legend(loc="upper left", fontsize=11)
 
-    ax1 = fig.add_subplot(gs[0, 1])
+    ax1 = fig.add_subplot(gs[1, 0])
     ax1.bar(x, d_b, color=["tab:orange" if r["method"] == baseline_method else "tab:blue" for r in rows], alpha=0.85)
     ax1.axhline(0.0, color="0.15", lw=1.2, ls="-")
     ax1.set_xticks(x)
     ax1.set_xticklabels(labels)
-    ax1.set_ylabel("ΔB = B_pred − B_obs (MeV)")
-    ax1.set_title("Residuals vs observation")
+    ax1.set_ylabel("ΔB = B_pred − B_obs (MeV)", fontsize=13)
+    ax1.set_title("Residuals vs observation", fontsize=14)
     ax1.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
+    ax1.tick_params(axis="both", labelsize=11.5)
 
     ax1.text(
         0.02,
@@ -265,12 +271,12 @@ def main() -> None:
         transform=ax1.transAxes,
         ha="left",
         va="top",
-        fontsize=9,
+        fontsize=11,
         bbox={"facecolor": "white", "alpha": 0.85, "edgecolor": "0.8"},
     )
 
-    fig.suptitle("Phase 7 / Step 7.13.17.5: He-4 numeric extension (multi-body reduction I/F)", y=1.02)
-    fig.subplots_adjust(left=0.08, right=0.98, top=0.86, bottom=0.22, wspace=0.28)
+    fig.suptitle("He-4 numeric extension (multi-body reduction I/F)", y=0.995, fontsize=15)
+    fig.subplots_adjust(left=0.10, right=0.98, top=0.94, bottom=0.10, hspace=0.35)
 
     out_png = out_dir / "nuclear_binding_energy_frequency_mapping_alpha_verification.png"
     fig.savefig(out_png, bbox_inches="tight")
@@ -337,4 +343,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

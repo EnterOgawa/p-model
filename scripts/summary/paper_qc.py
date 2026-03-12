@@ -126,6 +126,7 @@ def _check_part3_lint_strict() -> _Check:
 
 _MD_PROSE_LATEX_ESCAPE_RE = re.compile(r"\\\\|\\[A-Za-z]+")
 _MD_INLINE_MATH_RE = re.compile(r"(?<!\\)\$[^$\n]*(?<!\\)\$")
+_MD_ALLOWED_PROSE_LATEX_MACRO_RE = re.compile(r"\\(?:ref|eqref)\{[^{}]+\}")
 
 
 # 関数: `_check_markdown_prose_no_latex_escapes` の入出力契約と処理意図を定義する。
@@ -168,7 +169,8 @@ def _check_markdown_prose_no_latex_escapes(*, paper_dir: Path) -> _Check:
                 if not seg_in_math:
                     seg_no_code = re.sub(r"`[^`]*`", "", seg)
                     seg_no_inline_math = _MD_INLINE_MATH_RE.sub("", seg_no_code)
-                    m = _MD_PROSE_LATEX_ESCAPE_RE.search(seg_no_inline_math)
+                    seg_no_allowed_macro = _MD_ALLOWED_PROSE_LATEX_MACRO_RE.sub("", seg_no_inline_math)
+                    m = _MD_PROSE_LATEX_ESCAPE_RE.search(seg_no_allowed_macro)
                     # 条件分岐: `m` を満たす経路を評価する。
                     if m:
                         hits.append(
@@ -353,7 +355,7 @@ def _check_markdown_section_references(*, paper_dir: Path) -> _Check:
 # 関数: `_extract_figure_numbers_from_html` の入出力契約と処理意図を定義する。
 
 def _extract_figure_numbers_from_html(text: str) -> set[int]:
-    caps = re.findall(r"<figcaption><strong>図(\d+):", text)
+    caps = re.findall(r"<figcaption><strong>図(\d+):?</strong>", text)
     out: set[int] = set()
     for x in caps:
         try:
@@ -416,6 +418,7 @@ def _check_no_double_backslash(text: str) -> _Check:
     # `output\\private\\summary\\...` do not trigger false positives.
     scrubbed = re.sub(r"<pre[^>]*>.*?</pre>", "", text, flags=re.DOTALL)
     scrubbed = re.sub(r"<code[^>]*>.*?</code>", "", scrubbed, flags=re.DOTALL)
+    scrubbed = re.sub(r"\bdata-latex=(\"[^\"]*\"|'[^']*')", "", scrubbed)
 
     idx = scrubbed.find("\\\\")
     ok = idx < 0
@@ -497,7 +500,7 @@ def _check_figure_numbering(text: str, *, allow_sparse: bool = False) -> _Check:
     id_nums = [int(x) for x in ids]
 
     # caption: <strong>図1:</strong>
-    caps = re.findall(r"<figcaption><strong>図(\d+):", text)
+    caps = re.findall(r"<figcaption><strong>図(\d+):?</strong>", text)
     cap_nums = [int(x) for x in caps]
 
     details: Dict[str, Any] = {

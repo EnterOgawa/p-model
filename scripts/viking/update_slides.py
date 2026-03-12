@@ -49,6 +49,7 @@ INPUT_PPTX = ROOT / "doc" / "slides" / '時間波密度Pで捉える「重力・
 OUTPUT_PPTX = OUT_DIR / 'P_model_Verification_Full.pptx'
 INPUT_CSV = OUT_DIR / 'viking_shapiro_result.csv'
 IMG_FILENAME = OUT_DIR / 'viking_p_model_vs_measured_no_arrow.png'
+PDF_FILENAME = OUT_DIR / 'viking_p_model_vs_measured_no_arrow.pdf'
 
 # 関数: `create_viking_plot` の入出力契約と処理意図を定義する。
 def create_viking_plot():
@@ -62,9 +63,9 @@ def create_viking_plot():
     df['time_utc'] = pd.to_datetime(df['time_utc'])
 
     _set_japanese_font()
-    fig, ax = plt.subplots(figsize=(12.8, 7.2), dpi=200)
+    fig, ax = plt.subplots(figsize=(13.6, 8.2), dpi=200)
     # P-model理論値（青線）
-    ax.plot(df['time_utc'], df['shapiro_delay_us'], label='P-model シミュレーション', color='blue', linewidth=2)
+    ax.plot(df['time_utc'], df['shapiro_delay_us'], label='P-model シミュレーション', color='blue', linewidth=2.4)
     
     # 実測値（赤点）
     measured_peak_date = pd.Timestamp('1976-11-25')
@@ -73,16 +74,17 @@ def create_viking_plot():
         [measured_peak_date],
         [measured_peak_value],
         color='red',
-        s=100,
+        s=132,
         label='文献代表値（約250マイクロ秒）',
         zorder=5,
     )
 
-    ax.set_title('バイキング 太陽合（1976）: P-model シミュレーション vs 文献代表値', fontsize=14)
-    ax.set_xlabel('日付', fontsize=12)
-    ax.set_ylabel('往復遅延時間 [マイクロ秒]', fontsize=12)
+    ax.set_title('バイキング 太陽合（1976）: P-model シミュレーション vs 文献代表値', fontsize=18.8)
+    ax.set_xlabel('日付', fontsize=15.6)
+    ax.set_ylabel('往復遅延時間 [マイクロ秒]', fontsize=15.6)
     ax.grid(True, linestyle='--', linewidth=0.5, alpha=0.6)
-    ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1.0), borderaxespad=0.0, fontsize=11)
+    ax.tick_params(axis='both', labelsize=14.4)
+    ax.legend(loc="upper right", fontsize=14.0, frameon=True)
     
     # 日付フォーマット
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
@@ -90,8 +92,10 @@ def create_viking_plot():
     
     fig.tight_layout()
     fig.savefig(IMG_FILENAME, dpi=220, bbox_inches="tight")
+    fig.savefig(PDF_FILENAME, bbox_inches="tight")
     plt.close(fig)
     print(f"Graph generated: {IMG_FILENAME}")
+    print(f"Graph generated: {PDF_FILENAME}")
     return IMG_FILENAME
 
 # 関数: `add_slide_safe` の入出力契約と処理意図を定義する。
@@ -223,6 +227,7 @@ def main():
                 "argv": sys.argv,
                 "outputs": {
                     "viking_png": IMG_FILENAME if IMG_FILENAME.exists() else None,
+                    "viking_pdf": PDF_FILENAME if PDF_FILENAME.exists() else None,
                     "verification_pptx": OUTPUT_PPTX if OUTPUT_PPTX.exists() else None,
                 },
             }

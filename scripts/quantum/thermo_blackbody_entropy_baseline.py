@@ -11,6 +11,10 @@ from typing import Any, Dict, List
 import matplotlib.pyplot as plt
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
@@ -140,29 +144,31 @@ def main() -> None:
     s_curve = [s_coeff * (t**3) for t in xs]
     ratio_curve = [s_over_n_kb for _ in xs]
 
-    fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.2))
+    fig, axes = plt.subplots(2, 1, figsize=(10.8, 9.8))
 
     ax = axes[0]
     ax.plot(xs, s_curve, color="#1f77b4")
     ax.scatter([r["T_K"] for r in rows], [r["entropy_density_J_per_m3K"] for r in rows], color="#000000", s=18)
     ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.set_xlabel("Temperature T (K)")
-    ax.set_ylabel("Entropy density s (J/(m^3·K))")
-    ax.set_title("Blackbody radiation: s(T) = (4/3) a T^3")
+    ax.set_xlabel("Temperature T (K)", fontsize=13)
+    ax.set_ylabel("Entropy density s (J/(m^3·K))", fontsize=13)
+    ax.set_title("Blackbody radiation: s(T) = (4/3) a T^3", fontsize=14)
     ax.grid(True, which="both", alpha=0.25)
+    ax.tick_params(axis="both", labelsize=11.5)
 
     ax = axes[1]
     ax.plot(xs, ratio_curve, color="#d62728")
     ax.scatter([r["T_K"] for r in rows], [r["entropy_per_photon_kB"] for r in rows], color="#000000", s=18)
     ax.set_xscale("log")
-    ax.set_xlabel("Temperature T (K)")
-    ax.set_ylabel("Entropy per photon s/(n k_B)")
-    ax.set_title("Photon gas: s/(n k_B) = const.")
+    ax.set_xlabel("Temperature T (K)", fontsize=13)
+    ax.set_ylabel("Entropy per photon s/(n k_B)", fontsize=13)
+    ax.set_title("Photon gas: s/(n k_B) = const.", fontsize=14)
     ax.grid(True, which="both", alpha=0.25)
+    ax.tick_params(axis="both", labelsize=11.5)
 
-    fig.suptitle("Thermo baseline: blackbody entropy and second-law consistency (SI constants)", y=1.02)
-    fig.tight_layout()
+    fig.suptitle("Thermo baseline: blackbody entropy and second-law consistency (SI constants)", y=0.995, fontsize=15)
+    fig.tight_layout(rect=(0, 0, 1, 0.985))
     out_png = out_dir / "thermo_blackbody_entropy_baseline.png"
     fig.savefig(out_png, dpi=180, bbox_inches="tight")
     plt.close(fig)
@@ -209,4 +215,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

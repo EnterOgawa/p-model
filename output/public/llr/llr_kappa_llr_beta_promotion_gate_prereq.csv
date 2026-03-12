@@ -1,0 +1,6 @@
+prereq_id,label,status,metric,note
+step1_injection_recovery,Step1 injection/recovery,pass,"{'n_valid': 5, 'intercept': 0.0, 'slope': 1.0, 'intercept_sigma': 0.0013324267237545854, 'slope_sigma': 0.0012612792100391023, 'z_slope_minus_1': 0.0, 'z_intercept': 0.0, 'status': 'pass'}",slope/intercept consistency of synthetic recovery
+step2_cluster_robust,Step2 cluster robust,pass,overall=pass,cluster-robust station/target/policy consistency
+step3_hardware_period,Step3 hardware-period,pass,overall=pass,station_target_hardware_period and pre/post boundary continuity
+step4_homogeneous_subset,Step4 homogeneous subset,pass,overall=pass,subset internal consistency and stability vs reference
+step5_crd_flag_unit_test,Step5 CRD flag test,pass,overall=pass,range/system-delay/COM/refraction + CRD-MeritII inversion

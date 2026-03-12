@@ -47,29 +47,29 @@
         "sha256": "79d78dbe4ce7788dbbf236411af63dc3722a9e3b0b671608ae50f718c02d94e2"
       },
       "llr_operational_metrics_audit.csv": {
-        "bytes": 1176,
+        "bytes": 1174,
         "path": "output/public/llr/llr_operational_metrics_audit.csv",
-        "sha256": "1177a0af8acd3fc6e04e32a178307fef87176153bc4721356286a2e91cc49f79"
+        "sha256": "429f7405164a21e9a7da9228af6ef1c6baa65ce7d70293e9c41c3877407d463a"
       },
       "llr_operational_metrics_audit.json": {
-        "bytes": 9451,
+        "bytes": 9433,
         "path": "output/public/llr/llr_operational_metrics_audit.json",
-        "sha256": "ebea91d9e9a175382fc9d7f73c0a8effa059f2093ae53fa477b10677fb990682"
+        "sha256": "840f72e189c4dd061146f84f6a8d6333608487c8ba8863cbdf5fd243bb8179bd"
       },
       "llr_operational_metrics_audit.png": {
-        "bytes": 92086,
+        "bytes": 173481,
         "path": "output/public/llr/llr_operational_metrics_audit.png",
-        "sha256": "bedb51f3b1048179c2e34cbfb772ef29b6a1ae3260173f451a374973c0e5a01f"
+        "sha256": "5321afc333b361a0f7dbff74423d23baef59b1c4349186910eb45b7247813314"
       },
       "llr_operational_metrics_by_station.csv": {
-        "bytes": 1105,
+        "bytes": 1103,
         "path": "output/public/llr/llr_operational_metrics_by_station.csv",
-        "sha256": "058b9a7c9c7a72f4656fbd55f38f26401bbdec4d11f39a50d64ea8fc3202b5a6"
+        "sha256": "8a3c2bb48bc385113a294a904cf0580fbcb85183062297dcbaa4864cd2c85e32"
       },
       "llr_operational_metrics_by_target.csv": {
-        "bytes": 1327,
+        "bytes": 1313,
         "path": "output/public/llr/llr_operational_metrics_by_target.csv",
-        "sha256": "2ee33952ccae22cdb6921194513d6733f5b96d982cdc9d864268b0ea2377b742"
+        "sha256": "648a3ab03590406bc2e94c2ca7b2cf7fa6de8ee4bcdda949ba90be62b50e464e"
       },
       "llr_outliers_diagnosis_summary.json": {
         "bytes": 1320,
@@ -99,7 +99,7 @@
       "llr_precision_reaudit.json": {
         "bytes": 83063,
         "path": "output/public/llr/llr_precision_reaudit.json",
-        "sha256": "5973b35984bd8771a5c0cce043cce19fecc9bb6ad4de64af7e155c0c174fcad2"
+        "sha256": "3f2c2691f954da79d511e9995aaf5e5d2521e8b9a7966cb8ade484309b442750"
       },
       "llr_precision_reaudit.png": {
         "bytes": 123153,
@@ -190,7 +190,7 @@
       "threshold": 0.0,
       "title": "nglr1混在が weighted RMS を人工的に下げていないこと",
       "unit": "ns (all - exclude_nglr1)",
-      "value": 0.00017050215435343574
+      "value": 0.00034792233201041967
     },
     {
       "gate": false,
@@ -282,7 +282,7 @@
     "time_tag_mode_diff_status": "pass"
   },
   "domain": "llr",
-  "generated_utc": "2026-02-19T08:57:46.214518+00:00",
+  "generated_utc": "2026-03-04T08:09:39.478890+00:00",
   "inputs": {
     "apol_pos_eop_feasibility": {
       "apol_code_present_in_cache": false,
@@ -300,7 +300,7 @@
     },
     "batch_summary": {
       "beta": 1.0,
-      "generated_utc": "2026-02-19T01:03:37.070997+00:00",
+      "generated_utc": "2026-03-04T05:24:35.731112+00:00",
       "n_files": 4637,
       "n_points_total": 13146,
       "outlier_gate": {
@@ -327,7 +327,7 @@
     },
     "operational_metrics_audit": {
       "exclude_target": "nglr1",
-      "generated_utc": "2026-02-17T05:05:31.272355+00:00",
+      "generated_utc": "2026-03-04T07:39:20.415297+00:00",
       "modern_start_year": 2023
     },
     "outliers_diagnosis_summary": {
@@ -368,7 +368,7 @@
     },
     "precision_reaudit": {
       "decision": "recheck_required",
-      "generated_utc": "2026-02-19T08:57:31.348810+00:00",
+      "generated_utc": "2026-03-04T07:39:53.667885+00:00",
       "overall_status": "watch"
     },
     "time_tag_best_by_station": {
@@ -407,11 +407,11 @@
       "modern_start_year": 2023
     },
     "operational_metrics_ns": {
-      "all_weighted_rms": 2.218502683606913,
-      "exclude_nglr1_weighted_rms": 2.2183321814525594,
+      "all_weighted_rms": 2.218683501526308,
+      "exclude_nglr1_weighted_rms": 2.2183355791942976,
       "modern_apol_ex_nglr1_model_floor": 5.0623741009006995,
       "modern_apol_ex_nglr1_weighted_rms": 4.999386409856197,
-      "nglr1_mixing_delta_all_minus_excluded": 0.00017050215435343574
+      "nglr1_mixing_delta_all_minus_excluded": 0.00034792233201041967
     },
     "point_weighted_rms_ns": {
       "station_reflector": 8.98237486216411,

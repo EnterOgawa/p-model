@@ -939,7 +939,7 @@ def _plot(path: Path, *, observations: Sequence[CollisionObs], rows_baryon: Sequ
     z_lens_b = np.asarray([abs(float(by_cluster_b[obs.cluster_id]["z_delta_x_p_lens"])) for obs in observations], dtype=float)
     z_lens_p = np.asarray([abs(float(by_cluster_p[obs.cluster_id]["z_delta_x_p_lens"])) for obs in observations], dtype=float)
 
-    fig, axes = plt.subplots(2, 1, figsize=(11.5, 7.6), constrained_layout=True)
+    fig, axes = plt.subplots(2, 1, figsize=(12.6, 8.8), constrained_layout=True)
     ax0, ax1 = axes
 
     ax0.errorbar(obs_vals, y, xerr=obs_err, fmt="o", color="black", capsize=4, label="observed lens-gas offset")
@@ -947,10 +947,11 @@ def _plot(path: Path, *, observations: Sequence[CollisionObs], rows_baryon: Sequ
     ax0.scatter(pred_p, y - 0.08, marker="o", color="#ff7f0e", label=f"P-model: Δx_P-gas (α={alpha_p:.3f})")
     ax0.set_yticks(y)
     ax0.set_yticklabels(labels)
-    ax0.set_xlabel("offset along collision axis [kpc]")
-    ax0.set_title("Bullet-cluster offset audit: observed lens-gas vs model Δx_P-gas")
+    ax0.set_xlabel("offset along collision axis [kpc]", fontsize=13.0)
+    ax0.set_title("Bullet-cluster offset audit: observed lens-gas vs model Δx_P-gas", fontsize=14.2)
     ax0.grid(alpha=0.25)
-    ax0.legend(loc="best")
+    ax0.legend(loc="best", fontsize=11.2)
+    ax0.tick_params(labelsize=11.2)
 
     bar_w = 0.35
     ax1.bar(y - bar_w / 2.0, z_lens_b, width=bar_w, color="#1f77b4", label="baryon-only: |z(Δx_P-lens)|")
@@ -958,10 +959,11 @@ def _plot(path: Path, *, observations: Sequence[CollisionObs], rows_baryon: Sequ
     ax1.axhline(3.0, color="k", linestyle="--", linewidth=1.2, label="hard gate |z|=3")
     ax1.set_yticks(y)
     ax1.set_yticklabels(labels)
-    ax1.set_xlabel("|z|")
-    ax1.set_title("Lens-anchor residual gate")
+    ax1.set_xlabel("|z|", fontsize=13.0)
+    ax1.set_title("Lens-anchor residual gate", fontsize=14.2)
     ax1.grid(alpha=0.25)
-    ax1.legend(loc="best")
+    ax1.legend(loc="best", fontsize=11.2)
+    ax1.tick_params(labelsize=11.2)
 
     fig.savefig(path, dpi=150)
     plt.close(fig)

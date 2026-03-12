@@ -1,0 +1,981 @@
+{
+  "generated_utc": "2026-03-12T09:03:04.172697+00:00",
+  "rows": [
+    {
+      "id": "llr",
+      "label": "LLR（月レーザー測距）",
+      "status": "ok",
+      "status_label": "OK",
+      "score": 0.6633325060038965,
+      "score_raw": 0.6633325060038965,
+      "score_kind": "llr_rms_m",
+      "metric": "残差RMS（典型）≈0.663 m",
+      "detail": "EDC CRD Normal Point（station×reflector, SR+Tropo+Tide+Ocean）",
+      "sources": [
+        "C:/develop/waveP/output/private/llr/batch/llr_batch_summary.json"
+      ]
+    },
+    {
+      "id": "beta_cross_channel",
+      "label": "β cross-channel（VLBI+LLR+MESSENGER）",
+      "status": "ok",
+      "status_label": "OK",
+      "score": 0.7020245295253377,
+      "score_raw": 0.7020245295253377,
+      "score_kind": "abs_z",
+      "metric": "VLBI=reject / LLR=pass / MESSENGER=pass / cross=reject / beta_terminal=pass / |z(beta_vlbi-beta_llr)|=13.392 / beta_comb=1.000674+/-0.000960561 / |z(beta_comb-1)|=0.702 / messenger_replay_z=1.957 / bias(vlbi/llr)=reject/pass / bias(messenger)=pass / active_policy=policy_D_exclude_plus_messenger_fusion / policy_B_hold=watch / policy_D_promotion=pass,ready=true / recommended_policy=policy_D_exclude_plus_messenger_fusion / switch_decision=switch_to_policy_D_now(required=true,allowed=true) / switch_branch=promote_path_ready / watch_statement_id=watch_resolved_policy_alignment_completed",
+      "detail": "VLBI終端（8.7.46.29）+ LLR（8.7.47）+ MESSENGER（8.7.48）を統合し、β導出終端ゲートで判定。 active_policy=policy_D_exclude_plus_messenger_fusion (D: exclude + LLR+MESSENGER) / reason=policy_switch_decision=switch_to_policy_D_now -> auto-promoted to policy_D / policy_B_hold=watch / policy_D_promotion=pass / recommended_policy=policy_D_exclude_plus_messenger_fusion / recommended_reason=policy_D_promotion_ready=true -> allow llr+messenger fusion promotion / switch_decision=switch_to_policy_D_now / switch_branch=promote_path_ready / switch_branch_text=if policy_D_promotion_ready=true and blockers are cleared, switch to policy_D_exclude_plus_messenger_fusion now. / watch_statement=beta_terminal=watch; policy alignment to governance recommendation is completed.",
+      "sources": [
+        "C:/develop/waveP/output/public/summary/beta_cross_channel_registry.json",
+        "output/public/vlbi/vlbi_high_sensitivity_threshold_sweep_metrics.json",
+        "output/public/vlbi/vlbi_beta_stable_source_refit_metrics.json",
+        "output/public/vlbi/vlbi_beta_timeband_stratified_refit_metrics.json",
+        "output/public/vlbi/vlbi_beta_watchpack_apply_chain_metrics.json",
+        "output/public/vlbi/vlbi_beta_cross_consistency_subset_refit_metrics.json",
+        "output/public/llr/llr_kappa_llr_metrics.json",
+        "output/public/llr/llr_kappa_llr_beta_promotion_gate_metrics.json",
+        "output/public/mercury/messenger_beta_stage_j_final_gate_metrics.json",
+        "output/public/mercury/messenger_beta_stage_i_nuisance_sensitivity_metrics.json",
+        "output/public/mercury/messenger_beta_stage_h_segmentation_metrics.json",
+        "output/public/mercury/messenger_beta_stage_e_tnf_replay_metrics.json",
+        "output/public/mercury/messenger_beta_stage_e_replay_sweep_metrics.json",
+        "output/public/mercury/messenger_beta_stage_d_joint_metrics.json"
+      ]
+    },
+    {
+      "id": "cassini",
+      "label": "Cassini（太陽会合）",
+      "status": "ok",
+      "status_label": "OK",
+      "score": 0.7383841257042583,
+      "score_raw": 0.7383841257042583,
+      "score_kind": "cassini_corr",
+      "metric": "corr=0.963, RMSE=7.07e-11",
+      "detail": "ドップラー y(t) の形状一致（±10日窓）",
+      "sources": [
+        "C:/develop/waveP/output/private/cassini/cassini_fig2_metrics.csv"
+      ]
+    },
+    {
+      "id": "solar_deflection",
+      "label": "光偏向（太陽）",
+      "status": "info",
+      "status_label": "参考",
+      "score": 0.7346153846164396,
+      "score_raw": 0.7346153846164396,
+      "score_kind": "abs_z",
+      "metric": "|z|=0.735（公表 γ* 比較）",
+      "detail": "公表γ*=0.99983±0.00026 vs 予測γ=1.000021。Reference行：主判定は `cassini`（形状整合）と `scalar_limit_reject`（hard gate）を正とする。",
+      "sources": [
+        "C:/develop/waveP/output/private/theory/solar_light_deflection_metrics.json",
+        "C:/develop/waveP/output/private/theory/frozen_parameters.json"
+      ]
+    },
+    {
+      "id": "viking",
+      "label": "Viking（太陽会合）",
+      "status": "ok",
+      "status_label": "OK",
+      "score": 0.5,
+      "score_raw": 0.5,
+      "score_kind": "viking_lit_range",
+      "metric": "Shapiroピーク≈247.96 μs",
+      "detail": "往復Shapiro遅延（最大値の目安）",
+      "sources": [
+        "C:/develop/waveP/output/private/viking/viking_shapiro_result.csv"
+      ]
+    },
+    {
+      "id": "mercury",
+      "label": "Mercury（近日点移動）",
+      "status": "ok",
+      "status_label": "OK",
+      "score": 0.300436729328906,
+      "score_raw": 0.300436729328906,
+      "score_kind": "mercury_abs_percent",
+      "metric": "差≈0.01291 ″/世紀（0.03%）",
+      "detail": "実Cでの近日点移動（角秒/世紀）",
+      "sources": [
+        "C:/develop/waveP/output/private/mercury/mercury_precession_metrics.json"
+      ]
+    },
+    {
+      "id": "redshift",
+      "label": "GP-A / Galileo（重力赤方偏移）",
+      "status": "info",
+      "status_label": "参考",
+      "score": 0.07661290322580645,
+      "score_raw": 0.07661290322580645,
+      "score_kind": "abs_z",
+      "metric": "最大|z|=0.077（公表 ε* 比較）",
+      "detail": "複数実験の最大|z|（公表偏差 ε* と弱場予測 ε=0 の比較）。Reference行：主判定は `cassini`（形状整合）と `scalar_limit_reject`（hard gate）を正とする。",
+      "sources": [
+        "C:/develop/waveP/output/private/theory/gravitational_redshift_experiments.json"
+      ]
+    },
+    {
+      "id": "binary_pulsar",
+      "label": "連星パルサー（軌道減衰）",
+      "status": "ok",
+      "status_label": "OK",
+      "score": 1.0,
+      "score_raw": 1.0672555785087856,
+      "score_kind": "abs_z",
+      "metric": "最大|z|=1.07（R=1）",
+      "detail": "Pdot_b(obs)/Pdot_b(P-model quad) の一致度。worst=PSR B1913+16（Hulse?Taylor）",
+      "sources": [
+        "C:/develop/waveP/output/private/pulsar/binary_pulsar_orbital_decay_metrics.json"
+      ]
+    },
+    {
+      "id": "gw",
+      "label": "重力波（GW150914 等）",
+      "status": "ok",
+      "status_label": "OK",
+      "score": 1.0,
+      "score_raw": 1.2913454987213342,
+      "score_kind": "gw_median_max_r2",
+      "metric": "median(max R²)=0.813 / >=0.6: 10/10 / min(max R²)=0.618 / match省略=3件",
+      "detail": "chirp位相（f(t)抽出→四重極チャープ則fit）をイベント×検出器で集計（R²）。",
+      "sources": [
+        "C:/develop/waveP/output/private/gw/gw_multi_event_summary_metrics.json"
+      ]
+    },
+    {
+      "id": "gw_area_qnm_imr",
+      "label": "重力波（GW250114）",
+      "status": "ok",
+      "status_label": "OK",
+      "score": 0.5677520460059233,
+      "score_raw": 0.5677520460059233,
+      "score_kind": "hybrid",
+      "metric": "面積定理=4.447σ / first σ≥5 at t_ref=-10M / QNM(220) f=247.135 Hz / τ=0.004522 s / IMR max|z|=0.568 / IMR p=0.744",
+      "detail": "GW250114で面積定理の有意度とringdown QNM、IMR整合を同時監査。",
+      "sources": [
+        "C:/develop/waveP/output/private/gw/gw250114_area_theorem_test.json",
+        "C:/develop/waveP/output/private/gw/gw250114_ringdown_qnm_fit.json",
+        "C:/develop/waveP/output/private/gw/gw250114_imr_consistency.json"
+      ]
+    },
+    {
+      "id": "frame_dragging",
+      "label": "回転（フレームドラッグ）",
+      "status": "info",
+      "status_label": "参考",
+      "score": 0.2777777777777775,
+      "score_raw": 0.2777777777777775,
+      "score_kind": "abs_z",
+      "metric": "最大|z|=0.278（R_drag=1）",
+      "detail": "GP-B / LAGEOS の R_drag=abs(Ω_obs)/abs(Ω_pred)（R_drag=1 が一致; Reference行）。主判定は `scalar_limit_reject`（abs(z)>z_reject でReject）を正とする。",
+      "sources": [
+        "C:/develop/waveP/output/private/theory/frame_dragging_experiments.json"
+      ]
+    },
+    {
+      "id": "xrism",
+      "label": "XRISM（公開一次データ）",
+      "status": "ok",
+      "status_label": "OK",
+      "score": 0.5,
+      "score_raw": 0.5,
+      "score_kind": "adoption_gate",
+      "metric": "BH=adopted / cluster=adopted / detected_obsids(BH/cluster)=4/2 / BH sys/stat=0.22 / cluster sys/stat=1.67",
+      "detail": "BH/AGN と銀河団の双方で sys/stat ゲートを満たすかを監査。",
+      "sources": [
+        "C:/develop/waveP/output/private/xrism/xrism_integration_metrics.json"
+      ]
+    },
+    {
+      "id": "sparc_rotation",
+      "label": "銀河回転曲線（SPARC）",
+      "status": "ok",
+      "status_label": "OK",
+      "score": 0.7096778154661976,
+      "score_raw": 0.7096778154661976,
+      "score_kind": "chi2",
+      "metric": "Δχ²(baryon−P)=3e+05 / χ²/ν比(P/baryon)=0.201 / global χ²/ν=21.345 / median χ²/ν=7.097",
+      "detail": "single-Υ の厳しい拘束下で baryon-only 比の説明力向上を監査。",
+      "sources": [
+        "C:/develop/waveP/output/public/cosmology/sparc_rotation_curve_pmodel_audit_metrics.json"
+      ]
+    },
+    {
+      "id": "cosmo_fsigma8",
+      "label": "宇宙論（構造形成 fσ8）",
+      "status": "ok",
+      "status_label": "OK",
+      "score": 0.30820538075001574,
+      "score_raw": 0.30820538075001574,
+      "score_kind": "abs_z",
+      "metric": "χ²/dof=0.153/2 / χ²/ν=0.076 / max|z|=0.308 / τ_eff=0.0556 Gyr / overall=pass",
+      "detail": "遅延枝の実効摩擦項 Γ_eff で growth 方程式を閉じ、RSD fσ8 を監査。",
+      "sources": [
+        "C:/develop/waveP/output/private/cosmology/cosmology_fsigma8_growth_mapping_metrics.json"
+      ]
+    },
+    {
+      "id": "cosmo_cmb_acoustic",
+      "label": "宇宙論（CMB音響ピーク）",
+      "status": "ok",
+      "status_label": "OK",
+      "score": 0.03381355000002486,
+      "score_raw": 0.03381355000002486,
+      "score_kind": "holdout_peak",
+      "metric": "first3 max|Δℓ|=0.092 / first3 max|ΔA/A|=2.22e-16 / holdout4-6 max|Δℓ|=0.676 / holdout4-6 max|ΔA/A|=0.322 / A3/A1(pred/obs)=0.435/0.435 / DMなし第3ピーク減衰=pass / core=pass / extended=pass",
+      "detail": "第1〜3ピーク逆同定と第4〜6 holdout予言、DMなし第3ピーク減衰を同時監査。",
+      "sources": [
+        "C:/develop/waveP/output/public/cosmology/cosmology_cmb_acoustic_peak_reconstruction_metrics.json"
+      ]
+    },
+    {
+      "id": "cosmo_cmb_phase",
+      "label": "宇宙論（CMB偏極位相）",
+      "status": "ok",
+      "status_label": "OK",
+      "score": 0.5557389963876882,
+      "score_raw": 0.5557389963876882,
+      "score_kind": "phase_delta",
+      "metric": "Δφ_EE=0.567 / Δφ_TE=0.267 / |Δφ_EE−0.5|=0.067 / |Δφ_TE−0.25|=0.017 / hard_gate=pass",
+      "detail": "TT/EE/TEの位相関係（EEはTTから半波長、TEは1/4波長）を hard gate で監査。",
+      "sources": [
+        "C:/develop/waveP/output/private/cosmology/cosmology_cmb_polarization_phase_audit_metrics.json"
+      ]
+    },
+    {
+      "id": "cosmo_pantheon_hubble",
+      "label": "宇宙論（Pantheon+ Hubble図）",
+      "status": "ng",
+      "status_label": "不一致",
+      "score": 2.999994956313685,
+      "score_raw": 2.999994956313685,
+      "score_kind": "delta_aic_baseline_minus_pmodel",
+      "metric": "χ²_total(ΛCDM/P)=725.2465/725.2465 / ΔAIC=-4 / winner=baseline_lcdm",
+      "detail": "Pantheon+ μ(z) と Cosmic Chronometers H(z) の同時fit（H_eff^2 完全式）を ΔAIC で監査。",
+      "sources": [
+        "C:/develop/waveP/output/private/cosmology/cosmology_pantheonplus_cc_direct_fit_metrics.json"
+      ]
+    },
+    {
+      "id": "bbn",
+      "label": "BBN（初期熱史）",
+      "status": "ok",
+      "status_label": "OK",
+      "score": 0.6249446527347764,
+      "score_raw": 0.6249446527347764,
+      "score_kind": "abs_z",
+      "metric": "Yp(pred/obs)=0.2538/0.245±0.003 / |z|=1.25 / overall=pass",
+      "detail": "q_B=1/2 枝を入力とした He-4 存在比 Yp の第一原理監査。",
+      "sources": [
+        "C:/develop/waveP/output/public/quantum/bbn_he4_watch_convergence_audit_metrics.json"
+      ]
+    },
+    {
+      "id": "metric_case_b",
+      "label": "背景計量（caseB: 有効計量）",
+      "status": "ok",
+      "status_label": "OK",
+      "score": 0.5,
+      "score_raw": 0.5,
+      "score_kind": "gate",
+      "metric": "γ gate z=-0.735 / nonlinear_pde_closure=pass / decision=effective_metric_caseB_baseline_fixed",
+      "detail": "背景計量は g_{μν}(P) を正式採用（flat caseAは棄却）。",
+      "sources": [
+        "C:/develop/waveP/output/public/theory/pmodel_vector_metric_choice_audit_caseB_effective.json"
+      ]
+    },
+    {
+      "id": "cosmo_cluster_collision",
+      "label": "宇宙論（銀河団衝突オフセット）",
+      "status": "mixed",
+      "status_label": "要改善",
+      "score": 1.0,
+      "score_raw": 0.7854961556092852,
+      "score_kind": "chi2_dof",
+      "metric": "導出 χ²/ν=3.142 / 導出 max|z|=2.034 / ad_hoc=0 / xi_mode=derived / derivation=watch / 監査 χ²/ν=1.797 / 監査 lens max|z|=1.691 / audit=pass",
+      "detail": "Bullet系で Pμ–Jμ 遅延核からオフセットを導出し、レンズ中心ずれを監査。",
+      "sources": [
+        "C:/develop/waveP/output/public/cosmology/cosmology_cluster_collision_pmu_jmu_separation_derivation.json",
+        "C:/develop/waveP/output/public/cosmology/cosmology_cluster_collision_p_peak_offset_audit.json"
+      ]
+    },
+    {
+      "id": "gw_polarization",
+      "label": "重力波偏光モード（H1/L1/V1）",
+      "status": "mixed",
+      "status_label": "要改善",
+      "score": 2.0,
+      "score_raw": 2.0,
+      "score_kind": "gate",
+      "metric": "scalar_reduction=pass / scalar_exclusion=fail / tensor_consistency=fail / reason=pairwise_scalar_overlap_reduced_by_h1_l1_v1_network_gate_but_not_fully_excluded / overall=watch",
+      "detail": "ベクトル横波のネットワーク監査。縮退低減は確認、完全排除は継続課題。",
+      "sources": [
+        "C:/develop/waveP/output/public/gw/pmodel_vector_gw_polarization_mapping_audit.json"
+      ]
+    },
+    {
+      "id": "strong_field_higher_order",
+      "label": "強場（高次項同時拘束）",
+      "status": "mixed",
+      "status_label": "要改善",
+      "score": 1.7192518672971548,
+      "score_raw": 1.7192518672971548,
+      "score_kind": "delta_aic",
+      "metric": "ΔAIC=1.439 / λ_H=-4.96587e-05±6.62708e-05 / overall=watch",
+      "detail": "EHT+GW+Pulsar+Fe-Kαを単一 λ_H で同時拘束し、AICで採択可否を監査。",
+      "sources": [
+        "C:/develop/waveP/output/public/theory/pmodel_strong_field_higher_order_audit.json"
+      ]
+    },
+    {
+      "id": "eht",
+      "label": "EHT（ブラックホール影）",
+      "status": "mixed",
+      "status_label": "要改善",
+      "score": 1.174484195703969,
+      "score_raw": 1.174484195703969,
+      "score_kind": "abs_z",
+      "metric": "最大|z|=1.174（κ=1仮定）",
+      "detail": "M87*/SgrA* のリング直径 vs シャドウ直径（κ=1近似）。worst=Sgr A*",
+      "sources": [
+        "C:/develop/waveP/output/private/eht/eht_shadow_compare.json"
+      ]
+    },
+    {
+      "id": "cosmo_ddr",
+      "label": "宇宙論（距離二重性）",
+      "status": "mixed",
+      "status_label": "要改善",
+      "score": 2.0,
+      "score_raw": 34.93103448275861,
+      "score_kind": "abs_z",
+      "metric": "|z|=34.93（Pbg静的） / σ_cat込み|z|=7.75（σ_cat=0.128） / z=1でD_L×2.02（Δε=1.013）（Δμ=1.52mag, τ=1.4） / no-BAO最小abs(z)=1.09→0.85（Clusters+SNIa (2012, non-iso)）",
+      "detail": "距離二重性（DDR）は距離推定I/Fに膨張側(1+z)が埋め込まれているかに強く依存する。ここでは公表ε0に対する P-model最小（ε0=-1）との差を“前提監査の診断”として表示する（直ちに物理棄却とは解釈しない）。",
+      "sources": [
+        "C:/develop/waveP/output/private/cosmology/cosmology_distance_duality_constraints_metrics.json"
+      ]
+    },
+    {
+      "id": "metric_case_a",
+      "label": "背景計量（caseA: 平坦背景）",
+      "status": "ng",
+      "status_label": "不一致",
+      "score": 3.0,
+      "score_raw": 3.0,
+      "score_kind": "gate",
+      "metric": "γ gate z=3845.5 / Mercury係数残差=-0.66657 / overall=reject",
+      "detail": "平坦背景 η_{μν} は weak-field 整合で棄却。",
+      "sources": [
+        "C:/develop/waveP/output/public/theory/pmodel_vector_metric_choice_audit_caseA_flat.json"
+      ]
+    },
+    {
+      "id": "scalar_limit_reject",
+      "label": "純スカラー極限（回転なし）",
+      "status": "ng",
+      "status_label": "不一致",
+      "score": 3.0,
+      "score_raw": 3.0,
+      "score_kind": "abs_z",
+      "metric": "GP-B z=5.417 / LAGEOS z=19.8 / overall=reject",
+      "detail": "GP-B/LAGEOS の frame-dragging 観測で純スカラー極限を棄却。",
+      "sources": [
+        "C:/develop/waveP/output/public/theory/frame_dragging_scalar_limit_combined_audit.json"
+      ]
+    },
+    {
+      "id": "delta_saturation",
+      "label": "速度飽和 δ（理論）",
+      "status": "info",
+      "status_label": "参考",
+      "score": 1.5,
+      "score_raw": 1.5,
+      "score_kind": "delta_upper_bound",
+      "metric": "観測上限: δ<1.00e-34",
+      "detail": "既知の高γ観測から『δが大きすぎるとγ_maxが足りない』という上限制約（参考）。",
+      "sources": [
+        "C:/develop/waveP/output/private/theory/delta_saturation_constraints.json"
+      ]
+    },
+    {
+      "id": "gps",
+      "label": "GPS（衛星時計）",
+      "status": "info",
+      "status_label": "参考",
+      "score": 2.0,
+      "score_raw": 2.1151872369346667,
+      "score_kind": "gps_rms_ratio",
+      "metric": "中央値RMS: P/BRDC=1.227（+22.7%）",
+      "detail": "観測（準実測）= IGS Final CLK/SP3（RMSが小さいほど良い）",
+      "sources": [
+        "C:/develop/waveP/output/private/gps/gps_compare_metrics.json"
+      ]
+    }
+  ],
+  "status_counts": {
+    "ok": 15,
+    "mixed": 5,
+    "ng": 3,
+    "info": 5
+  },
+  "status_summary": {
+    "total": 28,
+    "counts": {
+      "ok": 15,
+      "mixed": 5,
+      "ng": 3,
+      "info": 5
+    },
+    "rates": {
+      "ok": 0.5357142857142857,
+      "mixed": 0.17857142857142858,
+      "ng": 0.10714285714285714,
+      "info": 0.17857142857142858
+    },
+    "ok_rate": 0.5357142857142857,
+    "ok_or_mixed_rate": 0.7142857142857143,
+    "weighted_rate_ok_plus_half_mixed": 0.625
+  },
+  "sigma_stats": {
+    "n": 15,
+    "n_within_1sigma": 10,
+    "n_within_2sigma": 12,
+    "rate_within_1sigma": 0.6666666666666666,
+    "rate_within_2sigma": 0.8,
+    "worst": {
+      "topic": "背景計量（caseA）",
+      "observable": "ベクトル拡張の計量選択ゲート",
+      "abs_z": 3845.5,
+      "raw": "γ gate z=3845.5 / Mercury係数残差=-0.66657 / decision=flat_metric_caseA_reject_baseline_fixed / overall=reject"
+    }
+  },
+  "table1_breakdown": [
+    {
+      "topic": "LLR（月レーザー測距）",
+      "observable": "残差RMS（中央値, station×reflector）",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "典型的なズレ: 0.663 m（小さいほど良い）",
+      "metric": "tropo+潮汐+海洋荷重まで含む",
+      "score_kind": "meters",
+      "score_value": 0.663
+    },
+    {
+      "topic": "LLR（月レーザー測距：NGLR-1）",
+      "observable": "残差RMS（中央値, station×NGLR-1）",
+      "status": "ng",
+      "status_label": "不一致",
+      "metric_public": "典型的なズレ: 3.627 m（小さいほど良い）",
+      "metric": "tropo+潮汐+海洋荷重まで含む（stations=APOL）",
+      "score_kind": "meters",
+      "score_value": 3.627
+    },
+    {
+      "topic": "Cassini（太陽会合）",
+      "observable": "ドップラー y(t)（観測 vs P-model）",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "形状の一致度: corr=0.963（1に近いほど一致）",
+      "metric": "RMSE=7.069e-11 / corr=0.963081",
+      "score_kind": "corr",
+      "score_value": 0.963
+    },
+    {
+      "topic": "Viking（太陽会合）",
+      "observable": "往復Shapiro遅延ピーク",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "文献代表レンジ(200–250 μs)内（目安）",
+      "metric": "ピーク時刻=1976-11-25T00:00:00+00:00",
+      "score_kind": "lit_range",
+      "score_value": null
+    },
+    {
+      "topic": "Mercury（近日点移動）",
+      "observable": "近日点移動（角秒/世紀）",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "代表値との差: 0.012913 ″/世紀（0.03%）（小さいほど良い）",
+      "metric": "差=0.012913 ″/世紀",
+      "score_kind": "abs_percent",
+      "score_value": 0.03
+    },
+    {
+      "topic": "GPS（衛星時計）",
+      "observable": "残差RMS（中央値, 衛星ごと）",
+      "status": "ng",
+      "status_label": "不一致",
+      "metric_public": "RMSが小さいほど良い。P-modelはBRDCより22.7%大きい（中央値）",
+      "metric": "P-model優位=6/31",
+      "score_kind": "abs_percent",
+      "score_value": 22.7
+    },
+    {
+      "topic": "光偏向（太陽）",
+      "observable": "公表推定値 γ*（PPN）",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "観測との差: 0.73σ（0に近いほど一致）",
+      "metric": "z=-0.735 / 太陽縁α=1.7510415±0.0002276547 ″",
+      "score_kind": "abs_sigma",
+      "score_value": 0.73
+    },
+    {
+      "topic": "重力赤方偏移",
+      "observable": "公表偏差 ε*（弱場比較）",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "観測との差: 0σ（0に近いほど一致）",
+      "metric": "z=+0.00 / 1980, 10.1103/PhysRevLett.45.2081",
+      "score_kind": "abs_sigma",
+      "score_value": 0.0
+    },
+    {
+      "topic": "重力赤方偏移",
+      "observable": "公表偏差 ε*（弱場比較）",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "観測との差: 0.08σ（0に近いほど一致）",
+      "metric": "z=+0.08 / 2018, 10.1103/PhysRevLett.121.231101",
+      "score_kind": "abs_sigma",
+      "score_value": 0.08
+    },
+    {
+      "topic": "宇宙論（距離二重性）",
+      "observable": "η^(P)(z=1)（D_L/((1+z)D_A)）",
+      "status": "mixed",
+      "status_label": "要改善",
+      "metric_public": "η^(P)(z=1)の差: 25.1σ（距離推定I/F監査を前提） / 公表ε0での差: 34.9σ（σ_cat込み: 7.7σ） / 整合にはz=1でD_L×2.02（Δε=1.013）（Δμ=1.52 mag, τ=1.4） / no-BAO最小abs(z)=1.09→0.85",
+      "metric": "Z_eps(FRW)=-0.448 / Z_eps(Pbg_static)=-34.93 / Z_eps_sys=7.75 / σ_cat=0.128 / p=1.013±0.029 / Z_eta(FRW)=-0.446 / Z_eta(Pbg_static)=-25.1 / Δε_needed=1.013 / no-BAO最小abs(z)=1.09→0.85 / 2021, 10.1051/0004-6361/202039637",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "宇宙論（Tolman表面輝度）",
+      "observable": "指数 n（SB ∝ (1+z)^-n）",
+      "status": "ng",
+      "status_label": "不一致",
+      "metric_public": "背景P（静的, n=2）との差: 3.5σ（大きいほど不一致） / 整合には進化補正が逆符号",
+      "metric": "z(FRW)=8.29 / z(Pbg_static)=-3.47 / evol_needed(Pbg)=-0.59 / 2001, 10.1086/322134",
+      "score_kind": "abs_sigma",
+      "score_value": 3.5
+    },
+    {
+      "topic": "宇宙論（Tolman表面輝度）",
+      "observable": "指数 n（SB ∝ (1+z)^-n）",
+      "status": "ng",
+      "status_label": "不一致",
+      "metric_public": "背景P（静的, n=2）との差: 10.5σ（大きいほど不一致） / 整合には進化補正が逆符号",
+      "metric": "z(FRW)=4.85 / z(Pbg_static)=-10.54 / evol_needed(Pbg)=-1.37 / 2001, 10.1086/322134",
+      "score_kind": "abs_sigma",
+      "score_value": 10.5
+    },
+    {
+      "topic": "宇宙論（独立プローブ）",
+      "observable": "SN time dilation（p_t）",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "観測との差: 0.3σ（0に近いほど一致）",
+      "metric": "z=0.3 / 2008, arXiv:0804.3595",
+      "score_kind": "abs_sigma",
+      "score_value": 0.3
+    },
+    {
+      "topic": "宇宙論（独立プローブ）",
+      "observable": "CMB温度スケーリング（p_T）",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "観測との差: 0.25σ（0に近いほど一致）",
+      "metric": "z=0.25 / 2011, arXiv:1112.1862",
+      "score_kind": "abs_sigma",
+      "score_value": 0.25
+    },
+    {
+      "topic": "JWST/MAST（スペクトル一次データ）",
+      "observable": "x1d→z（線同定；距離指標非依存）",
+      "status": "info",
+      "status_label": "参考",
+      "metric_public": "targets=10 / x1d_qc_ok=9/10 / z_confirmed=9/10 / release_wait=1; next_release=2026-04-09T20:45:23.996448+00:00 / 検証サマリ表=not_adopted_yet",
+      "metric": "targets=10 / x1d_qc_ok=9/10 / z_candidates=9/10 / z_confirmed=9/10 / release_wait=1; next_release=2026-04-09T20:45:23.996448+00:00 / 検証サマリ表=not_adopted_yet / reason=proprietary_release_wait（公開待ちが残るため completeness が将来に依存）",
+      "score_kind": "",
+      "score_value": null
+    },
+    {
+      "topic": "XRISM（BH/AGN）",
+      "observable": "Fe-K吸収線→v/c（SRドップラー）",
+      "status": "info",
+      "status_label": "参考",
+      "metric_public": "detected_obsids=4/4 / |β|_best≈0.092 / sys/stat≈0.22",
+      "metric": "detected_obsids=4/4 / |β|_best≈0.092 / σ_total≈0.004 / sys/stat≈0.22",
+      "score_kind": "",
+      "score_value": null
+    },
+    {
+      "topic": "XRISM（銀河団）",
+      "observable": "Fe-K輝線→z_xray（距離指標非依存）/ σ_v（線幅）",
+      "status": "info",
+      "status_label": "参考",
+      "metric_public": "detected_obsids=2/3 / Δv(opt−X)≈474.5 km/s / sys/stat≈1.67",
+      "metric": "detected_obsids=2/3 / Δv(opt−X)≈474.5 km/s / σ_z_total≈2.62e-03 / sys/stat≈1.67",
+      "score_kind": "",
+      "score_value": null
+    },
+    {
+      "topic": "宇宙論（CMB偏極位相）",
+      "observable": "TT/EE/TE 音響位相差（Δϕ_EE, Δϕ_TE）",
+      "status": "info",
+      "status_label": "参考",
+      "metric_public": "位相ズレ判定: pass（EE=0.067, TE=0.017）",
+      "metric": "Δϕ_EE=0.567 / Δϕ_TE=0.267 / |Δϕ_EE−0.5|=0.067 / |Δϕ_TE−0.25|=0.017 / hard_gate=pass / overall=pass",
+      "score_kind": "",
+      "score_value": null
+    },
+    {
+      "topic": "宇宙論（CMB音響ピーク）",
+      "observable": "TT音響ピーク（1〜3逆同定, 4〜6 holdout）",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "逆同定+holdout整合: first3 max|Δℓ|=0.09, holdout4-6 max|Δℓ|=0.68 / DMなし第3ピーク減衰=成立",
+      "metric": "first3 max|Δℓ|=0.092 / first3 max|ΔA/A|=2.22e-16 / holdout4-6 max|Δℓ|=0.676 / holdout4-6 max|ΔA/A|=0.322 / dm-free第3ピーク減衰=pass / A3/A1(pred/obs)=0.435/0.435 / core=pass / extended=pass",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "宇宙論（構造形成 fσ8）",
+      "observable": "成長率 fσ8（遅延枝の実効摩擦 Γ_eff）",
+      "status": "info",
+      "status_label": "参考",
+      "metric_public": "fσ8整合: χ²/dof=0.153/2（max|z|=0.308）",
+      "metric": "delay: χ²/dof=0.153/2 / χ²/ν=0.076 / max|z|=0.308 / τ_eff=0.0556 Gyr / overall=pass",
+      "score_kind": "",
+      "score_value": null
+    },
+    {
+      "topic": "宇宙論（Pantheon+ Hubble図）",
+      "observable": "Pantheon+ μ(z) + CC H(z) 直接fit（H_eff^2 完全式）",
+      "status": "ng",
+      "status_label": "不一致",
+      "metric_public": "ΔAIC=-4（判定=Reject）",
+      "metric": "χ²_total(ΛCDM/P)=725.2465/725.2465 / AIC(ΛCDM/P)=731.2465/735.2465 / ΔAIC(=AIC_baseline-AIC_P)=-4 / winner=baseline_lcdm",
+      "score_kind": "delta_aic",
+      "score_value": -4.0
+    },
+    {
+      "topic": "宇宙論（銀河団衝突オフセット）",
+      "observable": "レンズ中心−ガス中心オフセット（Bullet系）",
+      "status": "mixed",
+      "status_label": "要改善",
+      "metric_public": "Bullet系オフセット（導出）: χ²/ν=3.142 / max|z|=2.034",
+      "metric": "導出系: χ²/ν=3.142 / 導出系 max|z|=2.034 / オフセット監査: χ²/ν=1.797 / レンズ重心 max|z|=1.691 / ad_hoc=0 / xi_mode=derived / derivation=watch / audit=pass",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "回転（フレームドラッグ）",
+      "observable": "R_drag=abs(Ω_obs)/abs(Ω_pred)",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "観測との差: 0.28σ（1に近いほど一致）",
+      "metric": "z=-0.278 / |Ω|=37.2±7.2 mas/yr（予測 39.2） / 2011, 10.1103/PhysRevLett.106.221101",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "回転（フレームドラッグ）",
+      "observable": "R_drag=abs(Ω_obs)/abs(Ω_pred)",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "観測との差: 0.2σ（1に近いほど一致）",
+      "metric": "z=-0.2 / 2004, 10.1038/nature03007",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "回転（フレームドラッグ）",
+      "observable": "純スカラー極限（回転項なし）棄却ゲート",
+      "status": "ng",
+      "status_label": "不一致",
+      "metric_public": "純スカラー極限は棄却（GP-B/LAGEOS の両方で frame-dragging が reject） / GP-B z=5.42, LAGEOS z=19.8",
+      "metric": "GP-B z_scalar=5.417 / LAGEOS z_scalar=19.8 / frame-dragging reject=2/2 / gate=abs(z)>3 / decision=scalar_limit_rejected_by_frame_dragging / overall=reject",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "重力波（偏光モード）",
+      "observable": "ベクトル横波 vs スカラー縮退（H1/L1/V1）",
+      "status": "mixed",
+      "status_label": "要改善",
+      "metric_public": "3検出器(H1/L1/V1)でスカラー縮退は低減したが完全排除は未達",
+      "metric": "overall=watch / scalar_reduction=pass / scalar_exclusion=fail / tensor_consistency=fail / reason=pairwise_scalar_overlap_reduced_by_h1_l1_v1_network_gate_but_not_fully_excluded",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "背景計量（caseB）",
+      "observable": "ベクトル拡張の計量選択ゲート",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "有効計量 g_{μν}(P) を採用（weak-field + 非線形PDE closure）",
+      "metric": "γ gate z=-0.735 / Mercury係数残差=0.000310147 / nonlinear_pde_closure=pass / decision=effective_metric_caseB_baseline_fixed / overall=pass",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "背景計量（caseA）",
+      "observable": "ベクトル拡張の計量選択ゲート",
+      "status": "ng",
+      "status_label": "不一致",
+      "metric_public": "平坦背景 η_{μν} は weak-field 監査で棄却",
+      "metric": "γ gate z=3845.5 / Mercury係数残差=-0.66657 / decision=flat_metric_caseA_reject_baseline_fixed / overall=reject",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "EHT（ブラックホール影）",
+      "observable": "リング直径（M87*）",
+      "status": "mixed",
+      "status_label": "要改善",
+      "metric_public": "κ=1仮定の差: 0.08σ（0に近いほど一致）",
+      "metric": "z(P, κ=1)=0.083 / κ_fit=1.011±0.139 / 係数差(P/GR)=+4.808%",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "EHT（ブラックホール影）",
+      "observable": "リング直径（Sgr A*）",
+      "status": "mixed",
+      "status_label": "要改善",
+      "metric_public": "κ=1仮定の差: 1.17σ（0に近いほど一致）",
+      "metric": "z(P, κ=1)=-1.174 / κ_fit=0.95±0.042 / 係数差(P/GR)=+4.808%",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "銀河回転曲線（SPARC）",
+      "observable": "V_obs(R) の回転曲線フィット（single-Υ）",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "single-Υで説明力向上: Δχ²=3e+05, P-model χ²/ν=21.34",
+      "metric": "Δχ²(baryon−P)=2.9e+05 / χ²/ν比(P/baryon)=0.201 / χ²/ν: P=21.345, baryon=106.449 / 銀河別中央値 χ²/ν: P=7.097, baryon=43.975 / single-Υ best=0.54",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "連星パルサー（軌道減衰）",
+      "observable": "一致度 R = Pdot_b(obs)/Pdot_b(P-model quad)（R=1が一致）",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "R=1からのずれ: 最大 1.07σ（小さいほど良い） / 余分な放射はシステム依存（概算）",
+      "metric": "追加放射上限（概算, 3σ）: PSR B1913+16(Hulse?Taylor): <0.651%; PSR J0737?3039A/B(Double Pulsar): <0.025%; PSR J1738+0333(NS-WD): <40.643%; PSR J0348+0432(NS-WD): <58.094%",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "重力波（GW150914）",
+      "observable": "chirp位相（f(t)抽出→四重極チャープ則fit）",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "R^2 はchirp則の整合性、matchは波形テンプレートとの近さ（いずれも粗い指標）",
+      "metric": "H1: R^2=0.4727, L1: R^2=0.6184 / H1: match=0.203, L1: match=0.048 / window=-0.2..-0.01 s / wave=-0.08..-0.01 s",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "重力波（GW151226）",
+      "observable": "chirp位相（f(t)抽出→四重極チャープ則fit）",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "R^2 はchirp則の整合性、matchは波形テンプレートとの近さ（いずれも粗い指標） / match窓=70..300 Hz / 短窓などでmatchを省略する場合あり",
+      "metric": "H1: R^2=0.0585, L1: R^2=0.8958 / H1: match=省略（短窓 n=2）, L1: match=0.007 / wave_f=70..300 Hz / window=-0.2..-0.01 s / H1: wave=-0.195..-0.195 s, L1: wave=-0.91..-0.168 s",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "重力波（GW170104）",
+      "observable": "chirp位相（f(t)抽出→四重極チャープ則fit）",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "R^2 はchirp則の整合性、matchは波形テンプレートとの近さ（いずれも粗い指標） / match窓=70..300 Hz",
+      "metric": "H1: R^2=0.9468, L1: R^2=0.4766 / H1: match=0.033, L1: match=0.006 / wave_f=70..300 Hz / window=-0.2..-0.01 s / H1: wave=-0.172..0.011 s, L1: wave=-6.505..-0.093 s",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "重力波（GW170817）",
+      "observable": "chirp位相（f(t)抽出→四重極チャープ則fit）",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "R^2 はchirp則の整合性、matchは波形テンプレートとの近さ（いずれも粗い指標） / match窓=70..300 Hz",
+      "metric": "H1: R^2=0.9946, L1: R^2=0.9855 / H1: match=0.045, L1: match=0.009 / wave_f=70..300 Hz / window=-6..-0.1 s / H1: wave=-5.824..-0.063 s, L1: wave=-6.032..0.194 s",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "重力波（GW190425）",
+      "observable": "chirp位相（f(t)抽出→四重極チャープ則fit）",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "R^2 はchirp則の整合性、matchは波形テンプレートとの近さ（いずれも粗い指標） / match窓=70..300 Hz",
+      "metric": "L1: R^2=0.3567, V1: R^2=0.6276 / L1: match=6.23e-05, V1: match=0.007 / wave_f=70..300 Hz / window=-6..-0.1 s / L1: wave=-5.228..-1.19 s, V1: wave=-6.688..-1.045 s",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "重力波（GW200115_042309）",
+      "observable": "chirp位相（f(t)抽出→四重極チャープ則fit）",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "R^2 はchirp則の整合性、matchは波形テンプレートとの近さ（いずれも粗い指標） / match窓=70..300 Hz",
+      "metric": "H1: R^2=0.573, L1: R^2=0.7391, V1: R^2=0.4794 / H1: match=0.024, L1: match=0.011, V1: match=0.002 / wave_f=70..300 Hz / window=-2..-0.1 s / H1: wave=-2.367..-0.507 s, L1: wave=-8.333..-0.473 s, V1: wave=-2.062..-0.493 s",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "重力波（GW200129_065458）",
+      "observable": "chirp位相（f(t)抽出→四重極チャープ則fit）",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "R^2 はchirp則の整合性、matchは波形テンプレートとの近さ（いずれも粗い指標） / match窓=70..300 Hz / 短窓などでmatchを省略する場合あり",
+      "metric": "H1: R^2=0.0586, L1: R^2=0.3235, V1: R^2=0.8861 / H1: match=省略（短窓 n=1）, L1: match=0.247, V1: match=0.015 / wave_f=70..300 Hz / window=-0.2..-0.01 s / H1: wave=-0.084..-0.084 s, L1: wave=-0.069..-0.026 s, V1: wave=-63.001..-0.289 s",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "重力波（GW200224_222234）",
+      "observable": "chirp位相（f(t)抽出→四重極チャープ則fit）",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "R^2 はchirp則の整合性、matchは波形テンプレートとの近さ（いずれも粗い指標） / match窓=70..300 Hz / 短窓などでmatchを省略する場合あり",
+      "metric": "H1: R^2=0.5597, L1: R^2=-2.22e-16, V1: R^2=0.7216 / H1: match=省略（短窓 n=4）, L1: match=0.163, V1: match=0.024 / wave_f=70..300 Hz / window=-0.1..-0.01 s / H1: wave=-0.011..-0.01 s, L1: wave=-0.077..-0.017 s, V1: wave=-4.789..0.186 s",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "重力波（GW191216_213338）",
+      "observable": "chirp位相（f(t)抽出→四重極チャープ則fit）",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "R^2 はchirp則の整合性、matchは波形テンプレートとの近さ（いずれも粗い指標） / match窓=70..300 Hz",
+      "metric": "H1: R^2=0.9106, V1: R^2=0.5192 / H1: match=0.07, V1: match=0.025 / wave_f=70..300 Hz / window=-0.2..-0.01 s / H1: wave=-0.337..-0.009 s, V1: wave=-5.437..-0.046 s",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "重力波（GW200311_115853）",
+      "observable": "chirp位相（f(t)抽出→四重極チャープ則fit）",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "R^2 はchirp則の整合性、matchは波形テンプレートとの近さ（いずれも粗い指標） / match窓=70..300 Hz",
+      "metric": "H1: R^2=0.044, L1: R^2=0.1159, V1: R^2=0.7076 / H1: match=0.205, L1: match=0.005, V1: match=0.02 / wave_f=70..300 Hz / window=-0.2..-0.01 s / H1: wave=-0.215..-0.123 s, L1: wave=-8.551..0.116 s, V1: wave=-7.938..0.108 s",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "重力波（GW250114: 面積定理/QNM/IMR）",
+      "observable": "面積定理の有意度 + ringdown QNM(220) + IMR整合",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "面積定理有意度=4.45σ / IMR整合 max|z|=0.57 / IMR整合 p=0.744",
+      "metric": "面積定理(合成): 4.447σ / first σ≥5 at t_ref=-10M / QNM(220): f=247.135 Hz / τ=0.004522 s / IMR mass z=0.568 / IMR spin z=0.518 / IMR p=0.744",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "強場（高次項同時拘束）",
+      "observable": "単一 λ_H で EHT+GW+Pulsar+Fe-Kα を同時拘束",
+      "status": "mixed",
+      "status_label": "要改善",
+      "metric_public": "強場高次項の同時拘束: ΔAIC=1.439（watch）",
+      "metric": "ΔAIC(fit−baseline)=1.439 / λ_H=-4.96587e-05±6.62708e-05 / χ²/ν=0.272 / overall=watch",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "BBN（初期熱史）",
+      "observable": "He-4 質量比 Yp（凍結温度導出）",
+      "status": "ok",
+      "status_label": "OK",
+      "metric_public": "Yp整合: pred=0.2538, obs=0.245 / |z|=1.25",
+      "metric": "Yp(pred/obs)=0.2538/0.245±0.003 / |z|_linear=1.25 / |z|_MC=1.247 / q_B=0.5 / overall=pass / criterion=use max(|z_linear|, |z_mc|) after adding model sigma to observed sigma",
+      "score_kind": "policy_override",
+      "score_value": null
+    },
+    {
+      "topic": "速度飽和 δ（理論）",
+      "observable": "γ_max（v→cで発散しない）",
+      "status": "info",
+      "status_label": "参考",
+      "metric_public": "δが小さいほど γ_max が大きくなり、SR（発散）に近い / 観測上限: δ<1.00e-34",
+      "metric": "観測からの上限（最も厳しい例）: δ < 1.00e-34（高エネルギーν（10 PeV, m=0.1 eV仮定））",
+      "score_kind": "policy_override",
+      "score_value": null
+    }
+  ],
+  "table1_status_counts": {
+    "ok": 27,
+    "mixed": 6,
+    "ng": 7,
+    "info": 6
+  },
+  "table1_status_summary": {
+    "total": 46,
+    "counts": {
+      "ok": 27,
+      "mixed": 6,
+      "ng": 7,
+      "info": 6
+    },
+    "rates": {
+      "ok": 0.5869565217391305,
+      "mixed": 0.13043478260869565,
+      "ng": 0.15217391304347827,
+      "info": 0.13043478260869565
+    },
+    "ok_rate": 0.5869565217391305,
+    "ok_or_mixed_rate": 0.7173913043478262,
+    "weighted_rate_ok_plus_half_mixed": 0.6521739130434783
+  },
+  "policy": {
+    "sigma_thresholds": {
+      "ok_max": 1.0,
+      "mixed_max": 2.0
+    },
+    "llr_rms_m_thresholds": {
+      "ok_max": 1.0,
+      "mixed_max": 2.0
+    },
+    "cassini_corr_thresholds": {
+      "ok_min": 0.95,
+      "mixed_min": 0.9
+    },
+    "mercury_rel_percent_thresholds": {
+      "ok_max": 0.1,
+      "mixed_max": 1.0
+    },
+    "gps_rms_ratio_thresholds": {
+      "ok_max": 1.0,
+      "mixed_max": 1.1
+    },
+    "gw_r2_thresholds": {
+      "ok_min": 0.9,
+      "mixed_min": 0.6
+    },
+    "exceptions": {
+      "cosmo_ddr": "距離二重性（DDR）は『距離指標（SNIa/BAO）の前提（標準光源/標準定規/不透明度）』に強く依存する。ここでは静的背景P“最小モデル（ε0=-1）”の棄却度を示すが、静的無限空間の仮説で進める場合は距離指標の再導出が必須。",
+      "cosmo_tolman": "Tolman表面輝度は銀河進化（系統）が支配的になり得るため、本スコアボードでは『差の符号/スケールの補助情報』として扱う。",
+      "cosmo_bao_catalog": "BAO一次情報（銀河+random→ξℓ）は Phase A（screening）と Phase B（Ross full cov + recon + dist差し替え）で評価軸が異なる。本スコアボードは Phase B を優先し、Phase A は補助として併記する。",
+      "eht": "EHTは κ（リング/シャドウ比）、散乱、Kerrスピン/傾斜などの系統が支配的。ここでの z は κ=1 近似の入口であり、厳密な判定には κ と系統誤差の一次ソース詰めが必要。",
+      "gw": "GWの R^2/match は前処理（bandpass/whiten）や窓取りに依存する。短窓は match を省略し、主に chirp位相や波形の整合（定性的）を確認する。"
+    },
+    "notes": "OK/要改善/不一致 は“目安”。各テーマの厳密な判定は一次ソース・系統誤差・モデル仮定の確認が必要。"
+  },
+  "notes": [
+    "これは『全検証を1枚で俯瞰する』ための要約スコアボード。詳細は検証サマリ表と各章の図を参照。",
+    "OK/要改善/不一致 は、zスコア（|z|<=1/2）や相関・RMS等の暫定しきい値に基づく“目安”。",
+    "宇宙論（距離二重性/Tolman）は『静的背景Pの最小モデル』の棄却度（系統・進化が支配的になり得る点に注意）。"
+  ],
+  "outputs": {
+    "scoreboard_png": "C:/develop/waveP/output/public/summary/validation_scoreboard.png",
+    "scoreboard_pdf": "C:/develop/waveP/output/private/summary/validation_scoreboard.pdf",
+    "scoreboard_json": "C:/develop/waveP/output/public/summary/validation_scoreboard.json"
+  }
+}

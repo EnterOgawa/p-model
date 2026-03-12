@@ -1088,15 +1088,24 @@ def _render(
 ) -> None:
     _set_japanese_font()
 
-    nrows = len(results)
-    fig, axes = plt.subplots(nrows=nrows, ncols=2, figsize=(12.4, 3.9 * nrows), dpi=140)
-    axes = np.asarray(axes)
-    # 条件分岐: `axes.ndim == 1` を満たす経路を評価する。
-    if axes.ndim == 1:
-        axes = axes.reshape((1, 2))
+    # 図24: 1列2行（上: f(t), 下: 直線化）へ統一し、検出器は同一軸に重ねて比較する。
+    fig, (ax_f, ax_lin) = plt.subplots(
+        nrows=2,
+        ncols=1,
+        figsize=(16.0, 15.2),
+        dpi=150,
+        gridspec_kw={"hspace": 0.24},
+    )
+    det_colors = {
+        "H1": "#1f77b4",
+        "L1": "#d62728",
+        "V1": "#2ca02c",
+        "K1": "#9467bd",
+    }
 
-    for (ax_f, ax_lin), r in zip(axes, results):
+    for r in results:
         det = str(r.get("detector") or "")
+        color = det_colors.get(det, None)
         t_sel = np.asarray(r.get("t_sel"), dtype=np.float64)
         f_sel = np.asarray(r.get("f_sel"), dtype=np.float64)
 
@@ -1116,39 +1125,37 @@ def _render(
             ax_f.scatter(
                 t_sel[outlier_mask],
                 f_sel[outlier_mask],
-                s=12,
+                s=16,
                 alpha=0.25,
-                color="#888",
+                color=color if color is not None else "#888",
                 label=f"{det}: 除外点",
             )
 
-        ax_f.scatter(t_sel[inlier_mask], f_sel[inlier_mask], s=14, alpha=0.8, label=f"{det}: 抽出 f(t)")
+        ax_f.scatter(
+            t_sel[inlier_mask],
+            f_sel[inlier_mask],
+            s=21,
+            alpha=0.82,
+            color=color,
+            label=f"{det}: 抽出 f(t)",
+        )
 
-        t_line = np.linspace(float(np.min(t_sel)), float(np.max(t_sel)), 600)
-        f_line = _predict_f_from_fit(t_line, tc=tc, A=A)
-        ax_f.plot(t_line, f_line, color="#111", lw=1.8, label="四重極チャープ則（fit）")
+        # 条件分岐: `t_sel.size` を満たす経路を評価する。
+        if t_sel.size:
+            t_line = np.linspace(float(np.min(t_sel)), float(np.max(t_sel)), 600)
+            f_line = _predict_f_from_fit(t_line, tc=tc, A=A)
+            ax_f.plot(t_line, f_line, color=color, lw=2.0, alpha=0.92, label=f"{det}: 四重極チャープ則（fit）")
 
         ax_f.axvline(0.0, color="#666", lw=1.1, ls="--", alpha=0.8)
-        ax_f.set_title(f"{det}: 周波数トラック f(t)", fontsize=11)
-        ax_f.set_ylabel("周波数 f [Hz]")
-        ax_f.set_xlabel(f"時刻 t - t_event [s]（t_event={event_name}のGPS時刻）")
-        ax_f.grid(True, alpha=0.25)
-        ax_f.legend(loc="lower right")
-
-        cm = float(fit.get("chirp_mass_msun", float("nan")))
-        r2 = float(fit.get("r2", float("nan")))
-        r2_f = float(fit.get("r2_f", float("nan")))
-        sigma_t_s = float(fit.get("sigma_t_s", float("nan")))
-        n_in = int(fit.get("n_inliers", float("nan"))) if "n_inliers" in fit else int(np.sum(inlier_mask))
-        n_base = int(fit.get("n_base", float("nan"))) if "n_base" in fit else int(t_sel.size)
-        txt = (
-            f"M_c≈{cm:.2g} M☉,  R²(t)={r2:.4f},  R²(f)={r2_f:.4f}\n"
-            f"採用/候補={n_in}/{n_base},  σ_t≈{sigma_t_s:.3g} s"
-        )
-        ax_f.text(0.02, 0.98, txt, transform=ax_f.transAxes, va="top", ha="left", fontsize=9.6, color="#111")
+        ax_f.set_title("周波数トラック f(t)（検出器重ね描き）", fontsize=24.0)
+        ax_f.set_ylabel("周波数 f [Hz]", fontsize=21.2)
+        ax_f.set_xlabel(f"時刻 t - t_event [s]（t_event={event_name}のGPS時刻）", fontsize=20.0)
+        ax_f.grid(True, alpha=0.25, linestyle="--")
 
         # Right: linearized relation t = tc - A f^{-8/3}
-        x_all = np.power(f_sel, -8.0 / 3.0)
+        x_all = np.full_like(f_sel, np.nan, dtype=np.float64)
+        positive_mask = f_sel > 0
+        x_all[positive_mask] = np.power(f_sel[positive_mask], -8.0 / 3.0)
 
         x_in = x_all[inlier_mask]
         y_in = t_sel[inlier_mask]
@@ -1157,33 +1164,54 @@ def _render(
 
         # 条件分岐: `np.any(outlier_mask)` を満たす経路を評価する。
         if np.any(outlier_mask):
-            ax_lin.scatter(x_out, y_out, s=12, alpha=0.25, color="#888", label="除外点")
+            finite_out = np.isfinite(x_out) & np.isfinite(y_out)
+            if np.any(finite_out):
+                ax_lin.scatter(
+                    x_out[finite_out],
+                    y_out[finite_out],
+                    s=16,
+                    alpha=0.25,
+                    color=color if color is not None else "#888",
+                    label=f"{det}: 除外点",
+                )
 
-        ax_lin.scatter(x_in, y_in, s=14, alpha=0.8, label="採用点")
+        finite_in = np.isfinite(x_in) & np.isfinite(y_in)
+        if np.any(finite_in):
+            ax_lin.scatter(
+                x_in[finite_in],
+                y_in[finite_in],
+                s=21,
+                alpha=0.82,
+                color=color,
+                label=f"{det}: 採用点",
+            )
 
         # 条件分岐: `math.isfinite(A)` を満たす経路を評価する。
-        if math.isfinite(A):
+        if math.isfinite(A) and np.any(finite_in):
             x0 = float(np.min(x_in))
             x1 = float(np.max(x_in))
             x_line = np.linspace(x0, x1, 200)
             y_line = tc - A * x_line
-            ax_lin.plot(x_line, y_line, color="#111", lw=1.8, label="t = t_c − A f^{-8/3}（fit）")
+            ax_lin.plot(x_line, y_line, color=color, lw=2.0, alpha=0.92, label=f"{det}: t = t_c − A f^(-8/3)（fit）")
 
-        ax_lin.set_title(f"{det}: 直線化（t vs f^(-8/3)）", fontsize=11)
-        ax_lin.set_xlabel("f^(-8/3) [Hz^(-8/3)]")
-        ax_lin.set_ylabel("時刻 t - t_event [s]")
-        ax_lin.grid(True, alpha=0.25)
-        ax_lin.legend(loc="upper right")
+    ax_lin.set_title("直線化（t vs f^(-8/3)）", fontsize=24.0)
+    ax_lin.set_xlabel("f^(-8/3) [Hz^(-8/3)]", fontsize=20.0, labelpad=10)
+    ax_lin.set_ylabel("時刻 t - t_event [s]", fontsize=21.2)
+    ax_lin.grid(True, alpha=0.25, linestyle="--")
 
-    fig.suptitle(title, y=0.99)
+    ax_f.tick_params(labelsize=19.0)
+    ax_lin.tick_params(labelsize=19.0)
+    ax_f.legend(loc="upper left", fontsize=19.2, ncol=2)
+    ax_lin.legend(loc="lower right", fontsize=19.2, ncol=2)
+    ax_lin.xaxis.get_offset_text().set_size(19.0)
 
-    # 条件分岐: `note_lines` を満たす経路を評価する。
-    if note_lines:
-        fig.text(0.01, 0.01, "\n".join(note_lines), ha="left", va="bottom", fontsize=9.2, color="#333")
+    fig.suptitle(title, y=0.99, fontsize=21.2)
 
-    fig.tight_layout(rect=[0, 0.04, 1, 0.96])
+    # 図24: 下部注記は図外（本文）へ移し、図中の重なりを回避する。
+    fig.subplots_adjust(left=0.08, right=0.985, top=0.92, bottom=0.09, hspace=0.38)
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, bbox_inches="tight")
+    fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight")
     plt.close(fig)
 
 
@@ -1251,11 +1279,8 @@ def _render_public(
     ax.grid(True, alpha=0.25)
     ax.legend(loc="lower right", fontsize=9.5)
 
-    # 条件分岐: `note_lines` を満たす経路を評価する。
-    if note_lines:
-        fig.text(0.01, 0.01, "\n".join(note_lines), ha="left", va="bottom", fontsize=9.0, color="#333")
-
-    fig.tight_layout(rect=[0, 0.04, 1, 1])
+    # 図下注記は論文本文側へ移し、図中の重なりを回避する。
+    fig.tight_layout(rect=[0, 0.0, 1, 1])
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
@@ -1497,11 +1522,8 @@ def _render_waveform_compare(
 
     fig.suptitle(title, y=0.99)
 
-    # 条件分岐: `note_lines` を満たす経路を評価する。
-    if note_lines:
-        fig.text(0.01, 0.01, "\n".join(note_lines), ha="left", va="bottom", fontsize=9.2, color="#333")
-
-    fig.tight_layout(rect=[0, 0.04, 1, 0.96])
+    # 図下注記は論文本文側へ移し、図中の重なりを回避する。
+    fig.tight_layout(rect=[0, 0.0, 1, 0.96])
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
@@ -1561,11 +1583,8 @@ def _render_waveform_compare_public(
         ax.legend(loc="lower right", fontsize=9.5)
 
     fig.suptitle(title, y=0.99)
-    # 条件分岐: `note_lines` を満たす経路を評価する。
-    if note_lines:
-        fig.text(0.01, 0.01, "\n".join(note_lines), ha="left", va="bottom", fontsize=9.0, color="#333")
-
-    fig.tight_layout(rect=[0, 0.04, 1, 0.96])
+    # 図下注記は論文本文側へ移し、図中の重なりを回避する。
+    fig.tight_layout(rect=[0, 0.0, 1, 0.96])
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)

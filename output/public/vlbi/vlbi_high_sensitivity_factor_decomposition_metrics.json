@@ -1,0 +1,96 @@
+{
+  "generated_utc": "2026-03-07T05:00:59.696530+00:00",
+  "method": {
+    "description": "all-sky drop-one factor decomposition on high-sensitivity sessions",
+    "nuisance_mode": "baseline_intercept_linear",
+    "observable_series": "full",
+    "min_sensitivity_ns": 10.0
+  },
+  "input": {
+    "allsky_summary_csv": "C:\\develop\\waveP\\output\\public\\vlbi\\vlbi_allsky_beta_consistency_summary.csv",
+    "session_root": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb",
+    "n_sessions_selected": 5
+  },
+  "high_sensitivity_consistency": {
+    "n_valid": 5,
+    "beta_weighted_mean": 1.534162162389272,
+    "beta_weighted_sigma": 0.042670838819618494,
+    "chi2": 714.386406411689,
+    "dof": 4.0,
+    "chi2_dof": 178.59660160292225
+  },
+  "summary_rows": [
+    {
+      "session": "17MAY01XA",
+      "max_abs_bendsun_ns": 57.69163335272564,
+      "n_points": 4010,
+      "beta_all": 1.1866902903646863,
+      "beta_all_sigma": 0.06961457006841056,
+      "max_abs_z_source": 1.16089427779013,
+      "max_abs_z_baseline": 0.43525105072880266,
+      "max_abs_z_time_quartile": 0.5948635670634818,
+      "top_source_group": "0235+164",
+      "top_baseline_group": "BADARY-HARTRAO",
+      "top_time_quartile_group": "Q2"
+    },
+    {
+      "session": "18MAY01XA",
+      "max_abs_bendsun_ns": 38.915678326779855,
+      "n_points": 12427,
+      "beta_all": 1.402180917020599,
+      "beta_all_sigma": 0.055657027442395014,
+      "max_abs_z_source": 9.80908237798747,
+      "max_abs_z_baseline": 0.9084742345456417,
+      "max_abs_z_time_quartile": 2.449510355667791,
+      "top_source_group": "0229+131",
+      "top_baseline_group": "BADARY-KUNMING",
+      "top_time_quartile_group": "Q2"
+    },
+    {
+      "session": "22MAY09XA",
+      "max_abs_bendsun_ns": 11.981812554125794,
+      "n_points": 4874,
+      "beta_all": 5.460978325679481,
+      "beta_all_sigma": 0.38943244120781795,
+      "max_abs_z_source": 6.569753014820001,
+      "max_abs_z_baseline": 1.9037148815483298,
+      "max_abs_z_time_quartile": 2.9764251557359707,
+      "top_source_group": "0235+164",
+      "top_baseline_group": "RAEGSMAR-WETTZELL",
+      "top_time_quartile_group": "Q4"
+    },
+    {
+      "session": "20MAY06XA",
+      "max_abs_bendsun_ns": 11.452581368343477,
+      "n_points": 719,
+      "beta_all": 9.23257380132607,
+      "beta_all_sigma": 1.2206749153850662,
+      "max_abs_z_source": 1.1549848114820642,
+      "max_abs_z_baseline": 2.759466952668568,
+      "max_abs_z_time_quartile": 5.447791464975081,
+      "top_source_group": "3C418",
+      "top_baseline_group": "HARTRAO-WETTZELL",
+      "top_time_quartile_group": "Q3"
+    },
+    {
+      "session": "20MAY04XA",
+      "max_abs_bendsun_ns": 10.106397771203248,
+      "n_points": 9994,
+      "beta_all": 8.049708263926952,
+      "beta_all_sigma": 0.2797635712639582,
+      "max_abs_z_source": 3.140050897159135,
+      "max_abs_z_baseline": 1.7999480409579585,
+      "max_abs_z_time_quartile": 2.208269261546761,
+      "top_source_group": "0059+581",
+      "top_baseline_group": "SVETLOE-ZELENCHK",
+      "top_time_quartile_group": "Q2"
+    }
+  ],
+  "outputs": {
+    "summary_csv": "C:\\develop\\waveP\\output\\vlbi\\vlbi_high_sensitivity_factor_decomposition_summary.csv",
+    "components_csv": "C:\\develop\\waveP\\output\\vlbi\\vlbi_high_sensitivity_factor_decomposition_components.csv",
+    "metrics_json": "C:\\develop\\waveP\\output\\vlbi\\vlbi_high_sensitivity_factor_decomposition_metrics.json",
+    "plot_pdf": "C:\\develop\\waveP\\output\\vlbi\\vlbi_high_sensitivity_factor_decomposition.pdf",
+    "plot_png": "C:\\develop\\waveP\\output\\vlbi\\vlbi_high_sensitivity_factor_decomposition.png"
+  }
+}

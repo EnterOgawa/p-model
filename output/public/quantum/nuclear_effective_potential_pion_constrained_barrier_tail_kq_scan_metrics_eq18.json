@@ -1,0 +1,1215 @@
+{
+  "generated_utc": "2026-03-11T10:22:51.549890+00:00",
+  "phase": 7,
+  "step": "7.13.8",
+  "model": {
+    "effective_equation": "Nonrelativistic s-wave Schrödinger equation for relative motion with an effective potential V(r)=μ φ(r)=-μ c^2 u(r).",
+    "ansatz": "λπ-constrained three-range (barrier+tail split; free tail depth) with (k,q)-scan: same geometry as step 7.13.5, but allow both barrier height k and tail depth Vt=q·V3_mean (no mean-preserving constraint), selected jointly by cross-systematics (eq18–eq19 envelope). Singlet restricts V2_s>=0.",
+    "fit_constraints": {
+      "triplet": [
+        "B (CODATA mass defect; solves V1)",
+        "a_t (np low-energy)",
+        "r_t (np low-energy)",
+        "v2t (shape parameter; target)"
+      ],
+      "singlet": [
+        "a_s (np low-energy; fits V1_s,V2_s>=0; barrier+tail split fixed by λπ)",
+        "r_s (np low-energy; fits V1_s,V2_s>=0; barrier+tail split fixed by λπ)"
+      ]
+    },
+    "prediction_targets": {
+      "singlet": [
+        "v2s"
+      ]
+    },
+    "positioning": [
+      "Phenomenological constraint (effective model), not a first-principles derivation of nuclear forces.",
+      "The ansatz class is intentionally low-parameter to avoid 'arbitrary function fit'.",
+      "To limit arbitrariness, constrain geometry by λπ and split the tail into barrier+tail, then select a single global (k,q) (no mean-preserving) by cross-systematics before fitting per dataset."
+    ]
+  },
+  "sources": [
+    {
+      "dataset": "NIST Cuu CODATA constants (mp,mn,md) for deuteron binding baseline",
+      "local_manifest": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_nuclear_baseline\\manifest.json",
+      "local_manifest_sha256": "a4af996c9eba1f2dff6c6a73923182e26754b75ddbf3eb36263359dfb43d2a2a",
+      "local_extracted": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_nuclear_baseline\\extracted_values.json",
+      "local_extracted_sha256": "f66aef6422ce5a6e6d9653545a4decd10910923774b19e876132309631b9e245"
+    },
+    {
+      "dataset": "np scattering low-energy parameters (arXiv:0704.1024v1; eq18–eq19)",
+      "local_manifest": "C:\\develop\\waveP\\data\\quantum\\sources\\np_scattering_low_energy_arxiv_0704_1024v1_manifest.json",
+      "local_manifest_sha256": "eb2aec45ce182215d88ca7ba32c5b8bd62de9ab9820ee66f869b13dc64f6be80",
+      "local_extracted": "C:\\develop\\waveP\\data\\quantum\\sources\\np_scattering_low_energy_arxiv_0704_1024v1_extracted.json",
+      "local_extracted_sha256": "1508cdfe8a94b8322348f6e944fe51f3d3047d3ed620bfbe2f490d4c31aa1709"
+    }
+  ],
+  "constants": {
+    "hbarc_MeV_fm": 197.3269804,
+    "mu_c2_MeV": 469.4591551497099,
+    "B_MeV": 2.22456634198942
+  },
+  "results_by_dataset": [
+    {
+      "label": "eq18 (GWU/SAID)",
+      "eq_label": 18,
+      "inputs": {
+        "B_MeV": 2.22456634198942,
+        "triplet": {
+          "a_t_fm": 5.403,
+          "r_t_fm": 1.7494,
+          "v2t_fm3": 0.163
+        },
+        "singlet": {
+          "a_s_fm": -23.719,
+          "r_s_fm": 2.626,
+          "v2s_fm3": -0.005
+        }
+      },
+      "fit_triplet": {
+        "geometry": {
+          "R1_fm": 1.0603626979905982,
+          "R2_fm": 2.8983247078409686,
+          "Rb_fm": 3.6052331731680343,
+          "R3_fm": 4.3121416384951,
+          "L3_total_fm": 1.4138169306541313,
+          "Lb_fm": 0.7069084653270655,
+          "Lt_fm": 0.7069084653270655,
+          "lambda_pi_pm_fm": 1.413816930654131,
+          "R1_over_lambda_pi_pm": 0.75,
+          "R2_over_lambda_pi_pm": 2.05,
+          "Rb_over_lambda_pi_pm": 2.5500000000000003,
+          "R3_over_lambda_pi_pm": 3.0500000000000003,
+          "pion_constraint": {
+            "lambda_pi_fm": 1.413816930654131,
+            "R1_over_lambda_pi_bounds": [
+              0.25,
+              0.75
+            ],
+            "R2_over_lambda_pi_bounds": [
+              1.0,
+              2.05
+            ]
+          },
+          "tail_constraint": {
+            "tail_len_over_lambda": 1.0,
+            "barrier_len_fraction": 0.5,
+            "barrier_height_factor": 3.0,
+            "tail_depth_factor": 1.1,
+            "tail_mean_factor_definition": "<V>/V(R2) = (λπ/L3) * (1 - exp(-L3/λπ))",
+            "barrier_tail_rule": "Vb = barrier_height_factor*V3_mean, Vt = tail_depth_factor*V3_mean (no mean-preserving constraint)"
+          },
+          "tail_factor": 0.6321205588285577,
+          "barrier_tail_config": {
+            "lambda_pi_fm": 1.413816930654131,
+            "tail_len_over_lambda": 1.0,
+            "L3_total_fm": 1.413816930654131,
+            "barrier_len_fraction": 0.5,
+            "Lb_fm": 0.7069084653270655,
+            "Lt_fm": 0.7069084653270655,
+            "tail_factor": 0.6321205588285577,
+            "barrier_height_factor": 3.0,
+            "tail_depth_factor": 1.1,
+            "tail_depth_factor_mean_preserving": 5.0,
+            "barrier_coeff": 1.896361676485673,
+            "tail_depth_coeff": 0.6953326147114135
+          }
+        },
+        "V1_t_MeV": 97.5454373418475,
+        "V2_t_MeV": 7.568,
+        "V3_t_MeV": 0.0,
+        "V3_mean_t_MeV": 4.783888389214524,
+        "V3_barrier_t_MeV": 14.351665167643572,
+        "V3_tail_t_MeV": 5.262277228135977,
+        "a_t_exact_fm": 4.9151111368714835,
+        "ere": {
+          "a_fm": 4.915111163080851,
+          "r_eff_fm": 1.0420797569091969,
+          "v2_fm3": -0.01246812193471322,
+          "coeffs": {
+            "c0_fm1": -0.2034541980477178,
+            "c2_fm": 0.5210398784545984,
+            "c4_fm3": -0.01246812193471322
+          },
+          "fit_rms_fm1": 9.010171994057629e-10,
+          "points": [
+            {
+              "k_fm1": 0.002,
+              "kcot_fm1": -0.20345211494988671,
+              "delta_rad": -0.00983000634192393
+            },
+            {
+              "k_fm1": 0.004,
+              "kcot_fm1": -0.20344586240498752,
+              "delta_rad": -0.019658717324380022
+            },
+            {
+              "k_fm1": 0.006,
+              "kcot_fm1": -0.2034354415077846,
+              "delta_rad": -0.029484838744580105
+            },
+            {
+              "k_fm1": 0.008,
+              "kcot_fm1": -0.20342085227464707,
+              "delta_rad": -0.03930707871052036
+            },
+            {
+              "k_fm1": 0.01,
+              "kcot_fm1": -0.20340209472834006,
+              "delta_rad": -0.049124148789947523
+            },
+            {
+              "k_fm1": 0.012,
+              "kcot_fm1": -0.20337916889787697,
+              "delta_rad": -0.05893476515164271
+            },
+            {
+              "k_fm1": 0.014,
+              "kcot_fm1": -0.203352074818324,
+              "delta_rad": -0.06873764969651373
+            },
+            {
+              "k_fm1": 0.016,
+              "kcot_fm1": -0.20332081253056566,
+              "delta_rad": -0.07853153117602565
+            },
+            {
+              "k_fm1": 0.018000000000000002,
+              "kcot_fm1": -0.20328538208102584,
+              "delta_rad": -0.08831514629555422
+            },
+            {
+              "k_fm1": 0.02,
+              "kcot_fm1": -0.20324578352134579,
+              "delta_rad": -0.09808724080030772
+            },
+            {
+              "k_fm1": 0.022,
+              "kcot_fm1": -0.20320201690802087,
+              "delta_rad": -0.10784657054153325
+            },
+            {
+              "k_fm1": 0.024,
+              "kcot_fm1": -0.20315408230199483,
+              "delta_rad": -0.11759190252080427
+            },
+            {
+              "k_fm1": 0.026000000000000002,
+              "kcot_fm1": -0.20310197976820998,
+              "delta_rad": -0.1273220159102753
+            },
+            {
+              "k_fm1": 0.028,
+              "kcot_fm1": -0.2030457093751154,
+              "delta_rad": -0.13703570304688453
+            },
+            {
+              "k_fm1": 0.03,
+              "kcot_fm1": -0.20298527119413678,
+              "delta_rad": -0.1467317703985851
+            },
+            {
+              "k_fm1": 0.032,
+              "kcot_fm1": -0.20292066529909797,
+              "delta_rad": -0.15640903950080548
+            },
+            {
+              "k_fm1": 0.034,
+              "kcot_fm1": -0.20285189176560642,
+              "delta_rad": -0.16606634786144
+            },
+            {
+              "k_fm1": 0.036000000000000004,
+              "kcot_fm1": -0.2027789506703938,
+              "delta_rad": -0.1757025498328051
+            },
+            {
+              "k_fm1": 0.038,
+              "kcot_fm1": -0.2027018420906157,
+              "delta_rad": -0.18531651744911226
+            },
+            {
+              "k_fm1": 0.04,
+              "kcot_fm1": -0.20262056610311074,
+              "delta_rad": -0.19490714122814118
+            },
+            {
+              "k_fm1": 0.042,
+              "kcot_fm1": -0.2025351227836195,
+              "delta_rad": -0.204473330935925
+            },
+            {
+              "k_fm1": 0.044,
+              "kcot_fm1": -0.2024455122059586,
+              "delta_rad": -0.2140140163134012
+            },
+            {
+              "k_fm1": 0.046,
+              "kcot_fm1": -0.20235173444115875,
+              "delta_rad": -0.22352814776410132
+            },
+            {
+              "k_fm1": 0.048,
+              "kcot_fm1": -0.20225378955656162,
+              "delta_rad": -0.23301469700210187
+            },
+            {
+              "k_fm1": 0.05,
+              "kcot_fm1": -0.20215167761487315,
+              "delta_rad": -0.24247265765959286
+            },
+            {
+              "k_fm1": 0.052000000000000005,
+              "kcot_fm1": -0.20204539867318053,
+              "delta_rad": -0.25190104585354445
+            },
+            {
+              "k_fm1": 0.054,
+              "kcot_fm1": -0.2019349527819296,
+              "delta_rad": -0.2612989007110955
+            },
+            {
+              "k_fm1": 0.056,
+              "kcot_fm1": -0.2018203399838604,
+              "delta_rad": -0.2706652848534204
+            },
+            {
+              "k_fm1": 0.058,
+              "kcot_fm1": -0.2017015603129052,
+              "delta_rad": -0.27999928483794917
+            },
+            {
+              "k_fm1": 0.06,
+              "kcot_fm1": -0.20157861379304948,
+              "delta_rad": -0.28930001155894763
+            }
+          ]
+        },
+        "fit_score": 20.09521161615291,
+        "fit_deltas": {
+          "da_fm": -0.4878888631285161,
+          "dr_fm": -0.7073202430908032,
+          "dv2_fm3": -0.17546812193471323
+        },
+        "note": "Triplet: λπ-constrained geometry + barrier+tail split beyond R2 (free tail depth); select a single global (k,q) by cross-systematics, then fit per dataset."
+      },
+      "fit_singlet": {
+        "V1_s_MeV": 86.95521235521235,
+        "V2_s_MeV": 0.4461478447305196,
+        "V3_s_MeV": 0.0,
+        "Vb_s_MeV": 0.8460576747936379,
+        "Vt_s_MeV": 0.31022114742433393,
+        "geometry": {},
+        "a_s_exact_fm": -23.7190000023629,
+        "ere": {
+          "a_fm": -23.71899989524587,
+          "r_eff_fm": 1.0838007407780177,
+          "v2_fm3": 0.002583777674659719,
+          "coeffs": {
+            "c0_fm1": 0.04216029362184177,
+            "c2_fm": 0.5419003703890088,
+            "c4_fm3": 0.002583777674659719
+          },
+          "fit_rms_fm1": 1.581523576438519e-10,
+          "points": [
+            {
+              "k_fm1": 0.002,
+              "kcot_fm1": 0.04216246103707483,
+              "delta_rad": 0.0474000303711431
+            },
+            {
+              "k_fm1": 0.004,
+              "kcot_fm1": 0.04216896385430922,
+              "delta_rad": 0.09457352005462479
+            },
+            {
+              "k_fm1": 0.006,
+              "kcot_fm1": 0.04217980188416352,
+              "delta_rad": 0.14130021901194337
+            },
+            {
+              "k_fm1": 0.008,
+              "kcot_fm1": 0.042194975128346204,
+              "delta_rad": 0.18737202810526996
+            },
+            {
+              "k_fm1": 0.01,
+              "kcot_fm1": 0.04221448358927565,
+              "delta_rad": 0.23259805249818066
+            },
+            {
+              "k_fm1": 0.012,
+              "kcot_fm1": 0.0422383272701069,
+              "delta_rad": 0.2768085690204618
+            },
+            {
+              "k_fm1": 0.014,
+              "kcot_fm1": 0.04226650617476336,
+              "delta_rad": 0.31985775064784094
+            },
+            {
+              "k_fm1": 0.016,
+              "kcot_fm1": 0.04229902030798232,
+              "delta_rad": 0.36162511761102517
+            },
+            {
+              "k_fm1": 0.018000000000000002,
+              "kcot_fm1": 0.04233586967535939,
+              "delta_rad": 0.40201579621886985
+            },
+            {
+              "k_fm1": 0.02,
+              "kcot_fm1": 0.04237705428340619,
+              "delta_rad": 0.44095975028292955
+            },
+            {
+              "k_fm1": 0.022,
+              "kcot_fm1": 0.04242257413961741,
+              "delta_rad": 0.47841020040050625
+            },
+            {
+              "k_fm1": 0.024,
+              "kcot_fm1": 0.04247242925253693,
+              "delta_rad": 0.5143414643265898
+            },
+            {
+              "k_fm1": 0.026000000000000002,
+              "kcot_fm1": 0.04252661963184037,
+              "delta_rad": 0.5487464430161065
+            },
+            {
+              "k_fm1": 0.028,
+              "kcot_fm1": 0.042585145288420216,
+              "delta_rad": 0.5816339497493517
+            },
+            {
+              "k_fm1": 0.03,
+              "kcot_fm1": 0.04264800623447732,
+              "delta_rad": 0.6130260423706722
+            },
+            {
+              "k_fm1": 0.032,
+              "kcot_fm1": 0.04271520248362625,
+              "delta_rad": 0.6429554781461139
+            },
+            {
+              "k_fm1": 0.034,
+              "kcot_fm1": 0.04278673405099879,
+              "delta_rad": 0.6714633722309812
+            },
+            {
+              "k_fm1": 0.036000000000000004,
+              "kcot_fm1": 0.042862600953361696,
+              "delta_rad": 0.6985971073795627
+            },
+            {
+              "k_fm1": 0.038,
+              "kcot_fm1": 0.04294280320924292,
+              "delta_rad": 0.7244085157657564
+            },
+            {
+              "k_fm1": 0.04,
+              "kcot_fm1": 0.04302734083905357,
+              "delta_rad": 0.7489523337988144
+            },
+            {
+              "k_fm1": 0.042,
+              "kcot_fm1": 0.043116213865234454,
+              "delta_rad": 0.7722849170079913
+            },
+            {
+              "k_fm1": 0.044,
+              "kcot_fm1": 0.043209422312394545,
+              "delta_rad": 0.7944631934291255
+            },
+            {
+              "k_fm1": 0.046,
+              "kcot_fm1": 0.04330696620746597,
+              "delta_rad": 0.8155438293245845
+            },
+            {
+              "k_fm1": 0.048,
+              "kcot_fm1": 0.04340884557986113,
+              "delta_rad": 0.8355825794345324
+            },
+            {
+              "k_fm1": 0.05,
+              "kcot_fm1": 0.04351506046163994,
+              "delta_rad": 0.8546337943642476
+            },
+            {
+              "k_fm1": 0.052000000000000005,
+              "kcot_fm1": 0.043625610887683464,
+              "delta_rad": 0.8727500594161745
+            },
+            {
+              "k_fm1": 0.054,
+              "kcot_fm1": 0.04374049689587137,
+              "delta_rad": 0.8899819416119461
+            },
+            {
+              "k_fm1": 0.056,
+              "kcot_fm1": 0.04385971852727204,
+              "delta_rad": 0.9063778244135726
+            },
+            {
+              "k_fm1": 0.058,
+              "kcot_fm1": 0.043983275826336696,
+              "delta_rad": 0.9219838124696329
+            },
+            {
+              "k_fm1": 0.06,
+              "kcot_fm1": 0.04411116884109652,
+              "delta_rad": 0.9368436914062095
+            }
+          ]
+        },
+        "fit_mode": "Shared geometry (R1,R2,R3=R2+λπ) + barrier+tail split; fit (V1_s,V2_s>=0) to match (a_s,r_s).",
+        "fit_targets": [
+          "a_s",
+          "r_s"
+        ],
+        "prediction_targets": [
+          "v2s"
+        ],
+        "fit_method": "bracket_best",
+        "fit_scan": {
+          "v1": {},
+          "v2": {
+            "v2_min": 0.0,
+            "v2_max": 86.95521235521235,
+            "n_scan": 900
+          }
+        },
+        "note_fit": "bisection did not converge; using best endpoint (barrier+tail)",
+        "note_profile": "",
+        "note": "Singlet: uses shared (R1,R2) and a fixed barrier+tail split beyond R2; fits (V1_s,V2_s) by (a_s,r_s). v2s is a prediction."
+      },
+      "comparison": {
+        "triplet": {
+          "a_t_fit_minus_obs_fm": -0.4878888631285161,
+          "r_t_fit_minus_obs_fm": -0.7073202430908032,
+          "v2t_fit_minus_obs_fm3": -0.17546812193471323
+        },
+        "singlet": {
+          "a_s_fit_minus_obs_fm": -2.3628992096291768e-09,
+          "r_s_fit_minus_obs_fm": -1.5421992592219822,
+          "v2s_pred_minus_obs_fm3": 0.007583777674659719
+        }
+      }
+    }
+  ],
+  "systematics_proxy": {
+    "observed_envelope_v2t_fm3": {
+      "min": 0.163,
+      "max": 0.163
+    },
+    "observed_envelope_r_s_fm": {
+      "min": 2.626,
+      "max": 2.626
+    },
+    "observed_envelope_v2s_fm3": {
+      "min": -0.005,
+      "max": -0.005
+    },
+    "predicted_r_s_within_envelope": false,
+    "predicted_v2s_within_envelope": false,
+    "notes": [
+      "Eq.(18) and Eq.(19) are two phase-shift analyses in the same primary source; their difference is treated as an analysis-dependent systematics proxy.",
+      "Triplet fit is performed per dataset to expose sensitivity of the inferred u-profile to that proxy.",
+      "In step 7.9.7/7.9.8/7.13.3/7.13.4/7.13.5/7.13.6/7.13.7/7.13.8/7.13.8.1/7.13.8.2/7.13.8.3/7.13.8.4/7.13.8.5, singlet r_s is fitted per dataset; v2s is the remaining differential prediction."
+    ]
+  },
+  "falsification": {
+    "acceptance_criteria": [
+      "Under the λπ-constrained three-range (barrier+tail split; free tail depth) ansatz class with a single global (k,q) selected by cross-systematics, after fitting triplet targets and fitting singlet (a_s,r_s) with V2_s>=0, the predicted singlet v2s should be compatible with the observed range (eq18–eq19).",
+      "If predicted singlet v2s falls outside the analysis-dependent envelope, the ansatz class is rejected as a representation of the nuclear-scale u-profile."
+    ],
+    "within_envelope": {
+      "r_s": false,
+      "v2s": false
+    }
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_effective_potential_pion_constrained_barrier_tail_kq_scan_eq18.png",
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_effective_potential_pion_constrained_barrier_tail_kq_scan_eq18.pdf",
+    "csv": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_effective_potential_pion_constrained_barrier_tail_kq_scan.csv"
+  },
+  "pion_range_scale": {
+    "lambda_pi_pm_fm": 1.413816930654131,
+    "lambda_pi0_fm": 1.461932572116097,
+    "metrics_path": "C:\\develop\\waveP\\output\\public\\quantum\\qcd_hadron_masses_baseline_metrics.json",
+    "metrics_sha256": "e90aa74a74be08bc2ee9a8070980fc3259dfc1ba2637444e8ec9ce3f2d465078",
+    "pdg_source": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\pdg_rpp_2024_mass_width\\mass_width_2024.txt",
+      "edition": "RPP 2024",
+      "url": "https://pdg.lbl.gov/2024/mcdata/mass_width_2024.txt"
+    }
+  },
+  "barrier_tail_kq_scan": {
+    "k_grid": [
+      1.0,
+      1.5,
+      2.0,
+      2.5,
+      3.0
+    ],
+    "q_grid": [
+      0.4,
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9,
+      1.0,
+      1.1,
+      1.2
+    ],
+    "selected": {
+      "k": 3.0,
+      "q": 1.1
+    },
+    "observed_envelope_v2s_fm3": {
+      "min": -0.005,
+      "max": -0.005
+    },
+    "rows": [
+      {
+        "barrier_height_factor": 1.0,
+        "tail_depth_factor": 0.4,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.08124666270616118,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 0.07624666270616118,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 1.0,
+        "tail_depth_factor": 0.5,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.0693243906021286,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": -0.0743243906021286,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 1.0,
+        "tail_depth_factor": 0.6,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.14310539457783578,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": -0.14810539457783578,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 1.0,
+        "tail_depth_factor": 0.7,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.09008199085888284,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 0.08508199085888284,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 1.0,
+        "tail_depth_factor": 0.8,
+        "within_all": false,
+        "max_dist_to_env_fm3": 3.224243403706547,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 3.219243403706547,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 1.0,
+        "tail_depth_factor": 0.9,
+        "within_all": false,
+        "max_dist_to_env_fm3": 3.111613729575029,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 3.106613729575029,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 1.0,
+        "tail_depth_factor": 1.0,
+        "within_all": false,
+        "max_dist_to_env_fm3": 3.1088450602670457,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 3.1038450602670458,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 1.0,
+        "tail_depth_factor": 1.1,
+        "within_all": false,
+        "max_dist_to_env_fm3": 3.178370070998488,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 3.1733700709984882,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 1.0,
+        "tail_depth_factor": 1.2,
+        "within_all": false,
+        "max_dist_to_env_fm3": 3.416776978369073,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 3.411776978369073,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 1.5,
+        "tail_depth_factor": 0.4,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.9551888172122492,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": -0.9601888172122492,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 1.5,
+        "tail_depth_factor": 0.5,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.026096542077875488,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 0.021096542077875487,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 1.5,
+        "tail_depth_factor": 0.6,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.21121183706915378,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": -0.21621183706915378,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 1.5,
+        "tail_depth_factor": 0.7,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.3625024069442525,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": -0.3675024069442525,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 1.5,
+        "tail_depth_factor": 0.8,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.4463621492863071,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": -0.4513621492863071,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 1.5,
+        "tail_depth_factor": 0.9,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.5234827123955651,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": -0.5284827123955651,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 1.5,
+        "tail_depth_factor": 1.0,
+        "within_all": false,
+        "max_dist_to_env_fm3": 3.6429714702826472,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 3.6379714702826473,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 1.5,
+        "tail_depth_factor": 1.1,
+        "within_all": false,
+        "max_dist_to_env_fm3": 3.9245857987368997,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 3.9195857987369,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 1.5,
+        "tail_depth_factor": 1.2,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.18059669410176193,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 0.17559669410176193,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 2.0,
+        "tail_depth_factor": 0.4,
+        "within_all": false,
+        "max_dist_to_env_fm3": 1.2042263388992218,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 1.199226338899222,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 2.0,
+        "tail_depth_factor": 0.5,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.4577399267378459,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": -0.4627399267378459,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 2.0,
+        "tail_depth_factor": 0.6,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.039459275762712305,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 0.03445927576271231,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 2.0,
+        "tail_depth_factor": 0.7,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.021354918524113566,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 0.016354918524113565,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 2.0,
+        "tail_depth_factor": 0.8,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.629478619058426,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": -0.634478619058426,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 2.0,
+        "tail_depth_factor": 0.9,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.7063740618491549,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": -0.7113740618491549,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 2.0,
+        "tail_depth_factor": 1.0,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.7615180781189408,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": -0.7665180781189408,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 2.0,
+        "tail_depth_factor": 1.1,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.7951119725455686,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": -0.8001119725455687,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 2.0,
+        "tail_depth_factor": 1.2,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.038928462315474435,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 0.03392846231547444,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 2.5,
+        "tail_depth_factor": 0.4,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.14313211862345454,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 0.13813211862345454,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 2.5,
+        "tail_depth_factor": 0.5,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.11351757598445263,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 0.10851757598445262,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 2.5,
+        "tail_depth_factor": 0.6,
+        "within_all": false,
+        "max_dist_to_env_fm3": 13.321214154603014,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": -13.326214154603015,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 2.5,
+        "tail_depth_factor": 0.7,
+        "within_all": false,
+        "max_dist_to_env_fm3": 6.161649519005815,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": -6.166649519005815,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 2.5,
+        "tail_depth_factor": 0.8,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.03581959904579937,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 0.030819599045799374,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 2.5,
+        "tail_depth_factor": 0.9,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.015366870144858158,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 0.010366870144858159,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 2.5,
+        "tail_depth_factor": 1.0,
+        "within_all": false,
+        "max_dist_to_env_fm3": 1.1922872083225715,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": -1.1972872083225714,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 2.5,
+        "tail_depth_factor": 1.1,
+        "within_all": false,
+        "max_dist_to_env_fm3": 1.179030541683631,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": -1.184030541683631,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 2.5,
+        "tail_depth_factor": 1.2,
+        "within_all": false,
+        "max_dist_to_env_fm3": 1.1616371107493646,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": -1.1666371107493645,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 3.0,
+        "tail_depth_factor": 0.4,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.5260534425818787,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 0.5210534425818787,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 3.0,
+        "tail_depth_factor": 0.5,
+        "within_all": false,
+        "max_dist_to_env_fm3": 31.205921425738293,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": -31.21092142573829,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 3.0,
+        "tail_depth_factor": 0.6,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.16488549543495715,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 0.15988549543495714,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 3.0,
+        "tail_depth_factor": 0.7,
+        "within_all": false,
+        "max_dist_to_env_fm3": 16.21969690453538,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": -16.224696904535378,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 3.0,
+        "tail_depth_factor": 0.8,
+        "within_all": false,
+        "max_dist_to_env_fm3": 9.289228777949434,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": -9.294228777949435,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 3.0,
+        "tail_depth_factor": 0.9,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.05780027346930408,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 0.05280027346930408,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 3.0,
+        "tail_depth_factor": 1.0,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.031065372202219055,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 0.026065372202219054,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 3.0,
+        "tail_depth_factor": 1.1,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.007583777674659719,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": 0.002583777674659719,
+            "within_envelope": false
+          }
+        ]
+      },
+      {
+        "barrier_height_factor": 3.0,
+        "tail_depth_factor": 1.2,
+        "within_all": false,
+        "max_dist_to_env_fm3": 0.013186501722190557,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "v2s_pred_fm3": -0.018186501722190558,
+            "within_envelope": false
+          }
+        ]
+      }
+    ],
+    "policy": {
+      "tail_len_over_lambda_fixed": 1.0,
+      "barrier_len_fraction_fixed": 0.5,
+      "selection_rule": "Prefer any (k,q) that makes all predicted v2s within envelope; tie-break by minimal max_dist_to_env, then |q-q_mean_preserving(k)|, then |k-1|.",
+      "q_mean_preserving_formula": "q_mp = (L3_total + Lb*k)/Lt = 2 + k (for barrier_len_fraction=0.5)"
+    }
+  }
+}

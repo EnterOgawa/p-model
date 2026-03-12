@@ -1,0 +1,14 @@
+table,field_name,mapping_role,extractability,note
+ODF3C_TABLE,DATA VALIDITY INDICATOR,proxy_only,not_record_level_media_flag,Useful for timing/frequency context but not explicit media-model state.
+ODF3C_TABLE,DOWNLINK BAND ID,proxy_only,not_record_level_media_flag,Useful for timing/frequency context but not explicit media-model state.
+ODF3C_TABLE,EXCITER BAND ID,proxy_only,not_record_level_media_flag,Useful for timing/frequency context but not explicit media-model state.
+ODF3C_TABLE,PRIMARY RECEIVING STATION DOWNLINK DELAY,proxy_only,not_record_level_media_flag,Useful for timing/frequency context but not explicit media-model state.
+ODF3C_TABLE,PRIMARY RECEIVING STATION ID,proxy_only,not_record_level_media_flag,Useful for timing/frequency context but not explicit media-model state.
+ODF3C_TABLE,TIME TAG - FRACTIONAL PART,proxy_only,not_record_level_media_flag,Useful for timing/frequency context but not explicit media-model state.
+ODF3C_TABLE,TIME TAG - INTEGER PART,proxy_only,not_record_level_media_flag,Useful for timing/frequency context but not explicit media-model state.
+ODF3C_TABLE,TRANSMITTING STATION ID,proxy_only,not_record_level_media_flag,Useful for timing/frequency context but not explicit media-model state.
+ODF3C_TABLE,UPLINK BAND ID,proxy_only,not_record_level_media_flag,Useful for timing/frequency context but not explicit media-model state.
+ODF4B25_TABLE,RAMP START FREQUENCY - FRACTIONAL PART,proxy_only,not_record_level_media_flag,Useful for timing/frequency context but not explicit media-model state.
+ODF4B25_TABLE,RAMP START FREQUENCY - GHZ,proxy_only,not_record_level_media_flag,Useful for timing/frequency context but not explicit media-model state.
+ODF4B25_TABLE,RAMP START FREQUENCY - INTEGER PART,proxy_only,not_record_level_media_flag,Useful for timing/frequency context but not explicit media-model state.
+ODF4B25_TABLE,STATION ID,proxy_only,not_record_level_media_flag,Useful for timing/frequency context but not explicit media-model state.

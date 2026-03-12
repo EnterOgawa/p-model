@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-22T05:02:50.496510+00:00",
+  "generated_utc": "2026-03-12T07:07:47.190059+00:00",
   "kind": "cmb_polarization_phase_audit",
   "decision_rule": {
     "phase_hard_gate": "|Δφ_EE-0.5|<=0.12 and |Δφ_TE-0.25|<=0.12 and TE signs alternate",
@@ -49,6 +49,7 @@
   "related_outputs": {
     "metrics_json": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_polarization_phase_audit_metrics.json",
     "figure_png": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_polarization_phase_audit.png",
+    "figure_pdf": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_polarization_phase_audit.pdf",
     "peaks_csv": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_polarization_phase_audit_peaks.csv"
   }
 }

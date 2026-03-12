@@ -1,0 +1,326 @@
+{
+  "generated_utc": "2026-03-07T12:38:41.424904+00:00",
+  "phase_step": "8.7.48.1",
+  "data_root": "data/mercury/messenger",
+  "overall_status": "watch",
+  "stage_a_ready_for_stage_b": true,
+  "ingestion_gate_counts": {
+    "pass": 2,
+    "watch": 10,
+    "reject": 0
+  },
+  "unit_test_counts": {
+    "pass": 5,
+    "watch": 0,
+    "reject": 0
+  },
+  "stage_a_gates": [
+    {
+      "gate_id": "primary_odf",
+      "rel_path": "data-odf",
+      "required_level": "required",
+      "exists": true,
+      "file_count": 82,
+      "status": "pass",
+      "note": "主入口（range + Doppler）"
+    },
+    {
+      "gate_id": "secondary_tnf",
+      "rel_path": "data-tnf",
+      "required_level": "optional",
+      "exists": true,
+      "file_count": 82,
+      "status": "pass",
+      "note": "再走査枝（TNF replay）"
+    },
+    {
+      "gate_id": "calib_ant",
+      "rel_path": "calib/ant",
+      "required_level": "optional",
+      "exists": false,
+      "file_count": 0,
+      "status": "watch",
+      "note": "antenna selection"
+    },
+    {
+      "gate_id": "calib_ion",
+      "rel_path": "calib/ion",
+      "required_level": "optional",
+      "exists": false,
+      "file_count": 0,
+      "status": "watch",
+      "note": "ionosphere calibration"
+    },
+    {
+      "gate_id": "calib_tro",
+      "rel_path": "calib/tro",
+      "required_level": "optional",
+      "exists": false,
+      "file_count": 0,
+      "status": "watch",
+      "note": "troposphere calibration"
+    },
+    {
+      "gate_id": "calib_wea",
+      "rel_path": "calib/wea",
+      "required_level": "optional",
+      "exists": false,
+      "file_count": 0,
+      "status": "watch",
+      "note": "DSN weather"
+    },
+    {
+      "gate_id": "calib_ltf",
+      "rel_path": "calib/ltf",
+      "required_level": "optional",
+      "exists": false,
+      "file_count": 0,
+      "status": "watch",
+      "note": "light-time file"
+    },
+    {
+      "gate_id": "calib_mdm",
+      "rel_path": "calib/mdm",
+      "required_level": "optional",
+      "exists": false,
+      "file_count": 0,
+      "status": "watch",
+      "note": "momentum dump summary"
+    },
+    {
+      "gate_id": "calib_mpd",
+      "rel_path": "calib/mpd",
+      "required_level": "optional",
+      "exists": false,
+      "file_count": 0,
+      "status": "watch",
+      "note": "maneuver performance"
+    },
+    {
+      "gate_id": "calib_sff",
+      "rel_path": "calib/sff",
+      "required_level": "optional",
+      "exists": false,
+      "file_count": 0,
+      "status": "watch",
+      "note": "small forces"
+    },
+    {
+      "gate_id": "external_naif",
+      "rel_path": "external/naif",
+      "required_level": "optional",
+      "exists": false,
+      "file_count": 0,
+      "status": "watch",
+      "note": "SPICE kernels"
+    },
+    {
+      "gate_id": "external_iers",
+      "rel_path": "external/iers",
+      "required_level": "optional",
+      "exists": false,
+      "file_count": 0,
+      "status": "watch",
+      "note": "Earth orientation"
+    }
+  ],
+  "unit_tests": [
+    {
+      "test_id": "time_system_conversion",
+      "status": "pass",
+      "evidence_files": 161,
+      "note": "時刻系変換（UTC/TDB/SCLK）を確認する",
+      "keywords": [
+        "UTC",
+        "TDB",
+        "ET",
+        "SCLK",
+        "TIME SYSTEM",
+        "START_TIME",
+        "STOP_TIME"
+      ],
+      "evidence_sample": [
+        "data/mercury/messenger/data-odf/collection_mess-rs-raw_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11003_005_odf.dat",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11003_005_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11007_008_odf.dat",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11007_008_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11010_013_odf.dat",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11010_013_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11014_014_odf.dat",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11014_014_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11017_017_odf.dat",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11017_017_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11019_020_odf.dat",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11019_020_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11021_023_odf.dat",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11021_023_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11028_031_odf.dat",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11028_031_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11032_032_odf.dat",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11032_032_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11034_035_odf.dat"
+      ]
+    },
+    {
+      "test_id": "dsn_station_metadata",
+      "status": "pass",
+      "evidence_files": 85,
+      "note": "DSN 局メタデータを確認する",
+      "keywords": [
+        "DSS",
+        "DEEP SPACE STATION",
+        "STATION",
+        "COMPLEX",
+        "ANTENNA"
+      ],
+      "evidence_sample": [
+        "data/mercury/messenger/data-odf/collection_mess-rs-raw_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11003_005_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11007_008_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11010_013_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11014_014_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11017_017_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11019_020_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11021_023_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11028_031_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11032_032_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11034_035_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11038_039_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11040_044_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11045_046_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11047_048_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11049_053_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11053_054_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11054_058_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11059_2000_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11061_066_odf.xml"
+      ]
+    },
+    {
+      "test_id": "range_doppler_sign_convention",
+      "status": "pass",
+      "evidence_files": 120,
+      "note": "range/doppler と符号規約の語彙を確認する",
+      "keywords": [
+        "DOPPLER",
+        "RANGE",
+        "SIGN",
+        "COHERENT",
+        "FREQ",
+        "FREQUENCY"
+      ],
+      "evidence_sample": [
+        "data/mercury/messenger/data-odf/2011/mess_rs_11003_005_odf.dat",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11003_005_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11007_008_odf.dat",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11007_008_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11010_013_odf.dat",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11010_013_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11014_014_odf.dat",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11014_014_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11017_017_odf.dat",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11017_017_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11019_020_odf.dat",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11019_020_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11021_023_odf.dat",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11021_023_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11028_031_odf.dat",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11028_031_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11032_032_odf.dat",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11032_032_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11034_035_odf.dat",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11034_035_odf.xml"
+      ]
+    },
+    {
+      "test_id": "two_three_way_flag",
+      "status": "pass",
+      "evidence_files": 80,
+      "note": "two-way/three-way フラグ語彙を確認する",
+      "keywords": [
+        "TWO-WAY",
+        "THREE-WAY",
+        "2-WAY",
+        "3-WAY",
+        "ONE-WAY"
+      ],
+      "evidence_sample": [
+        "data/mercury/messenger/data-odf/2011/mess_rs_11003_005_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11007_008_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11010_013_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11014_014_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11017_017_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11019_020_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11021_023_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11028_031_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11032_032_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11034_035_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11038_039_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11040_044_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11045_046_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11047_048_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11049_053_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11053_054_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11054_058_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11059_2000_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11061_066_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11066_069_odf.xml"
+      ]
+    },
+    {
+      "test_id": "transponder_delay",
+      "status": "pass",
+      "evidence_files": 80,
+      "note": "transponder delay 語彙を確認する",
+      "keywords": [
+        "TRANSPONDER",
+        "TURNAROUND",
+        "DELAY"
+      ],
+      "evidence_sample": [
+        "data/mercury/messenger/data-odf/2011/mess_rs_11003_005_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11007_008_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11010_013_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11014_014_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11017_017_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11019_020_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11021_023_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11028_031_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11032_032_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11034_035_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11038_039_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11040_044_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11045_046_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11047_048_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11049_053_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11053_054_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11054_058_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11059_2000_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11061_066_odf.xml",
+        "data/mercury/messenger/data-odf/2011/mess_rs_11066_069_odf.xml"
+      ]
+    }
+  ],
+  "notes": {
+    "ingestion_plot": "generated",
+    "unit_plot": "generated",
+    "policy": "beta_extraction_is_theory_native_no_ppn_summary_inputs"
+  },
+  "outputs_private": [
+    "output/private/mercury/messenger_beta_stage_a_ingest_inventory.csv",
+    "output/private/mercury/messenger_beta_stage_a_unit_tests.csv",
+    "output/private/mercury/messenger_beta_stage_a_ingest_status.pdf",
+    "output/private/mercury/messenger_beta_stage_a_ingest_status.png",
+    "output/private/mercury/messenger_beta_stage_a_unit_tests_status.pdf",
+    "output/private/mercury/messenger_beta_stage_a_unit_tests_status.png"
+  ],
+  "outputs_public": [
+    "output/public/mercury/messenger_beta_stage_a_ingest_inventory.csv",
+    "output/public/mercury/messenger_beta_stage_a_unit_tests.csv",
+    "output/public/mercury/messenger_beta_stage_a_ingest_status.pdf",
+    "output/public/mercury/messenger_beta_stage_a_ingest_status.png",
+    "output/public/mercury/messenger_beta_stage_a_unit_tests_status.pdf",
+    "output/public/mercury/messenger_beta_stage_a_unit_tests_status.png"
+  ]
+}

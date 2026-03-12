@@ -1,0 +1,89 @@
+{
+  "generated_utc": "2026-03-07T23:05:30.295025+00:00",
+  "phase_step": "8.7.48.5_sweep",
+  "overall_status": "pass",
+  "inputs": {
+    "tnf_doppler_csv": "data/mercury/messenger/derived/tnf_doppler_observations.csv",
+    "tnf_range_csv": "data/mercury/messenger/derived/tnf_range_observations.csv",
+    "odf_stage_d_metrics": "output/public/mercury/messenger_beta_stage_d_joint_metrics.json",
+    "beta_split_mode": "split"
+  },
+  "grid": {
+    "doppler_bin_list": [
+      40,
+      50,
+      60,
+      70,
+      80,
+      90,
+      100,
+      120
+    ],
+    "range_bin_list": [
+      20,
+      30,
+      40,
+      50,
+      60
+    ],
+    "min_joint_rows_list": [
+      120,
+      150,
+      180,
+      220,
+      260,
+      320
+    ],
+    "station_bias_cap_list": [
+      8,
+      10,
+      12,
+      14,
+      16,
+      20
+    ]
+  },
+  "counts": {
+    "n_trials": 1440,
+    "replay_status_counts": {
+      "pass": 18,
+      "watch": 1422,
+      "reject": 0
+    }
+  },
+  "best_trial": {
+    "doppler_bin_minutes": 80,
+    "range_bin_minutes": 60,
+    "min_joint_rows": 120,
+    "max_station_bias_per_channel": 14,
+    "n_rows_joint": 1547,
+    "n_rows_range": 562,
+    "n_rows_doppler": 985,
+    "beta_dyn": 399.3573769527737,
+    "beta_sigma": 208.0902758024091,
+    "beta_z_from_1": 1.9143488344983095,
+    "status_data": "pass",
+    "status_sigma": "watch",
+    "replay_status": "pass",
+    "replay_dyn_status": "pass",
+    "replay_lt_status": "pass",
+    "replay_z_delta_beta": 1.9571653261565023,
+    "replay_dyn_z_delta_beta": 1.9571653261565023,
+    "replay_lt_z_delta_beta": 2.0446348174405086e-05,
+    "replay_delta_beta": 407.2682664827239,
+    "score": 2165.2556019589115
+  },
+  "recommended_stage_e_args": {
+    "doppler_bin_minutes": 80,
+    "range_bin_minutes": 60,
+    "min_joint_rows": 120,
+    "max_station_bias_per_channel": 14
+  },
+  "outputs_private": [
+    "output/private/mercury/messenger_beta_stage_e_replay_sweep_summary.csv"
+  ],
+  "outputs_public": [
+    "output/public/mercury/messenger_beta_stage_e_replay_sweep_summary.csv",
+    "output/public/mercury/messenger_beta_stage_e_replay_sweep_metrics.json"
+  ]
+}

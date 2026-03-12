@@ -624,19 +624,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     }
     _write_json(out_json, out)
 
-    fig, ax = plt.subplots(1, 1, figsize=(9.5, 5.2))
+    fig, ax = plt.subplots(1, 1, figsize=(11.2, 6.4))
     t = np.array([r["time"] for r in sigma_by_time], dtype=np.float64)
     s = np.array([r["sigma"] for r in sigma_by_time], dtype=np.float64)
-    ax.plot(t, s, marker="o", ms=4, lw=2.0, label="combined (ringdown+pyRing)")
+    ax.plot(t, s, marker="o", ms=5.5, lw=2.2, label="combined (ringdown+pyRing)")
     ax.axvline(ref_time, color="black", lw=1.2, ls="--", alpha=0.8, label="reference time")
     ax.axhline(5.0, color="grey", lw=1.0, ls=":", alpha=0.8)
-    ax.set_xlabel("inspiral truncation time (M)")
-    ax.set_ylabel("Gaussian significance (σ)")
-    ax.set_title(f"GW250114 area theorem (data release): σ_ref={sigma_ref['sigma_gaussian_combined']:.2f}")
+    ax.set_xlabel("inspiral truncation time (M)", fontsize=15.2)
+    ax.set_ylabel("Gaussian significance (σ)", fontsize=15.2)
+    ax.set_title(f"GW250114 area theorem (data release): σ_ref={sigma_ref['sigma_gaussian_combined']:.2f}", fontsize=17.0)
+    ax.tick_params(labelsize=14.0)
     ax.grid(True, alpha=0.3)
-    ax.legend(fontsize=9)
+    ax.legend(fontsize=13.4)
     fig.tight_layout()
     fig.savefig(out_png, dpi=160)
+    fig.savefig(out_png.with_suffix(".pdf"))
     plt.close(fig)
 
     try:

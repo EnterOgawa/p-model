@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-13T07:50:33.470729+00:00",
+  "generated_utc": "2026-02-27T07:35:31.835994+00:00",
   "inputs": {
     "events": [
       "GW150914",
@@ -43,9 +43,9 @@
     ]
   },
   "outputs": {
-    "png": "C:/develop/waveP/output/private/gw/gw_multi_event_summary.png",
-    "public_png": "C:/develop/waveP/output/private/gw/gw_multi_event_summary_public.png",
-    "metrics_json": "C:/develop/waveP/output/private/gw/gw_multi_event_summary_metrics.json"
+    "png": "C:/develop/waveP/output/public/gw/gw_multi_event_summary.png",
+    "public_png": "C:/develop/waveP/output/public/gw/gw_multi_event_summary_public.png",
+    "metrics_json": "C:/develop/waveP/output/public/gw/gw_multi_event_summary_metrics.json"
   },
   "event_meta": [
     {

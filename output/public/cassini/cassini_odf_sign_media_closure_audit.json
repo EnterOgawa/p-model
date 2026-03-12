@@ -1,0 +1,114 @@
+{
+  "generated_utc": "2026-03-08T04:14:24.766018+00:00",
+  "inputs": {
+    "points_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_beta_direct_fit_points.csv",
+    "cross_source_metrics": "C:\\develop\\waveP\\output\\cassini\\cassini_beta_direct_fit_cross_source_metrics.json",
+    "odf_if_manifest": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_raw_if_manifest.json"
+  },
+  "candidate_fit_results": [
+    {
+      "candidate": "same_sign",
+      "fit_intercept": true,
+      "delta_beta": -615.1089742666451,
+      "delta_beta_sigma_proxy": 13.63815593297,
+      "intercept": 1.6276989503435334e-06,
+      "corr_obs_fit": 0.06927530305470708,
+      "rmse": 1.1392700310021458e-06,
+      "weighted_rms": 1.1392700310021458e-06,
+      "n_points": 421841,
+      "zscore_vs_tdf_plasma": 45.109785953053816,
+      "zscore_vs_tdf_raw": 45.10416076554998,
+      "zscore_min_vs_tdf": 45.10416076554998
+    },
+    {
+      "candidate": "invert_sign",
+      "fit_intercept": true,
+      "delta_beta": 615.1089742666451,
+      "delta_beta_sigma_proxy": 13.63815593297,
+      "intercept": -1.6276989503435334e-06,
+      "corr_obs_fit": 0.06927530305470708,
+      "rmse": 1.1392700310021458e-06,
+      "weighted_rms": 1.1392700310021458e-06,
+      "n_points": 421841,
+      "zscore_vs_tdf_plasma": 45.094292675361345,
+      "zscore_vs_tdf_raw": 45.099966137024026,
+      "zscore_min_vs_tdf": 45.094292675361345
+    },
+    {
+      "candidate": "same_sign_offset_removed",
+      "fit_intercept": false,
+      "delta_beta": -395.78465923206045,
+      "delta_beta_sigma_proxy": 11.985186004845104,
+      "intercept": 0.0,
+      "corr_obs_fit": 0.06927530305470707,
+      "rmse": 1.1407889506250026e-06,
+      "weighted_rms": 1.1407889506250026e-06,
+      "n_points": 421841,
+      "zscore_vs_tdf_plasma": 33.03161374748418,
+      "zscore_vs_tdf_raw": 33.0252081657256,
+      "zscore_min_vs_tdf": 33.0252081657256
+    },
+    {
+      "candidate": "invert_sign_offset_removed",
+      "fit_intercept": false,
+      "delta_beta": 395.78465923206045,
+      "delta_beta_sigma_proxy": 11.985186004845104,
+      "intercept": 0.0,
+      "corr_obs_fit": 0.06927530305470707,
+      "rmse": 1.1407889506250026e-06,
+      "weighted_rms": 1.1407889506250026e-06,
+      "n_points": 421841,
+      "zscore_vs_tdf_plasma": 33.01398367452138,
+      "zscore_vs_tdf_raw": 33.02043502345697,
+      "zscore_min_vs_tdf": 33.01398367452138
+    }
+  ],
+  "best_candidate": {
+    "candidate": "invert_sign_offset_removed",
+    "fit_intercept": false,
+    "delta_beta": 395.78465923206045,
+    "delta_beta_sigma_proxy": 11.985186004845104,
+    "corr_obs_fit": 0.06927530305470707,
+    "zscore_min_vs_tdf": 33.01398367452138
+  },
+  "media_label_audit": {
+    "status": "watch",
+    "record_level_media_flag_detected": false,
+    "scanned_labels": 14,
+    "missing_labels": 0,
+    "field_hits": {},
+    "description_keyword_hits": {
+      "MEDIA": 28,
+      "CORRECTION": 14,
+      "CALIBRATION": 42,
+      "Z CORRECTION": 14
+    },
+    "watch_reason": "ODF labels contain correction-related descriptions but no explicit record-level media flag field."
+  },
+  "media_manifest_assessment": {
+    "sign_terminal_gate_pass": false,
+    "sign_watch_reason_codes": [
+      "sign_terminal_gate_not_closed",
+      "stable_arc_coverage_below_gate"
+    ],
+    "record_level_media_state_extractable": true,
+    "parser_media_hook_mode": "external_csp_join_ready",
+    "crosswalk_json": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_media_correction_field_map.json",
+    "external_csp_public_reproducibility_state": "pds_ancillary_payload_complete",
+    "external_csp_hard_watch_required": false,
+    "external_csp_hard_watch_reason": ""
+  },
+  "promotion_gates": {
+    "sign_hypothesis_closed": false,
+    "media_label_flag_observable": false,
+    "media_label_or_manifest_observable": true,
+    "media_manifest_extractable": true,
+    "media_external_csp_payload_available": true,
+    "media_gate": true
+  },
+  "recommended_status": "watch",
+  "reasons": [
+    "sign_hypothesis_not_closed",
+    "odf_sign_terminal_gate_not_closed"
+  ]
+}

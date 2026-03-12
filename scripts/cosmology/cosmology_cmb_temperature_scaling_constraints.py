@@ -196,7 +196,8 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path) -> None:
     _set_japanese_font()
     import matplotlib.pyplot as plt
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6.8))
+    # 図42: 横2列をやめて縦1列（2段）で表示する。
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14.8, 14.2))
 
     # Left: z-scores
     ax1.axvline(0.0, color="k", linewidth=1.0, alpha=0.6)
@@ -209,11 +210,12 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path) -> None:
     ax1.scatter(z_ddr, y - dy, s=45, label=f"DDRをp_Tだけで回復: p_T={_fmt_float(p_ddr, digits=3)}", color="#2ca02c")
 
     ax1.set_yticks(y)
-    ax1.set_yticklabels(labels)
-    ax1.set_xlabel("z-score（(p_T_model - p_T_obs)/σ）", fontsize=11)
-    ax1.set_title("T(z)スケーリング：モデルのz-score", fontsize=13)
+    ax1.set_yticklabels(labels, fontsize=12.0)
+    ax1.set_xlabel("z-score（(p_T_model - p_T_obs)/σ）", fontsize=13.2)
+    ax1.set_title("T(z)スケーリング：モデルのz-score", fontsize=15.8)
+    ax1.tick_params(labelsize=12.0)
     ax1.grid(True, linestyle="--", alpha=0.5, axis="x")
-    ax1.legend(fontsize=9, loc="lower right")
+    ax1.legend(fontsize=11.2, loc="lower right")
 
     # Right: observed p_T with reference lines
     ax2.axvline(p_std, color="#1f77b4", linewidth=1.2, alpha=0.85, label="標準: p_T=1（β_T=0）")
@@ -230,21 +232,16 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path) -> None:
         label="観測（一次ソースの公表値）",
     )
     ax2.set_yticks(y)
-    ax2.set_yticklabels(labels)
-    ax2.set_xlabel("p_T（T(z)=T0(1+z)^(p_T)）", fontsize=11)
-    ax2.set_title("観測 p_T（CMB温度スケーリング指数）の一次ソース制約", fontsize=13)
+    ax2.set_yticklabels(labels, fontsize=12.0)
+    ax2.set_xlabel("p_T（T(z)=T0(1+z)^(p_T)）", fontsize=13.2)
+    ax2.set_title("観測 p_T（CMB温度スケーリング指数）の一次ソース制約", fontsize=15.8)
+    ax2.tick_params(labelsize=12.0)
     ax2.grid(True, linestyle="--", alpha=0.5, axis="x")
-    ax2.legend(fontsize=9, loc="lower right")
+    ax2.legend(fontsize=11.2, loc="lower right")
 
-    fig.suptitle("宇宙論（独立プローブ）：CMB温度スケーリング T(z) の制約", fontsize=14)
-    fig.text(
-        0.5,
-        0.01,
-        "注：T(z)は距離指標と独立に推定できる。標準スケーリング（p_T=1）と整合するため、p_Tの変更だけでDDRを回復する説明は成立しない。",
-        ha="center",
-        fontsize=10,
-    )
-    plt.tight_layout(rect=(0.0, 0.03, 1.0, 0.93))
+    fig.suptitle("宇宙論（独立プローブ）：CMB温度スケーリング T(z) の制約", fontsize=17.0)
+    # 図下注記は論文本文側へ移し、図中の重なりを回避する。
+    plt.tight_layout(rect=(0.0, 0.03, 1.0, 0.95))
 
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)

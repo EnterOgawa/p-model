@@ -600,7 +600,12 @@ def _plot(
     _set_japanese_font()
     import matplotlib.pyplot as plt
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6.8))
+    fig, (ax1, ax2) = plt.subplots(
+        2,
+        1,
+        figsize=(14.4, 11.8),
+        gridspec_kw={"height_ratios": [2.1, 1.2]},
+    )
 
     ax1.errorbar(ell, dl, yerr=sigma, fmt=".", color="#888888", alpha=0.45, label="Planck 2018 TT (binned)")
     ax1.plot(ell, bestfit, color="#1f77b4", linewidth=1.2, alpha=0.9, label="Planck best-fit")
@@ -617,11 +622,12 @@ def _plot(
 
     ax1.set_xlim(50.0, 2200.0)
     ax1.set_ylim(0.0, max(float(np.max(dl) * 1.08), 6200.0))
-    ax1.set_xlabel("multipole ℓ")
-    ax1.set_ylabel("D_ℓ = ℓ(ℓ+1)C_ℓ/2π  [μK²]")
-    ax1.set_title("CMB TT acoustic peaks: Planck vs P-model modal reconstruction")
+    ax1.set_xlabel("multipole ℓ", fontsize=15.8)
+    ax1.set_ylabel("D_ℓ = ℓ(ℓ+1)C_ℓ/2π  [μK²]", fontsize=15.8)
+    ax1.set_title("CMB TT acoustic peaks: Planck vs P-model modal reconstruction", fontsize=18.4)
     ax1.grid(True, linestyle="--", alpha=0.35)
-    ax1.legend(fontsize=8, loc="upper right")
+    ax1.legend(fontsize=17.0, loc="upper right")
+    ax1.tick_params(labelsize=15.0)
 
     labels = ["ℓ1", "ℓ2", "ℓ3"] + [f"ℓ{int(p.n)}(h)" for p in holdouts]
     d_ell = [float(pred3[i]["ell"] - obs3[i].ell) for i in range(3)] + [
@@ -637,10 +643,11 @@ def _plot(
     ax2.bar(x + 0.5 * w, d_amp, width=w, color="#ff7f0e", label="ΔA/A")
     ax2.set_xticks(x)
     ax2.set_xticklabels(labels)
-    ax2.set_ylabel("residual")
-    ax2.set_title("Peak residuals (first3 fit + ℓ4-ℓ6 holdout)")
+    ax2.set_ylabel("residual", fontsize=15.8)
+    ax2.set_title("Peak residuals (first3 fit + ℓ4-ℓ6 holdout)", fontsize=18.4)
     ax2.grid(True, linestyle="--", alpha=0.35, axis="y")
-    ax2.legend(fontsize=9, loc="upper right")
+    ax2.legend(fontsize=17.0, loc="upper right")
+    ax2.tick_params(labelsize=15.0)
 
     status = gate.get("overall", {}).get("status", "n/a")
     status_ext = gate.get("overall_extended", {}).get("status", "n/a")
@@ -650,22 +657,24 @@ def _plot(
     d4_amp = gate.get("holdout4", {}).get("residual", {}).get("delta_amp_rel", float("nan"))
     d46_ell = gate.get("extended_4to6", {}).get("max_abs_delta_ell", float("nan"))
     d46_amp = gate.get("extended_4to6", {}).get("max_abs_delta_amp_rel", float("nan"))
-    fig.suptitle("P-model CMB acoustic-peak audit (ℓ1-ℓ3 fit + ℓ4-ℓ6 holdout)", fontsize=14)
+    fig.suptitle("P-model CMB acoustic-peak audit (ℓ1-ℓ3 fit + ℓ4-ℓ6 holdout)", fontsize=19.6)
     fig.text(
         0.5,
-        0.01,
+        0.015,
         (
             f"core={status}, extended={status_ext}; first3: max|Δℓ|={_fmt(float(max_dell_3), 3)}, "
-            f"max|ΔA/A|={_fmt(float(max_damp_3), 4)}; "
+            f"max|ΔA/A|={_fmt(float(max_damp_3), 4)}\n"
             f"holdout ℓ4: Δℓ={_fmt(float(d4_ell), 3)}, ΔA/A={_fmt(float(d4_amp), 4)}; "
             f"holdout ℓ4-ℓ6: max|Δℓ|={_fmt(float(d46_ell), 3)}, max|ΔA/A|={_fmt(float(d46_amp), 4)}"
         ),
         ha="center",
-        fontsize=10,
+        va="bottom",
+        fontsize=16.4,
     )
-    plt.tight_layout(rect=(0.0, 0.03, 1.0, 0.93))
+    plt.tight_layout(rect=(0.0, 0.07, 1.0, 0.95))
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)
+    fig.savefig(out_png.with_suffix(".pdf"))
     plt.close(fig)
 
 
@@ -785,6 +794,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     base = "cosmology_cmb_acoustic_peak_reconstruction"
     out_png = out_dir / f"{base}.png"
+    out_pdf = out_dir / f"{base}.pdf"
     out_metrics = out_dir / f"{base}_metrics.json"
     out_fals = out_dir / f"{base}_falsification_pack.json"
     out_csv = out_dir / f"{base}_peaks.csv"
@@ -839,6 +849,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "gate": gate,
         "outputs": {
             "png": str(out_png).replace("\\", "/"),
+            "pdf": str(out_pdf).replace("\\", "/"),
             "metrics_json": str(out_metrics).replace("\\", "/"),
             "falsification_pack_json": str(out_fals).replace("\\", "/"),
             "peaks_csv": str(out_csv).replace("\\", "/"),
@@ -868,6 +879,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "related_outputs": {
             "metrics_json": str(out_metrics).replace("\\", "/"),
             "figure_png": str(out_png).replace("\\", "/"),
+            "figure_pdf": str(out_pdf).replace("\\", "/"),
             "peaks_csv": str(out_csv).replace("\\", "/"),
         },
     }
@@ -876,9 +888,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     copied: Dict[str, str] = {}
     # 条件分岐: `not bool(args.skip_public_copy)` を満たす経路を評価する。
     if not bool(args.skip_public_copy):
-        copied = _copy_outputs_to_public([out_png, out_metrics, out_fals, out_csv], pub_dir)
+        copied = _copy_outputs_to_public([out_png, out_pdf, out_metrics, out_fals, out_csv], pub_dir)
 
     print(f"[ok] png : {out_png}")
+    print(f"[ok] pdf : {out_pdf}")
     print(f"[ok] json: {out_metrics}")
     print(f"[ok] fals: {out_fals}")
     print(f"[ok] csv : {out_csv}")

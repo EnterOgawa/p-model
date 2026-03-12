@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-01-31T15:05:39.034439+00:00",
+  "generated_utc": "2026-03-11T13:54:48.073042+00:00",
   "phase": 7,
   "step": "7.14.2",
   "inputs": {
@@ -128,8 +128,8 @@
     ]
   },
   "outputs": {
-    "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_heat_capacity_baseline.csv",
-    "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_heat_capacity_baseline.png"
+    "csv": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_heat_capacity_baseline.csv",
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_heat_capacity_baseline.png"
   },
   "notes": [
     "Cp° computed from NIST Shomate coefficients; t=T/1000.",

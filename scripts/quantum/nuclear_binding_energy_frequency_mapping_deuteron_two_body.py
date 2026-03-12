@@ -5,6 +5,10 @@ import math
 from pathlib import Path
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
@@ -217,8 +221,11 @@ def main() -> None:
 
     import matplotlib.pyplot as plt
 
-    fig = plt.figure(figsize=(12.8, 4.4), dpi=160)
-    gs = fig.add_gridspec(1, 2, wspace=0.28)
+    plt.rcParams["pdf.fonttype"] = 42
+    plt.rcParams["ps.fonttype"] = 42
+
+    fig = plt.figure(figsize=(16.6, 7.4), dpi=170)
+    gs = fig.add_gridspec(1, 2, width_ratios=[1.0, 1.56], wspace=0.24)
 
     ax0 = fig.add_subplot(gs[0, 0])
     ax0.axis("off")
@@ -228,7 +235,7 @@ def main() -> None:
         "deuteron (pn) two-body: bound-state scales (frozen)",
         ha="left",
         va="top",
-        fontsize=12,
+        fontsize=16.0,
         weight="bold",
         transform=ax0.transAxes,
     )
@@ -243,13 +250,13 @@ def main() -> None:
         ),
         ha="left",
         va="top",
-        fontsize=10,
+        fontsize=17.0,
         transform=ax0.transAxes,
         bbox={"boxstyle": "round,pad=0.35", "facecolor": "white", "edgecolor": "0.85"},
     )
     ax0.text(
         0.0,
-        0.46,
+        0.40,
         (
             "Square-well example (s-wave):\n"
             "  V(r)=−V0 (r<R), 0 (r≥R)\n"
@@ -259,7 +266,7 @@ def main() -> None:
         ),
         ha="left",
         va="top",
-        fontsize=10,
+        fontsize=16.0,
         transform=ax0.transAxes,
     )
 
@@ -269,18 +276,34 @@ def main() -> None:
     labels = [str(f["label"]) for f in fits]
 
     ax1.plot(xs, ys, marker="o", lw=1.8)
+    y_max = max(ys) if ys else 0.0
     for x, y, lab in zip(xs, ys, labels):
-        ax1.text(x, y, lab.replace("R = ", ""), fontsize=8, ha="left", va="bottom", rotation=15)
+        # Top-side overlap with title/grid text is avoided by shifting labels downward.
+        y_shift_pts = -16 if y > (y_max - 4.0) else -8
+        rot = 10 if y_shift_pts <= -16 else 15
+        ax1.annotate(
+            lab.replace("R = ", ""),
+            xy=(x, y),
+            xytext=(4, y_shift_pts),
+            textcoords="offset points",
+            fontsize=14.4,
+            ha="left",
+            va="top",
+            rotation=rot,
+        )
 
-    ax1.set_xlabel("well range R (fm)")
-    ax1.set_ylabel("required depth V0 (MeV)")
-    ax1.set_title("Square-well depth required to support B (illustration)")
+    ax1.set_xlabel("well range R (fm)", fontsize=15.0)
+    ax1.set_ylabel("required depth V0 (MeV)", fontsize=15.0)
+    ax1.set_title("Square-well depth required to support B (illustration)", fontsize=16.2)
     ax1.grid(True, ls=":", lw=0.6, alpha=0.6)
+    ax1.tick_params(axis="both", labelsize=13.4)
 
-    fig.suptitle("Phase 7 / Step 7.13.17.2: deuteron Δω mapping via 2-body boundary condition", y=1.02)
-    fig.subplots_adjust(left=0.06, right=0.98, top=0.88, bottom=0.14, wspace=0.28)
+    fig.suptitle("deuteron Δω mapping via 2-body boundary condition", y=0.99, fontsize=17.4)
+    fig.subplots_adjust(left=0.05, right=0.985, top=0.90, bottom=0.11, wspace=0.24)
 
+    out_pdf = out_dir / "nuclear_binding_energy_frequency_mapping_deuteron_two_body.pdf"
     out_png = out_dir / "nuclear_binding_energy_frequency_mapping_deuteron_two_body.png"
+    fig.savefig(out_pdf, bbox_inches="tight")
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
@@ -335,12 +358,13 @@ def main() -> None:
                 "R is treated as a knob (e.g., λπ, r_d, proxy R0, tail scale) to visualize how the required depth scales.",
             ],
         },
-        "outputs": {"png": str(out_png)},
+        "outputs": {"pdf": str(out_pdf), "png": str(out_png)},
     }
 
     out_json = out_dir / "nuclear_binding_energy_frequency_mapping_deuteron_two_body_metrics.json"
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    print(f"[ok] pdf : {out_pdf}")
     print(f"[ok] png : {out_png}")
     print(f"[ok] json: {out_json}")
 

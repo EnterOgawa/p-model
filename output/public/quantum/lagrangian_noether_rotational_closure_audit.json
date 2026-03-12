@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-19T14:29:14.897506+00:00",
+  "generated_utc": "2026-03-12T09:03:24.992861+00:00",
   "phase": {
     "phase": 8,
     "step": "8.7.21.6+8.7.26.2",
@@ -188,26 +188,26 @@
     {
       "id": "l_rot::closure_upstream",
       "metric": "lagrangian_noether_observable_closure.overall_status",
-      "value": "pass",
+      "value": "reject",
       "expected": "pass",
-      "pass": true,
+      "pass": false,
       "gate_level": "hard",
-      "status": "pass",
-      "score": 1.0,
+      "status": "reject",
+      "score": 0.0,
       "note": "上流の L_total 閉包監査が pass。"
     },
     {
       "id": "l_rot::drift_guard",
       "metric": "closure_drift(overall_status,recalc_required)",
       "value": {
-        "overall_status": "pass",
-        "recalc_required": false
+        "overall_status": "reject",
+        "recalc_required": true
       },
       "expected": "status in {pass,watch} and recalc_required=false",
-      "pass": true,
+      "pass": false,
       "gate_level": "hard",
-      "status": "pass",
-      "score": 1.0,
+      "status": "reject",
+      "score": 0.0,
       "note": "drift監査で再計算トリガーが立っていないこと。"
     },
     {
@@ -245,9 +245,12 @@
     }
   ],
   "decision": {
-    "overall_status": "pass",
-    "decision": "l_rot_closure_pass",
-    "hard_fail_ids": [],
+    "overall_status": "reject",
+    "decision": "l_rot_closure_rejected",
+    "hard_fail_ids": [
+      "l_rot::closure_upstream",
+      "l_rot::drift_guard"
+    ],
     "watch_ids": [],
     "rule": "Reject if any hard check fails; watch if only watch-level checks fail; otherwise pass."
   }

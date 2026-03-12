@@ -42,12 +42,12 @@ def _set_japanese_font() -> None:
             mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
 
         mpl.rcParams["axes.unicode_minus"] = False
-        mpl.rcParams["font.size"] = 13.0
-        mpl.rcParams["axes.titlesize"] = 18.0
-        mpl.rcParams["axes.labelsize"] = 14.0
-        mpl.rcParams["xtick.labelsize"] = 12.0
-        mpl.rcParams["ytick.labelsize"] = 12.0
-        mpl.rcParams["legend.fontsize"] = 12.0
+        mpl.rcParams["font.size"] = 15.0
+        mpl.rcParams["axes.titlesize"] = 20.0
+        mpl.rcParams["axes.labelsize"] = 16.0
+        mpl.rcParams["xtick.labelsize"] = 14.0
+        mpl.rcParams["ytick.labelsize"] = 14.0
+        mpl.rcParams["legend.fontsize"] = 14.0
     except Exception:
         return
 
@@ -431,7 +431,7 @@ def _plot(
 ) -> None:
     _set_japanese_font()
 
-    fig = plt.figure(figsize=(16.4, 13.2))
+    fig = plt.figure(figsize=(14.2, 12.0))
     grid = fig.add_gridspec(2, 2, height_ratios=[1.0, 1.18], hspace=0.34, wspace=0.20)
 
     ax0 = fig.add_subplot(grid[0, 0])
@@ -444,14 +444,14 @@ def _plot(
     else:
         rot_profile = 1.0 + kappa_rot * (r_ratio ** -3) * (np.sin(theta) ** 2)
 
-    ax0.plot(theta * 180.0 / math.pi, static_profile, color="#2f2f2f", linestyle="--", linewidth=2.6, label="δP_rot=0")
-    ax0.plot(theta * 180.0 / math.pi, rot_profile, color="#1f77b4", linewidth=3.0, label="δP_rot≠0")
-    ax0.set_xlabel("polar angle θ [deg]", fontsize=15.0)
-    ax0.set_ylabel(r"$P/P_{\mathrm{static}}$ ($r=1.5R$)", fontsize=15.0)
-    ax0.set_title("Rotational P-profile (minimal ansatz)", fontsize=19.0, pad=11.0)
+    ax0.plot(theta * 180.0 / math.pi, static_profile, color="#2f2f2f", linestyle="--", linewidth=2.6, label="δP_rot=0（回転項なし）")
+    ax0.plot(theta * 180.0 / math.pi, rot_profile, color="#1f77b4", linewidth=3.0, label="δP_rot≠0（回転項あり）")
+    ax0.set_xlabel("極角 θ [deg]", fontsize=17.0)
+    ax0.set_ylabel(r"$P/P_{\mathrm{static}}$（$r=1.5R$）", fontsize=17.0)
+    ax0.set_title("回転 P プロファイル監査（最小 ansatz）", fontsize=21.0, pad=11.0)
     ax0.grid(True, alpha=0.25)
-    ax0.tick_params(axis="both", labelsize=12.5)
-    ax0.legend(loc="lower right")
+    ax0.tick_params(axis="both", labelsize=14.5)
+    ax0.legend(loc="upper right", fontsize=14.0)
 
     frame_static = [r for r in static_rows if str(r.get("kind") or "") == "frame_dragging"]
     frame_rot = [r for r in rot_rows if str(r.get("kind") or "") == "frame_dragging"]
@@ -472,17 +472,17 @@ def _plot(
     ax1 = fig.add_subplot(grid[0, 1])
     x = np.arange(len(labels), dtype=float)
     width = 0.30
-    ax1.bar(x - width, obs_ratio, width=width, color="#1f77b4", label="observed/reference")
-    ax1.bar(x, static_ratio, width=width, color="#d62728", alpha=0.9, label="δP_rot=0 prediction")
-    ax1.bar(x + width, rot_ratio, width=width, color="#2ca02c", alpha=0.9, label="δP_rot≠0 prediction")
+    ax1.bar(x - width, obs_ratio, width=width, color="#1f77b4", label="観測/参照")
+    ax1.bar(x, static_ratio, width=width, color="#d62728", alpha=0.9, label="δP_rot=0 予測")
+    ax1.bar(x + width, rot_ratio, width=width, color="#2ca02c", alpha=0.9, label="δP_rot≠0 予測")
     ax1.axhline(1.0, color="#555555", linestyle="--", linewidth=1.0)
     ax1.set_xticks(x)
-    ax1.set_xticklabels(labels, rotation=10, ha="right", fontsize=12.0)
-    ax1.set_ylabel("dimensionless ratio", fontsize=15.0)
-    ax1.set_title("Frame-dragging ratio audit", fontsize=19.0, pad=11.0)
+    ax1.set_xticklabels(labels, rotation=10, ha="right", fontsize=14.0)
+    ax1.set_ylabel("無次元比", fontsize=17.0)
+    ax1.set_title("フレームドラッグ比率監査", fontsize=21.0, pad=11.0)
     ax1.grid(True, axis="y", alpha=0.25)
-    ax1.tick_params(axis="both", labelsize=12.5)
-    ax1.legend(loc="lower left", fontsize=11.8)
+    ax1.tick_params(axis="both", labelsize=14.5)
+    ax1.legend(loc="upper right", fontsize=14.0)
     yvals = [v for v in obs_ratio + static_ratio + rot_ratio if np.isfinite(v)]
     if yvals:
         y_center = float(np.mean(yvals))
@@ -491,7 +491,7 @@ def _plot(
     for xpos, values_plot in zip([x - width, x, x + width], [obs_ratio, static_ratio, rot_ratio]):
         for xi, yi in zip(xpos, values_plot):
             if np.isfinite(yi):
-                ax1.text(xi, yi + 0.007, f"{yi:.3f}", ha="center", va="bottom", fontsize=10.6, color="0.22")
+                ax1.text(xi, yi + 0.007, f"{yi:.3f}", ha="center", va="bottom", fontsize=13.2, color="0.22")
 
     ax2 = fig.add_subplot(grid[1, :])
     z_static = [float(r["z_score"]) if r.get("z_score") is not None else 0.0 for r in frame_static]
@@ -502,12 +502,12 @@ def _plot(
     ax2.axhline(-z_reject, color="#333333", linestyle="--", linewidth=1.0)
     ax2.axhline(0.0, color="#666666", linestyle="-", linewidth=0.9)
     ax2.set_xticks(x)
-    ax2.set_xticklabels(labels, rotation=10, ha="right", fontsize=12.0)
-    ax2.set_ylabel("z = (obs - pred) / sigma", fontsize=15.0)
-    ax2.set_title("Precession gate comparison", fontsize=19.0, pad=11.0)
+    ax2.set_xticklabels(labels, rotation=10, ha="right", fontsize=14.0)
+    ax2.set_ylabel("z = (観測 - 予測) / σ", fontsize=17.0)
+    ax2.set_title("歳差ゲート比較", fontsize=21.0, pad=11.0)
     ax2.grid(True, axis="y", alpha=0.25)
-    ax2.tick_params(axis="both", labelsize=12.5)
-    ax2.legend(loc="upper right")
+    ax2.tick_params(axis="both", labelsize=14.5)
+    ax2.legend(loc="upper right", fontsize=14.0)
     max_abs_z_panel = max([abs(v) for v in z_static + z_rot] + [abs(z_reject), 1e-6])
     y_margin = 0.08 * max_abs_z_panel
     ax2.set_ylim(-(max_abs_z_panel + y_margin), max_abs_z_panel + y_margin)
@@ -516,11 +516,12 @@ def _plot(
         x_center = bar.get_x() + bar.get_width() * 0.5
         y_text = h + (0.015 * max_abs_z_panel if h >= 0.0 else -0.03 * max_abs_z_panel)
         va = "bottom" if h >= 0.0 else "top"
-        ax2.text(x_center, y_text, f"{h:.2f}", ha="center", va=va, fontsize=10.8, color="0.20")
+        ax2.text(x_center, y_text, f"{h:.2f}", ha="center", va=va, fontsize=13.4, color="0.20")
 
     fig.subplots_adjust(left=0.065, right=0.985, top=0.94, bottom=0.075, hspace=0.32, wspace=0.20)
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)
+    fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight")
     plt.close(fig)
 
 
@@ -695,6 +696,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_json = outdir / "pmodel_rotating_sphere_p_distribution_audit.json"
     out_csv = outdir / "pmodel_rotating_sphere_p_distribution_audit.csv"
     out_png = outdir / "pmodel_rotating_sphere_p_distribution_audit.png"
+    out_pdf = outdir / "pmodel_rotating_sphere_p_distribution_audit.pdf"
 
     all_rows = static_rows + rot_rows
     payload_out = {
@@ -746,6 +748,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "rows_json": str(out_json).replace("\\", "/"),
             "rows_csv": str(out_csv).replace("\\", "/"),
             "plot_png": str(out_png).replace("\\", "/"),
+            "plot_pdf": str(out_pdf).replace("\\", "/"),
         },
     }
 
@@ -755,7 +758,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     copied: List[Path] = []
     canon_copied: List[Path] = []
-    for src in (out_json, out_csv, out_png):
+    for src in (out_json, out_csv, out_png, out_pdf):
         dst = canon_outdir / src.name
         # 条件分岐: `src.resolve() == dst.resolve()` を満たす経路を評価する。
         if src.resolve() == dst.resolve():
@@ -766,7 +769,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     # 条件分岐: `not args.no_public_copy` を満たす経路を評価する。
     if not args.no_public_copy:
-        for src in (out_json, out_csv, out_png):
+        for src in (out_json, out_csv, out_png, out_pdf):
             dst = public_outdir / src.name
             shutil.copy2(src, dst)
             copied.append(dst)
@@ -781,6 +784,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     "rows_json": out_json,
                     "rows_csv": out_csv,
                     "plot_png": out_png,
+                    "plot_pdf": out_pdf,
                     "canon_copies": canon_copied,
                     "public_copies": copied,
                 },
@@ -803,6 +807,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json : {out_json}")
     print(f"[ok] csv  : {out_csv}")
     print(f"[ok] png  : {out_png}")
+    print(f"[ok] pdf  : {out_pdf}")
     # 条件分岐: `canon_copied` を満たす経路を評価する。
     if canon_copied:
         print(f"[ok] canon copies : {len(canon_copied)} files -> {canon_outdir}")

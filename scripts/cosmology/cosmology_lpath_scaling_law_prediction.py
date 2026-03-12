@@ -103,23 +103,25 @@ def _render_png(path: Path, rows: Sequence[Dict[str, Any]], *, lpath0_kpc: float
     ratios = [float(row["lpath_ratio"]) for row in rows]
     tau_vals = [float(row["tau_free_pred_gyr"]) for row in rows]
 
-    fig, axes = plt.subplots(1, 2, figsize=(12.0, 4.8), dpi=150)
+    fig, axes = plt.subplots(1, 2, figsize=(12.8, 5.2), dpi=150)
     axes[0].bar(labels, ratios, color="#4c78a8")
     axes[0].axhline(1.0, color="#666666", linestyle="--", linewidth=1.0)
-    axes[0].set_ylabel("L_path / L_path,0")
-    axes[0].set_title("Step 8.7.25.21: universal scaling ratios")
-    axes[0].tick_params(axis="x", rotation=25)
+    axes[0].set_ylabel("L_path / L_path,0", fontsize=13.2)
+    axes[0].set_title("universal scaling ratios", fontsize=14.2)
+    axes[0].tick_params(axis="x", rotation=25, labelsize=11.6)
+    axes[0].tick_params(axis="y", labelsize=11.6)
     axes[0].grid(True, axis="y", alpha=0.25)
 
     axes[1].bar(labels, tau_vals, color="#f58518")
     axes[1].axhline(float(tau0_gyr), color="#666666", linestyle="--", linewidth=1.0, label="baseline tau_free")
-    axes[1].set_ylabel("tau_free predicted [Gyr]")
-    axes[1].set_title("Coarse-grained relaxation time")
-    axes[1].tick_params(axis="x", rotation=25)
+    axes[1].set_ylabel("tau_free predicted [Gyr]", fontsize=13.2)
+    axes[1].set_title("Coarse-grained relaxation time", fontsize=14.2)
+    axes[1].tick_params(axis="x", rotation=25, labelsize=11.6)
+    axes[1].tick_params(axis="y", labelsize=11.6)
     axes[1].grid(True, axis="y", alpha=0.25)
-    axes[1].legend(loc="upper right")
+    axes[1].legend(loc="upper right", fontsize=12.0)
 
-    fig.suptitle("L_path scaling from L_int = g_P P_mu J^mu")
+    fig.suptitle("L_path scaling from L_int = g_P P_mu J^mu", fontsize=15.4)
     fig.text(
         0.01,
         -0.02,
@@ -127,7 +129,7 @@ def _render_png(path: Path, rows: Sequence[Dict[str, Any]], *, lpath0_kpc: float
             f"baseline: L_path,0={lpath0_kpc:.4f} kpc, tau_free,0={tau0_gyr:.6f} Gyr, "
             f"Pi0={pi0:.6f} (Pi0=tau_int,0/tau_free,0-1)"
         ),
-        fontsize=8,
+        fontsize=12.0,
         va="top",
     )
     fig.tight_layout()

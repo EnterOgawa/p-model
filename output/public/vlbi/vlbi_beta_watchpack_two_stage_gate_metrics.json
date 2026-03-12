@@ -1,0 +1,46 @@
+{
+  "generated_utc": "2026-03-07T05:25:01.744744+00:00",
+  "step": "8.7.46.23",
+  "candidate_session": "20MAY04XA",
+  "drop_scenario": "drop_20MAY04XA",
+  "gates": {
+    "stage1_allsky": {
+      "metric": "allsky_relative_improvement",
+      "value": 0.7031147993384002,
+      "threshold_min": 0.05,
+      "pass": true
+    },
+    "stage2_stable_timeband": {
+      "stable_delta_chi2_dof": 1.3023871977234478,
+      "timeband_delta_chi2_dof": 1.3023871977234478,
+      "stable_threshold_max": 0.0,
+      "timeband_threshold_max": 0.0,
+      "pass": false
+    },
+    "status_regression": {
+      "keep_stable_status": "watch",
+      "drop_stable_status": "reject",
+      "keep_timeband_status": "watch",
+      "drop_timeband_status": "reject",
+      "regression": true
+    }
+  },
+  "decision": {
+    "overall_pass": false,
+    "selected_scenario": "keep_all",
+    "selected_policy": "keep_all",
+    "selected_allsky_summary_csv": "C:\\develop\\waveP\\output\\vlbi\\vlbi_allsky_beta_consistency_summary_keep_all.csv",
+    "selected_threshold_ns": 10.0,
+    "reason": "exclude_candidate_failed_stable_timeband_non_regression_gate"
+  },
+  "references": {
+    "watchpack_comparison_metrics": "C:\\develop\\waveP\\output\\public\\vlbi\\vlbi_beta_watchpack_condition_refit_comparison_metrics.json",
+    "threshold_comparison_metrics": "C:\\develop\\waveP\\output\\public\\vlbi\\vlbi_high_sensitivity_threshold_sweep_condition_comparison_metrics.json"
+  },
+  "outputs": {
+    "summary_csv": "C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_watchpack_two_stage_gate_summary.csv",
+    "metrics_json": "C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_watchpack_two_stage_gate_metrics.json",
+    "plot_pdf": "C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_watchpack_two_stage_gate.pdf",
+    "plot_png": "C:\\develop\\waveP\\output\\vlbi\\vlbi_beta_watchpack_two_stage_gate.png"
+  }
+}

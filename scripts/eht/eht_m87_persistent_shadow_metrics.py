@@ -240,7 +240,7 @@ def main() -> int:
         yerr_plus = np.array([m2017.sigma_plus_uas, m2018.sigma_plus_uas], dtype=float)
         x = np.arange(len(epochs), dtype=float)
 
-        fig, ax = plt.subplots(figsize=(10.5, 4.8))
+        fig, ax = plt.subplots(figsize=(11.8, 5.8))
         ax.errorbar(
             x,
             y,
@@ -256,9 +256,10 @@ def main() -> int:
         ax.plot(x, y, color="#d62728", alpha=0.35, lw=2.0, zorder=2)
 
         ax.set_xticks(x)
-        ax.set_xticklabels(labels)
-        ax.set_ylabel("角直径 [µas]")
-        ax.set_title("EHT M87*: リング直径の multi-epoch 整合（2017 vs 2018）")
+        ax.set_xticklabels(labels, fontsize=13.6)
+        ax.set_ylabel("角直径 [µas]", fontsize=14.8)
+        ax.set_title("EHT M87*: リング直径の multi-epoch 整合（2017 vs 2018）", fontsize=16.8)
+        ax.tick_params(labelsize=13.2)
         ax.grid(True, axis="y", alpha=0.25)
 
         # Annotate delta.
@@ -270,17 +271,22 @@ def main() -> int:
                 transform=ax.transAxes,
                 ha="right",
                 va="top",
-                fontsize=10,
+                fontsize=12.8,
                 bbox={"facecolor": "white", "alpha": 0.8, "edgecolor": "#cccccc"},
             )
 
-        ax.legend(loc="lower right", framealpha=0.9)
+        # 図18: 凡例はグラフ中央上に重ねる。
+        ax.legend(loc="upper center", bbox_to_anchor=(0.5, 0.98), borderaxespad=0.1, framealpha=0.9, fontsize=12.8)
         fig.tight_layout()
 
         png_path = out_dir / "eht_m87_persistent_shadow_ring_diameter.png"
+        pdf_path = out_dir / "eht_m87_persistent_shadow_ring_diameter.pdf"
         fig.savefig(png_path, dpi=220)
+        fig.savefig(pdf_path)
         public_png_path = out_dir / "eht_m87_persistent_shadow_ring_diameter_public.png"
+        public_pdf_path = out_dir / "eht_m87_persistent_shadow_ring_diameter_public.pdf"
         fig.savefig(public_png_path, dpi=220)
+        fig.savefig(public_pdf_path)
         plt.close(fig)
     except Exception as e:
         print(f"[warn] plot skipped: {e}")

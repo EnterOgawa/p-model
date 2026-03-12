@@ -1,0 +1,9 @@
+key,value
+session_label,22MAY23XA
+expected_internal_id,AUA020
+status,watch
+alias_confirmed,false
+n_netcdf_scanned,243
+observed_session_values,R11052
+count[R11052],243
+rationale,expected internal id was not found in scanned Session metadata

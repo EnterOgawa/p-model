@@ -1,0 +1,12 @@
+key,value
+all_required_mediums_local,true
+required_mediums,"IONCAL,TROPCAL,PLSMCAL"
+local_mediums_observed,"IONCAL,TROPCAL,PLSMCAL"
+ion_files_n,2
+tro_files_n,2
+plasma_model_chpart_windows_n,183
+command_windows_n,183
+source_listing_urls_n,12
+medium_availability.IONCAL,true
+medium_availability.TROPCAL,true
+medium_availability.PLSMCAL,true

@@ -584,10 +584,10 @@ def _load_solar_light_deflection_rows(root: Path) -> List[TableRow]:
     return [
         TableRow(
             topic="光偏向（太陽）",
-            observable="PPN γ（GR=1）",
+            observable="公表推定値 γ*（PPN）",
             data=label,
             n=n_meas,
-            reference=obs_txt or "γ（観測）",
+            reference=(obs_txt or "γ（観測）") + "（Reference; 主判定=cassini/scalar_limit_reject）",
             pmodel=pm_txt or "γ=2β-1",
             metric=" / ".join(metric_parts),
             metric_public=metric_public,
@@ -1181,10 +1181,10 @@ def _load_gravitational_redshift_rows(root: Path) -> List[TableRow]:
         out.append(
             TableRow(
                 topic="重力赤方偏移",
-                observable="偏差 ε（GR=0）",
+                observable="公表偏差 ε*（弱場比較）",
                 data=label,
                 n=None,
-                reference=obs_txt,
+                reference=obs_txt + "（Reference; 主判定=cassini/scalar_limit_reject）",
                 pmodel="ε=0",
                 metric=metric,
                 metric_public=metric_public,
@@ -1655,7 +1655,7 @@ def _load_cosmology_jwst_mast_rows(root: Path) -> List[TableRow]:
     """
     JWST/MAST x1d pipeline status (Phase 4 / Step 4.6).
 
-    This is treated as a reference/screening row (not sigma-evaluable) so Table 1 can show
+    This is treated as a reference/screening row (not sigma-evaluable) so 検証サマリ表 can show
     the reproducible entry point and the current 'release wait' blocker.
     """
     path = _OUT_PRIVATE / "cosmology" / "jwst_spectra_integration_metrics.json"
@@ -1707,8 +1707,8 @@ def _load_cosmology_jwst_mast_rows(root: Path) -> List[TableRow]:
     # 条件分岐: `status and status != "adopted"` を満たす経路を評価する。
 
     if status and status != "adopted":
-        metric_parts.append(f"Table1={status}")
-        metric_public_parts.append(f"Table1={status}")
+        metric_parts.append(f"検証サマリ表={status}")
+        metric_public_parts.append(f"検証サマリ表={status}")
 
     # 条件分岐: `reason_txt` を満たす経路を評価する。
 
@@ -1803,8 +1803,8 @@ def _load_xrism_rows(root: Path) -> List[TableRow]:
     # 条件分岐: `bh_status and bh_status != "adopted"` を満たす経路を評価する。
 
     if bh_status and bh_status != "adopted":
-        bh_metric_parts.append(f"Table1={bh_status}")
-        bh_metric_public_parts.append(f"Table1={bh_status}")
+        bh_metric_parts.append(f"検証サマリ表={bh_status}")
+        bh_metric_public_parts.append(f"検証サマリ表={bh_status}")
 
     # 条件分岐: `bh_reason_txt` を満たす経路を評価する。
 
@@ -1874,8 +1874,8 @@ def _load_xrism_rows(root: Path) -> List[TableRow]:
     # 条件分岐: `cl_status and cl_status != "adopted"` を満たす経路を評価する。
 
     if cl_status and cl_status != "adopted":
-        cl_metric_parts.append(f"Table1={cl_status}")
-        cl_metric_public_parts.append(f"Table1={cl_status}")
+        cl_metric_parts.append(f"検証サマリ表={cl_status}")
+        cl_metric_public_parts.append(f"検証サマリ表={cl_status}")
 
     # 条件分岐: `cl_reason_txt` を満たす経路を評価する。
 
@@ -1902,7 +1902,7 @@ def _load_xrism_rows(root: Path) -> List[TableRow]:
 
 def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
     """
-    BAO primary-statistics row for Table 1.
+    BAO primary-statistics row for 検証サマリ表.
 
     Uses the Phase 4.5B (decisive) output: MW multigrid recon + Ross 2016 full covariance peakfit,
     and reports ε (AP warping) under dist=pbg (and lcdm as a reference computed in the same pipeline).
@@ -2628,6 +2628,103 @@ def _load_cosmology_fsigma8_growth_rows(root: Path) -> List[TableRow]:
             n=n_pts if n_pts > 0 else None,
             reference="観測 fσ8(z)（一次統計）",
             pmodel="遅延ポテンシャルから Γ_eff を導出し growth 方程式へ写像",
+            metric=" / ".join(metric_parts),
+            metric_public=metric_public,
+        )
+    ]
+
+
+# 関数: `_load_cosmology_pantheon_hubble_rows` の入出力契約と処理意図を定義する。
+
+def _load_cosmology_pantheon_hubble_rows(root: Path) -> List[TableRow]:
+    path = _first_existing(
+        [
+            _OUT_PRIVATE / "cosmology" / "cosmology_pantheonplus_cc_direct_fit_metrics.json",
+            _OUT_PUBLIC / "cosmology" / "cosmology_pantheonplus_cc_direct_fit_metrics.json",
+            root / "output" / "cosmology" / "cosmology_pantheonplus_cc_direct_fit_metrics.json",
+        ]
+    )
+    # 条件分岐: `path is None` を満たす経路を評価する。
+    if path is None:
+        return []
+
+    try:
+        j = _read_json(path)
+    except Exception:
+        return []
+
+    sizes = j.get("dataset_sizes") if isinstance(j.get("dataset_sizes"), dict) else {}
+    n_sn = int(_safe_float(sizes.get("pantheon_points_used")) or 0)
+    n_cc = int(_safe_float(sizes.get("cc_points_used")) or 0)
+    n_all = n_sn + n_cc
+
+    models = j.get("models") if isinstance(j.get("models"), dict) else {}
+    baseline = models.get("baseline") if isinstance(models.get("baseline"), dict) else {}
+    pmodel = models.get("pmodel") if isinstance(models.get("pmodel"), dict) else {}
+    b_chi2 = _safe_float(baseline.get("chi2_total"))
+    p_chi2 = _safe_float(pmodel.get("chi2_total"))
+    b_aic = _safe_float(baseline.get("AIC"))
+    p_aic = _safe_float(pmodel.get("AIC"))
+    p_shape = pmodel.get("shape_params") if isinstance(pmodel.get("shape_params"), dict) else {}
+    alpha_r = _safe_float(p_shape.get("alpha_r"))
+    alpha_m = _safe_float(p_shape.get("alpha_m"))
+    alpha_l = _safe_float(p_shape.get("alpha_lambda"))
+
+    cmp_ = j.get("comparison") if isinstance(j.get("comparison"), dict) else {}
+    delta_aic = _safe_float(cmp_.get("delta_aic_baseline_minus_pmodel"))
+    winner = str(cmp_.get("winner") or "")
+
+    metric_parts: List[str] = []
+    # 条件分岐: `b_chi2 is not None and p_chi2 is not None` を満たす経路を評価する。
+    if b_chi2 is not None and p_chi2 is not None:
+        metric_parts.append(f"χ²_total(ΛCDM/P)={_fmt_float(b_chi2, digits=4)}/{_fmt_float(p_chi2, digits=4)}")
+
+    # 条件分岐: `b_aic is not None and p_aic is not None` を満たす経路を評価する。
+
+    if b_aic is not None and p_aic is not None:
+        metric_parts.append(f"AIC(ΛCDM/P)={_fmt_float(b_aic, digits=4)}/{_fmt_float(p_aic, digits=4)}")
+
+    # 条件分岐: `delta_aic is not None` を満たす経路を評価する。
+
+    if delta_aic is not None:
+        metric_parts.append(f"ΔAIC(=AIC_baseline-AIC_P)={_fmt_float(delta_aic, digits=4)}")
+
+    # 条件分岐: `winner` を満たす経路を評価する。
+
+    if winner:
+        metric_parts.append(f"winner={winner}")
+
+    metric_public = ""
+    # 条件分岐: `delta_aic is not None` を満たす経路を評価する。
+    if delta_aic is not None:
+        # 条件分岐: `delta_aic > 2.0` を満たす経路を評価する。
+        if delta_aic > 2.0:
+            judge = "Pass"
+        # 条件分岐: 前段条件が不成立で、`delta_aic > -2.0` を追加評価する。
+        elif delta_aic > -2.0:
+            judge = "Watch"
+        else:
+            judge = "Reject"
+
+        metric_public = f"ΔAIC={_fmt_float(delta_aic, digits=2)}（判定={judge}）"
+
+    pmodel_desc = "H_eff^2完全式"
+    # 条件分岐: `alpha_r is not None and alpha_m is not None and alpha_l is not None` を満たす経路を評価する。
+    if alpha_r is not None and alpha_m is not None and alpha_l is not None:
+        pmodel_desc += (
+            f"（α_r={_fmt_float(alpha_r, digits=4)}, "
+            f"α_m={_fmt_float(alpha_m, digits=4)}, "
+            f"α_Λ={_fmt_float(alpha_l, digits=4)}）"
+        )
+
+    return [
+        TableRow(
+            topic="宇宙論（Pantheon+ Hubble図）",
+            observable="Pantheon+ μ(z) + CC H(z) 直接fit（H_eff^2 完全式）",
+            data="Pantheon+（zCMB, MU_SH0ES）+ Cosmic Chronometers",
+            n=n_all if n_all > 0 else None,
+            reference="flat ΛCDM 同時fit（H0, Δμ）",
+            pmodel=pmodel_desc,
             metric=" / ".join(metric_parts),
             metric_public=metric_public,
         )
@@ -3397,10 +3494,10 @@ def _load_frame_dragging_rows(root: Path) -> List[TableRow]:
         obs_txt = ""
         # 条件分岐: `mu is not None and sig is not None` を満たす経路を評価する。
         if mu is not None and sig is not None:
-            obs_txt = f"μ={_fmt_float(mu, digits=4)}±{_fmt_float(sig, digits=4)}"
+            obs_txt = f"R_drag={_fmt_float(mu, digits=4)}±{_fmt_float(sig, digits=4)}"
         # 条件分岐: 前段条件が不成立で、`mu is not None` を追加評価する。
         elif mu is not None:
-            obs_txt = f"μ={_fmt_float(mu, digits=4)}"
+            obs_txt = f"R_drag={_fmt_float(mu, digits=4)}"
 
         metric_parts: List[str] = []
         # 条件分岐: `z is not None` を満たす経路を評価する。
@@ -3435,11 +3532,11 @@ def _load_frame_dragging_rows(root: Path) -> List[TableRow]:
         out.append(
             TableRow(
                 topic="回転（フレームドラッグ）",
-                observable="比 μ=|Ω_obs|/|Ω_pred|（GR=1）",
+                observable="R_drag=abs(Ω_obs)/abs(Ω_pred)",
                 data=label,
                 n=None,
-                reference=obs_txt or "μ（観測）",
-                pmodel="μ=1",
+                reference=(obs_txt or "R_drag（観測）") + "（Reference; 主判定=scalar_limit_reject）",
+                pmodel="R_drag=1",
                 metric=" / ".join(metric_parts),
                 metric_public=metric_public,
             )
@@ -3736,10 +3833,10 @@ def _load_quantum_gravity_quantum_interference_rows(root: Path) -> List[TableRow
         rows.append(
             TableRow(
                 topic="量子時計（赤方偏移）",
-                observable="偏差 ε（GR=0）",
+                observable="公表偏差 ε*（弱場比較）",
                 data="光格子時計（chronometric leveling）",
                 n=None,
-                reference="ε=0（GR）",
+                reference="ε*=0（参照基準）",
                 pmodel="ε=0（弱場）",
                 metric=" / ".join(parts),
             )
@@ -5460,6 +5557,7 @@ def build_table1_rows(root: Path) -> List[TableRow]:
     rows.extend(_load_cosmology_cmb_polarization_phase_rows(root))
     rows.extend(_load_cosmology_cmb_acoustic_peak_rows(root))
     rows.extend(_load_cosmology_fsigma8_growth_rows(root))
+    rows.extend(_load_cosmology_pantheon_hubble_rows(root))
     rows.extend(_load_cosmology_cluster_collision_rows(root))
     rows.extend(_load_frame_dragging_rows(root))
     rows.extend(_load_gw_polarization_rows(root))
@@ -5550,7 +5648,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     payload = {
         "generated_utc": _iso_utc_now(),
         "table1": {
-            "title": "検証サマリ（Table 1）",
+            "title": "検証サマリ表",
             "rows": [r.to_dict() for r in rows],
             "notes": notes,
         },
@@ -5565,19 +5663,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     _write_json(json_path, payload)
     _write_csv(csv_path, rows)
-    _write_markdown(md_path, title="検証サマリ（Table 1）", rows=rows, notes=notes)
+    _write_markdown(md_path, title="検証サマリ表", rows=rows, notes=notes)
 
     payload_q = {
         "generated_utc": payload["generated_utc"],
         "table1": {
-            "title": "検証サマリ（Table 1）",
+            "title": "検証サマリ表",
             "rows": [r.to_dict() for r in rows_quantum],
             "notes": notes_quantum,
         },
     }
     _write_json(json_path_q, payload_q)
     _write_csv(csv_path_q, rows_quantum)
-    _write_markdown(md_path_q, title="検証サマリ（Table 1）", rows=rows_quantum, notes=notes_quantum)
+    _write_markdown(md_path_q, title="検証サマリ表", rows=rows_quantum, notes=notes_quantum)
 
     try:
         worklog.append_event(

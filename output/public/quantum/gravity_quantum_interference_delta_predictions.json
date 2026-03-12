@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-27T02:42:21.801936+00:00",
+  "generated_utc": "2026-03-12T01:15:50.194261+00:00",
   "phase": 7,
   "step": "7.16.12",
   "title": "P-model vs GR post-Newtonian difference scale (gravity × quantum interference; unified atom audit)",
@@ -234,7 +234,9 @@
   },
   "outputs": {
     "png": "C:\\develop\\waveP\\output\\public\\quantum\\gravity_quantum_interference_delta_predictions.png",
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\gravity_quantum_interference_delta_predictions.pdf",
     "atom_interferometer_unified_audit_png": "C:\\develop\\waveP\\output\\public\\quantum\\atom_interferometer_unified_audit.png",
+    "atom_interferometer_unified_audit_pdf": "C:\\develop\\waveP\\output\\public\\quantum\\atom_interferometer_unified_audit.pdf",
     "atom_interferometer_unified_audit_csv": "C:\\develop\\waveP\\output\\public\\quantum\\atom_interferometer_unified_audit_summary.csv",
     "atom_interferometer_unified_audit_metrics": "C:\\develop\\waveP\\output\\public\\quantum\\atom_interferometer_unified_audit_metrics.json"
   },

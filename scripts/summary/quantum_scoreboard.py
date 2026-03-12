@@ -46,7 +46,7 @@ def _clamp(x: float, lo: float, hi: float) -> float:
 
 def _score_norm_quantum(metric_public: str, metric_fallback: str, pmodel: str) -> Optional[float]:
     """
-    Return a normalized discrepancy score in [0,3] (smaller is better) for the quantum Table 1.
+    Return a normalized discrepancy score in [0,3] (smaller is better) for the quantum 検証サマリ表.
 
     Rules (coarse, for an overview scoreboard):
     - Use |σ| / |z| when present.
@@ -175,7 +175,7 @@ def build_quantum_scoreboard(root: Path) -> Dict[str, Any]:
         "inputs": {"paper_table1_quantum_results_json": str(table1_json).replace("\\", "/")},
         "rows": [],
         "notes": [
-            "これは Part III（量子）Table 1 を『1枚で俯瞰』するための要約スコアボード。",
+            "これは Part III（量子）検証サマリ表 を『1枚で俯瞰』するための要約スコアボード。",
             "OK/要改善/不一致 は、z/σ/手続き感度（Δ）の粗い proxy に基づく“目安”。厳密な判定は各節の棄却条件を正とする。",
         ],
     }
@@ -252,25 +252,31 @@ def main() -> int:
     out_dir = root / "output" / "private" / "summary"
     default_json = out_dir / "quantum_scoreboard.json"
     default_png = out_dir / "quantum_scoreboard.png"
+    default_pdf = out_dir / "quantum_scoreboard.pdf"
 
     ap = argparse.ArgumentParser(description="Build a quantum-only (Part III) scoreboard (overview).")
     ap.add_argument("--out-json", type=str, default=str(default_json), help="Output JSON path")
     ap.add_argument("--out-png", type=str, default=str(default_png), help="Output PNG path")
+    ap.add_argument("--out-pdf", type=str, default=str(default_pdf), help="Output PDF path")
     args = ap.parse_args()
 
     out_json = Path(args.out_json)
     out_png = Path(args.out_png)
+    out_pdf = Path(args.out_pdf)
 
     payload = build_quantum_scoreboard(root)
     plot_validation_scoreboard(
         payload,
         out_png=out_png,
+        out_pdf=out_pdf,
         title="総合スコアボード（量子：緑=OK / 黄=要改善 / 赤=不一致）",
         xlabel="正規化スコア（0=理想, 1=OK境界, 2=要改善境界）",
+        target_fig_h_in=12.8,
     )
 
     payload["outputs"] = {
         "scoreboard_png": str(out_png).replace("\\", "/"),
+        "scoreboard_pdf": str(out_pdf).replace("\\", "/"),
         "scoreboard_json": str(out_json).replace("\\", "/"),
     }
     _write_json(out_json, payload)
@@ -283,13 +289,14 @@ def main() -> int:
                 "inputs": {
                     "paper_table1_quantum_results_json": root / "output" / "private" / "summary" / "paper_table1_quantum_results.json"
                 },
-                "outputs": {"scoreboard_png": out_png, "scoreboard_json": out_json},
+                "outputs": {"scoreboard_png": out_png, "scoreboard_pdf": out_pdf, "scoreboard_json": out_json},
             }
         )
     except Exception:
         pass
 
     print(f"Wrote: {out_png}")
+    print(f"Wrote: {out_pdf}")
     print(f"Wrote: {out_json}")
     return 0
 

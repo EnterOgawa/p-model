@@ -69,7 +69,7 @@ def load_summary(summary_csv: Path) -> List[Dict[str, str]]:
 
 def plot_all_residuals_brdc(sats: List[str]) -> Path:
     _set_japanese_font()
-    plt.figure(figsize=(12, 7))
+    plt.figure(figsize=(14.2, 8.2))
 
     count = 0
     for sat in sats:
@@ -81,26 +81,44 @@ def plot_all_residuals_brdc(sats: List[str]) -> Path:
         try:
             df = pd.read_csv(filename)
             df["time_utc"] = pd.to_datetime(df["time_utc"])
-            plt.plot(df["time_utc"], df["res_brdc_s"] * 1e9, label=sat, linewidth=0.8, alpha=0.6)
+            plt.plot(df["time_utc"], df["res_brdc_s"] * 1e9, label=sat, linewidth=1.05, alpha=0.68)
             count += 1
         except Exception as e:
             print(f"[warn] failed to read {filename}: {e}")
 
-    plt.title("GPS 放送暦 時計残差（BRDC - IGS, 全衛星）", fontsize=16)
-    plt.xlabel("UTC時刻", fontsize=12)
-    plt.ylabel("時計残差 [ns]", fontsize=12)
+    plt.title("GPS 放送暦 時計残差（BRDC - IGS, 全衛星）", fontsize=20.6)
+    plt.xlabel("UTC時刻", fontsize=16.2, rotation=0, labelpad=10)
+    plt.ylabel("時計残差 [ns]", fontsize=16.2)
     plt.axhline(0, color="black", linestyle="-", linewidth=0.8)
     plt.grid(True, linestyle="--", alpha=0.5)
-    plt.legend(bbox_to_anchor=(1.01, 1), loc="upper left", fontsize="small", ncol=2, borderaxespad=0.0)
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-    plt.gcf().autofmt_xdate()
+    plt.tick_params(axis="both", labelsize=14.4)
+    plt.legend(
+        bbox_to_anchor=(1.005, 1.0),
+        loc="upper left",
+        fontsize=12.8,
+        ncol=2,
+        borderaxespad=0.0,
+        labelspacing=0.36,
+        handlelength=1.7,
+        columnspacing=0.82,
+        frameon=True,
+        borderpad=0.48,
+    )
+    ax = plt.gca()
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+    for tick_label in ax.get_xticklabels():
+        tick_label.set_rotation(28)
+        tick_label.set_ha("right")
     plt.tight_layout()
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     out_png = OUT_DIR / "gps_clock_residuals_all_31.png"
+    out_pdf = OUT_DIR / "gps_clock_residuals_all_31.pdf"
     plt.savefig(out_png, dpi=300)
+    plt.savefig(out_pdf)
     plt.close()
     print(f"[ok] {out_png} (plotted {count} sats)")
+    print(f"[ok] {out_pdf} (plotted {count} sats)")
     return out_png
 
 
@@ -116,31 +134,42 @@ def plot_residual_compare_g01() -> Optional[Path]:
     df["time_utc"] = pd.to_datetime(df["time_utc"])
 
     _set_japanese_font()
-    plt.figure(figsize=(10.5, 5.2))
-    plt.plot(df["time_utc"], df["res_brdc_s"] * 1e9, label="放送暦（BRDC）- IGS", linewidth=1.6)
+    plt.figure(figsize=(12.2, 6.4))
+    plt.plot(df["time_utc"], df["res_brdc_s"] * 1e9, label="放送暦（BRDC）- IGS", linewidth=2.1)
     # 条件分岐: `"res_pmodel_s" in df.columns` を満たす経路を評価する。
     if "res_pmodel_s" in df.columns:
         plt.plot(
             df["time_utc"],
             df["res_pmodel_s"] * 1e9,
             label="P-model（dt_rel除去）- IGS",
-            linewidth=1.6,
+            linewidth=2.1,
         )
 
-    plt.title("GPS 時計残差：G01（観測IGSに対する比較）", fontsize=14)
-    plt.xlabel("UTC時刻")
-    plt.ylabel("残差 [ns]（バイアス＋ドリフト除去後）")
+    plt.title("GPS 時計残差：G01（観測IGSに対する比較）", fontsize=17.8)
+    plt.xlabel("UTC時刻", fontsize=16.2)
+    plt.ylabel("残差 [ns]（バイアス＋ドリフト除去後）", fontsize=16.2)
     plt.axhline(0.0, color="black", linewidth=1.0, alpha=0.6)
     plt.grid(True, alpha=0.3)
+    plt.tick_params(axis="both", labelsize=14.8)
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
     plt.gcf().autofmt_xdate()
-    plt.legend()
+    plt.legend(
+        fontsize=16.2,
+        loc="upper right",
+        frameon=True,
+        borderpad=0.7,
+        labelspacing=0.45,
+        handlelength=2.4,
+    )
     plt.tight_layout()
 
     out_png = OUT_DIR / "gps_residual_compare_G01.png"
+    out_pdf = OUT_DIR / "gps_residual_compare_G01.pdf"
     plt.savefig(out_png, dpi=220)
+    plt.savefig(out_pdf)
     plt.close()
     print(f"[ok] {out_png}")
+    print(f"[ok] {out_pdf}")
     return out_png
 
 
@@ -225,24 +254,28 @@ def plot_rms_compare(summary_rows: List[Dict[str, str]]) -> Tuple[Optional[Path]
     p_vals = [p_map.get(k, float("nan")) for k in labels]
 
     _set_japanese_font()
-    fig, ax = plt.subplots(figsize=(13.0, 5.2))
+    fig, ax = plt.subplots(figsize=(14.8, 6.9))
     x = range(len(labels))
     w = 0.42
     ax.bar([i - w / 2 for i in x], b_vals, width=w, label="放送暦（BRDC）- IGS（RMS）")
     ax.bar([i + w / 2 for i in x], p_vals, width=w, label="P-model（dt_rel除去）- IGS（RMS）")
-    ax.set_title("GPS：観測IGSに対する残差RMS（全衛星）", fontsize=14)
-    ax.set_ylabel("RMS [ns]（バイアス＋ドリフト除去後）")
-    ax.set_xlabel("衛星PRN")
+    ax.set_title("GPS：観測IGSに対する残差RMS（全衛星）", fontsize=20.0)
+    ax.set_ylabel("RMS [ns]（バイアス＋ドリフト除去後）", fontsize=16.2)
+    ax.set_xlabel("衛星PRN", fontsize=16.2)
     ax.set_xticks(list(x))
-    ax.set_xticklabels(labels, rotation=60, ha="right", fontsize=8.5)
+    ax.set_xticklabels(labels, rotation=60, ha="right", fontsize=13.0)
+    ax.tick_params(axis="y", labelsize=14.2)
     ax.grid(True, axis="y", alpha=0.3)
-    ax.legend()
+    ax.legend(fontsize=14.6)
     fig.tight_layout()
 
     out_png = OUT_DIR / "gps_rms_compare.png"
+    out_pdf = OUT_DIR / "gps_rms_compare.pdf"
     fig.savefig(out_png, dpi=220)
+    fig.savefig(out_pdf)
     plt.close(fig)
     print(f"[ok] {out_png}")
+    print(f"[ok] {out_pdf}")
     return out_png, metrics
 
 

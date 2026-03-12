@@ -474,8 +474,10 @@ def _plot(
     _set_japanese_font()
     import matplotlib.pyplot as plt
 
-    fig, axes = plt.subplots(2, 2, figsize=(16, 10))
-    ax_tt, ax_ee, ax_te, ax_phase = axes.ravel()
+    # 図102: 4段を2ブロック（上段:TT/EE, 下段:TE/位相）へ分割して可読性を上げる。
+    fig, axes = plt.subplots(2, 2, figsize=(17.8, 15.2))
+    ax_tt, ax_ee = axes[0]
+    ax_te, ax_phase = axes[1]
 
     ax_tt.plot(tt.ell, tt.bestfit, color="#1f77b4", linewidth=1.4, label="TT best-fit")
     ax_tt.scatter([f.ell_obs for f in tt_features], [f.dl_bestfit for f in tt_features], color="#d62728", s=55, zorder=4, label="TT peaks (fit)")
@@ -483,11 +485,11 @@ def _plot(
         ax_tt.axvline(f.ell_pred, color="#d62728", linestyle="--", linewidth=1.0, alpha=0.5)
 
     ax_tt.set_xlim(120, 1100)
-    ax_tt.set_xlabel("multipole ℓ")
-    ax_tt.set_ylabel("D_ℓ [μK²]")
-    ax_tt.set_title("TT peaks used to fix ℓ_A and φ")
+    ax_tt.set_xlabel("multipole ℓ", fontsize=18.4)
+    ax_tt.set_ylabel("D_ℓ [μK²]", fontsize=18.4)
+    ax_tt.set_title("TT peaks used to fix ℓ_A and φ", fontsize=20.8)
     ax_tt.grid(True, linestyle="--", alpha=0.35)
-    ax_tt.legend(fontsize=8, loc="upper right")
+    ax_tt.legend(fontsize=19.0, loc="upper right")
 
     ax_ee.errorbar(ee.ell, ee.dl, yerr=ee.sigma, fmt=".", color="#bbbbbb", alpha=0.35, label="EE observed")
     ax_ee.plot(ee.ell, ee.bestfit, color="#2ca02c", linewidth=1.3, label="EE best-fit")
@@ -496,11 +498,11 @@ def _plot(
         ax_ee.axvline(f.ell_pred, color="#9467bd", linestyle="--", linewidth=1.0, alpha=0.65)
 
     ax_ee.set_xlim(220, 1250)
-    ax_ee.set_xlabel("multipole ℓ")
-    ax_ee.set_ylabel("D_ℓ [μK²]")
-    ax_ee.set_title("EE: predicted half-phase shift from TT")
+    ax_ee.set_xlabel("multipole ℓ", fontsize=18.4)
+    ax_ee.set_ylabel("D_ℓ [μK²]", fontsize=18.4)
+    ax_ee.set_title("EE: predicted half-phase shift from TT", fontsize=20.8)
     ax_ee.grid(True, linestyle="--", alpha=0.35)
-    ax_ee.legend(fontsize=8, loc="upper right")
+    ax_ee.legend(fontsize=19.0, loc="upper right")
 
     ax_te.errorbar(te.ell, te.dl, yerr=te.sigma, fmt=".", color="#bbbbbb", alpha=0.35, label="TE observed")
     ax_te.plot(te.ell, te.bestfit, color="#ff7f0e", linewidth=1.3, label="TE best-fit")
@@ -513,11 +515,11 @@ def _plot(
         ax_te.axvline(f.ell_pred, color="#17becf", linestyle="--", linewidth=1.0, alpha=0.65)
 
     ax_te.set_xlim(180, 1900)
-    ax_te.set_xlabel("multipole ℓ")
-    ax_te.set_ylabel("D_ℓ [μK²]")
-    ax_te.set_title("TE: predicted quarter-phase shift from TT")
+    ax_te.set_xlabel("multipole ℓ", fontsize=18.4)
+    ax_te.set_ylabel("D_ℓ [μK²]", fontsize=18.4)
+    ax_te.set_title("TE: predicted quarter-phase shift from TT", fontsize=20.8)
     ax_te.grid(True, linestyle="--", alpha=0.35)
-    ax_te.legend(fontsize=8, loc="upper right")
+    ax_te.legend(fontsize=19.0, loc="upper right")
 
     expected = [0.5, 0.25]
     fitted = [float(phase_fit_ee["delta_fit"]), float(phase_fit_te["delta_fit"])]
@@ -528,31 +530,21 @@ def _plot(
     ax_phase.bar(x + 0.5 * w, fitted, width=w, color="#1f77b4", label="fitted")
     ax_phase.set_xticks(x)
     ax_phase.set_xticklabels(labels)
-    ax_phase.set_ylabel("phase offset Δφ")
+    ax_phase.set_ylabel("phase offset Δφ", fontsize=18.4)
     ax_phase.set_ylim(0.0, 0.9)
     ax_phase.grid(True, linestyle="--", alpha=0.35, axis="y")
-    ax_phase.set_title("Phase-offset audit (Planck TT/TE/EE)")
-    ax_phase.legend(fontsize=9, loc="upper right")
+    ax_phase.set_title("位相ずれ監査（Planck TT/TE/EE）", fontsize=20.8)
+    ax_phase.legend(fontsize=19.0, loc="upper right")
 
-    status = gate.get("overall_status", "n/a")
-    ee_shift = fitted[0] - expected[0]
-    te_shift = fitted[1] - expected[1]
-    fig.suptitle("CMB polarization transfer audit (Stokes extension + Thomson source)", fontsize=14)
-    fig.text(
-        0.5,
-        0.01,
-        (
-            f"overall={status}; Δφ_EE(obs-exp)={_fmt(float(ee_shift), 4)}, "
-            f"Δφ_TE(obs-exp)={_fmt(float(te_shift), 4)}; "
-            f"max|Δℓ|_EE={_fmt(float(gate['summary']['ee_max_abs_delta_ell']), 4)}, "
-            f"max|Δℓ|_TE={_fmt(float(gate['summary']['te_max_abs_delta_ell']), 4)}"
-        ),
-        ha="center",
-        fontsize=10,
-    )
-    plt.tight_layout(rect=(0.0, 0.03, 1.0, 0.94))
+    for axis in (ax_tt, ax_ee, ax_te, ax_phase):
+        axis.tick_params(labelsize=17.2)
+
+    fig.suptitle("CMB polarization transfer audit (Stokes extension + Thomson source)", fontsize=22.2)
+    # 図下注記は論文本文側へ移し、図中の重なりを回避する。
+    plt.tight_layout(rect=(0.0, 0.03, 1.0, 0.972))
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)
+    fig.savefig(out_png.with_suffix(".pdf"))
     plt.close(fig)
 
 
@@ -669,6 +661,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     base = "cosmology_cmb_polarization_phase_audit"
     out_png = out_dir / f"{base}.png"
+    out_pdf = out_dir / f"{base}.pdf"
     out_json = out_dir / f"{base}_metrics.json"
     out_fals = out_dir / f"{base}_falsification_pack.json"
     out_csv = out_dir / f"{base}_peaks.csv"
@@ -740,6 +733,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "gate": gate,
         "outputs": {
             "png": str(out_png).replace("\\", "/"),
+            "pdf": str(out_pdf).replace("\\", "/"),
             "metrics_json": str(out_json).replace("\\", "/"),
             "falsification_pack_json": str(out_fals).replace("\\", "/"),
             "peaks_csv": str(out_csv).replace("\\", "/"),
@@ -763,6 +757,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "related_outputs": {
             "metrics_json": str(out_json).replace("\\", "/"),
             "figure_png": str(out_png).replace("\\", "/"),
+            "figure_pdf": str(out_pdf).replace("\\", "/"),
             "peaks_csv": str(out_csv).replace("\\", "/"),
         },
     }
@@ -771,9 +766,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     copied: Dict[str, str] = {}
     # 条件分岐: `not bool(args.skip_public_copy)` を満たす経路を評価する。
     if not bool(args.skip_public_copy):
-        copied = _copy_to_public([out_png, out_json, out_fals, out_csv], Path(args.public_dir).resolve())
+        copied = _copy_to_public([out_png, out_pdf, out_json, out_fals, out_csv], Path(args.public_dir).resolve())
 
     print(f"[ok] png : {out_png}")
+    print(f"[ok] pdf : {out_pdf}")
     print(f"[ok] json: {out_json}")
     print(f"[ok] fals: {out_fals}")
     print(f"[ok] csv : {out_csv}")

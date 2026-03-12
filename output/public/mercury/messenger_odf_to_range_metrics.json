@@ -1,0 +1,26 @@
+{
+  "generated_utc": "2026-03-07T15:36:03.689418+00:00",
+  "phase_step": "8.7.48.2",
+  "status": "pass",
+  "reason": "ok",
+  "observable_mode": "range",
+  "data_root": "data/mercury/messenger",
+  "odf_root": "data/mercury/messenger/data-odf",
+  "normalized_csv": "data/mercury/messenger/derived/odf_range_observations.csv",
+  "n_candidate_files": 201,
+  "n_scan_rows": 201,
+  "n_rows_out": 7277,
+  "scan_status_counts": {
+    "pass": 191,
+    "watch": 10,
+    "reject": 0
+  },
+  "outputs_private": [
+    "output/private/mercury/messenger_odf_to_range_file_scan.csv",
+    "output/private/mercury/messenger_odf_to_range_metrics.json"
+  ],
+  "outputs_public": [
+    "output/public/mercury/messenger_odf_to_range_file_scan.csv",
+    "output/public/mercury/messenger_odf_to_range_metrics.json"
+  ]
+}

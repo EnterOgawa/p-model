@@ -1,0 +1,78 @@
+{
+  "generated_utc": "2026-03-12T03:01:42.726931+00:00",
+  "required_mediums": [
+    "IONCAL",
+    "TROPCAL",
+    "PLSMCAL"
+  ],
+  "local_csp_file_count": 0,
+  "local_csp_paths": [],
+  "local_csp_medium_counts": {
+    "IONCAL": 1,
+    "TROPCAL": 1,
+    "PLSMCAL": 1
+  },
+  "local_mediums_observed": [
+    "IONCAL",
+    "PLSMCAL",
+    "TROPCAL"
+  ],
+  "all_required_mediums_local": true,
+  "ancillary_manifest_path": "C:\\develop\\waveP\\data\\cassini\\sources\\csp_media_ancillary\\media_ancillary_manifest.json",
+  "ancillary_manifest_available": true,
+  "ancillary_medium_availability": {
+    "IONCAL": true,
+    "TROPCAL": true,
+    "PLSMCAL": true
+  },
+  "ancillary_all_required_mediums_local": true,
+  "ancillary_command_windows_n": 183,
+  "source_documents": {
+    "trk_2_23_paths": [
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0022\\document\\trk_2_23_000531.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0023\\document\\trk_2_23_000531.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0024\\document\\trk_2_23_000531.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0025\\document\\trk_2_23_000531.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0026\\document\\trk_2_23_000531.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0027\\document\\trk_2_23_000531.txt"
+    ],
+    "casrssis_paths": [
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0022\\document\\casrssis.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0023\\document\\casrssis.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0024\\document\\casrssis.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0025\\document\\casrssis.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0026\\document\\casrssis.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0027\\document\\casrssis.txt"
+    ],
+    "dors_002_020501_paths": [
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0022\\document\\dors_002_020501.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0023\\document\\dors_002_020501.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0024\\document\\dors_002_020501.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0025\\document\\dors_002_020501.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0026\\document\\dors_002_020501.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0027\\document\\dors_002_020501.txt"
+    ],
+    "route_confirmed_paths": [
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0022\\document\\trk_2_23_000531.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0023\\document\\trk_2_23_000531.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0024\\document\\trk_2_23_000531.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0025\\document\\trk_2_23_000531.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0026\\document\\trk_2_23_000531.txt",
+      "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\cors_0027\\document\\trk_2_23_000531.txt"
+    ]
+  },
+  "doc_csp_name_samples": [
+    "IONCAL_82_0112_DOPR.CSP",
+    "TROPCAL_82_0002_DOPRNG.CSP"
+  ],
+  "doc_medium_mentions": {
+    "IONCAL": 24,
+    "TROPCAL": 18,
+    "PLSMCAL": 12
+  },
+  "delivery_route_documented": true,
+  "public_reproducibility_state": "pds_ancillary_payload_complete",
+  "hard_watch_required": false,
+  "hard_watch_reason": "",
+  "next_action": "Local CSP payload is complete; run record-level media join hook."
+}

@@ -1,0 +1,57 @@
+{
+  "generated_utc": "2026-03-08T03:08:18.223802+00:00",
+  "phase": {
+    "step": "8.7.48.35"
+  },
+  "overall_status": "pass",
+  "diff_count": 0,
+  "checks": [
+    {
+      "id": "switch_decision_id_registry_vs_checklist",
+      "status": "pass",
+      "expected": "hold_policy_B_until_policy_D_ready",
+      "actual": "hold_policy_B_until_policy_D_ready"
+    },
+    {
+      "id": "watch_statement_id_registry_vs_checklist",
+      "status": "pass",
+      "expected": "watch_hold_policy_B_until_policy_D_ready",
+      "actual": "watch_hold_policy_B_until_policy_D_ready"
+    },
+    {
+      "id": "watch_statement_text_registry_vs_checklist",
+      "status": "pass",
+      "expected": "beta_terminal=watch; active policy is fixed to policy_B_exclude_comparator_when_ineligible until policy_D_promotion_ready=true and blockers (llr_bias_gate,llr_promotion_gate,policy_d_bias_gate) are resolved.",
+      "actual": "beta_terminal=watch; active policy is fixed to policy_B_exclude_comparator_when_ineligible until policy_D_promotion_ready=true and blockers (llr_bias_gate,llr_promotion_gate,policy_d_bias_gate) are resolved."
+    },
+    {
+      "id": "score_detail_contains_switch_decision_id",
+      "status": "pass",
+      "expected": "hold_policy_B_until_policy_D_ready",
+      "actual": "VLBI終端（8.7.46.29）+ LLR（8.7.47）+ MESSENGER（8.7.48）を統合し、β導出終端ゲートで判定。 active_policy=policy_B_exclude_comparator_when_ineligible (B: exclude comparator) / reason=vlbi_subset_refit_eligible=false -> exclude comparator fallback / policy_B_hold=pass / policy_D_promotion=watch / policy_D_blockers=llr_bias_gate,llr_promotion_gate,policy_d_bias_gate / recommended_policy=policy_B_exclude_comparator_when_ineligible / recommended_reason=policy_D_promotion_ready=false -> keep policy_B hold / switch_decision=hold_policy_B_until_policy_D_ready / switch_hold_reason=policy_D_promotion_ready=false / switch_branch=hold_path_not_ready / switch_branch_text=if policy_D_promotion_ready=false or blockers remain, keep policy_B_exclude_comparator_when_ineligible. / watch_statement=beta_terminal=watch; active policy is fixed to policy_B_exclude_comparator_when_ineligible until policy_D_promotion_ready=true and blockers (llr_bias_gate,llr_promotion_gate,policy_d_bias_gate) are resolved."
+    },
+    {
+      "id": "score_detail_contains_watch_statement_text",
+      "status": "pass",
+      "expected": "beta_terminal=watch; active policy is fixed to policy_B_exclude_comparator_when_ineligible until policy_D_promotion_ready=true and blockers (llr_bias_gate,llr_promotion_gate,policy_d_bias_gate) are resolved.",
+      "actual": "VLBI終端（8.7.46.29）+ LLR（8.7.47）+ MESSENGER（8.7.48）を統合し、β導出終端ゲートで判定。 active_policy=policy_B_exclude_comparator_when_ineligible (B: exclude comparator) / reason=vlbi_subset_refit_eligible=false -> exclude comparator fallback / policy_B_hold=pass / policy_D_promotion=watch / policy_D_blockers=llr_bias_gate,llr_promotion_gate,policy_d_bias_gate / recommended_policy=policy_B_exclude_comparator_when_ineligible / recommended_reason=policy_D_promotion_ready=false -> keep policy_B hold / switch_decision=hold_policy_B_until_policy_D_ready / switch_hold_reason=policy_D_promotion_ready=false / switch_branch=hold_path_not_ready / switch_branch_text=if policy_D_promotion_ready=false or blockers remain, keep policy_B_exclude_comparator_when_ineligible. / watch_statement=beta_terminal=watch; active policy is fixed to policy_B_exclude_comparator_when_ineligible until policy_D_promotion_ready=true and blockers (llr_bias_gate,llr_promotion_gate,policy_d_bias_gate) are resolved."
+    },
+    {
+      "id": "score_metric_contains_expected_switch_branch",
+      "status": "pass",
+      "expected": "switch_branch=hold_path_not_ready",
+      "actual": "VLBI=reject / LLR=watch / MESSENGER=pass / cross=reject / beta_terminal=watch / |z(beta_vlbi-beta_llr)|=13.392 / beta_comb=1.000674+/-0.000960562 / |z(beta_comb-1)|=0.702 / messenger_replay_z=1.957 / bias(vlbi/llr)=reject/watch / bias(messenger)=pass / active_policy=policy_B_exclude_comparator_when_ineligible / policy_B_hold=pass / policy_D_promotion=watch,ready=false / policy_D_blockers=llr_bias_gate,llr_promotion_gate,policy_d_bias_gate / recommended_policy=policy_B_exclude_comparator_when_ineligible / switch_decision=hold_policy_B_until_policy_D_ready(required=false,allowed=false) / switch_branch=hold_path_not_ready / watch_statement_id=watch_hold_policy_B_until_policy_D_ready"
+    },
+    {
+      "id": "score_detail_contains_expected_switch_branch_text",
+      "status": "pass",
+      "expected": "if policy_D_promotion_ready=false or blockers remain, keep policy_B_exclude_comparator_when_ineligible.",
+      "actual": "VLBI終端（8.7.46.29）+ LLR（8.7.47）+ MESSENGER（8.7.48）を統合し、β導出終端ゲートで判定。 active_policy=policy_B_exclude_comparator_when_ineligible (B: exclude comparator) / reason=vlbi_subset_refit_eligible=false -> exclude comparator fallback / policy_B_hold=pass / policy_D_promotion=watch / policy_D_blockers=llr_bias_gate,llr_promotion_gate,policy_d_bias_gate / recommended_policy=policy_B_exclude_comparator_when_ineligible / recommended_reason=policy_D_promotion_ready=false -> keep policy_B hold / switch_decision=hold_policy_B_until_policy_D_ready / switch_hold_reason=policy_D_promotion_ready=false / switch_branch=hold_path_not_ready / switch_branch_text=if policy_D_promotion_ready=false or blockers remain, keep policy_B_exclude_comparator_when_ineligible. / watch_statement=beta_terminal=watch; active policy is fixed to policy_B_exclude_comparator_when_ineligible until policy_D_promotion_ready=true and blockers (llr_bias_gate,llr_promotion_gate,policy_d_bias_gate) are resolved."
+    }
+  ],
+  "inputs": {
+    "registry": "output/public/summary/beta_cross_channel_registry.json",
+    "checklist": "output/public/summary/beta_terminal_reject_checklist.json",
+    "scoreboard": "output/public/summary/validation_scoreboard.json"
+  }
+}

@@ -257,7 +257,7 @@
       "Only watch-level checks fail (current proxy-input stage)."
     ]
   },
-  "generated_utc": "2026-02-20T01:42:11.184613+00:00",
+  "generated_utc": "2026-03-12T09:05:10.367715+00:00",
   "inputs": {
     "offset_observations_csv": "data/cosmology/bullet_cluster/collision_offset_observables.csv",
     "offset_source_mode": "primary_map_registered",

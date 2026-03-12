@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-19T10:41:13.496842+00:00",
+  "generated_utc": "2026-03-12T09:03:16.157013+00:00",
   "phase": {
     "phase": 8,
     "step": "8.7.13",
@@ -18,15 +18,15 @@
     "hom_noise_psd_watch_audit_json": "output/public/quantum/hom_noise_psd_watch_audit.json"
   },
   "input_hashes_sha256": {
-    "action_principle_el_derivation_audit_json": "9813f2117cedef3561594fafc113b06f12ea2ff12ec7fad11cec29af71b2529c",
-    "nonrelativistic_reduction_schrodinger_mapping_audit_json": "f2ee2d47d67c018435ca1f27d7cb1491a98a2165cb4e1deeb3476c84a9890fde",
-    "born_route_a_proxy_constraints_pack_json": "8630a1ef7280cea036690e14a125223822f610c5aa3f8a7932ae9dca859a0c34",
-    "quantum_connection_born_ab_gate_json": "43b2b268eedfebd499b64019ec4aa2b512e1e8babf2e3c322c2a5c291c38ac15",
-    "quantum_connection_bridge_table_json": "b613af195d09550a9dd9193dfece61b450305ca559503d8a79d6555eba68ffc1",
-    "quantum_connection_shared_kpi_json": "1cca1e8b34cc17d1042744105a16e1a14e7d08723246b67090fa7e5f3d3dcfc7",
-    "derivation_parameter_falsification_pack_json": "31354d1096af5dd3b382b8f0386644e97e436df440ec63ead8c95d66974cb1ba",
+    "action_principle_el_derivation_audit_json": "7c82b74b02dd603a856d533d7acb258828ab4d3b6ce42c869912c921a936b77b",
+    "nonrelativistic_reduction_schrodinger_mapping_audit_json": "46b16f672ff5cead40aba80e17f765223b3fd2727d5cd0dd390bc7a2b1b6148b",
+    "born_route_a_proxy_constraints_pack_json": "e95781f059fc4dfd64ca210bb0c94aac3f53001dfd2a747b1cdb764b776ccd59",
+    "quantum_connection_born_ab_gate_json": "955e8ca2a45fc965770d988ce8989e1b21eb100eeaaa656c398b38d254a65147",
+    "quantum_connection_bridge_table_json": "610e159e7cc4eac918b2e0e49a6bc0de9191afe86c9c8bfe2d9894243911da4d",
+    "quantum_connection_shared_kpi_json": "b4299ac173db3e74f66ebe9f2e7b236c1554081e77f62edd33c74adf1fae851c",
+    "derivation_parameter_falsification_pack_json": "ce26ea7e4afc908356f4181f6b98b871b529cb0abcb97d1d7b3bc276f3867663",
     "bell_kwiat_delay_signature_watch_audit_json": "662fedf146dc2de16a2e3fcf3c75ef537f83e6a8d980e8435b6ff7c709678f5d",
-    "hom_noise_psd_watch_audit_json": "744f6711fa7c2a467d85ce2868b3b5869320a9d701af64e940b89bedaa19cc52"
+    "hom_noise_psd_watch_audit_json": "191bffa0e90a2416563da8c9fc5dad54bc79a227a6476e2d9309cb18080e2cba"
   },
   "checks": [
     {
@@ -176,14 +176,14 @@
     {
       "id": "shared::overall_status",
       "metric": "shared_kpi_overall",
-      "value": "pass",
+      "value": "reject",
       "expected": "pass",
-      "pass": true,
+      "pass": false,
       "gate_level": "hard",
-      "status": "pass",
-      "score": 1.0,
+      "status": "reject",
+      "score": 0.0,
       "source": "quantum_connection_shared_kpi",
-      "note": "量子接続共通KPIの overall.status。"
+      "note": "shared KPI overall gate is hard."
     },
     {
       "id": "bridge::overall_not_reject",
@@ -223,14 +223,22 @@
     }
   ],
   "decision": {
-    "route_a_gate": "A_continue",
-    "transition": "A_stay",
-    "overall_status": "watch",
-    "hard_fail_ids": [],
+    "route_a_gate": "A_reject",
+    "transition": "A_to_B",
+    "overall_status": "reject",
+    "hard_fail_ids": [
+      "shared::overall_status"
+    ],
     "watchlist": [
       "hom_noise_psd_shape",
       "kwiat2013_prl111_130406_05082013_15:delay_signature"
     ],
+    "shared_gate_policy": "strict_hard",
+    "shared_gate_policy_result": {
+      "demoted_to_watch": false,
+      "watch_eligibility": true,
+      "watch_eligibility_reason": "bell_pairing_only_reject"
+    },
     "watch_convergence": {
       "watch_n": 2,
       "nonhard_stable_n": 2,
@@ -266,7 +274,17 @@
       ]
     },
     "bridge_status": "watch",
-    "shared_status": "pass",
+    "shared_status": "reject",
+    "shared_gate_policy": "strict_hard",
+    "shared_gate_policy_eval": {
+      "eligible": true,
+      "reason": "bell_pairing_only_reject",
+      "selection_ok": true,
+      "delay_ok": true,
+      "pairing_ok": false,
+      "other_channels_ok": true,
+      "pairing_delta_sigma_max": 129.42291337930078
+    },
     "watch_stability": {
       "kwiat_delay_signature": {
         "decision": "keep_watch_nonhard_gate",

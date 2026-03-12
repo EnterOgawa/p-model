@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-17T02:49:44.845006+00:00",
+  "generated_utc": "2026-03-12T09:03:18.783746+00:00",
   "phase": {
     "phase": 8,
     "step": "8.7.21.1",
@@ -13,10 +13,10 @@
     "derivation_observable_chain_lock_audit_json": "output/public/quantum/derivation_observable_chain_lock_audit.json"
   },
   "input_hashes_sha256": {
-    "action_principle_el_derivation_audit_json": "9813f2117cedef3561594fafc113b06f12ea2ff12ec7fad11cec29af71b2529c",
-    "nonrelativistic_reduction_schrodinger_mapping_audit_json": "f2ee2d47d67c018435ca1f27d7cb1491a98a2165cb4e1deeb3476c84a9890fde",
-    "derivation_parameter_falsification_pack_json": "31354d1096af5dd3b382b8f0386644e97e436df440ec63ead8c95d66974cb1ba",
-    "derivation_observable_chain_lock_audit_json": "15c71eb4b046675d5bc8d1529623495f32a157c9a049049b62065ff2ec8e0eac"
+    "action_principle_el_derivation_audit_json": "7c82b74b02dd603a856d533d7acb258828ab4d3b6ce42c869912c921a936b77b",
+    "nonrelativistic_reduction_schrodinger_mapping_audit_json": "46b16f672ff5cead40aba80e17f765223b3fd2727d5cd0dd390bc7a2b1b6148b",
+    "derivation_parameter_falsification_pack_json": "ce26ea7e4afc908356f4181f6b98b871b529cb0abcb97d1d7b3bc276f3867663",
+    "derivation_observable_chain_lock_audit_json": "1704dc81b74c53e0c121b09978ff2bb88470c96a800edb27fc32bc9b4242b391"
   },
   "assumptions": [
     "Boundary variation is fixed to zero at the audit boundary.",
@@ -171,14 +171,26 @@
     {
       "id": "chain::hard_fail",
       "metric": "hard_fail_ids_n",
-      "value": 0,
+      "value": 1,
       "expected": 0,
-      "pass": true,
+      "pass": false,
       "gate_level": "hard",
+      "status": "reject",
+      "score": 0.0,
+      "source": "derivation_observable_chain_lock_audit",
+      "note": "導出チェーン全体で hard fail が無い。"
+    },
+    {
+      "id": "chain::shared_gate_policy",
+      "metric": "shared_gate_policy(chain_lock)",
+      "value": "strict_hard",
+      "expected": "strict_hard",
+      "pass": true,
+      "gate_level": "watch",
       "status": "pass",
       "score": 1.0,
       "source": "derivation_observable_chain_lock_audit",
-      "note": "導出チェーン全体で hard fail が無い。"
+      "note": "chain lock が想定どおりの shared gate policy で生成されている。"
     },
     {
       "id": "chain::watch_convergence",
@@ -239,14 +251,19 @@
     "chain_watchlist": [
       "hom_noise_psd_shape",
       "kwiat2013_prl111_130406_05082013_15:delay_signature"
-    ]
+    ],
+    "chain_shared_gate_policy": "strict_hard",
+    "expected_shared_gate_policy": "strict_hard"
   },
   "decision": {
-    "overall_status": "pass",
-    "hard_fail_ids": [],
+    "overall_status": "reject",
+    "hard_fail_ids": [
+      "chain::hard_fail"
+    ],
     "watch_ids": [],
     "route_a_gate": "A_continue",
     "transition": "A_stay",
+    "shared_gate_policy": "strict_hard",
     "rule": "Reject if any hard closure check fails; watch if only non-hard watch-convergence check fails; otherwise pass."
   }
 }

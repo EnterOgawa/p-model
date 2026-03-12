@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-20T12:38:33.711601+00:00",
+  "generated_utc": "2026-03-11T13:54:44.590766+00:00",
   "thresholds": {
     "selection_origin_ratio_min": 1.0,
     "delay_signature_z_min": 3.0,
@@ -143,16 +143,16 @@
       "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
       "statistic": "CH_J",
       "selection_knob": "window_ns",
-      "delta_window": 0.003506711345143672,
-      "sigma_stat_med": 5.361102175232119e-06,
-      "ratio": 654.1026883136847,
-      "recommended_window_ns": 1000.0,
+      "delta_window": 0.0010034215964490737,
+      "sigma_stat_med": 5.352180330385456e-06,
+      "ratio": 187.4790336851017,
+      "recommended_window_ns": 2000.0,
       "recommended_window_method": {
         "name": "trial_match_pairs_total",
         "note": "Recommended window matches the trial-based coincidence total (independent pipeline).",
         "trial_total_coinc": 38158,
-        "selected_pairs_total": 40056,
-        "abs_delta_pairs": 1898
+        "selected_pairs_total": 23756,
+        "abs_delta_pairs": 14402
       },
       "ks_delay": {
         "Alice": 0.02869748256715876,
@@ -313,10 +313,10 @@
       "note": "Freeze natural window/offset by an ex-ante rule (no access to Bell statistic). Sweeps are treated as systematics, not optimizers.",
       "freeze_policy_json": {
         "path": "output/public/quantum/bell/freeze_policy.json",
-        "sha256": "6cc27820672d26b0cbee2f9e020b0b2ed6ec87df4c7eecf587104986dd7ad021"
+        "sha256": "c024cba43559b5fa6203b9ae36780231c24432785e4672634826ba76f449ad91"
       },
       "freeze_policy": {
-        "generated_utc": "2026-02-20T12:38:30.598362+00:00",
+        "generated_utc": "2026-03-11T13:54:41.337943+00:00",
         "phase": {
           "phase": 7,
           "step": "7.20.2",
@@ -449,15 +449,15 @@
             "evidence": {
               "natural_window_frozen_json": {
                 "path": "output/public/quantum/bell/weihs1998_longdist_longdist1/natural_window_frozen.json",
-                "sha256": "3f0c4c705ecef8a284fb700cb11a2241723d7d59da0451cee0938f69f011a9e9"
+                "sha256": "d05b0710c8c520b757ddc8a562638d795eb9c08d8b7869c6360a6f95df4b76a0"
               },
               "window_sweep_metrics_json": {
                 "path": "output/public/quantum/bell/weihs1998_longdist_longdist1/window_sweep_metrics.json",
-                "sha256": "412bb942db9e8f97e13e7c3e2cae2b3e2e55e4b826f9c3490ebd1e9bfde52758"
+                "sha256": "f14adc08ee61b0952d5eebf49e8324c57cee7d13a30a04cd4b101bc4649cb582"
               },
               "offset_sweep_metrics_json": {
                 "path": "output/public/quantum/bell/weihs1998_longdist_longdist1/offset_sweep_metrics.json",
-                "sha256": "556705251655bed2f83f8d2279c485690dc317373742ae92d70b1801a311618c"
+                "sha256": "0bbba477eb93afb5844b32f6bf8e4f59ca1aab4b8dece4e98b4d7bdb9ad2c27c"
               }
             }
           },
@@ -486,15 +486,15 @@
             "evidence": {
               "natural_window_frozen_json": {
                 "path": "output/public/quantum/bell/delft_hensen2015/natural_window_frozen.json",
-                "sha256": "fa54b0539e9648c2d19d3b8ceebac416354a9f29f58c4e797f006a89f865fd30"
+                "sha256": "5ea47e0bd6c3ac6db566dd57e4538ad358619f194140ceb0b30150add71cdf22"
               },
               "window_sweep_metrics_json": {
                 "path": "output/public/quantum/bell/delft_hensen2015/window_sweep_metrics.json",
-                "sha256": "cf7a69acc53b81067269cea7962ede2ac735d45fdca6bbe923f2b340cab755b8"
+                "sha256": "4ddd4e9406c03c03fea807defb64171d2245b536b6aae08b66c0169ade9cd2e3"
               },
               "offset_sweep_metrics_json": {
                 "path": "output/public/quantum/bell/delft_hensen2015/offset_sweep_metrics.json",
-                "sha256": "906550312044e4d9d671a5ce088fcfea336161256174809804f7801c0df29d16"
+                "sha256": "ad8c3de6fed6f0a14365287892e34134806677f67ac28d9c1614b7539e9adc00"
               }
             }
           },
@@ -523,15 +523,15 @@
             "evidence": {
               "natural_window_frozen_json": {
                 "path": "output/public/quantum/bell/delft_hensen2016_srep30289/natural_window_frozen.json",
-                "sha256": "3272ed85874946f20e6ab4a54b52d51ed6f814e0022092c2d1e735b4f43f4370"
+                "sha256": "9447d6f13d37e27bcbea88bdaabd62e451c1afd11c5df9a14fa1adbb25cee842"
               },
               "window_sweep_metrics_json": {
                 "path": "output/public/quantum/bell/delft_hensen2016_srep30289/window_sweep_metrics.json",
-                "sha256": "0d13c38ee43350e607a410d1cd0a65ceca3b8679117bf9315c78ddaac3d06b4a"
+                "sha256": "33f3ed01d97b6a3c2b478acd3d0557f693052c84b5935a61a3ce374986c704f2"
               },
               "offset_sweep_metrics_json": {
                 "path": "output/public/quantum/bell/delft_hensen2016_srep30289/offset_sweep_metrics.json",
-                "sha256": "9e3aae9b7671dafbfc6eed4fef6d1bb3c46566c96ca116af9c3334f1fd1b6120"
+                "sha256": "1e06512a47f2204b2e388721490092ebbf6ebeb1e26f6994c12c68503d9f9eec"
               }
             }
           },
@@ -540,18 +540,18 @@
             "display_name": "NIST",
             "selection_knob": "window_ns",
             "recommended": {
-              "recommended_window_ns": 1000.0,
+              "recommended_window_ns": 2000.0,
               "recommended_start_offset_ps": null,
               "recommended_window_method": {
                 "name": "trial_match_pairs_total",
                 "note": "Recommended window matches the trial-based coincidence total (independent pipeline).",
                 "trial_total_coinc": 38158,
-                "selected_pairs_total": 40056,
-                "abs_delta_pairs": 1898
+                "selected_pairs_total": 23756,
+                "abs_delta_pairs": 14402
               }
             },
             "frozen": {
-              "frozen_window_ns": 1000.0,
+              "frozen_window_ns": 2000.0,
               "frozen_start_offset_ps": null,
               "snap_rule": "min(window in grid where window >= recommended_window_ns); fallback: min grid"
             },
@@ -563,19 +563,19 @@
             "evidence": {
               "natural_window_frozen_json": {
                 "path": "output/public/quantum/bell/nist_03_43_afterfixingModeLocking_s3600/natural_window_frozen.json",
-                "sha256": "da16bf5704e3f0682da145f6cdd03e4db4d40b98f6f9c61e53bb707f98e31708"
+                "sha256": "8ca258b5f4a117252043121e76963d9f7b19bc40eeec52a3d8f45ef27a2b22d5"
               },
               "window_sweep_metrics_json": {
                 "path": "output/public/quantum/bell/nist_03_43_afterfixingModeLocking_s3600/window_sweep_metrics.json",
-                "sha256": "79b617058a8572b147012c8704bd6569ae61b9803781cb3ea8adc92eb41af204"
+                "sha256": "e14c79f3449f49fbdd52e13c8cd077d89b064d24e99c858f33b375dcc0b1c7ff"
               },
               "offset_sweep_metrics_json": {
                 "path": "output/public/quantum/bell/nist_03_43_afterfixingModeLocking_s3600/offset_sweep_metrics.json",
-                "sha256": "554bfb82ac5efa9df094a49466d618804b9216cfdee595bf39b5cf7649d49d7f"
+                "sha256": "ad0f0c1d242bd522a7053cf86ca9874e751ba548f5bd0256e18a75356ed812a5"
               },
               "trial_based_counts_json": {
                 "path": "output/public/quantum/bell/nist_03_43_afterfixingModeLocking_s3600/trial_based_counts.json",
-                "sha256": "5e6c9d60a95ed45f560cc2d5758fbd269aab5fa75d9b3a0f9356df8280390e2a"
+                "sha256": "0d4b5dfe58096b33a2e29d66faae1bdfa4ae59909f14e7e8bc720fab4cbf9e85"
               }
             }
           },
@@ -606,15 +606,15 @@
             "evidence": {
               "natural_window_frozen_json": {
                 "path": "output/public/quantum/bell/kwiat2013_prl111_130406_05082013_15/natural_window_frozen.json",
-                "sha256": "9099c2618a0591e1483751b42cc71a93b852bc15756cf6c901c4e8b7bff80ffa"
+                "sha256": "98902e8bafd67d227001dadfb91d65eda9135c3cd1b8ff997f8dc4ab6862373d"
               },
               "window_sweep_metrics_json": {
                 "path": "output/public/quantum/bell/kwiat2013_prl111_130406_05082013_15/window_sweep_metrics.json",
-                "sha256": "72321ad2de890483d1a8b6833419228bd8c4a1d43213f85f5a3bcd60531c4cf8"
+                "sha256": "3e9558f9c5b61f52e0c64714e8e3eb9c908c7b87ec7c18c32cf8f84ff676d28c"
               },
               "trial_based_counts_json": {
                 "path": "output/public/quantum/bell/kwiat2013_prl111_130406_05082013_15/trial_based_counts.json",
-                "sha256": "132f9d0ebbeb116b8782ba11d5467c3a19dd25fa6d9bdbb41320e9c1f9999967"
+                "sha256": "0398256f1ea2b4c6cdac4c86985d9c665380f304727bf0d145909cdd9366ca25"
               }
             }
           }
@@ -622,7 +622,7 @@
         "inputs": {
           "falsification_pack_json": {
             "path": "output/public/quantum/bell/falsification_pack.json",
-            "sha256": "7820256fb2c8943b75b540cc3ae316f1d4a5f885e882dd7636f2e21ae002dcfa"
+            "sha256": "73672da0b5f76b334df143b0dc27395b25741739316771e52f2b9ad078ec5add"
           }
         },
         "outputs": {
@@ -632,7 +632,7 @@
     }
   },
   "cross_dataset": {
-    "generated_utc": "2026-02-20T12:38:33.714267+00:00",
+    "generated_utc": "2026-03-11T13:54:44.593496+00:00",
     "summary": {
       "n_datasets": 5,
       "selection_ratio_min": 3.6508938846257903,
@@ -670,8 +670,8 @@
         "selection_ratio": {
           "threshold_min": 1.0,
           "min": 5.822553917580089,
-          "median": 329.9626211156324,
-          "max": 654.1026883136847
+          "median": 96.6507938013409,
+          "max": 187.4790336851017
         },
         "delay_signature_z": {
           "threshold_min": 3.0,
@@ -684,14 +684,14 @@
     "covariance_summary": {
       "supported": true,
       "rank_eps_1e-10": 5,
-      "condition_number_abs": 555947201.1978604,
-      "largest_eigenvalue": 0.2227459297786455,
-      "largest_mode_explained_ratio": 0.94812987091292,
+      "condition_number_abs": 556045022.7163571,
+      "largest_eigenvalue": 0.22274533847333117,
+      "largest_mode_explained_ratio": 0.9481312917232276,
       "strongest_profile_corr_pair": {
         "dataset_i": "weihs1998_longdist_longdist1",
         "dataset_j": "nist_03_43_afterfixingModeLocking_s3600",
-        "corr": -0.8875010557695602,
-        "abs_corr": 0.8875010557695602
+        "corr": -0.8907975257870273,
+        "abs_corr": 0.8907975257870273
       }
     },
     "systematics_15items_summary": {
@@ -707,7 +707,7 @@
           "item_id": "coincidence_window",
           "item_label": "coincidence window",
           "median_delta_over_sigma": 3.1334835552781444,
-          "max_delta_over_sigma": 385.33643210135585
+          "max_delta_over_sigma": 130.6923264250103
         },
         {
           "item_id": "detector_efficiency_drift",
@@ -725,7 +725,7 @@
           "item_id": "threshold",
           "item_label": "threshold",
           "median_delta_over_sigma": 0.25,
-          "max_delta_over_sigma": 3.114292351975679
+          "max_delta_over_sigma": 1.0244788031569447
         },
         {
           "item_id": "transmission_loss",
@@ -743,80 +743,80 @@
           "item_id": "dark_count",
           "item_label": "dark count",
           "median_delta_over_sigma": 0.2,
-          "max_delta_over_sigma": 1.0006740563211505
+          "max_delta_over_sigma": 3.3472385923556156
         }
       ],
       "top_item_correlation_pairs": [
         {
-          "item_i": "coincidence_window",
-          "item_j": "accidental_correction",
-          "corr": 0.9999517303986725,
+          "item_i": "dark_count",
+          "item_j": "trial_definition",
+          "corr": 0.9987260638362726,
           "relation": "correlated"
         },
         {
           "item_i": "coincidence_window",
-          "item_j": "trial_definition",
-          "corr": 0.9992293346702208,
+          "item_j": "accidental_correction",
+          "corr": 0.998475625158159,
+          "relation": "correlated"
+        },
+        {
+          "item_i": "polarization_correction",
+          "item_j": "electronic_noise",
+          "corr": 0.9984153839392305,
           "relation": "correlated"
         },
         {
           "item_i": "accidental_correction",
           "item_j": "trial_definition",
-          "corr": 0.9989431937647397,
-          "relation": "correlated"
-        },
-        {
-          "item_i": "polarization_correction",
-          "item_j": "electronic_noise",
-          "corr": 0.9987746135513849,
-          "relation": "correlated"
-        },
-        {
-          "item_i": "threshold",
-          "item_j": "accidental_correction",
-          "corr": 0.9979114073924836,
-          "relation": "correlated"
-        },
-        {
-          "item_i": "coincidence_window",
-          "item_j": "threshold",
-          "corr": 0.9972859210114715,
-          "relation": "correlated"
-        },
-        {
-          "item_i": "threshold",
-          "item_j": "trial_definition",
-          "corr": 0.9956863863737774,
-          "relation": "correlated"
-        },
-        {
-          "item_i": "clock_sync",
-          "item_j": "environmental_variation",
-          "corr": -0.9948842730228044,
-          "relation": "correlated"
-        },
-        {
-          "item_i": "polarization_correction",
-          "item_j": "transmission_loss",
-          "corr": -0.9864653861351594,
-          "relation": "correlated"
-        },
-        {
-          "item_i": "transmission_loss",
-          "item_j": "electronic_noise",
-          "corr": -0.9844291684580093,
+          "corr": 0.99785023199529,
           "relation": "correlated"
         },
         {
           "item_i": "dark_count",
+          "item_j": "accidental_correction",
+          "corr": 0.9932743787375298,
+          "relation": "correlated"
+        },
+        {
+          "item_i": "coincidence_window",
           "item_j": "trial_definition",
-          "corr": 0.9823295708108426,
+          "corr": 0.9929137564428462,
           "relation": "correlated"
         },
         {
           "item_i": "coincidence_window",
           "item_j": "dark_count",
-          "corr": 0.9743980560977411,
+          "corr": 0.985761138360475,
+          "relation": "correlated"
+        },
+        {
+          "item_i": "polarization_correction",
+          "item_j": "transmission_loss",
+          "corr": -0.9836282641178515,
+          "relation": "correlated"
+        },
+        {
+          "item_i": "transmission_loss",
+          "item_j": "electronic_noise",
+          "corr": -0.9833860160952533,
+          "relation": "correlated"
+        },
+        {
+          "item_i": "transmission_loss",
+          "item_j": "environmental_variation",
+          "corr": -0.9804522735778062,
+          "relation": "correlated"
+        },
+        {
+          "item_i": "electronic_noise",
+          "item_j": "environmental_variation",
+          "corr": 0.9655562711215726,
+          "relation": "correlated"
+        },
+        {
+          "item_i": "coincidence_window",
+          "item_j": "threshold",
+          "corr": 0.9641085090437476,
           "relation": "correlated"
         }
       ]
@@ -827,7 +827,7 @@
         "n_pass": 0,
         "n_fail": 5,
         "median_value": 7.599442954268822,
-        "max_value": 654.1026883136847,
+        "max_value": 187.4790336851017,
         "min_value": 3.6508938846257903
       },
       "detection": {
@@ -861,7 +861,7 @@
       }
     },
     "null_tests_summary": {
-      "generated_utc": "2026-02-20T12:38:32.175874+00:00",
+      "generated_utc": "2026-03-11T13:54:43.088092+00:00",
       "phase": {
         "phase": 7,
         "step": "7.20.1",
@@ -926,7 +926,7 @@
           ],
           "null_tests_json": {
             "path": "output/public/quantum/bell/weihs1998_longdist_longdist1/null_tests.json",
-            "sha256": "2b3b7da2e5ce82f006098a1dbab78ddf53e4d54f02da331184a21b2ce861d7e0"
+            "sha256": "431941c9e734a7043d358892137bc1b61f05e453e6142e188fd425e0e1ab3ee9"
           }
         },
         {
@@ -962,7 +962,7 @@
           ],
           "null_tests_json": {
             "path": "output/public/quantum/bell/delft_hensen2015/null_tests.json",
-            "sha256": "552d8704f6d86acf6b3d5d9f02c77faa7a8dd296d2682ac4f4c9b35cbceb7c60"
+            "sha256": "b4203c1dd1afb0029e972fcb1079b32d047da7a9a5e1debbdfb6bdccc43ee806"
           }
         },
         {
@@ -1000,7 +1000,7 @@
           ],
           "null_tests_json": {
             "path": "output/public/quantum/bell/delft_hensen2016_srep30289/null_tests.json",
-            "sha256": "504307194824b477c92c17ada982b1fab26c347a35230221186ef206d6d9d98d"
+            "sha256": "521aca1271a2713d6091179a69ee87a1e243b2683c08dd26bb7237d70eb2d519"
           }
         },
         {
@@ -1009,10 +1009,10 @@
           "statistic_family": "CH",
           "baseline": {
             "param_name": "window_ns",
-            "value": 1000.0,
+            "value": 2000.0,
             "statistic_name": "CH J_prob (A1=0,B1=0)",
-            "statistic": -0.0006990843043696472,
-            "sigma_boot": 9.100388784991122e-06,
+            "statistic": -0.000982524306564714,
+            "sigma_boot": 7.67773919017981e-06,
             "delay_signature_z_max": 43.90965148631052
           },
           "tests": [
@@ -1032,7 +1032,7 @@
           ],
           "null_tests_json": {
             "path": "output/public/quantum/bell/nist_03_43_afterfixingModeLocking_s3600/null_tests.json",
-            "sha256": "8b6b6778ecb8314a369d16e0d482fec1863e04c44ca6299d344198f694bb2ab2"
+            "sha256": "a784f82394f135e9ae292b895d3f24d3771e861fea07d325dd3ba75004afc5b2"
           }
         },
         {
@@ -1064,7 +1064,7 @@
           ],
           "null_tests_json": {
             "path": "output/public/quantum/bell/kwiat2013_prl111_130406_05082013_15/null_tests.json",
-            "sha256": "471e04e6a6453b2f37c32ada6a71241a0e3cea6301dc4a19d9b4b382f565a44b"
+            "sha256": "84af4c67b58fdfbd24aaafddfce4c1d4efa9855f23347169465fccb71d219fad"
           }
         }
       ],
@@ -1073,7 +1073,7 @@
       }
     },
     "pairing_crosscheck_summary": {
-      "generated_utc": "2026-02-20T12:38:33.706116+00:00",
+      "generated_utc": "2026-03-11T13:54:44.585407+00:00",
       "phase": {
         "phase": 7,
         "step": "7.20.3",
@@ -1090,7 +1090,7 @@
           "supported": true,
           "crosscheck_pairing_json": {
             "path": "output/public/quantum/bell/weihs1998_longdist_longdist1/crosscheck_pairing.json",
-            "sha256": "3be895c797c65e0beac3b1cb6533bb05aa553176bf5e20db955d6fc5646e7b99"
+            "sha256": "48a48fb3b42800e5b44d0f1108adda3833b844adb507cf03e3196dcd5bed6716"
           },
           "delta": {
             "abs_delta_statistic_abs": 0.002181156390948402,
@@ -1104,7 +1104,7 @@
           "supported": false,
           "crosscheck_pairing_json": {
             "path": "output/public/quantum/bell/delft_hensen2015/crosscheck_pairing.json",
-            "sha256": "ea4e447fb1e1b1725ca49b184c6ca148e105a6c10ecbfbae38ae06007693b1d4"
+            "sha256": "19de55e4edf0b6fab10a81e4b7d04083c4b57b0163a9487c9e6158c1df71e3b5"
           },
           "delta": null
         },
@@ -1114,7 +1114,7 @@
           "supported": false,
           "crosscheck_pairing_json": {
             "path": "output/public/quantum/bell/delft_hensen2016_srep30289/crosscheck_pairing.json",
-            "sha256": "0b845f7cccbb5a5937d6c6523b039de5741303ea131cec4db902cdc1aec78c78"
+            "sha256": "dc6b7941a35f6e906b2bfba532064e40cd1844295dc7b86d883ac42335f894a1"
           },
           "delta": null
         },
@@ -1124,11 +1124,11 @@
           "supported": true,
           "crosscheck_pairing_json": {
             "path": "output/public/quantum/bell/nist_03_43_afterfixingModeLocking_s3600/crosscheck_pairing.json",
-            "sha256": "eec9f0837f19581546c835394ec869b138461ac68ec7cb855d659a0967631a07"
+            "sha256": "8321fd69c7b976502872bf3a68a13c05178ec1883cc3ac364333dd0403ebc417"
           },
           "delta": {
-            "abs_delta_statistic": 1.867090885505733e-07,
-            "delta_over_sigma_boot": 0.020516605714527774,
+            "abs_delta_statistic": 0.0009936753741595044,
+            "delta_over_sigma_boot": 129.42291337930078,
             "note": "Treat this pairing-choice delta as an implementation/systematic sensitivity (not an optimizer)."
           }
         },
@@ -1138,7 +1138,7 @@
           "supported": true,
           "crosscheck_pairing_json": {
             "path": "output/public/quantum/bell/kwiat2013_prl111_130406_05082013_15/crosscheck_pairing.json",
-            "sha256": "be247e641229b1ed2d212bbfa76d94d161c8c8199e92a7cd78c70d1df20202f7"
+            "sha256": "62b64d5217e13637a83cd3fe49bb96a7911ea4d753c0ddbc772a108f00546d79"
           },
           "delta": {
             "abs_delta_statistic": 0.0,
@@ -1154,31 +1154,31 @@
     "inputs": {
       "longterm_consistency_json": {
         "path": "output/public/quantum/bell/longterm_consistency.json",
-        "sha256": "302aa3bfa3bcb550a3ec29e348bb63b8b2c035623f94a38b1e2f64d4dc4eeb35"
+        "sha256": "beccb1cab75b408d7b922f648e8a3cc50e6fa17d25825d63d80b57f0ea8a07d5"
       },
       "systematics_decomposition_15items_json": {
         "path": "output/public/quantum/bell/systematics_decomposition_15items.json",
-        "sha256": "8bd14831719a74a090a4ee502315ef956c94c68dd77915a21fa49d81cca9260b"
+        "sha256": "8bb1e78693653f0993eb0ab8b9b3577da445aaa0b25cf755708efd5b02800b8f"
       },
       "cross_dataset_covariance_json": {
         "path": "output/public/quantum/bell/cross_dataset_covariance.json",
-        "sha256": "4ed8b76b06b2beb4b9cd34be29d0baaa0312c493dd279af522a95a07d7fa5aaf"
+        "sha256": "363d0315d772a958f7f0730c984341f046db2ee300b1dc4fc189c0e6242336fb"
       },
       "selection_loophole_quantification_json": {
         "path": "output/public/quantum/bell/selection_loophole_quantification.json",
-        "sha256": "520f55cad5b355cd6c42deb256e35e8495f4728f12256ba213903ded5d0b49a9"
+        "sha256": "837ee809e3601fcb702577d89de7b631880852d1b8130b24b37c8d7f51ad4ecf"
       },
       "null_tests_summary_json": {
         "path": "output/public/quantum/bell/null_tests_summary.json",
-        "sha256": "5052f754f9a3906edd397b7c8ead0f09701155aaaad939249f7ef68e82fb856e"
+        "sha256": "c9c3f37227de71971dcca6e0da360213a6195f4af40d78dd8db5fc03ab03be10"
       },
       "freeze_policy_json": {
         "path": "output/public/quantum/bell/freeze_policy.json",
-        "sha256": "6cc27820672d26b0cbee2f9e020b0b2ed6ec87df4c7eecf587104986dd7ad021"
+        "sha256": "c024cba43559b5fa6203b9ae36780231c24432785e4672634826ba76f449ad91"
       },
       "crosscheck_pairing_summary_json": {
         "path": "output/public/quantum/bell/crosscheck_pairing_summary.json",
-        "sha256": "b1dac99a5b28cfc1aff261a14f8ffbcf0370fc57aeb8fc79b38f1fe98311cfd0"
+        "sha256": "a9f745601a9a7161ff4791e10cc2d40931ad3c91d4c7efae29c1c31cdb10dcc3"
       }
     }
   },

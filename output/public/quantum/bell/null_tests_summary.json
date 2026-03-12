@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-20T12:38:32.175874+00:00",
+  "generated_utc": "2026-03-11T13:54:43.088092+00:00",
   "phase": {
     "phase": 7,
     "step": "7.20.1",
@@ -64,7 +64,7 @@
       ],
       "null_tests_json": {
         "path": "output/public/quantum/bell/weihs1998_longdist_longdist1/null_tests.json",
-        "sha256": "2b3b7da2e5ce82f006098a1dbab78ddf53e4d54f02da331184a21b2ce861d7e0"
+        "sha256": "431941c9e734a7043d358892137bc1b61f05e453e6142e188fd425e0e1ab3ee9"
       }
     },
     {
@@ -100,7 +100,7 @@
       ],
       "null_tests_json": {
         "path": "output/public/quantum/bell/delft_hensen2015/null_tests.json",
-        "sha256": "552d8704f6d86acf6b3d5d9f02c77faa7a8dd296d2682ac4f4c9b35cbceb7c60"
+        "sha256": "b4203c1dd1afb0029e972fcb1079b32d047da7a9a5e1debbdfb6bdccc43ee806"
       }
     },
     {
@@ -138,7 +138,7 @@
       ],
       "null_tests_json": {
         "path": "output/public/quantum/bell/delft_hensen2016_srep30289/null_tests.json",
-        "sha256": "504307194824b477c92c17ada982b1fab26c347a35230221186ef206d6d9d98d"
+        "sha256": "521aca1271a2713d6091179a69ee87a1e243b2683c08dd26bb7237d70eb2d519"
       }
     },
     {
@@ -147,10 +147,10 @@
       "statistic_family": "CH",
       "baseline": {
         "param_name": "window_ns",
-        "value": 1000.0,
+        "value": 2000.0,
         "statistic_name": "CH J_prob (A1=0,B1=0)",
-        "statistic": -0.0006990843043696472,
-        "sigma_boot": 9.100388784991122e-06,
+        "statistic": -0.000982524306564714,
+        "sigma_boot": 7.67773919017981e-06,
         "delay_signature_z_max": 43.90965148631052
       },
       "tests": [
@@ -170,7 +170,7 @@
       ],
       "null_tests_json": {
         "path": "output/public/quantum/bell/nist_03_43_afterfixingModeLocking_s3600/null_tests.json",
-        "sha256": "8b6b6778ecb8314a369d16e0d482fec1863e04c44ca6299d344198f694bb2ab2"
+        "sha256": "a784f82394f135e9ae292b895d3f24d3771e861fea07d325dd3ba75004afc5b2"
       }
     },
     {
@@ -202,7 +202,7 @@
       ],
       "null_tests_json": {
         "path": "output/public/quantum/bell/kwiat2013_prl111_130406_05082013_15/null_tests.json",
-        "sha256": "471e04e6a6453b2f37c32ada6a71241a0e3cea6301dc4a19d9b4b382f565a44b"
+        "sha256": "84af4c67b58fdfbd24aaafddfce4c1d4efa9855f23347169465fccb71d219fad"
       }
     }
   ],

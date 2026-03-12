@@ -907,15 +907,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             ax.fill_between(xs, p16, p84, color="#4C78A8", alpha=0.25, linewidth=0.0)
             ax.plot(xs, med, color="#4C78A8", lw=2.0, marker="o", ms=3)
             ax.axvline(t_ref_220, color="black", lw=1.0, ls="--", alpha=0.8)
-            ax.set_xlabel("start time (M)")
-            ax.set_ylabel(ylabel)
+            ax.set_xlabel("start time (M)", fontsize=18)
+            ax.set_ylabel(ylabel, fontsize=18)
+            ax.tick_params(labelsize=16)
             ax.grid(True, alpha=0.3)
 
-        fig, axes = plt.subplots(2, 1, figsize=(10, 7), sharex=True)
+        fig, axes = plt.subplots(2, 1, figsize=(12.6, 9.2), sharex=True)
         plot_series(axes[0], rows_220, key="f_hz", scale=1.0, ylabel="f_220 (Hz)")
         plot_series(axes[1], rows_220, key="tau_s", scale=1000.0, ylabel="tau_220 (ms)")
-        fig.suptitle(f"GW250114 ringdown QNM (data release): {resolved}", fontsize=12)
-        fig.tight_layout()
+        fig.suptitle(f"GW250114 ringdown QNM (data release): {resolved}", fontsize=20)
+        fig.tight_layout(rect=[0.0, 0.0, 1.0, 0.96])
         fig.savefig(out_png, dpi=160)
         plt.close(fig)
 
@@ -1055,7 +1056,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _write_json(out_json, out)
 
     # Plot: best fit per detector (time-domain overlay).
-    fig, axes = plt.subplots(2, 1, figsize=(10, 7), sharex=False)
+    fig, axes = plt.subplots(2, 1, figsize=(12.6, 9.2), sharex=False)
     for ax, det in zip(axes, ["H1", "L1"]):
         rec = results.get(det) or {}
         summ = (rec.get("summary") or {}) if isinstance(rec, dict) else {}
@@ -1089,16 +1090,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         env = np.exp(-t_fit / tau_s)
         yhat = env * (a0 * np.cos(2 * math.pi * f_hz * t_fit) + b0 * np.sin(2 * math.pi * f_hz * t_fit))
 
-        ax.plot(t_fit * 1000.0, y, lw=1.0, label="data (bandpass)")
-        ax.plot(t_fit * 1000.0, yhat, lw=2.0, label="fit")
-        ax.set_title(f"{det}: f={f_hz:.1f} Hz, tau={tau_s*1000:.2f} ms, band={bp[0]}-{bp[1]} Hz, t0={t0*1000:.1f} ms")
-        ax.set_xlabel("t - t0 (ms)")
-        ax.set_ylabel("strain (arb.)")
+        ax.plot(t_fit * 1000.0, y, lw=1.2, label="data (bandpass)")
+        ax.plot(t_fit * 1000.0, yhat, lw=2.4, label="fit")
+        ax.set_title(
+            f"{det}: f={f_hz:.1f} Hz, tau={tau_s*1000:.2f} ms, band={bp[0]}-{bp[1]} Hz, t0={t0*1000:.1f} ms",
+            fontsize=16,
+        )
+        ax.set_xlabel("t - t0 (ms)", fontsize=18)
+        ax.set_ylabel("strain (arb.)", fontsize=18)
+        ax.tick_params(labelsize=16)
         ax.grid(True, alpha=0.3)
-        ax.legend(loc="upper right", fontsize=9)
+        ax.legend(loc="upper right", fontsize=16)
 
-    fig.suptitle(f"GWOSC ringdown QNM fit: {fetch.get('resolved_event')} ({args.catalog})", fontsize=12)
-    fig.tight_layout()
+    fig.suptitle(f"GWOSC ringdown QNM fit: {fetch.get('resolved_event')} ({args.catalog})", fontsize=20)
+    fig.tight_layout(rect=[0.0, 0.0, 1.0, 0.96])
     fig.savefig(out_png, dpi=160)
     plt.close(fig)
 

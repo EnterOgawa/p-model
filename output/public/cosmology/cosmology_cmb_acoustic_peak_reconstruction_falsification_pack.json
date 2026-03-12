@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-22T11:27:59.816246+00:00",
+  "generated_utc": "2026-03-12T06:53:24.024690+00:00",
   "kind": "cmb_acoustic_peak_reconstruction_pmodel_modal",
   "decision_rule": {
     "first3": "max(|Δell_n|) <= 15 and max(|ΔA_n/A_n|) <= 0.15",
@@ -162,6 +162,7 @@
   "related_outputs": {
     "metrics_json": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_acoustic_peak_reconstruction_metrics.json",
     "figure_png": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_acoustic_peak_reconstruction.png",
+    "figure_pdf": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_acoustic_peak_reconstruction.pdf",
     "peaks_csv": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_acoustic_peak_reconstruction_peaks.csv"
   }
 }

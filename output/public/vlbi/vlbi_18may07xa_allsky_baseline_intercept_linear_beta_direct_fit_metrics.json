@@ -1,0 +1,133 @@
+{
+  "generated_utc": "2026-03-07T04:49:16.930456+00:00",
+  "session": "18MAY07XA_ALLSKY_BASELINE_INTERCEPT_LINEAR",
+  "method": {
+    "description": "direct fit from vgosDb observables using BendSun substitution (no PPN input)",
+    "equation": "ObsMinusBase = c0 + beta * BendSun_GR, where Base = DelayTheo - BendSun_GR",
+    "ionosphere_handling": "ionosphere-free combination from GroupDelayFull_bX/bS unless disabled",
+    "gr_add_back": "not_applied (observables are not O-C residual products)"
+  },
+  "input": {
+    "root": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\18MAY07XA\\extracted",
+    "observable_series": "full",
+    "observable_x_variable": {
+      "name": "GroupDelayFull",
+      "file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\18MAY07XA\\extracted\\18MAY07XA\\ObsEdit\\GroupDelayFull_bX.nc",
+      "sha256": "a3ca2b625d3d3d89f4c8f74738f1d29cc87725d38848f08e56c5251a7206a1d8"
+    },
+    "observable_s_variable": {
+      "name": "GroupDelayFull",
+      "file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\18MAY07XA\\extracted\\18MAY07XA\\ObsEdit\\GroupDelayFull_bS.nc",
+      "sha256": "5046c0bf38294b781c519da88da8fb98645410bb1253c3989122e4415d0eb537"
+    },
+    "theoretical_variable": {
+      "name": "DelayTheoretical",
+      "file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\18MAY07XA\\extracted\\18MAY07XA\\ObsTheoretical\\DelayTheoretical.nc",
+      "sha256": "a6dbfa37e0a69e5096aba09ae722f6c0204ec3ccd9ed90c80fa2ec0adc0a1b35"
+    },
+    "gravity_template_variable": {
+      "name": "Cal-BendSun",
+      "file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\18MAY07XA\\extracted\\18MAY07XA\\ObsCalTheo\\Cal-BendSun.nc",
+      "sha256": "e8cd30ba41356f0b948e345bce007893f966933bc2da3e5c6a0b0420c6de96e4"
+    },
+    "sigma_x_variable": {
+      "name": "GroupDelaySig",
+      "file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\18MAY07XA\\extracted\\18MAY07XA\\Observables\\GroupDelay_bX.nc",
+      "sha256": "9be84d1b1c5228b0c4074601531df2c02df2a1c3b9c369d8b9a6a6856a0419c0"
+    },
+    "sigma_s_variable": {
+      "name": "GroupDelaySig",
+      "file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\18MAY07XA\\extracted\\18MAY07XA\\Observables\\GroupDelay_bS.nc",
+      "sha256": "62c7d6098c12279154bb9b7f44cc79267b9fa39cd80f3400f14615bc7a01986c"
+    },
+    "flag_variable": {
+      "name": "DelayFlag",
+      "file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\18MAY07XA\\extracted\\18MAY07XA\\ObsEdit\\Edit.nc",
+      "sha256": "a4590f9e488e48d676b0dc2e3071fe263ae19d525cc3496c3ff0312be276c2b3"
+    },
+    "source_variable": {
+      "name": "Source",
+      "file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\18MAY07XA\\extracted\\18MAY07XA\\Observables\\Source.nc",
+      "sha256": "b3a6e2c67abbdfb0b7bcfd58d6167461b48988fd54ea90b6b78ba5f3d4016ddc"
+    },
+    "freq_group_x_variable": {
+      "name": "FreqGroupIono",
+      "file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\18MAY07XA\\extracted\\18MAY07XA\\ObsDerived\\EffFreq_bX.nc",
+      "sha256": "2914e3934a068fe0469d2cc163c9a16f7ed27527226e09d6e76e38b246971f5b"
+    },
+    "freq_group_s_variable": {
+      "name": "FreqGroupIono",
+      "file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\18MAY07XA\\extracted\\18MAY07XA\\ObsDerived\\EffFreq_bS.nc",
+      "sha256": "33827ca369a98a3e313012cd2983546ee5973a3c63a345eba7a2b3c89dc7ab8c"
+    },
+    "band_index": 0,
+    "obs_band_when_single_band": "X",
+    "min_template_abs_s": 1e-14,
+    "flag_filter_enabled": true,
+    "sigma_weight_enabled": true,
+    "nuisance_mode": "baseline_intercept_linear",
+    "ionosphere_free_enabled": true,
+    "source_filter": []
+  },
+  "counts": {
+    "n_common_raw": 9716,
+    "n_kept": 9390,
+    "n_rejected": 326,
+    "n_sources_in_filter": null
+  },
+  "fit_result": {
+    "n_points": 9390,
+    "intercept_s": -0.00022227701337773308,
+    "intercept_sigma_s": 4.702094031762602e-10,
+    "delta_gamma": 8.14584100842932,
+    "delta_gamma_sigma": 0.4527652674753409,
+    "gamma_est": 9.14584100842932,
+    "gamma_sigma": 0.4527652674753409,
+    "beta_est": 5.07292050421466,
+    "beta_sigma": 0.22638263373767045,
+    "delta_beta": 4.07292050421466,
+    "chi2": 7945054938.701416,
+    "dof": 9334,
+    "rmse_s": 8.235201615699003e-09,
+    "weighted_rmse_s": 6.838169764960033e-09,
+    "corr_template_residual": 0.00495672135032004,
+    "n_params": 56,
+    "nuisance_info": {
+      "requested_mode": "baseline_intercept_linear",
+      "effective_mode": "baseline_intercept_linear",
+      "baseline_groups": 28,
+      "nuisance_columns": 54,
+      "baseline_variable": {
+        "name": "Baseline",
+        "file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\18MAY07XA\\extracted\\18MAY07XA\\Observables\\Baseline.nc"
+      },
+      "time_variable": {
+        "ymdhm_name": "YMDHM",
+        "ymdhm_file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\18MAY07XA\\extracted\\18MAY07XA\\Observables\\TimeUTC.nc",
+        "second_name": "Second",
+        "second_file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\18MAY07XA\\extracted\\18MAY07XA\\Observables\\TimeUTC.nc"
+      }
+    }
+  },
+  "ionosphere_audit": {
+    "enabled": true,
+    "status": "ok",
+    "formula": "(fX^2*tauX - fS^2*tauS)/(fX^2 - fS^2)",
+    "n_valid_formula": 9689,
+    "iono_correction_variable": {
+      "name": "Cal-SlantPathIonoGroup",
+      "file": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\18MAY07XA\\extracted\\18MAY07XA\\ObsDerived\\Cal-SlantPathIonoGroup_bX.nc"
+    },
+    "n_compared": 9689,
+    "corr_delta_vs_minus_cal": 0.9999999999999997,
+    "mean_check_s": -4.579376461242837e-21,
+    "std_check_s": 5.141590485163126e-19,
+    "max_abs_check_s": 6.0948739620341524e-18
+  },
+  "outputs": {
+    "points_csv": "C:\\develop\\waveP\\output\\vlbi\\vlbi_18may07xa_allsky_baseline_intercept_linear_beta_direct_fit_points.csv",
+    "summary_csv": "C:\\develop\\waveP\\output\\vlbi\\vlbi_18may07xa_allsky_baseline_intercept_linear_beta_direct_fit_summary.csv",
+    "plot_pdf": "C:\\develop\\waveP\\output\\vlbi\\vlbi_18may07xa_allsky_baseline_intercept_linear_beta_direct_fit.pdf",
+    "plot_png": "C:\\develop\\waveP\\output\\vlbi\\vlbi_18may07xa_allsky_baseline_intercept_linear_beta_direct_fit.png"
+  }
+}

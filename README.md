@@ -173,6 +173,7 @@ P-modelは、真のオープンサイエンスと「人間の恣意的な介入�
 
 3. **データを検証する**<br>
 本リポジトリの `scripts/` および `output/` フォルダ内のコードやデータ（Part IVの検証環境）を参照・実行し、ご自身の環境で検証を行ってください。
+Bell 再解析で使う `output/public/quantum/bell/*/normalized_events.npz` は、Git 本体ではなく Release assets から取得してください。
 
 5. **議論に参加する**<br>
 理論に対する建設的な反証、データ解析のバグ報告については、GitHub Issuesをご利用ください。

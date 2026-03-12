@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T06:39:26.867950+00:00",
+  "generated_utc": "2026-02-28T12:23:43.075253+00:00",
   "input": "C:/develop/waveP/data/cosmology/distance_duality_constraints.json",
   "definition": {
     "eta_pmodel": "η^(P)(z) ≡ D_L / [(1+z) D_A]",
@@ -483,9 +483,9 @@
     }
   ],
   "outputs": {
-    "png": "C:/develop/waveP/output/cosmology/cosmology_ddr_pmodel_eta_constraints.png",
-    "metrics_json": "C:/develop/waveP/output/cosmology/cosmology_ddr_pmodel_eta_constraints.json",
-    "table_md": "C:/develop/waveP/output/cosmology/cosmology_ddr_pmodel_eta_constraints_table.md"
+    "png": "C:/develop/waveP/output/private/cosmology/cosmology_ddr_pmodel_eta_constraints.png",
+    "metrics_json": "C:/develop/waveP/output/private/cosmology/cosmology_ddr_pmodel_eta_constraints.json",
+    "table_md": "C:/develop/waveP/output/private/cosmology/cosmology_ddr_pmodel_eta_constraints_table.md"
   },
   "docs": {
     "frw_redshift_factor_decomposition": "doc/cosmology/ddr_redshift_factor_decomposition.md",

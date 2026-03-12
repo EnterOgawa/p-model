@@ -10,6 +10,10 @@ from pathlib import Path
 import numpy as np
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # クラス: `Config` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Config:
@@ -163,6 +167,17 @@ def _extract_alpha_inverse(*, pdf_path: Path) -> tuple[float, float, str]:
     return val, sigma, m.group(0)
 
 
+# 関数: `_fmt_sci_no_e` の入出力契約と処理意図を定義する。
+def _fmt_sci_no_e(value: float, *, digits: int = 2) -> str:
+    if not math.isfinite(value):
+        return "n/a"
+    if value == 0.0:
+        return "0"
+    exp = int(math.floor(math.log10(abs(value))))
+    coeff = value / (10.0**exp)
+    return f"{coeff:.{digits}f}×10^{exp}"
+
+
 # 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
@@ -281,19 +296,19 @@ def main() -> None:
 
     import matplotlib.pyplot as plt
 
-    fig = plt.figure(figsize=(14.8, 8.0), dpi=160)
-    gs = fig.add_gridspec(2, 2, wspace=0.26, hspace=0.32)
+    fig = plt.figure(figsize=(12.8, 16.4), dpi=170)
+    gs = fig.add_gridspec(4, 1, hspace=0.38)
 
     # Panel A: Casimir force magnitude vs separation
     ax0 = fig.add_subplot(gs[0, 0])
     ax0.plot(a_nm, force_n, lw=2.0, label="ideal conductor (PFA)")
     ax0.set_xscale("log")
     ax0.set_yscale("log")
-    ax0.set_xlabel("separation a (nm)")
-    ax0.set_ylabel("|F| (N)")
-    ax0.set_title("Casimir: sphere–plate force scale")
+    ax0.set_xlabel("separation a (nm)", fontsize=12.5)
+    ax0.set_ylabel("|F| (N)", fontsize=12.5)
+    ax0.set_title("Casimir: sphere–plate force scale", fontsize=13.5)
     ax0.grid(True, which="both", ls=":", lw=0.6, alpha=0.6)
-    ax0.legend(frameon=True, fontsize=9, loc="lower left")
+    ax0.legend(frameon=True, fontsize=10.5, loc="lower left")
     ax0.text(
         0.02,
         0.98,
@@ -305,20 +320,21 @@ def main() -> None:
         transform=ax0.transAxes,
         va="top",
         ha="left",
-        fontsize=9,
+        fontsize=10.5,
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.85, "edgecolor": "0.85"},
     )
+    ax0.tick_params(axis="both", labelsize=11)
 
     # Panel B: Lamb shift scaling factors
-    ax1 = fig.add_subplot(gs[0, 1])
+    ax1 = fig.add_subplot(gs[1, 0])
     ax1.plot(z, z4_rel, marker="o", lw=1.8, label="Lamb shift ~ Z^4")
     ax1.plot(z, z6_rel, marker="o", lw=1.8, label="unknown 2-loop ~ Z^6")
     ax1.set_yscale("log")
-    ax1.set_xlabel("Z")
-    ax1.set_ylabel("relative scale (Z=1 → 1)")
-    ax1.set_title("Lamb shift: scaling (why Z>1 helps)")
+    ax1.set_xlabel("Z", fontsize=12.5)
+    ax1.set_ylabel("relative scale (Z=1 → 1)", fontsize=12.5)
+    ax1.set_title("Lamb shift: scaling (why Z>1 helps)", fontsize=13.5)
     ax1.grid(True, which="both", ls=":", lw=0.6, alpha=0.6)
-    ax1.legend(frameon=True, fontsize=9, loc="upper left")
+    ax1.legend(frameon=True, fontsize=10.5, loc="upper left")
     ax1.scatter([2, 7], [2**4, 7**4], s=45, zorder=5, color="#1f77b4")
     ax1.scatter([2, 7], [2**6, 7**6], s=45, zorder=5, color="#ff7f0e")
     ax1.text(
@@ -328,18 +344,19 @@ def main() -> None:
         transform=ax1.transAxes,
         va="bottom",
         ha="left",
-        fontsize=9,
+        fontsize=10.5,
     )
+    ax1.tick_params(axis="both", labelsize=11)
 
     # Panel C: nuclear-size contributions (example numbers) + atomic gravity order check
-    ax2 = fig.add_subplot(gs[1, 0])
+    ax2 = fig.add_subplot(gs[2, 0])
     x = np.arange(len(nucl_mhz), dtype=float)
     ax2.errorbar(x, nucl_mhz, yerr=nucl_sigma_mhz, fmt="o", capsize=4, lw=1.6)
     ax2.set_yscale("log")
     ax2.set_xticks(x)
     ax2.set_xticklabels(nucl_labels, rotation=15, ha="right")
-    ax2.set_ylabel("ΔE_nucl(2s) (MHz)")
-    ax2.set_title("Nuclear-size term (example; Table 4)")
+    ax2.set_ylabel("ΔE_nucl(2s) (MHz)", fontsize=12.5)
+    ax2.set_title("Nuclear-size term (example; Table 4)", fontsize=13.5)
     ax2.grid(True, which="both", ls=":", lw=0.6, alpha=0.6)
     ax2.text(
         0.02,
@@ -348,7 +365,7 @@ def main() -> None:
         transform=ax2.transAxes,
         va="top",
         ha="left",
-        fontsize=9,
+        fontsize=10.5,
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.85, "edgecolor": "0.85"},
     )
     try:
@@ -359,8 +376,8 @@ def main() -> None:
             if deltaE_grav_h_eV is not None and deltaE_grav_h_eV > 0:
                 extra = (
                     "\nH 1S–2S precision (Parthey+2011):\n"
-                    f"σf={sigma_1s2s_hz} Hz ⇒ hσ≈{sigma_1s2s_e_ev:.2e} eV\n"
-                    f"ratio (hσ / ΔE_grav(H))≈{ratio_sigma_to_grav_h:.1e}"
+                    f"σf={sigma_1s2s_hz} Hz ⇒ hσ≈{_fmt_sci_no_e(sigma_1s2s_e_ev, digits=2)} eV\n"
+                    f"ratio (hσ / ΔE_grav(H))≈{_fmt_sci_no_e(ratio_sigma_to_grav_h, digits=2)}"
                 )
 
             ax2.text(
@@ -368,22 +385,25 @@ def main() -> None:
                 0.02,
                 (
                     "Atomic gravity (order):\n"
-                    f"|φ|/c^2 ~ {h_case['phi_over_c2_abs']:.1e} (H), {u_case['phi_over_c2_abs']:.1e} (U)\n"
-                    f"ΔE ~ {h_case['deltaE_eV_abs']:.1e}–{u_case['deltaE_eV_abs']:.1e} eV"
+                    f"|φ|/c^2 ~ {_fmt_sci_no_e(h_case['phi_over_c2_abs'], digits=2)} (H), "
+                    f"{_fmt_sci_no_e(u_case['phi_over_c2_abs'], digits=2)} (U)\n"
+                    f"ΔE ~ {_fmt_sci_no_e(h_case['deltaE_eV_abs'], digits=2)}–"
+                    f"{_fmt_sci_no_e(u_case['deltaE_eV_abs'], digits=2)} eV"
                     + extra
                 ),
                 transform=ax2.transAxes,
                 va="bottom",
                 ha="left",
-                fontsize=8,
+                fontsize=10.0,
                 bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.85, "edgecolor": "0.85"},
             )
     except Exception:
         pass
+    ax2.tick_params(axis="both", labelsize=11)
 
     # Panel D: alpha^{-1} (recoil vs electron g-2)
 
-    ax3 = fig.add_subplot(gs[1, 1])
+    ax3 = fig.add_subplot(gs[3, 0])
     labels = ["Recoil (Rb; 0812.3139)", "g-2 (e−; 0801.1134)"]
     y = np.array([alpha_inv_recoil, alpha_inv_g2], dtype=float)
     yerr = np.array([alpha_inv_recoil_sigma, alpha_inv_g2_sigma], dtype=float)
@@ -391,27 +411,27 @@ def main() -> None:
     ax3.errorbar(xx, y, yerr=yerr, fmt="o", capsize=4, elinewidth=1.8, color="#1f77b4", ecolor="#1f77b4")
     ax3.set_xticks(xx)
     ax3.set_xticklabels(labels)
-    ax3.set_ylabel("alpha^{-1}")
-    ax3.set_title("α precision cross-check (recoil vs g-2)")
+    ax3.set_ylabel("alpha^{-1}", fontsize=12.5)
+    ax3.set_title("α precision cross-check (recoil vs g-2)", fontsize=13.5)
     ax3.grid(True, ls=":", lw=0.6, alpha=0.7)
     ax3.text(
         0.02,
         0.02,
         (
-            f"Δ(alpha^-1) = {alpha_inv_delta:+.3e} ± {alpha_inv_delta_sigma:.3e} (z={alpha_inv_z:+.2f})\n"
+            f"Δ(alpha^-1) = {_fmt_sci_no_e(alpha_inv_delta, digits=3)} ± "
+            f"{_fmt_sci_no_e(alpha_inv_delta_sigma, digits=3)} (z={alpha_inv_z:+.2f})\n"
             f"epsilon_needed (recoil) ≈ {epsilon_required*1e9:+.2f} ppb"
         ),
         transform=ax3.transAxes,
-        fontsize=9,
+        fontsize=10.5,
         va="bottom",
         ha="left",
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.85, "edgecolor": "0.85"},
     )
+    ax3.tick_params(axis="both", labelsize=11)
 
-    fig.suptitle(
-        "Phase 7 / Step 7.8: vacuum + QED precision observables (Casimir, Lamb, H 1S–2S, α)", y=0.995
-    )
-    fig.tight_layout()
+    fig.suptitle("Vacuum + QED precision observables (Casimir, Lamb, H 1S–2S, α)", y=0.995, fontsize=15)
+    fig.tight_layout(rect=(0, 0, 1, 0.985))
 
     out_png = out_dir / "qed_vacuum_precision.png"
     fig.savefig(out_png, bbox_inches="tight")

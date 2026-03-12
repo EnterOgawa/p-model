@@ -433,6 +433,7 @@ def main() -> None:
             n_vals[i] = r.n_trials
 
         out_png = out_dir / f"{out_tag}_chsh.png"
+        out_pdf = out_dir / f"{out_tag}_chsh.pdf"
         out_json = out_dir / f"{out_tag}_chsh_metrics.json"
         out_csv = out_dir / f"{out_tag}_chsh_sweep_start_offset.csv"
 
@@ -445,24 +446,31 @@ def main() -> None:
         import matplotlib.pyplot as plt
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10.8, 7.2), dpi=150, sharex=True)
+        panel_title_font = 14.6
+        axis_label_font = 13.4
+        tick_font = 12.2
+        legend_font = 11.8
 
         ax1.fill_between(offsets, s_vals - s_errs, s_vals + s_errs, color="#1f77b4", alpha=0.2, lw=0)
         ax1.plot(offsets, s_vals, color="#1f77b4", lw=1.8, label="S(start_offset)")
         ax1.axhline(2.0, color="0.25", ls="--", lw=1.0, label="Bell bound (2)")
         ax1.axhline(2.0 * np.sqrt(2.0), color="0.25", ls=":", lw=1.0, label="2√2 (QM reference)")
         ax1.axhline(baseline.s, color="#ff7f0e", ls="-.", lw=1.0, label=f"baseline S={baseline.s:.3f}")
-        ax1.set_ylabel("CHSH S")
-        ax1.set_title("Delft (Hensen 2015) open data: CHSH S and event-ready window start sensitivity")
+        ax1.set_ylabel("CHSH S", fontsize=axis_label_font)
+        ax1.set_title("Delft (Hensen 2015) open data: CHSH S and event-ready window start sensitivity", fontsize=panel_title_font)
         ax1.grid(True, which="both", ls=":", lw=0.6, alpha=0.7)
-        ax1.legend(frameon=True, fontsize=9, loc="upper right")
+        ax1.legend(frameon=True, fontsize=legend_font, loc="lower right")
+        ax1.tick_params(axis="both", labelsize=tick_font)
 
         ax2.plot(offsets, n_vals, color="#2ca02c", lw=1.8)
-        ax2.set_xlabel("event-ready window start offset (ps)")
-        ax2.set_ylabel("valid Bell trials (n)")
+        ax2.set_xlabel("event-ready window start offset (ps)", fontsize=axis_label_font)
+        ax2.set_ylabel("valid Bell trials (n)", fontsize=axis_label_font)
         ax2.grid(True, which="both", ls=":", lw=0.6, alpha=0.7)
+        ax2.tick_params(axis="both", labelsize=tick_font)
 
         fig.tight_layout()
         fig.savefig(out_png)
+        fig.savefig(out_pdf)
         plt.close(fig)
 
         metrics = {
@@ -498,7 +506,7 @@ def main() -> None:
                 "S_err": s_errs.tolist(),
                 "csv": str(out_csv),
             },
-            "outputs": {"png": str(out_png), "csv": str(out_csv)},
+            "outputs": {"png": str(out_png), "pdf": str(out_pdf), "csv": str(out_csv)},
             "notes": [
                 "This script follows the logic in the published bell_open_data_analysis_example.py (converted to reproducible waveP style).",
                 "The sweep reproduces the documented sensitivity plot idea (Supplementary Fig. S3).",
@@ -507,6 +515,7 @@ def main() -> None:
         out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
         print(f"[ok] png : {out_png}")
+        print(f"[ok] pdf : {out_pdf}")
         print(f"[ok] csv : {out_csv}")
         print(f"[ok] json: {out_json}")
         return
@@ -534,6 +543,7 @@ def main() -> None:
             n_vals[i] = r.n_trials_total
 
         out_png = out_dir / f"{out_tag}_chsh.png"
+        out_pdf = out_dir / f"{out_tag}_chsh.pdf"
         out_json = out_dir / f"{out_tag}_chsh_metrics.json"
         out_csv = out_dir / f"{out_tag}_chsh_sweep_start_offset.csv"
 
@@ -546,6 +556,10 @@ def main() -> None:
         import matplotlib.pyplot as plt
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10.8, 7.2), dpi=150, sharex=True)
+        panel_title_font = 14.6
+        axis_label_font = 13.4
+        tick_font = 12.2
+        legend_font = 11.8
 
         ax1.fill_between(offsets, s_vals - s_errs, s_vals + s_errs, color="#1f77b4", alpha=0.2, lw=0)
         ax1.plot(offsets, s_vals, color="#1f77b4", lw=1.8, label="S_combined(start_offset)")
@@ -554,18 +568,21 @@ def main() -> None:
         ax1.axhline(
             baseline2.s_combined, color="#ff7f0e", ls="-.", lw=1.0, label=f"baseline S={baseline2.s_combined:.3f}"
         )
-        ax1.set_ylabel("CHSH S (combined)")
-        ax1.set_title("Delft (Hensen 2016; Sci Rep 30289) open data: CHSH S and window-start sensitivity")
+        ax1.set_ylabel("CHSH S (combined)", fontsize=axis_label_font)
+        ax1.set_title("Delft (Hensen 2016; Sci Rep 30289) open data: CHSH S and window-start sensitivity", fontsize=panel_title_font)
         ax1.grid(True, which="both", ls=":", lw=0.6, alpha=0.7)
-        ax1.legend(frameon=True, fontsize=9, loc="upper right")
+        ax1.legend(frameon=True, fontsize=legend_font, loc="lower right")
+        ax1.tick_params(axis="both", labelsize=tick_font)
 
         ax2.plot(offsets, n_vals, color="#2ca02c", lw=1.8)
-        ax2.set_xlabel("event-ready window start offset (ps)")
-        ax2.set_ylabel("valid Bell trials (n)")
+        ax2.set_xlabel("event-ready window start offset (ps)", fontsize=axis_label_font)
+        ax2.set_ylabel("valid Bell trials (n)", fontsize=axis_label_font)
         ax2.grid(True, which="both", ls=":", lw=0.6, alpha=0.7)
+        ax2.tick_params(axis="both", labelsize=tick_font)
 
         fig.tight_layout()
         fig.savefig(out_png)
+        fig.savefig(out_pdf)
         plt.close(fig)
 
         metrics = {
@@ -607,7 +624,7 @@ def main() -> None:
                 "S_err_combined": s_errs.tolist(),
                 "csv": str(out_csv),
             },
-            "outputs": {"png": str(out_png), "csv": str(out_csv)},
+            "outputs": {"png": str(out_png), "pdf": str(out_pdf), "csv": str(out_csv)},
             "notes": [
                 "This script follows bell_open_data_2_analysis_example.py (Sci Rep 30289 dataset) and adapts it to waveP style.",
                 "CHSH S is computed for psi-plus and psi-minus separately, then combined (weighted by trial counts).",
@@ -617,6 +634,7 @@ def main() -> None:
         out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
         print(f"[ok] png : {out_png}")
+        print(f"[ok] pdf : {out_pdf}")
         print(f"[ok] csv : {out_csv}")
         print(f"[ok] json: {out_json}")
         return

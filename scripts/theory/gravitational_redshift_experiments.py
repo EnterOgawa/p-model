@@ -141,7 +141,7 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path, scale: float) -> Non
     yerr = np.array([float(r["sigma"]) / scale for r in rows], dtype=float)
     x = np.arange(len(rows), dtype=float)
 
-    fig = plt.figure(figsize=(10.5, 5.8))
+    fig = plt.figure(figsize=(11.8, 6.6))
     ax = fig.add_subplot(1, 1, 1)
     ax.axhline(0.0, color="black", linewidth=1.0, alpha=0.8, label="P-model / GR 予測（ε=0）")
     ax.errorbar(
@@ -157,17 +157,19 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path, scale: float) -> Non
     )
 
     ax.set_xticks(x)
-    ax.set_xticklabels(labels, rotation=12, ha="right")
+    ax.set_xticklabels(labels, rotation=12, ha="right", fontsize=13.6)
 
     power = int(round(np.log10(scale)))
-    ax.set_ylabel(f"偏差 ε（観測のずれ） [×10^{power}]")
-    ax.set_title("重力赤方偏移：観測 vs P-model（一次ソース）")
+    ax.set_ylabel(f"偏差 ε（観測のずれ） [×10^{power}]", fontsize=15.4)
+    ax.set_title("重力赤方偏移：観測 vs P-model（一次ソース）", fontsize=17.2)
+    ax.tick_params(axis="y", labelsize=13.6)
     ax.grid(True, alpha=0.25)
-    ax.legend(loc="upper right")
+    ax.legend(loc="upper right", fontsize=13.8)
 
     fig.tight_layout()
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)
+    fig.savefig(out_png.with_suffix(".pdf"))
     plt.close(fig)
 
 

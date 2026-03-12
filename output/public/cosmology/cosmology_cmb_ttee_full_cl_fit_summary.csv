@@ -1,0 +1,13 @@
+metric,value
+n_bin_total,215.0
+chi2_baseline_lcdm,200.76526799224456
+chi2_pmodel_flexible,198.3404094825316
+chi2_pmodel_shape_only,200.76526799224456
+aic_baseline_lcdm,200.76526799224456
+aic_pmodel_flexible,214.3404094825316
+delta_aic_baseline_minus_pmodel,-13.575141490287052
+shape_improvement,0.0
+channel_scaling_improvement,2.424858509712948
+aic_penalty,16.0
+alpha,1.0
+delta_ell,0.0

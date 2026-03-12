@@ -1,9 +1,11 @@
 # P-model: A Unified Theory of Time-Wave Dynamics
-**時間波ダイナミクスに基づく局所的・決定論的な統一理論**
+**時間波ダイナミクスに基づく統一理論 (The P-model)**
 
 [![Release](https://img.shields.io/github/v/release/EnterOgawa/p-model?label=Latest%20Release)](https://github.com/EnterOgawa/p-model/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![License: CC BY-ND 4.0](https://img.shields.io/badge/License-CC_BY--ND_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nd/4.0/)
+
+**Document v1.0 — 2026-03-09 UTC**
 
 ## 👤 Author
 - **Shunji Ogawa**
@@ -11,147 +13,162 @@
 - **Email:** `s_ogawa@entersystem.co.jp`
 
 ## 🌐 For English Readers (English version coming soon)
-**P-model** is a novel, deterministic, and local unified theory based on "Time-Wave Dynamics" ($P_\mu$). It unifies macroscopic gravity and microscopic quantum phenomena without assuming dark matter, spatial expansion, or quantum non-locality. 
-Notably, our comprehensive re-analysis of raw time-tag data from historic Bell tests demonstrates that apparent quantum non-locality is an illusion caused by **selection bias in coincidence windows**.
-The full English translation of our four-part paper series and validation scripts will be published shortly. Please **Star** this repository to stay updated!
+**P-model** proposes that "all matter is waves, and the medium is time itself." From a single scalar field P(x), it derives gravity, clocks, light propagation, rotation, and quantum phenomena — all through one unified mapping.
+
+Key result: β=1 predicted from first principles, independently confirmed by LLR and MESSENGER. 47 verification items, 5 falsifiable predictions for 2027–2035+.
+
+Full English translation coming soon. Please **Star** this repo to stay updated!
 
 ---
 
 ## 🕊️ Foreword: 理念と先人たちへの敬意
 P-modelは、既存の物理学を否定するためのものではありません。
-アインシュタインを筆頭に、これまで物理学という巨大な山に挑み、人類の知を切り拓いてきたすべての先人たちに対し、最大限の感謝と深い尊敬の念を抱いています。彼らの偉大な観測データの蓄積と、緻密に組み上げられた基礎理論の礎がなければ、このモデルが決して産声を上げることはありませんでした。
 
-本プロジェクトの原動力は、ただ純粋に「自然の真理を知りたい」という渇望です。
-どれほど複雑に見えるマクロな宇宙の現象も、難解で不可思議なミクロの量子世界も、その根底にある自然の摂理は「驚くほどシンプルであるはずだ」。その直感を数式とデータによって証明したいという願いから、この理論は生まれました。
+アインシュタインをはじめ、物理学という巨大な山に挑み続けてきたすべての先人たちに、心からの感謝と敬意を。彼らの観測データと理論の蓄積がなければ、このモデルは生まれませんでした。
 
----
-
-## 🌌 The Paradigm Shift
-現代物理学は長きにわたり、マクロな宇宙を支配する「**一般相対性理論**（曲がった時空の幾何学）」と、ミクロな世界を記述する「量子力学（**シュレーディンガー方程式**に代表される確率と波動の力学）」という、根本的に相容れない2つの理論体系によって分断されてきました。
-
-**P-model** は、これらを統合するための新しい理論枠組みです。
-空間の膨張や暗黒物質、多世界解釈や非局所性を前提とせず「**時間は波である（4元ベクトル時間波 $P_\mu$）**」というたった一つの基底方程式から出発します。
-
-驚くべきことに、この時間波の空間勾配はマクロな「重力」として振る舞い、その波の微小な揺らぎと固有時の遅れは、ミクロな「シュレーディンガー方程式（量子位相の干渉）」として自然に導出されます。このアプローチにより、太陽系の重力異常から素粒子の崩壊に至るまでの物理現象を、決定論的かつ局所的なプロセスとして統一的に記述することを試みています。
-
-本リポジトリは、P-modelの理論体系を一次観測データから検証するためのコード（スクリプト群）と、その計算結果（公開成果物）を管理・公開する**検証フレームワーク専用のリポジトリ**です。
+この理論の出発点はとてもシンプルです。「宇宙は、見かけほど複雑ではないはずだ」という直感。マクロな星の運動もミクロな粒子のふるまいも、根っこでは同じ仕組みで動いている——それを数式とデータで示したい。その一心で書き上げました。
 
 ---
 
-## 📚 The Four-Part Series (論文四部作)
+## 🌊 時間波ダイナミクスとは何か
 
-P-modelの全容は、理論と実証を解説する3つの論文（Part I ~ III）と、検証・再現性を担保する論文（Part IV）の、**計4つの論文（四部作）**によって構成されています。
+P-modelの核心は、たったひとつの視点の転換です。
 
-* **[Part I] コア理論：万物の公理と基準書**
-  時間波密度 $P$ を定義し、重力、光の屈折、量子位相（Schrödinger方程式）への写像を固定します。また、4次元ベクトル拡張 $P_\mu$ によるラグランジアンを提示します。
-* **[Part II] 宇宙物理編：暗黒物質と空間膨張の排除**
-  太陽系テストから、ブラックホールの影、重力波、そして宇宙論スケール（BAO, CMB）に至るまでの観測事実を検証します。
-* **[Part III] 量子物理編：量子現象の再解釈とミクロの統合**
-  ベルテストの生データ再解析を通じて非局所性を系統誤差として解体し、核力（テンソル力）と弱い相互作用（パリティの破れ）を $P_\mu$ から導出します。
-* **[Part IV] 検証資料と再現性プロトコル（本リポジトリ連動）**
-  論文内のすべての結果を一次データから完全に再現するためのコード群、ハッシュ台帳、および未来観測による差分予測のマイルストーンを定義します。
+> **時間は、ただ流れるだけの「背景」ではない。宇宙のあらゆるスケールを支配する「波」そのものだ。**
 
-> **※ 論文本文（Part I 〜 IV）へのリンク**
-> *（現在、論文本文はプレプリントサーバー等への公開準備中です。公開され次第、ここにリンクを追記します）*
+この発想には、4つの意図があります。
 
----
+**1. ミクロとマクロを分けない**<br>
+量子力学と一般相対性理論——現代物理学はこの2つを別々の理論で記述しています。P-modelは「そもそも分ける必要がない」と考えます。どちらも、時間波のふるまいの異なる側面にすぎません。
 
-## ⚡ Key Discoveries (主要な発見)
+**2. 宇宙を測る「物差し」自体が揺れている**<br>
+宇宙は膨張している、とされています。でも、もし物差しの方が変わっていたら？ P-modelは、ダークエネルギーのようなパラメータを一切使わずに、観測データに自然な説明を与えます。
 
-P-modelの重要な特徴は、事後的なパラメータ調整（Over-fitting）を必要としない一貫性にあります。
+**3. 量子コンピュータの動作原理がヒントになった**<br>
+量子の「不気味な遠隔作用」に頼るのではなく、波の共鳴や干渉という局所的な仕組みで説明する。量子コンピュータが実際にどう動いているかを考えるうちに、この理論は形になりました。
 
-### マクロとミクロの奇跡的な符合 ($\lambda_{\mathrm{rot}}$)
-Part IIにおいてマクロな重力異常（フレームドラッグ）を説明するために固定された回転結合定数 $\lambda_{\mathrm{rot}}$ が、Part IIIにおけるミクロな原子核の「テンソル力」や弱い相互作用の「V-A結合」の計算においても、**全く同じ方程式**として観測量を導き出しました。
-
-### 量子エンタングルメントの再解釈（ベルテストの生データ再解析）
-アインシュタインが最後までその実在に懐疑的であった「非局所性（不気味な遠隔作用）」。P-modelでは、Weihs(1998)やDelft(2015)といった歴史的なベルテストの**公開一次データ（生の時間タグログ）に立ち返り、独自のパイプラインで網羅的な再解析**を行いました。
-
-なぜ私たちが、量子力学の根幹に関わるこの現象に、全く異なる解釈を提示できるのか。
-その理由は、ベルテストの「生データ」の性質にあります。生データは、最初から綺麗にペアとして揃った状態ではなく、検出器が光子を捉えた何千万回もの時刻（タイムスタンプ）の記録に過ぎません。研究者たちはこの膨大なデータ群の中から、**「AとBの到着時刻の差が〇〇ナノ秒以内なら、ペアとみなす」という抽出条件（同時計数窓）**を設定して相関を計算しています。
-
-私たちは公開された生データそのものを用い、この「ペアとみなす時間幅（抽出ルール）」を少しずつ変化させ、結果がどのように推移するかを全パターン計算し直しました。
-すると驚くべきことに、**「到着時刻のズレが 1.0 ナノ秒以内のものをペアとする」と設定した時は古典的な限界を超えない（$S<2$）にもかかわらず、条件をほんの少し広げて「1.5 ナノ秒以内」にした途端に強い相関が現れ（$S>2$）、さらに「2.0 ナノ秒以内」に広げると再び相関が弱まる**、という現象が確認されたのです。
-
-もし非局所的な相関が普遍的な自然現象であれば、人間の設定したわずかコンマ数ナノ秒の抽出ルールの違いによって、これほど劇的に結果が変動することは考えにくいと私たちは解釈しています。
-これは、もともと環境ノイズ等で揺らいでいるデータ群の中から、「強い相関（$S>2$）が現れる特定の条件」が事後的に選択されたことによる、**強烈な抽出バイアス（selection bias）の影響**である可能性を強く示唆しています。
-
-事後的な条件の調整を排した客観的な検証においては、$S>2$ という特異な相関は現れません。非局所性という前提に頼らなくとも、世界はアインシュタインが信じた通り、局所的で決定論的であると説明できるのです。
-
-### 量子コンピューターの物理的実態（波の局所的な共鳴装置）
-「もし非局所的なもつれが存在しないのであれば、なぜ現実に量子コンピューターは動作しているのか？」という疑問が生じるのは当然です。
-P-modelでは、量子コンピューターの計算能力を「多世界での同時計算」や「非局所的なテレパシー」によるものとは解釈しません。その物理的実態は、極めて精巧に制御された**「局所的なアナログ波の共鳴回路（結合振動子）」**であると説明します。
-
-超伝導量子ビットなどのハードウェアにおいて、複数の量子ビットは魔法のように同期しているわけではなく、マイクロ波キャビティやジョセフソン接合を介して物理的に接続されています。P-modelの視点では、量子計算とは「特定のアルゴリズムというフィルターに対して波を流し込み、最も強く共鳴した波形（正解の傾向）を局所的な干渉によって増幅し、読み取るプロセス」に他なりません。
-
-この決定論的な波の干渉モデルは、量子コンピューターが決して1回で100%の正答を出せず、熱やノイズの揺らぎに対する統計的なエラー訂正を絶えず必要とする現実のハードウェアの挙動とも完全に整合します。
+**4. 4次元のまま、特異点を消す**<br>
+高次元を仮定する必要はありません。時間が波として振る舞うだけで、ブラックホールの特異点のような「物理法則の破綻」を自然に回避できます。
 
 ---
 
-## 🔮 Differential Predictions (未来観測による検証マイルストーン)
+## 📊 検証スコアボード（現在地）
 
-P-modelは、既存理論と結果が分岐する以下の「差分予測」を提示し、今後の観測データによる検証を待ち受けます。
+全47件の検証結果です。通ったもの、保留のもの、棄却されたもの——すべて隠さず公開しています。
 
-* **ngEHTによる強場非線形項の検証:** 次世代EHTの精度向上により、P-model固有の空間勾配の非線形項が分離可能になります。
-* **重力波（GW）の偏光とスカラー縮退の検証:** 高S/Nの重力波イベントにおいて、P-modelの「4次元ベクトル射影」がテンソル波（GR）よりも整合性が高いかどうかが検証されます。
-* **高赤方偏移銀河の年齢（JWST）:** 空間膨張を仮定しないP-modelは、「成熟した巨大銀河の年齢矛盾」に対して自然な説明を提供します。
-* **完全ブラインドでのベルテスト検証:** 解析時の「同時計数窓」を事前に固定した完全ブラインド・テストにより、非局所的な相関の実在性が客観的に証明されます。
+| 判定 | 件数 | どんな項目か |
+|---|---|---|
+| **Pass** | 20 | 弱場テスト（LLR, Cassini, Viking 等）、β終端、XRISM、SPARC、量子系 |
+| **Watch** | 16 | EHT（精度待ち）、GW偏光（検出器増待ち）、宇宙論（高z待ち）、Bell selection 等 |
+| **Reject** | 6 | caseA計量、純スカラー極限、Pantheon+直接fit、量子サブセット3件 |
+| **Reference** | 5 | 光偏向γ\*, 赤方偏移ε\*, フレームドラッグ, GPS, 速度飽和δ₀ |
 
----
+β（光の応答指数）は理論から β=1 と予言し、LLR と MESSENGER の2つの独立チャネルで確認。**β 終端監査: Pass。**
 
-## 🔬 Reproducibility & Rejection Protocol (再現性と反証可能性)
-
-本プロジェクトでは、すべての検証に対して**「Rejection Protocol（棄却手順）」**を厳格に適用しています。
-
-1. **Input:** 使用する一次データ（NASA, LIGO, NISTなどからの公開データ）。
-2. **Frozen:** 過去のデータで固定され、以後絶対に動かさない「凍結パラメータ（$\beta$ など）」。
-3. **Statistic & Reject:** 明確に定義された棄却の閾値。
-
-本リポジトリの `scripts/` および `output/` には、これらの検証を自ら実行するためのコード群が格納されています。
+宇宙論は率直に言って弱いです。Pantheon+ では ΛCDM に AIC で負けており、DDR には深刻な張力があります。ここは、より遠い宇宙のデータが揃うまで決着しません。
 
 ---
 
-## ⚙️ Core Scripts Architecture (端から端までの完全な再現性)
+## 📚 論文五部作
 
-P-modelは、真のオープンサイエンスと「人間の恣意的な介入（チェリーピッキング）」の排除を体現するため、データ解析から論文ソースの生成までを自動化する「**Executable Paper（実行可能な論文）**」形式を採用しています。
+| Part | タイトル | ひとことで言うと |
+|---|---|---|
+| **I** | コア理論：理論的基礎と写像原理 | P と φ の定義、β=1 の導出、凍結パラメータの一元管理 |
+| **II** | 宇宙物理編：宇宙物理学および宇宙論的検証 | 太陽系からブラックホール、重力波、宇宙論まで27件の検証 |
+| **III** | 量子物理編：微視的および量子的現象の再評価 | Bell テスト再解析、核物理、BBN、V-A 構造、20件の検証 |
+| **IV** | 検証資料と再現性プロトコル | 全結果を再現するコード群、反証条件パック（JSON）、ハッシュ台帳 |
+| **V** | 未来への予測 | 「いつ・何を観測すれば・決着するか」を5項目で固定 |
 
-以下のコマンドを実行することで、一次データの取得・再解析から、論文を構成するすべての図表・数値データの計算、そして**最終的な論文のソースファイル（`.tex`）の組み上げに至るまで**の全プロセスがあなたのローカルPC上で自動的かつ物理的に再現されます。
+> *論文本文はプレプリントサーバーへの公開準備中です。公開され次第、ここにリンクを追記します。*
 
-*(※生成された `.tex` ファイルは、組版レイアウトや数式の最終確認をご自身で行えるよう、あえて自動PDF化は行っていません。お好みのLaTeX環境（`lualatex`推奨）で手動コンパイルして完成させてください)*
+---
 
-**1. 全ての検証と論文ソースの一括生成**
-宇宙論から量子相関に至る全計算を実行し、結果を反映した完全な論文ソース（`.tex`）を生成します。
-> `python scripts/summary/run_all.py`
+## 🔮 未来への予測——決着は、これから
 
-**2. 各パートの個別検証とソース生成**
-特定の領域にフォーカスして検証を行い、そのパートのソースファイルをビルドします。
+この理論が正しいかどうかは、まだ分かりません。分かるのはこれからです。P-modelは具体的な数字を先に置いて、未来の観測を待ちます。
 
-* **Part II（宇宙物理編）:** 太陽系テスト、重力波、赤方偏移の再計算とソース生成。
-  > `python -B scripts/summary/paper_build.py --profile part2_astro --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine`
-* **Part III（量子物理編）:** ベルテスト生データの網羅的再解析と、非局所性棄却のソース生成。
-  > `python -B scripts/summary/paper_build.py --profile part3_quantum --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine`
-* **Part IV（検証資料）:** 再現性プロトコルとハッシュ台帳のソース生成。
-  > `python -B scripts/summary/paper_build.py --profile part4_verification --tex-audit-engine lualatex --tex-audit-require-engine`
+| 予測 | 何が起きるはずか | いつ頃 | 種別 |
+|---|---|---|---|
+| **ブラックホールの影** | GR より約 **4.8% 大きい** | ngEHT ~2030 / BHEX ~2031 | コア |
+| **重力波の偏光** | P_μ ベクトル波の横波成分 | LIGO O5 ~2027–2028 | コア |
+| **宇宙論の独自項** | 高 z で ln(1+z) に由来するずれ | DESI/Euclid/Roman ~2027–2035 | コア |
+| **マクロ量子干渉** | 巨大分子の干渉パターンが壊れる | MAQRO型 ~2035+ | 拡張仮説 |
+| **距離測定の前提検証** | 食い違いは測定前提の違いに帰着 | 標準サイレン/JWST ~2027–2030 | コア |
 
-各スクリプトが生成した詳細な検証ログ、図表データ、およびコンパイル前の論文ソースファイルは、`output/public/` および `output/private/summary/` ディレクトリに格納されます。
+最もクリティカルなのは、**ブラックホールの影の 4.8% 差**。2030年前後に ngEHT が測定精度1%に達すれば、この理論の採否が決まります。
+
+---
+
+## ⚡ この理論の特徴
+
+**β=1 はフィットではなく予言**<br>
+有効計量の null 測地線から導出された理論値です。3つの独立チャネル（Cassini, LLR, MESSENGER）で確認済み。
+
+**棄却された箇所も全部公開**<br>
+理論が合わなかった場所（caseA 棄却、CMB の形状改善ゼロ、DDR の深刻課題）を隠しません。反証条件は検証の前に凍結し、結果がどうであれ報告します。
+
+**参照枠に依存しない**<br>
+本文は P-model の定義と写像だけで閉じています。GR や量子力学との比較は Reference note として隔離し、P-model の定義を既存理論で置き換えることはしません。
+
+---
+
+## 🔬 再現性と反証可能性
+
+すべての検証に「棄却手順（Rejection Protocol）」を適用しています。
+
+1. **入力**: NASA, ESA, LIGO, NIST, EHT, AME2020 等の公開一次データ
+2. **凍結**: β=1 等のパラメータは Part I で固定。変更するなら Part I を改訂して全パートを再生成
+3. **棄却閾値**: 反証条件パック（JSON）として機械可読で事前固定
+
+---
+
+## ⚙️ 自分の手で検証する
+
+**全パート一括生成**
+```
+python scripts/summary/run_all.py
+```
+
+**パートごとの個別生成**
+```bash
+# Part I（コア理論）
+python -B scripts/summary/paper_build.py --profile paper --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine
+
+# Part II（宇宙物理編）
+python -B scripts/summary/paper_build.py --profile part2_astrophysics --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine
+
+# Part III（量子物理編）
+python -B scripts/summary/paper_build.py --profile part3_quantum --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine
+
+# Part IV（検証資料）
+python -B scripts/summary/paper_build.py --profile part4_verification --tex-audit-engine lualatex --tex-audit-require-engine
+```
+
+生成されたデータは `output/public/` に、ログは `output/private/summary/` に格納されます。
 
 ---
 
 ## 🚀 Getting Started
 
-1. **理論を読む:** 別媒体で公開されているP-modelの論文（Part I〜IV）をお読みください（※公開準備中）。
-2. **データを検証する:** 本リポジトリの `scripts/` および `output/` フォルダ内のコードやデータ（Part IVの検証環境）を参照・実行し、ご自身の環境で検証を行ってください。
-3. **議論に参加する:** 理論に対する建設的な反証、データ解析のバグ報告については、GitHub Issuesをご利用ください。
+1. **論文を読む** — Part I–V（公開準備中）
+2. **コードを動かす** — `scripts/` と `output/` で自分の環境で検証
+3. **議論する** — 反証・バグ報告は GitHub Issues へ
 
 ---
 
-## ⚖️ License (ライセンス)
+### 📄 ビルド要件
+TeX ソースは **LuaLaTeX** で組版しています。TeX Live 等のフルインストール環境が必要です。バージョン管理は `pmodel_version.sty` で一元化。
 
-本プロジェクトは、学術的テキストと検証コードの役割を明確に分けるため、デュアルライセンスを採用しています。
+> **For English readers:** The `.tex` sources require **LuaLaTeX** with `luatexja` for Japanese typesetting. Ensure your TeX distribution includes `lualatex`.
 
-* **論文ドキュメントおよびテキスト (Papers and Text):**
-  外部で公開されている論文ファイル（Part I〜IV）、本リポジトリ内の図表、および本READMEのテキストは、[Creative Commons Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)](https://creativecommons.org/licenses/by-nd/4.0/) の下でライセンスされています。原著作者（Shunji Ogawa / ENTERSYSTEM Co., Ltd.）のクレジットを明記する限りにおいて共有を歓迎しますが、**理論のテキストや数式、図表を改変したものを配布することは固く禁じます。** *(※本リポジトリのスクリプトを用いて論文データを生成した場合であっても、理論の根幹をなす著作物の改変禁止の制限は維持されます)*
-  
-* **検証コード・データ (Code and Data):**
-  本リポジトリ内の検証スクリプト（`scripts/`）、出力データ（`output/`）等のプログラムコードは、[MIT License](https://opensource.org/licenses/MIT) の下でライセンスされています。透明性のある科学的検証と議論を促進するため、自由にコードを実行・利用・改変することができます。
+---
+
+## ⚖️ ライセンス
+
+**論文・テキスト・図表:** [CC BY-ND 4.0](https://creativecommons.org/licenses/by-nd/4.0/) — クレジット付きの共有は歓迎、改変配布は禁止。
+
+**検証コード・データ:** [MIT License](https://opensource.org/licenses/MIT) — 自由に実行・利用・改変可能。
+
+---
 
 > *"全ての事象はシンプルである。時間は幾何学の次元ではなく、波であり、マクロな星の自転も、ミクロな素粒子のスピンも、すべてはその波の局所的な渦に過ぎない。"*

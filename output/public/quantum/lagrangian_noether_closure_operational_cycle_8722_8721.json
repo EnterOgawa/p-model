@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-19T15:03:56.873078+00:00",
+  "generated_utc": "2026-03-08T04:41:05.882186+00:00",
   "phase": 8,
   "step": "8.7.21.4",
   "title": "Lagrangian-Noether closure operational cycle (8.7.22 -> 8.7.21.3)",
@@ -7,56 +7,15 @@
     "weak_interaction_beta_decay_route_ab_audit_json": "output/public/quantum/weak_interaction_beta_decay_route_ab_audit.json",
     "lagrangian_noether_observable_closure_drift_audit_json": "output/public/quantum/lagrangian_noether_observable_closure_drift_audit.json"
   },
-  "upstream_runs": [
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "scripts/quantum/weak_interaction_ckm_first_row_audit.py"
-      ],
-      "rc": 0,
-      "stdout_tail": "[ok] wrote:\n  C:\\develop\\waveP\\output\\public\\quantum\\weak_interaction_ckm_first_row_audit_summary.csv\n  C:\\develop\\waveP\\output\\public\\quantum\\weak_interaction_ckm_first_row_audit.json\n  C:\\develop\\waveP\\output\\public\\quantum\\weak_interaction_ckm_first_row_audit.png",
-      "stderr_tail": "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\pypdf\\_crypt_providers\\_cryptography.py:32: CryptographyDeprecationWarning: ARC4 has been moved to cryptography.hazmat.decrepit.ciphers.algorithms.ARC4 and will be removed from cryptography.hazmat.primitives.ciphers.algorithms in 48.0.0.\n  from cryptography.hazmat.primitives.ciphers.algorithms import AES, ARC4"
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "scripts/quantum/weak_interaction_pmns_first_row_audit.py"
-      ],
-      "rc": 0,
-      "stdout_tail": "[ok] wrote:\n  C:\\develop\\waveP\\output\\public\\quantum\\weak_interaction_pmns_first_row_audit_summary.csv\n  C:\\develop\\waveP\\output\\public\\quantum\\weak_interaction_pmns_first_row_audit.json\n  C:\\develop\\waveP\\output\\public\\quantum\\weak_interaction_pmns_first_row_audit.png",
-      "stderr_tail": "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\pypdf\\_crypt_providers\\_cryptography.py:32: CryptographyDeprecationWarning: ARC4 has been moved to cryptography.hazmat.decrepit.ciphers.algorithms.ARC4 and will be removed from cryptography.hazmat.primitives.ciphers.algorithms in 48.0.0.\n  from cryptography.hazmat.primitives.ciphers.algorithms import AES, ARC4"
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "scripts/quantum/weak_interaction_beta_decay_route_ab_audit.py"
-      ],
-      "rc": 0,
-      "stdout_tail": "[ok] wrote:\n  C:\\develop\\waveP\\output\\public\\quantum\\weak_interaction_beta_decay_route_ab_audit_summary.csv\n  C:\\develop\\waveP\\output\\public\\quantum\\weak_interaction_beta_decay_route_ab_equalized_summary.csv\n  C:\\develop\\waveP\\output\\public\\quantum\\weak_interaction_beta_decay_route_ab_audit.json\n  C:\\develop\\waveP\\output\\public\\quantum\\weak_interaction_beta_decay_route_ab_audit.png\n  C:\\develop\\waveP\\output\\public\\quantum\\weak_interaction_beta_decay_route_ab_equalized_holdout.png\n  C:\\develop\\waveP\\output\\public\\quantum\\weak_interaction_beta_decay_route_a_watch_outliers.csv\n  C:\\develop\\waveP\\output\\public\\quantum\\weak_interaction_beta_decay_route_a_watch_outliers.json\n  C:\\develop\\waveP\\output\\public\\quantum\\weak_interaction_beta_decay_route_a_watch_outliers.png",
-      "stderr_tail": ""
-    },
-    {
-      "cmd": [
-        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
-        "-B",
-        "scripts/quantum/lagrangian_noether_observable_closure_drift_audit.py"
-      ],
-      "rc": 0,
-      "stdout_tail": "[ok] wrote: output/public/quantum/lagrangian_noether_observable_closure_drift_audit.json\n[ok] wrote: output/public/quantum/lagrangian_noether_observable_closure_drift_audit.csv\n[ok] wrote: output/public/quantum/lagrangian_noether_observable_closure_drift_audit.png\n[summary] overall_status=pass, recalc_required=False, hard_fail_rows=0",
-      "stderr_tail": ""
-    }
-  ],
+  "upstream_runs": [],
   "checks": [
     {
       "id": "op_cycle::upstream_rc",
       "metric": "8.7.22 + 8.7.21.3 command return codes",
-      "value": "0,0,0,0",
+      "value": "skipped",
       "expected": "all 0",
-      "status": "pass",
-      "score": 1.0,
+      "status": "watch",
+      "score": 0.5,
       "note": "Operational cycle script return codes."
     },
     {
@@ -67,6 +26,15 @@
       "status": "pass",
       "score": 1.0,
       "note": "Route-A/B transition consistency."
+    },
+    {
+      "id": "op_cycle::shared_gate_policy",
+      "metric": "closure shared_gate_policy alignment",
+      "value": "strict_hard",
+      "expected": "strict_hard",
+      "status": "pass",
+      "score": 1.0,
+      "note": "Closure drift output must match requested shared gate policy id."
     },
     {
       "id": "op_cycle::ckm_pmns_closure",
@@ -80,25 +48,27 @@
     {
       "id": "op_cycle::drift_overall",
       "metric": "closure drift overall_status",
-      "value": "pass",
+      "value": "reject",
       "expected": "pass",
-      "status": "pass",
-      "score": 1.0,
+      "status": "reject",
+      "score": 0.0,
       "note": "L_total->EL->observables drift gate result."
     },
     {
       "id": "op_cycle::drift_recalc_required",
       "metric": "closure drift recalc_required",
-      "value": false,
+      "value": true,
       "expected": false,
-      "status": "pass",
-      "score": 1.0,
+      "status": "reject",
+      "score": 0.0,
       "note": "Operational recalc trigger must remain false."
     }
   ],
   "decision": {
-    "overall_status": "watch",
-    "decision": "operational_cycle_stable_with_ckm_watch",
+    "overall_status": "reject",
+    "decision": "operational_cycle_failed",
+    "shared_gate_policy": "strict_hard",
+    "closure_shared_gate_policy": "strict_hard",
     "watch_is_allowed_only_for": [
       "op_cycle::ckm_pmns_closure"
     ],

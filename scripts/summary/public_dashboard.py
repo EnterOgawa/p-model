@@ -895,7 +895,7 @@ def _extract_paper_table1_card(root: Path) -> Dict[str, Any]:
 
         return {
             "id": "paper_table1",
-            "title": "検証サマリ（Table 1）",
+            "title": "検証サマリ表",
             "kind": "論文化（Phase 8 / Step 8.2）",
             "summary_lines": [
                 "未生成: cmd /c scripts\\summary\\build_materials.bat quick-nodocx を実行してください。",
@@ -947,7 +947,7 @@ def _extract_paper_table1_card(root: Path) -> Dict[str, Any]:
 
     return {
         "id": "paper_table1",
-        "title": "検証サマリ（Table 1）",
+        "title": "検証サマリ表",
         "kind": "論文化（Phase 8 / Step 8.2）",
         **({"detail_href": "pmodel_paper.html"} if paper_html.exists() else {}),
         "summary_lines": summary_lines,
@@ -957,7 +957,7 @@ def _extract_paper_table1_card(root: Path) -> Dict[str, Any]:
             "本文: doc/paper/10_manuscript.md（固定パスの図表に言及）",
             f"論文HTML: {_rel_repo_path(root, paper_html)}",
         ],
-        "table": {"headers": headers, "rows": rows, "caption": "検証サマリ（Table 1, 自動生成）"} if rows else None,
+        "table": {"headers": headers, "rows": rows, "caption": "検証サマリ表（自動生成）"} if rows else None,
     }
 
 
@@ -1093,7 +1093,7 @@ def _extract_validation_scoreboard_card(root: Path) -> Dict[str, Any]:
             "kind": "決定的検証（Phase 7）",
             "summary_lines": [
                 "未生成: python -B scripts/summary/validation_scoreboard.py を実行してください。",
-                "（Table 1 と各章の図を俯瞰する1枚要約）",
+                "（検証サマリ表と各章の図を俯瞰する1枚要約）",
             ],
         }
 
@@ -1155,7 +1155,7 @@ def _extract_validation_scoreboard_card(root: Path) -> Dict[str, Any]:
             except Exception:
                 suffix = ""
 
-        summary_lines.append(f"Table 1（全27行, 目安）: OK={t_ok}, 要改善={t_mixed}, 不一致={t_ng}, 参考={t_info}{suffix}")
+        summary_lines.append(f"検証サマリ表（全27行, 目安）: OK={t_ok}, 要改善={t_mixed}, 不一致={t_ng}, 参考={t_info}{suffix}")
 
     gw_metric = find_metric("gw")
     # 条件分岐: `gw_metric` を満たす経路を評価する。
@@ -1168,9 +1168,9 @@ def _extract_validation_scoreboard_card(root: Path) -> Dict[str, Any]:
         summary_lines.append(f"宇宙論（距離二重性）: {cosmo_ddr}")
 
     explain_lines = [
-        "検証結果（Table 1）を『1枚で俯瞰』するための要約スコアボード。二重パルサーと重力波も含む。",
+        "検証結果（検証サマリ表）を『1枚で俯瞰』するための要約スコアボード。二重パルサーと重力波も含む。",
         "OK/要改善/不一致 は zスコア（|z|<=1/2）や相関・RMSなどの暫定しきい値に基づく“目安”。",
-        "詳細は Table 1 と、各章の図（LLR/Cassini/GW/EHT等）を参照。",
+        "詳細は検証サマリ表と、各章の図（LLR/Cassini/GW/EHT等）を参照。",
     ]
     policy = j.get("policy") if isinstance(j.get("policy"), dict) else {}
     exceptions = policy.get("exceptions") if isinstance(policy.get("exceptions"), dict) else {}
@@ -1211,7 +1211,7 @@ def _extract_validation_scoreboard_card(root: Path) -> Dict[str, Any]:
             table = {
                 "headers": ["テーマ", "観測量/指標", "判定（目安）", "かんたん解釈"],
                 "rows": table_rows,
-                "caption": "Table 1（全検証）の各行を、簡易しきい値で OK/要改善/不一致/参考 に分類した一覧（目安）。",
+                "caption": "検証サマリ表（全検証）の各行を、簡易しきい値で OK/要改善/不一致/参考 に分類した一覧（目安）。",
             }
 
     return {
@@ -1223,7 +1223,7 @@ def _extract_validation_scoreboard_card(root: Path) -> Dict[str, Any]:
         "explain_lines": explain_lines,
         "detail_lines": [
             "再現: scripts/summary/validation_scoreboard.py → output/private/summary/validation_scoreboard.(png|json)",
-            "補足: σ評価可能な項目の集計は Table 1（output/private/summary/paper_table1_results.json）を元に計算。",
+            "補足: σ評価可能な項目の集計は 検証サマリ表（output/private/summary/paper_table1_results.json）を元に計算。",
         ],
         **({"table": table} if table else {}),
     }
@@ -1669,7 +1669,7 @@ def _extract_paper_html_card(root: Path) -> Dict[str, Any]:
             "detail_href": "pmodel_paper.html",
             "summary_lines": [
                 "論文本体（Markdown）を、レポートと同じカード形式の単一HTMLにまとめたもの。",
-                "Table 1（検証サマリ）・本文・図表一覧・一次ソース一覧へすぐ辿れる。",
+                "検証サマリ表・本文・図表一覧・一次ソース一覧へすぐ辿れる。",
             ],
             "detail_lines": [
                 f"出力: {_rel_repo_path(root, paper_html)}",
@@ -6302,7 +6302,7 @@ def main() -> int:
                         "BAOを含む最も強い制約は強く棄却する一方、BAOなしの一部制約は棄却が弱い。",
                     ],
                     "detail_lines": [
-                        "これは DDR の全一次ソース行（Table 1 の元データ）を並べ、ε0=-1 からの外れ度 |z| を比較した俯瞰図。",
+                        "これは DDR の全一次ソース行（検証サマリ表の元データ）を並べ、ε0=-1 からの外れ度 |z| を比較した俯瞰図。",
                         "次の焦点：どの仮定（校正/共分散/進化補正/幾何モデル）が |z| を支配しているかを個別に切り分ける。",
                         "再現: scripts/cosmology/cosmology_distance_duality_source_sensitivity.py → output/cosmology/cosmology_distance_duality_source_sensitivity.png",
                     ],

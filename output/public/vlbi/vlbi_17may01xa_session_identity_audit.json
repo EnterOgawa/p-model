@@ -1,0 +1,36 @@
+{
+  "generated_utc": "2026-03-07T04:47:55.962460+00:00",
+  "session_label": "17MAY01XA",
+  "expected_internal_id": "AUA020",
+  "input_root": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\17MAY01XA\\extracted",
+  "scan_summary": {
+    "n_netcdf_scanned": 206,
+    "session_value_counts": {
+      "AUA020": 206
+    },
+    "observed_session_values": [
+      "AUA020"
+    ],
+    "status": "pass",
+    "alias_confirmed": true,
+    "rationale": "expected internal id found in Session metadata across netCDF files"
+  },
+  "session_value_examples": {
+    "AUA020": [
+      "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\17MAY01XA\\extracted\\17MAY01XA\\Apriori\\Antenna.nc",
+      "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\17MAY01XA\\extracted\\17MAY01XA\\Apriori\\Eccentricity.nc",
+      "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\17MAY01XA\\extracted\\17MAY01XA\\Apriori\\Source.nc",
+      "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\17MAY01XA\\extracted\\17MAY01XA\\Apriori\\Station.nc",
+      "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\17MAY01XA\\extracted\\17MAY01XA\\BADARY\\AzEl.nc"
+    ]
+  },
+  "wrapper_files_sample": [
+    "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\17MAY01XA\\extracted\\17MAY01XA\\17MAY01XA_V001_iIVS_kall.wrp",
+    "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\17MAY01XA\\extracted\\17MAY01XA\\17MAY01XA_V004_iIVS_kall.wrp",
+    "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\17MAY01XA\\extracted\\17MAY01XA\\17MAY01XA_V004_iIVS_kngs.wrp"
+  ],
+  "outputs": {
+    "json": "C:\\develop\\waveP\\output\\vlbi\\vlbi_17may01xa_session_identity_audit.json",
+    "csv": "C:\\develop\\waveP\\output\\vlbi\\vlbi_17may01xa_session_identity_audit.csv"
+  }
+}

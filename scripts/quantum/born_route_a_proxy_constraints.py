@@ -343,12 +343,18 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
             colors.append("#dc2626")
 
     y = np.arange(len(labels))
-    fig, ax = plt.subplots(figsize=(11.5, 4.8), dpi=180)
+    fig, ax = plt.subplots(figsize=(11.5, 5.5), dpi=180)
     ax.barh(y, scores, color=colors)
     ax.axvline(1.0, linestyle="--", color="#6b7280", linewidth=1.2)
     ax.set_yticks(y, labels)
-    ax.set_xlabel("normalized score (<=1 is pass)")
-    ax.set_title(f"Born route-A proxy gate: {payload.get('decision', {}).get('route_a_gate', 'unknown')}")
+    ax.tick_params(axis="y", labelsize=13.6)
+    ax.set_xlabel("normalized score (<=1 is pass)", fontsize=14.8)
+    ax.set_title(
+        f"Born route-A proxy gate: {payload.get('decision', {}).get('route_a_gate', 'unknown')}",
+        fontsize=15.6,
+        pad=8.0,
+    )
+    ax.tick_params(axis="x", labelsize=13.4)
     ax.grid(axis="x", alpha=0.25, linestyle=":")
     fig.tight_layout()
     path.parent.mkdir(parents=True, exist_ok=True)

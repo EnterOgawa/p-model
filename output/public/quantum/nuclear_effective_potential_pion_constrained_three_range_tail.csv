@@ -1,0 +1,2 @@
+dataset,eq_label,lambda_pi_pm_fm,R1_fm,R2_fm,R3_fm,L3_fm,tail_factor,R1_over_lambda_pi_pm,R2_over_lambda_pi_pm,R3_over_lambda_pi_pm,V1_t_MeV,V2_t_MeV,V3_t_MeV,V1_s_MeV,V2_s_MeV,V3_s_MeV,v2s_pred_fm3,v2s_obs_fm3,v2s_within_envelope
+eq19 (Nijmegen),19,1.41381693065,0.977497360742,1.49825320045,2.91207013111,1.41381693065,0.632120558829,0.691388919985,1.0597222087,2.0597222087,87.7582032091,16,10.1139289413,99.0184362934,-35.2210979063,10.1139289413,0.347211971731,-0.48,0

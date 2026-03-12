@@ -1,0 +1,74 @@
+{
+  "generated_utc": "2026-03-08T04:14:25.798390+00:00",
+  "inputs": {
+    "manifest_json": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_raw_if_manifest.json",
+    "sign_recordlevel_reaudit_json": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_sign_recordlevel_reaudit.json",
+    "cross_source_metrics_json": "C:\\develop\\waveP\\output\\cassini\\cassini_beta_direct_fit_cross_source_metrics.json",
+    "sign_media_closure_json": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_sign_media_closure_audit.json"
+  },
+  "terminal_policy": {
+    "status": "watch",
+    "odf_raw_role": "reference_watch_fixed",
+    "primary_beta_route": "tdf_plus_scalar_limit",
+    "policy_statement": "ODF raw remains Reference/Watch; primary beta judgement uses TDF + scalar-limit.",
+    "promotion_ready": false
+  },
+  "promotion_checks": [
+    {
+      "gate": "manifest_sign_terminal_gate",
+      "status": "watch",
+      "pass_condition": "terminal_gate_pass == true",
+      "value": false
+    },
+    {
+      "gate": "cross_odf_vs_tdf_z_best",
+      "status": "watch",
+      "pass_condition": "odf_vs_tdf_z_best.status == pass",
+      "value": "watch"
+    },
+    {
+      "gate": "cross_odf_corr_floor",
+      "status": "watch",
+      "pass_condition": "odf_corr_floor.status == pass",
+      "value": "watch"
+    },
+    {
+      "gate": "sign_media_closure",
+      "status": "watch",
+      "pass_condition": "sign_media.recommended_status == pass_candidate",
+      "value": "watch"
+    }
+  ],
+  "sign_terminal_snapshot": {
+    "terminal_gate_status": "watch",
+    "terminal_gate_pass": false,
+    "terminal_gate_selected_coverage_ratio_points": 0.1734207912459908,
+    "terminal_gate_min_coverage_ratio_points": 0.25,
+    "cross_gate_odf_sign_terminal": "watch"
+  },
+  "convergence_snapshot": {
+    "recommended_status": "watch",
+    "gate_odf_vs_tdf_z_best": "watch",
+    "gate_odf_corr_floor": "watch"
+  },
+  "sign_media_snapshot": {
+    "recommended_status": "watch"
+  },
+  "reasons": [
+    "sign_terminal_gate_not_closed",
+    "stable_arc_coverage_below_gate",
+    "if_manifest_not_closed",
+    "odf_sign_terminal_gate_not_closed",
+    "odf_delta_beta_not_converged",
+    "odf_shape_corr_too_low",
+    "sign_hypothesis_not_closed",
+    "odf_raw_reference_watch_fixed",
+    "primary_beta_route_tdf_plus_scalar_limit"
+  ],
+  "re_promotion_conditions": [
+    "manifest.keys.doppler_sign_convention.terminal_gate_pass == true",
+    "cross_source.convergence_audit.gates.odf_vs_tdf_z_best.status == pass",
+    "cross_source.convergence_audit.gates.odf_corr_floor.status == pass",
+    "sign_media_closure.recommended_status == pass_candidate"
+  ]
+}

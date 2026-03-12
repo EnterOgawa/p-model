@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-20T12:38:30.035713+00:00",
+  "generated_utc": "2026-03-11T13:54:40.778746+00:00",
   "phase": {
     "phase": 7,
     "step": "7.16.10",
@@ -234,7 +234,7 @@
       "fair_sampling": {
         "supported": true,
         "metric_name": "selection_ratio",
-        "value": 654.1026883136847,
+        "value": 187.4790336851017,
         "threshold": 1.0,
         "pass": false,
         "direction": "lower_or_equal_is_closure",
@@ -434,7 +434,7 @@
       "n_pass": 0,
       "n_fail": 5,
       "median_value": 7.599442954268822,
-      "max_value": 654.1026883136847,
+      "max_value": 187.4790336851017,
       "min_value": 3.6508938846257903
     },
     "detection": {

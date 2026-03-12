@@ -1,0 +1,136 @@
+{
+  "generated_utc": "2026-03-07T10:33:11.798891+00:00",
+  "phase": {
+    "step": "8.7.47.19"
+  },
+  "input": {
+    "vlbi_summary_csv": "output/public/vlbi/vlbi_allsky_beta_consistency_summary.csv",
+    "llr_metrics_json": "output/public/llr/llr_kappa_llr_metrics.json",
+    "n_vlbi_rows": 53,
+    "thresholds": [
+      10.0,
+      12.0,
+      15.0,
+      20.0
+    ],
+    "min_sessions": [
+      2,
+      3
+    ],
+    "year_windows": [
+      {
+        "name": "all",
+        "start": 2000,
+        "end": 2099
+      },
+      {
+        "name": "2017_2018",
+        "start": 2017,
+        "end": 2018
+      },
+      {
+        "name": "le2020",
+        "start": 2000,
+        "end": 2020
+      },
+      {
+        "name": "ge2020",
+        "start": 2020,
+        "end": 2099
+      },
+      {
+        "name": "ge2021",
+        "start": 2021,
+        "end": 2099
+      },
+      {
+        "name": "2021_2022",
+        "start": 2021,
+        "end": 2022
+      }
+    ]
+  },
+  "llr_reference": {
+    "beta_est": 1.0006742979447485,
+    "beta_sigma": 0.0009605616286801067,
+    "source": "template_decontaminated"
+  },
+  "baseline_scenario": {
+    "scenario_id": "thr10|all|min3",
+    "threshold_ns": 10.0,
+    "year_window": "all",
+    "year_start": 2000,
+    "year_end": 2099,
+    "min_sessions": 3,
+    "n_sessions": 5,
+    "fit_ok": true,
+    "beta_weighted_mean": 1.6549159815168129,
+    "beta_weighted_sigma": 0.048843810492328936,
+    "chi2": 602.9445652388189,
+    "dof": 4.0,
+    "chi2_dof": 150.73614130970472,
+    "subset_consistency_status": "reject",
+    "abs_z_vs_llr": 13.391977394202545,
+    "cross_consistency_status": "reject",
+    "scenario_status": "reject",
+    "sessions": "17MAY01XA,18MAY01XA,20MAY04XA,20MAY06XA,22MAY09XA",
+    "reason": ""
+  },
+  "best_any_scenario": {
+    "scenario_id": "thr10|2017_2018|min2",
+    "threshold_ns": 10.0,
+    "year_window": "2017_2018",
+    "year_start": 2017,
+    "year_end": 2018,
+    "min_sessions": 2,
+    "n_sessions": 2,
+    "fit_ok": true,
+    "beta_weighted_mean": 1.3907263363380622,
+    "beta_weighted_sigma": 0.05005640935290951,
+    "chi2": 0.22161147291813102,
+    "dof": 1.0,
+    "chi2_dof": 0.22161147291813102,
+    "subset_consistency_status": "pass",
+    "abs_z_vs_llr": 7.790815339371524,
+    "cross_consistency_status": "reject",
+    "scenario_status": "reject",
+    "sessions": "17MAY01XA,18MAY01XA",
+    "reason": ""
+  },
+  "best_operational_scenario": {
+    "scenario_id": "thr10|le2020|min3",
+    "threshold_ns": 10.0,
+    "year_window": "le2020",
+    "year_start": 2000,
+    "year_end": 2020,
+    "min_sessions": 3,
+    "n_sessions": 4,
+    "fit_ok": true,
+    "beta_weighted_mean": 1.594086111608445,
+    "beta_weighted_sigma": 0.04923258302823244,
+    "chi2": 505.89944322703957,
+    "dof": 3.0,
+    "chi2_dof": 168.63314774234652,
+    "subset_consistency_status": "reject",
+    "abs_z_vs_llr": 12.05093991134659,
+    "cross_consistency_status": "reject",
+    "scenario_status": "reject",
+    "sessions": "17MAY01XA,18MAY01XA,20MAY04XA,20MAY06XA",
+    "reason": ""
+  },
+  "improvement_vs_baseline": {
+    "baseline_abs_z": 13.391977394202545,
+    "delta_abs_z_best_any": 5.601162054831021,
+    "delta_abs_z_best_operational": 1.3410374828559544
+  },
+  "vlbi_beta_comparator_eligibility": {
+    "eligible": false,
+    "status": "reject",
+    "reason": "subset_consistency_reject"
+  },
+  "outputs": {
+    "subset_csv": "output/private/vlbi/vlbi_beta_cross_consistency_subset_refit.csv",
+    "plot_pdf": "output/private/vlbi/vlbi_beta_cross_consistency_subset_refit.pdf",
+    "plot_png": "output/private/vlbi/vlbi_beta_cross_consistency_subset_refit.png"
+  }
+}

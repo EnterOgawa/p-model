@@ -1,0 +1,58 @@
+{
+  "generated_utc": "2026-03-12T05:36:22.122922+00:00",
+  "inputs": {
+    "pantheon_file": "C:\\develop\\waveP\\data\\cosmology\\pantheonplus_sh0es.dat",
+    "cc_file": "C:\\develop\\waveP\\data\\cosmology\\sources\\cosmic_chronometers_data_CC.dat",
+    "pantheon_z_min": 0.01
+  },
+  "dataset_sizes": {
+    "pantheon_points_used": 1588,
+    "cc_points_used": 32
+  },
+  "models": {
+    "baseline": {
+      "name": "flat_LCDM",
+      "shape_params": {
+        "Omega_m": 0.3693055555555555
+      },
+      "h0_best_km_s_Mpc": 65.98308463224618,
+      "delta_mu_best_mag": -0.20609666217807487,
+      "chi2_sn": 709.8825279468483,
+      "chi2_cc": 15.363937501460551,
+      "chi2_total": 725.2464654483089,
+      "AIC": 731.2464654483089
+    },
+    "pmodel": {
+      "name": "pmodel_heff2_full",
+      "shape_params": {
+        "alpha_r": 0.0,
+        "alpha_m": 0.36936516374588935,
+        "alpha_lambda": 0.0,
+        "omega_r_sq": 0.0,
+        "omega_m_sq": 2412.0180313345636,
+        "omega_lambda_sq": 0.0
+      },
+      "h0_best_km_s_Mpc": 65.9806635779496,
+      "delta_mu_best_mag": -0.20615730476941577,
+      "chi2_sn": 709.8810958467554,
+      "chi2_cc": 15.365359514180824,
+      "chi2_total": 725.2464553609362,
+      "AIC": 735.2464553609362
+    }
+  },
+  "comparison": {
+    "delta_aic_baseline_minus_pmodel": -3.9999899126273704,
+    "delta_aic_sign_rule": "DeltaAIC = AIC_baseline - AIC_P_model (positive favors P-model)",
+    "winner": "baseline_lcdm"
+  },
+  "outputs_private": {
+    "figure_pdf": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_pantheonplus_cc_direct_fit.pdf",
+    "figure_png": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_pantheonplus_cc_direct_fit.png",
+    "metrics_json": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_pantheonplus_cc_direct_fit_metrics.json",
+    "summary_csv": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_pantheonplus_cc_direct_fit_summary.csv"
+  },
+  "notes": [
+    "Pantheon+ は diag誤差（MU_SH0ES_ERR_DIAG）を使用した直接比較（共分散完全版ではない）。",
+    "P-model は H_eff^2(z)=H0^2+αr[(1+z)^4-1]+αm[(1+z)^3-1]-αΛ ln(1+z) の完全式を採用。"
+  ]
+}

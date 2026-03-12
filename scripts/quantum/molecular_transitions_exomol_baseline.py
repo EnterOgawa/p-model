@@ -12,6 +12,10 @@ from typing import Any, Optional
 import matplotlib.pyplot as plt
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
@@ -458,10 +462,13 @@ def main() -> None:
     # ---- Figure (text table, stable & readable in paper) ----
 
     n_panels = max(1, len(per_dataset))
-    ncols = 2 if n_panels > 1 else 1
+    # 可読性優先で1列固定にし、紙面幅に合わせて拡大する。
+    ncols = 1
     nrows = int(math.ceil(n_panels / ncols))
-    fig_w = 11.5
-    fig_h = 5.6 if nrows == 1 else 8.2
+    # 紙面での可読性を優先し、幅をやや絞って同一掲載幅での文字見かけサイズを上げる。
+    fig_w = 12.2
+    # 注記を右側へ寄せる前提で、縦方向の過大化を抑えて紙面はみ出しを回避する。
+    fig_h = max(7.8, 4.6 * float(nrows) + 1.2)
 
     fig, axes = plt.subplots(nrows, ncols, figsize=(fig_w, fig_h), dpi=180)
     axes_flat = list(axes.flat) if hasattr(axes, "flat") else [axes]  # type: ignore[truthy-bool]
@@ -469,8 +476,8 @@ def main() -> None:
         ax.set_axis_off()
 
     fig.suptitle(
-        "Phase 7 / Step 7.12: Molecular transition baseline (primary line lists; representative transitions)",
-        fontsize=13,
+        "Molecular transition baseline (primary line lists; representative transitions)",
+        fontsize=21,
         y=0.98,
     )
 
@@ -480,14 +487,15 @@ def main() -> None:
         src = str(ds.get("source") or "").strip()
         src_prefix = f"{src} " if src else ""
         title = f"{mol} ({src_prefix}{dataset_tag}; top {top_n} by A)"
-        ax.text(0.02, 0.95, title, transform=ax.transAxes, fontsize=12.0, va="top")
+        ax.text(0.02, 0.95, title, transform=ax.transAxes, fontsize=18.8, va="top")
 
         # Rows for this molecule.
         sub = [r for r in rows_all if str(r["molecule"]) == mol]
         sub = sorted(sub, key=lambda r: int(r["rank_by_A_desc"]))
 
-        y = 0.86
-        dy = 0.072
+        y = 0.84
+        # 行間を広げて、2行構成の遷移表記が重ならないようにする。
+        dy = 0.104
         for r in sub:
             rank = int(r["rank_by_A_desc"])
             nu = float(r["wavenumber_cm^-1"])
@@ -499,33 +507,35 @@ def main() -> None:
                 y,
                 f"{rank:>2d}) {label}",
                 transform=ax.transAxes,
-                fontsize=9.3,
+                fontsize=15.2,
                 ha="left",
                 va="center",
             )
             ax.text(
                 0.03,
-                y - 0.032,
+                y - 0.040,
                 f"    ν̃={nu:.6f} cm⁻¹  λ={lam:.3f} μm  A={A:.3e} s⁻¹",
                 transform=ax.transAxes,
-                fontsize=9.1,
+                fontsize=14.4,
                 ha="left",
                 va="center",
                 color="#222222",
             )
             y -= dy
             # 条件分岐: `y < 0.18` を満たす経路を評価する。
-            if y < 0.18:
+            if y < 0.20:
                 break
 
         ax.text(
-            0.02,
-            0.06,
-            "Selection rule: pick top-N transitions by Einstein A.\n"
-            "This fixes targets; it is not a P-model derivation.",
+            0.62,
+            0.14,
+            "Selection: top-N by Einstein A.\n"
+            "Target fix only (not P-model derivation).",
             transform=ax.transAxes,
-            fontsize=8.8,
-            bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor="#cccccc"),
+            fontsize=13.8,
+            ha="left",
+            va="bottom",
+            bbox=dict(boxstyle="round,pad=0.34", facecolor="white", edgecolor="#cccccc"),
         )
 
     for ax in axes_flat[len(per_dataset) :]:

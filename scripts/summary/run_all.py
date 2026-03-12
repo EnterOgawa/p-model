@@ -334,7 +334,12 @@ def main() -> int:
         "--jobs",
         type=int,
         default=1,
-        help="Max concurrent tasks (default: 1). Uses safe group-level parallelism; DOCX export remains serial.",
+        help="Max concurrent tasks (default: 1). Uses safe group-level parallelism.",
+    )
+    ap.add_argument(
+        "--with-docx",
+        action="store_true",
+        help="Enable DOCX exports explicitly (default: disabled).",
     )
     ap.add_argument(
         "--docx-orientation",
@@ -352,6 +357,7 @@ def main() -> int:
 
     offline = bool(args.offline) or (not args.online)
     include_blocked = bool(args.include_blocked)
+    enable_docx = bool(args.with_docx)
     docx_orientation = str(args.docx_orientation)
     docx_margin_mm = float(args.docx_margin_mm)
     jobs = max(1, int(getattr(args, "jobs", 1) or 1))
@@ -1881,7 +1887,7 @@ def main() -> int:
         "mode": "offline" if offline else "online",
         "include_blocked": include_blocked,
         "jobs": jobs,
-        "docx": {"orientation": docx_orientation, "margin_mm": docx_margin_mm},
+        "docx": {"enabled": enable_docx, "orientation": docx_orientation, "margin_mm": docx_margin_mm},
         "python": sys.version,
         "tasks": [],
     }
@@ -2094,85 +2100,91 @@ def main() -> int:
     print(f"\n=== Refreshing: {report_task.key} ===")
     _run_task(report_task, env=env, log_dir=log_dir)
 
-    # Export DOCX versions for easy sharing/editing (best effort; depends on local Word availability).
-    docx_tasks: List[Task] = [
-        Task(
-            key="docx_public_report",
-            argv=[
-                py,
-                "-B",
-                str(root / "scripts" / "summary" / "html_to_docx.py"),
-                "--in",
-                str(out_summary / "pmodel_public_report.html"),
-                "--out",
-                str(out_summary / "pmodel_public_report.docx"),
-                "--pagebreak-validations",
-                "--orientation",
-                docx_orientation,
-                "--margin-mm",
-                str(docx_margin_mm),
-            ],
-            cwd=cwd,
-        ),
-        Task(
-            key="docx_paper",
-            argv=[
-                py,
-                "-B",
-                str(root / "scripts" / "summary" / "html_to_docx.py"),
-                "--in",
-                str(out_summary / "pmodel_paper.html"),
-                "--out",
-                str(out_summary / "pmodel_paper.docx"),
-                "--paper-equations",
-                "--orientation",
-                docx_orientation,
-                "--margin-mm",
-                str(docx_margin_mm),
-            ],
-            cwd=cwd,
-        ),
-        Task(
-            key="docx_part4_verification",
-            argv=[
-                py,
-                "-B",
-                str(root / "scripts" / "summary" / "html_to_docx.py"),
-                "--in",
-                str(out_summary / "pmodel_paper_part4_verification.html"),
-                "--out",
-                str(out_summary / "pmodel_paper_part4_verification.docx"),
-                "--paper-equations",
-                "--orientation",
-                docx_orientation,
-                "--margin-mm",
-                str(docx_margin_mm),
-            ],
-            cwd=cwd,
-        ),
-    ]
-    for task in docx_tasks:
-        print(f"\n=== Running: {task.key} ===")
-        rec = _run_task(task, env=env, log_dir=log_dir)
-        # html_to_docx.py returns:
-        #   0: ok, 3: skipped (no Word backend), otherwise: error.
-        rc = int(rec.get("returncode") or 0)
-        # 条件分岐: `rc == 3` を満たす経路を評価する。
-        if rc == 3:
-            rec["skipped"] = True
-            rec["reason"] = "no supported Word backend found"
-
-        run_info["tasks"].append(rec)
-        # 条件分岐: `not rec.get("ok", False)` を満たす経路を評価する。
-        if not rec.get("ok", False):
+    # Export DOCX only when explicitly requested.
+    if enable_docx:
+        docx_tasks: List[Task] = [
+            Task(
+                key="docx_public_report",
+                argv=[
+                    py,
+                    "-B",
+                    str(root / "scripts" / "summary" / "html_to_docx.py"),
+                    "--in",
+                    str(out_summary / "pmodel_public_report.html"),
+                    "--out",
+                    str(out_summary / "pmodel_public_report.docx"),
+                    "--pagebreak-validations",
+                    "--orientation",
+                    docx_orientation,
+                    "--margin-mm",
+                    str(docx_margin_mm),
+                ],
+                cwd=cwd,
+            ),
+            Task(
+                key="docx_paper",
+                argv=[
+                    py,
+                    "-B",
+                    str(root / "scripts" / "summary" / "html_to_docx.py"),
+                    "--in",
+                    str(out_summary / "pmodel_paper.html"),
+                    "--out",
+                    str(out_summary / "pmodel_paper.docx"),
+                    "--paper-equations",
+                    "--orientation",
+                    docx_orientation,
+                    "--margin-mm",
+                    str(docx_margin_mm),
+                ],
+                cwd=cwd,
+            ),
+            Task(
+                key="docx_part4_verification",
+                argv=[
+                    py,
+                    "-B",
+                    str(root / "scripts" / "summary" / "html_to_docx.py"),
+                    "--in",
+                    str(out_summary / "pmodel_paper_part4_verification.html"),
+                    "--out",
+                    str(out_summary / "pmodel_paper_part4_verification.docx"),
+                    "--paper-equations",
+                    "--orientation",
+                    docx_orientation,
+                    "--margin-mm",
+                    str(docx_margin_mm),
+                ],
+                cwd=cwd,
+            ),
+        ]
+        for task in docx_tasks:
+            print(f"\n=== Running: {task.key} ===")
+            rec = _run_task(task, env=env, log_dir=log_dir)
+            # html_to_docx.py returns:
+            #   0: ok, 3: skipped (no Word backend), otherwise: error.
+            rc = int(rec.get("returncode") or 0)
             # 条件分岐: `rc == 3` を満たす経路を評価する。
             if rc == 3:
-                print(f"[warn] {task.key} skipped (no Word). See log: {rec['log']}")
-            else:
-                print(f"[err] {task.key} failed. See log: {rec['log']}")
-                failures += 1
+                rec["skipped"] = True
+                rec["reason"] = "no supported Word backend found"
 
-    # Persist once more so the report (and readers) can see DOCX task results.
+            run_info["tasks"].append(rec)
+            # 条件分岐: `not rec.get("ok", False)` を満たす経路を評価する。
+            if not rec.get("ok", False):
+                # 条件分岐: `rc == 3` を満たす経路を評価する。
+                if rc == 3:
+                    print(f"[warn] {task.key} skipped (no Word). See log: {rec['log']}")
+                else:
+                    print(f"[err] {task.key} failed. See log: {rec['log']}")
+                    failures += 1
+    else:
+        run_info["tasks"].append(
+            {"key": "docx_exports", "skipped": True, "reason": "disabled by default; pass --with-docx to enable"}
+        )
+        print("[info] DOCX exports are disabled by default (use --with-docx to enable).")
+
+    # Persist once more so the report (and readers) can see final task results.
 
     status_path.write_text(json.dumps(run_info, ensure_ascii=False, indent=2), encoding="utf-8")
 
@@ -2194,11 +2206,11 @@ def main() -> int:
                 "status_path": status_path,
                 "outputs": {
                     "public_report_html": public_html,
-                    "public_report_docx": public_docx if public_docx.exists() else None,
+                    "public_report_docx": public_docx if (enable_docx and public_docx.exists()) else None,
                     "paper_html": paper_html if paper_html.exists() else None,
-                    "paper_docx": paper_docx if paper_docx.exists() else None,
+                    "paper_docx": paper_docx if (enable_docx and paper_docx.exists()) else None,
                     "part4_verification_html": part4_html if part4_html.exists() else None,
-                    "part4_verification_docx": part4_docx if part4_docx.exists() else None,
+                    "part4_verification_docx": part4_docx if (enable_docx and part4_docx.exists()) else None,
                     "run_all_logs_dir": log_dir,
                 },
             }

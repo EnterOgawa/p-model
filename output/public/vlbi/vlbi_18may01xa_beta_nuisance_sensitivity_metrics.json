@@ -1,0 +1,78 @@
+{
+  "generated_utc": "2026-03-07T01:40:40.404196+00:00",
+  "session": "18MAY01XA",
+  "input_root": "C:\\develop\\waveP\\data\\vlbi\\sources\\vgosdb\\18MAY01XA\\extracted",
+  "modes": [
+    "none",
+    "baseline_intercept",
+    "baseline_intercept_linear"
+  ],
+  "source_include": "0229+131,0235+164",
+  "observable_series": "full",
+  "ionosphere_free_enabled": true,
+  "uniform_weight_enabled": false,
+  "baseline_mode_for_delta_aic": "baseline_intercept",
+  "summary": {
+    "beta_spread_abs": 5659.656676647284,
+    "mode_best_weighted_rmse": "baseline_intercept_linear",
+    "mode_best_aic_like": "baseline_intercept_linear"
+  },
+  "rows": [
+    {
+      "mode": "none",
+      "n_points": 2645,
+      "n_params": 2,
+      "beta_est": 5660.682620987207,
+      "beta_sigma": 280.0210761585266,
+      "delta_beta": 5659.682620987207,
+      "gamma_est": 11320.365241974414,
+      "gamma_sigma": 560.0421523170533,
+      "chi2": 1.2113625245750544e+17,
+      "dof": 2643,
+      "weighted_rmse_s": 0.00010526854452718136,
+      "aic_like": 1.2113625245750544e+17,
+      "delta_aic_base_minus_mode": -1.2113625130986437e+17
+    },
+    {
+      "mode": "baseline_intercept",
+      "n_points": 2645,
+      "n_params": 46,
+      "beta_est": 1.3888747757588427,
+      "beta_sigma": 0.04203723942134866,
+      "delta_beta": 0.38887477575884266,
+      "gamma_est": 1.7777495515176853,
+      "gamma_sigma": 0.08407447884269732,
+      "chi2": 1147640984.828649,
+      "dof": 2599,
+      "weighted_rmse_s": 1.0246241222749797e-08,
+      "aic_like": 1147641076.828649,
+      "delta_aic_base_minus_mode": 0.0
+    },
+    {
+      "mode": "baseline_intercept_linear",
+      "n_points": 2645,
+      "n_params": 90,
+      "beta_est": 1.0259443399229191,
+      "beta_sigma": 0.01647150658203494,
+      "delta_beta": 0.025944339922919113,
+      "gamma_est": 1.0518886798458382,
+      "gamma_sigma": 0.03294301316406988,
+      "chi2": 149603420.9204855,
+      "dof": 2555,
+      "weighted_rmse_s": 3.699408699968473e-09,
+      "aic_like": 149603600.9204855,
+      "delta_aic_base_minus_mode": 998037475.9081635
+    }
+  ],
+  "mode_metric_paths": {
+    "none": "C:\\develop\\waveP\\output\\vlbi\\vlbi_18may01xa_none_beta_direct_fit_metrics.json",
+    "baseline_intercept": "C:\\develop\\waveP\\output\\vlbi\\vlbi_18may01xa_baseline_intercept_beta_direct_fit_metrics.json",
+    "baseline_intercept_linear": "C:\\develop\\waveP\\output\\vlbi\\vlbi_18may01xa_baseline_intercept_linear_beta_direct_fit_metrics.json"
+  },
+  "outputs": {
+    "summary_csv": "C:\\develop\\waveP\\output\\vlbi\\vlbi_18may01xa_beta_nuisance_sensitivity_summary.csv",
+    "metrics_json": "C:\\develop\\waveP\\output\\vlbi\\vlbi_18may01xa_beta_nuisance_sensitivity_metrics.json",
+    "plot_pdf": "C:\\develop\\waveP\\output\\vlbi\\vlbi_18may01xa_beta_nuisance_sensitivity.pdf",
+    "plot_png": "C:\\develop\\waveP\\output\\vlbi\\vlbi_18may01xa_beta_nuisance_sensitivity.png"
+  }
+}

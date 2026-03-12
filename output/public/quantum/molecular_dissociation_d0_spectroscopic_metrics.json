@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T14:03:45.888038+00:00",
+  "generated_utc": "2026-03-11T13:56:07.171053+00:00",
   "phase": 7,
   "step": "7.12",
   "title": "Spectroscopic dissociation energy D0 (0 K; fixed baseline)",
@@ -68,6 +68,7 @@
     }
   ],
   "outputs": {
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\molecular_dissociation_d0_spectroscopic.pdf",
     "png": "C:\\develop\\waveP\\output\\public\\quantum\\molecular_dissociation_d0_spectroscopic.png"
   }
 }

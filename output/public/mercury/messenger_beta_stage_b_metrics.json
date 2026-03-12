@@ -1,0 +1,17 @@
+{
+  "generated_utc": "2026-03-07T15:39:31.729868+00:00",
+  "phase_step": "8.7.48.2",
+  "data_root": "data/mercury/messenger",
+  "doppler_csv": "data/mercury/messenger/derived/odf_doppler_observations.csv",
+  "overall_status": "watch",
+  "source_columns": {
+    "epoch_col": "epoch_utc",
+    "doppler_col": "doppler_hz"
+  },
+  "n_rows": 1885257,
+  "n_arcs_total": 308,
+  "valid_arcs": 308,
+  "median_rms_hz": 17300972.789891157,
+  "plot": "generated",
+  "notes": "Stage B MVP uses arc-local linear nuisance fit (intercept+drift)."
+}

@@ -1,0 +1,13 @@
+gate_id,rel_path,required_level,exists,file_count,status,note
+primary_odf,data-odf,required,1,82,pass,主入口（range + Doppler）
+secondary_tnf,data-tnf,optional,1,82,pass,再走査枝（TNF replay）
+calib_ant,calib/ant,optional,0,0,watch,antenna selection
+calib_ion,calib/ion,optional,0,0,watch,ionosphere calibration
+calib_tro,calib/tro,optional,0,0,watch,troposphere calibration
+calib_wea,calib/wea,optional,0,0,watch,DSN weather
+calib_ltf,calib/ltf,optional,0,0,watch,light-time file
+calib_mdm,calib/mdm,optional,0,0,watch,momentum dump summary
+calib_mpd,calib/mpd,optional,0,0,watch,maneuver performance
+calib_sff,calib/sff,optional,0,0,watch,small forces
+external_naif,external/naif,optional,0,0,watch,SPICE kernels
+external_iers,external/iers,optional,0,0,watch,Earth orientation

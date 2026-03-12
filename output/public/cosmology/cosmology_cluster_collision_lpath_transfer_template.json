@@ -122,7 +122,7 @@
       "offset_pred_kpc": 139.148860161026,
       "offset_ref_kpc": 139.148860161026,
       "offset_sigma_kpc": null,
-      "primary_registration_status": "pending_registration_values",
+      "primary_registration_status": "apply_not_requested",
       "priority_class": "low_blocked_missing_primary_data",
       "readiness_state": "missing_observed_offset",
       "required_action": "register_offset_obs_and_sigma_from_primary_dataset",
@@ -147,7 +147,7 @@
       "offset_pred_kpc": 110.6972508579986,
       "offset_ref_kpc": 110.6972508579986,
       "offset_sigma_kpc": null,
-      "primary_registration_status": "pending_registration_values",
+      "primary_registration_status": "apply_not_requested",
       "priority_class": "low_blocked_missing_primary_data",
       "readiness_state": "missing_observed_offset",
       "required_action": "register_offset_obs_and_sigma_from_primary_dataset",
@@ -174,7 +174,7 @@
       "n_applied": 0,
       "n_invalid_registration_rows": 0,
       "n_missing_registration_rows": 0,
-      "n_pending_registration_rows": 2,
+      "n_pending_registration_rows": 0,
       "n_rows": 2
     },
     "non_bullet_primary_registration_checklist": {
@@ -186,10 +186,10 @@
       "n_rows": 2
     },
     "primary_dataset_update_watchpack": {
-      "apply_primary_registration": true,
+      "apply_primary_registration": false,
       "blocked_priority_class": "low_blocked_missing_primary_data",
       "blocked_reason": "missing_nonbullet_primary_offsets",
-      "event_counter": 3,
+      "event_counter": 4,
       "input_file_signature": {
         "exists": true,
         "mtime_utc": "2026-02-21T22:39:03.675298+00:00",
@@ -225,7 +225,7 @@
       "primary_registration_rows_invalid": 0,
       "primary_registration_rows_loaded": 2,
       "primary_registration_rows_missing": 0,
-      "primary_registration_rows_pending_values": 2,
+      "primary_registration_rows_pending_values": 0,
       "update_event_detected": false,
       "update_event_type": "no_change"
     }
@@ -247,9 +247,9 @@
       "Non-Bullet transfer rows do not yet have observed offsets/sigma."
     ]
   },
-  "generated_utc": "2026-02-22T23:24:54.095178+00:00",
+  "generated_utc": "2026-03-04T11:31:59.909116+00:00",
   "inputs": {
-    "apply_primary_registration": true,
+    "apply_primary_registration": false,
     "bootstrap_primary_registration": false,
     "bullet_derivation_json": "output/public/cosmology/cosmology_cluster_collision_pmu_jmu_separation_derivation.json",
     "cases_csv": "data/cosmology/bullet_cluster/collision_lpath_transfer_cases.csv",
@@ -263,6 +263,7 @@
     "private_nonbullet_checklist_csv": "output/private/cosmology/cluster_collision_nonbullet_primary_registration_checklist.csv",
     "private_nonbullet_primary_registration_apply_report_csv": "output/private/cosmology/cluster_collision_nonbullet_primary_registration_apply_report.csv",
     "private_nonbullet_primary_registration_template_csv": "output/private/cosmology/cluster_collision_nonbullet_primary_registration_template.csv",
+    "private_pdf": "output/private/cosmology/cosmology_cluster_collision_lpath_transfer_template.pdf",
     "private_png": "output/private/cosmology/cosmology_cluster_collision_lpath_transfer_template.png",
     "private_template_csv": "output/private/cosmology/cluster_collision_lpath_transfer_input_template.csv",
     "public_csv": "output/public/cosmology/cosmology_cluster_collision_lpath_transfer_template.csv",
@@ -270,13 +271,14 @@
     "public_nonbullet_checklist_csv": "output/public/cosmology/cluster_collision_nonbullet_primary_registration_checklist.csv",
     "public_nonbullet_primary_registration_apply_report_csv": "output/public/cosmology/cluster_collision_nonbullet_primary_registration_apply_report.csv",
     "public_nonbullet_primary_registration_template_csv": "output/public/cosmology/cluster_collision_nonbullet_primary_registration_template.csv",
+    "public_pdf": "output/public/cosmology/cosmology_cluster_collision_lpath_transfer_template.pdf",
     "public_png": "output/public/cosmology/cosmology_cluster_collision_lpath_transfer_template.png",
     "public_template_csv": "output/public/cosmology/cluster_collision_lpath_transfer_input_template.csv"
   },
   "phase": {
     "name": "cluster collision lpath transfer template",
     "phase": 8,
-    "step": "8.7.25.26"
+    "step": "8.7.25.25"
   },
   "reference_state": {
     "anchor_offset_reference_kpc": {
@@ -308,7 +310,7 @@
     "primary_registration_rows_invalid": 0,
     "primary_registration_rows_loaded": 2,
     "primary_registration_rows_missing": 0,
-    "primary_registration_rows_pending_values": 2,
+    "primary_registration_rows_pending_values": 0,
     "primary_registration_template_rows": 2,
     "template_case_rows": 4
   }

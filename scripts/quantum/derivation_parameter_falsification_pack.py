@@ -579,9 +579,11 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     ax.barh(y_values, scores, color=colors)
     ax.axvline(1.0, linestyle="--", color="#6b7280", linewidth=1.2)
     ax.set_yticks(y_values, labels)
-    ax.set_xlabel("normalized score (<=1 means threshold satisfied)")
+    ax.tick_params(axis="y", labelsize=13.6)
+    ax.set_xlabel("normalized score (<=1 means threshold satisfied)", fontsize=14.8)
     decision = (payload.get("decision") or {}).get("route_a_gate") if isinstance(payload.get("decision"), dict) else "unknown"
-    ax.set_title(f"Derivation-parameter falsification pack ({decision})")
+    ax.set_title(f"Derivation-parameter falsification pack ({decision})", fontsize=15.6, pad=8.0)
+    ax.tick_params(axis="x", labelsize=13.4)
     ax.grid(axis="x", alpha=0.25, linestyle=":")
     fig.tight_layout()
     path.parent.mkdir(parents=True, exist_ok=True)

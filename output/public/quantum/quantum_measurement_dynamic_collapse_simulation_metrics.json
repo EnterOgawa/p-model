@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-16T07:35:44.260151+00:00",
+  "generated_utc": "2026-03-12T09:04:08.700330+00:00",
   "phase": 8,
   "step": "8.7.20",
   "model": {
@@ -75,7 +75,8 @@
   },
   "outputs": {
     "csv": "C:\\develop\\waveP\\output\\public\\quantum\\quantum_measurement_dynamic_collapse_simulation.csv",
-    "png": "C:\\develop\\waveP\\output\\public\\quantum\\quantum_measurement_dynamic_collapse_simulation.png"
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\quantum_measurement_dynamic_collapse_simulation.png",
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\quantum_measurement_dynamic_collapse_simulation.pdf"
   },
   "notes": [
     "Operational simulation for measurement dynamics; not yet a first-principles derivation from microscopic P-field interactions.",

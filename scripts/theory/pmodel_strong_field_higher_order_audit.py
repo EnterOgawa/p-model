@@ -2849,8 +2849,12 @@ def _plot(
     lam = np.asarray([r.lambda_obs for r in rows], dtype=float)
     sig = np.asarray([r.sigma_lambda for r in rows], dtype=float)
 
-    fig, axes = plt.subplots(1, 3, figsize=(15.6, 4.8), constrained_layout=True)
-    ax0, ax1, ax2 = axes
+    # 図112: 2列構成から1列（縦3段）へ変更して可読性を優先する。
+    fig = plt.figure(figsize=(12.8, 14.2), constrained_layout=True)
+    grid = fig.add_gridspec(3, 1, height_ratios=[1.45, 1.0, 1.15])
+    ax0 = fig.add_subplot(grid[0, 0])
+    ax1 = fig.add_subplot(grid[1, 0])
+    ax2 = fig.add_subplot(grid[2, 0])
 
     color_map = {"EHT": "#1f77b4", "GW": "#ff7f0e", "PULSAR": "#2ca02c"}
     for i, row in enumerate(rows):
@@ -2897,10 +2901,10 @@ def _plot(
 
     ax0.set_yticks(y)
     ax0.set_yticklabels(labels)
-    ax0.set_xlabel("λ_H estimate")
-    ax0.set_title("Channel-level λ_H constraints")
+    ax0.set_xlabel("λ_H estimate", fontsize=15.0)
+    ax0.set_title("Channel-level λ_H constraints", fontsize=16.2)
     ax0.grid(alpha=0.25)
-    ax0.legend(loc="best", fontsize=8.8)
+    ax0.legend(loc="best", fontsize=13.6)
 
     metrics = ["chi2/dof baseline", "chi2/dof fit", "ΔAIC (fit-baseline)"]
     vals = [
@@ -2912,13 +2916,13 @@ def _plot(
     ax1.axhline(0.0, color="#666666", linewidth=1.0)
     ax1.set_xticks(np.arange(len(metrics)))
     ax1.set_xticklabels(metrics, rotation=12, ha="right")
-    ax1.set_title("Joint fit merit")
+    ax1.set_title("Joint fit merit", fontsize=16.2)
     ax1.grid(alpha=0.25, axis="y")
     for b in bars:
         h = b.get_height()
         # 条件分岐: `np.isfinite(h)` を満たす経路を評価する。
         if np.isfinite(h):
-            ax1.text(b.get_x() + b.get_width() * 0.5, h, f"{h:.3f}", ha="center", va="bottom", fontsize=8)
+            ax1.text(b.get_x() + b.get_width() * 0.5, h, f"{h:.3f}", ha="center", va="bottom", fontsize=13.0)
 
     diag_labels = ["κ ratio (compressed)", "GW primary homology", "GW multi-event homology", "GW area σ"]
     diag_vals = [kappa_ratio, gw_homology, gw_multi_homology, gw_area_sigma]
@@ -2929,12 +2933,16 @@ def _plot(
     ax2.axhline(3.0, color="#7f7f7f", linestyle=":", linewidth=1.0, label="GW area gate")
     ax2.set_xticks([0, 1, 2, 3])
     ax2.set_xticklabels(diag_labels, rotation=12, ha="right")
-    ax2.set_title("Watch diagnostics")
+    ax2.set_title("Watch diagnostics", fontsize=16.2)
     ax2.grid(alpha=0.25, axis="y")
-    ax2.legend(loc="best", fontsize=8.8)
+    ax2.legend(loc="best", fontsize=13.6)
 
-    fig.suptitle("Phase 8 / Step 8.7.27: strong-field higher-order closure audit")
+    for axis in (ax0, ax1, ax2):
+        axis.tick_params(labelsize=13.2)
+
+    fig.suptitle("strong-field higher-order closure audit", fontsize=17.6)
     fig.savefig(path, dpi=160)
+    fig.savefig(path.with_suffix(".pdf"))
     plt.close(fig)
 
 

@@ -724,46 +724,51 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     }
     _write_json(out_json, out)
 
-    fig, axes = plt.subplots(2, 2, figsize=(11.5, 7.2))
+    fig, axes = plt.subplots(2, 2, figsize=(13.6, 9.4))
     ax_f, ax_tau, ax_m, ax_a = axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1]
 
     ax_f.hist(f_pred, bins=80, color="#4C78A8", alpha=0.8, density=True)
     ax_f.axvline(f_meas, color="black", lw=1.5, label="measured")
-    ax_f.set_title(f"QNM f220: pred vs meas (z={z_f:.2f})")
-    ax_f.set_xlabel("f (Hz)")
+    ax_f.set_title(f"QNM f220: pred vs meas (z={z_f:.2f})", fontsize=15.8)
+    ax_f.set_xlabel("f (Hz)", fontsize=14.6)
     ax_f.grid(True, alpha=0.3)
-    ax_f.legend(fontsize=9)
+    ax_f.tick_params(labelsize=13.4)
+    ax_f.legend(fontsize=13.4)
 
     ax_tau.hist(tau_pred * 1000.0, bins=80, color="#F58518", alpha=0.8, density=True)
     ax_tau.axvline(tau_meas * 1000.0, color="black", lw=1.5, label="measured")
-    ax_tau.set_title(f"QNM tau220: pred vs meas (z={z_tau:.2f})")
-    ax_tau.set_xlabel("tau (ms)")
+    ax_tau.set_title(f"QNM tau220: pred vs meas (z={z_tau:.2f})", fontsize=15.8)
+    ax_tau.set_xlabel("tau (ms)", fontsize=14.6)
     ax_tau.grid(True, alpha=0.3)
-    ax_tau.legend(fontsize=9)
+    ax_tau.tick_params(labelsize=13.4)
+    ax_tau.legend(fontsize=13.4)
 
     ax_m.hist(m_det, bins=80, color="#54A24B", alpha=0.8, density=True)
     # 条件分岐: `m_cmp is not None and math.isfinite(float(m_cmp))` を満たす経路を評価する。
     if m_cmp is not None and math.isfinite(float(m_cmp)):
         ax_m.axvline(float(m_cmp), color="black", lw=1.5, label="ringdown inferred")
 
-    ax_m.set_title(f"Final mass (det)  z1d={z_m_1d:.2f}")
-    ax_m.set_xlabel("M_f (M_sun)")
+    ax_m.set_title(f"Final mass (det)  z1d={z_m_1d:.2f}", fontsize=15.8)
+    ax_m.set_xlabel("M_f (M_sun)", fontsize=14.6)
     ax_m.grid(True, alpha=0.3)
-    ax_m.legend(fontsize=9)
+    ax_m.tick_params(labelsize=13.4)
+    ax_m.legend(fontsize=13.4)
 
     ax_a.hist(a_f, bins=80, color="#B279A2", alpha=0.8, density=True)
     # 条件分岐: `a_cmp is not None and math.isfinite(float(a_cmp))` を満たす経路を評価する。
     if a_cmp is not None and math.isfinite(float(a_cmp)):
         ax_a.axvline(float(a_cmp), color="black", lw=1.5, label="ringdown inferred")
 
-    ax_a.set_title(f"Final spin  z1d={z_a_1d:.2f}")
-    ax_a.set_xlabel("a_f")
+    ax_a.set_title(f"Final spin  z1d={z_a_1d:.2f}", fontsize=15.8)
+    ax_a.set_xlabel("a_f", fontsize=14.6)
     ax_a.grid(True, alpha=0.3)
-    ax_a.legend(fontsize=9)
+    ax_a.tick_params(labelsize=13.4)
+    ax_a.legend(fontsize=13.4)
 
-    fig.suptitle(f"GW250114 IMR consistency proxy: {ev['resolved_event']} ({args.catalog})", fontsize=12)
+    fig.suptitle(f"GW250114 IMR consistency proxy: {ev['resolved_event']} ({args.catalog})", fontsize=17.4)
     fig.tight_layout()
     fig.savefig(out_png, dpi=160)
+    fig.savefig(out_png.with_suffix(".pdf"))
     plt.close(fig)
 
     try:

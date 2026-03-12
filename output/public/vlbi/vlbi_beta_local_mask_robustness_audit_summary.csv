@@ -1,0 +1,3 @@
+combo_tag,top_sources,top_time_quartiles,selected_scenario,selected_policy,selected_removed_fraction,selected_allsky_relative_improvement,selected_stable_chi2_dof,selected_timeband_chi2_dof,selected_threshold_chi2_dof,n_candidates,n_pass_candidates
+ts3_tq2,3,2,local_source_2000_472,local_mask:local_source_2000_472,0.034820892535521314,0.0935698470691394,4.23615028197059,4.23615028197059,161.8853449038688,12,5
+ts5_tq4,5,4,local_source_2000_472,local_mask:local_source_2000_472,0.034820892535521314,0.0935698470691394,4.23615028197059,4.23615028197059,161.8853449038688,30,16

@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-13T07:42:52.619320+00:00",
+  "generated_utc": "2026-03-08T05:19:42.257731+00:00",
   "input": "C:/develop/waveP/data/cosmology/distance_duality_constraints.json",
   "ddr_sigma_policy": {
     "policy": "category_sys",
@@ -524,5 +524,9 @@
   "outputs": {
     "png": "C:/develop/waveP/output/private/cosmology/cosmology_reconnection_parameter_space.png",
     "metrics_json": "C:/develop/waveP/output/private/cosmology/cosmology_reconnection_parameter_space_metrics.json"
+  },
+  "outputs_public": {
+    "png": "C:/develop/waveP/output/public/cosmology/cosmology_reconnection_parameter_space.png",
+    "metrics_json": "C:/develop/waveP/output/public/cosmology/cosmology_reconnection_parameter_space_metrics.json"
   }
 }

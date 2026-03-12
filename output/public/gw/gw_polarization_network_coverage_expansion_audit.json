@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-22T14:03:47.771673+00:00",
+  "generated_utc": "2026-03-12T08:43:30.457529+00:00",
   "schema": "wavep.gw.polarization.coverage_expansion_audit.v1",
   "phase": 8,
   "step": "8.7.19.9",
@@ -1257,10 +1257,12 @@
     "audit_json": "C:/develop/waveP/output/private/gw/gw_polarization_network_coverage_expansion_audit.json",
     "audit_csv": "C:/develop/waveP/output/private/gw/gw_polarization_network_coverage_expansion_audit.csv",
     "audit_png": "C:/develop/waveP/output/private/gw/gw_polarization_network_coverage_expansion_audit.png",
+    "audit_pdf": "C:/develop/waveP/output/private/gw/gw_polarization_network_coverage_expansion_audit.pdf",
     "public_copies": [
       "C:/develop/waveP/output/public/gw/gw_polarization_network_coverage_expansion_audit.json",
       "C:/develop/waveP/output/public/gw/gw_polarization_network_coverage_expansion_audit.csv",
-      "C:/develop/waveP/output/public/gw/gw_polarization_network_coverage_expansion_audit.png"
+      "C:/develop/waveP/output/public/gw/gw_polarization_network_coverage_expansion_audit.png",
+      "C:/develop/waveP/output/public/gw/gw_polarization_network_coverage_expansion_audit.pdf"
     ]
   },
   "falsification": {

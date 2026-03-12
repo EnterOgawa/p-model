@@ -6,6 +6,10 @@ import math
 from pathlib import Path
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
@@ -295,14 +299,25 @@ def main() -> None:
 
     try:
         import matplotlib.pyplot as plt
+        import matplotlib as mpl
     except Exception as e:
         raise SystemExit(f"[fail] matplotlib is required to plot: {e}") from e
+
+    # PDF文字埋め込みと可読性の底上げ。
+    mpl.rcParams["pdf.fonttype"] = 42
+    mpl.rcParams["ps.fonttype"] = 42
+    mpl.rcParams["font.size"] = 14.8
+    mpl.rcParams["axes.titlesize"] = 18.0
+    mpl.rcParams["axes.labelsize"] = 15.6
+    mpl.rcParams["xtick.labelsize"] = 14.2
+    mpl.rcParams["ytick.labelsize"] = 14.2
+    mpl.rcParams["legend.fontsize"] = 14.0
 
     a_vals = [a for a, _ in pairs_local]
     r_local = [r for _, r in pairs_local]
     r_sat = [r for _, r in pairs_local_sat]
 
-    fig = plt.figure(figsize=(12.8, 4.8))
+    fig = plt.figure(figsize=(14.6, 6.2))
     gs = fig.add_gridspec(1, 2, width_ratios=[1.6, 1.0])
 
     ax0 = fig.add_subplot(gs[0, 0])
@@ -313,9 +328,9 @@ def main() -> None:
     ax0.set_ylim(0.0, max(2.5, _percentile(sorted(r_sat), 99.5)))
     ax0.set_xlabel("A")
     ax0.set_ylabel("B_pred/B_obs")
-    ax0.set_title("Minimal additional physics under frozen falsification thresholds")
+    ax0.set_title("Minimal additional physics under frozen falsification thresholds", fontsize=18.2)
     ax0.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax0.legend(loc="upper right", fontsize=9)
+    ax0.legend(loc="upper right", fontsize=14.0)
 
     ax1 = fig.add_subplot(gs[0, 1])
     labels = ["baseline\n(z_median)", "baseline\n(z_Δmedian)", "sat\n(z_median)", "sat\n(z_Δmedian)"]
@@ -327,15 +342,18 @@ def main() -> None:
     ax1.axhline(-float(thresholds["z_median_abs_max"]), color="0.2", lw=1.0, ls="--")
     ax1.set_xticks(range(len(vals)))
     ax1.set_xticklabels(labels, rotation=20, ha="right")
-    ax1.set_ylabel("z (σ_proxy units)")
-    ax1.set_title("Operational z-scores (pass if abs(z)≤3)")
+    ax1.set_ylabel("z (σ_proxy units)", fontsize=15.4)
+    ax1.set_title("Operational z-scores (pass if abs(z)≤3)", fontsize=17.6)
     ax1.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
+    ax1.tick_params(axis="both", labelsize=13.8)
 
-    fig.suptitle("Phase 7 / Step 7.13.18: saturation of coherent bonds per nucleon (ν)", y=1.02)
-    fig.subplots_adjust(left=0.07, right=0.98, top=0.86, bottom=0.18, wspace=0.25)
+    fig.suptitle("Saturation of coherent bonds per nucleon (ν)", y=0.98, fontsize=20.0)
+    fig.subplots_adjust(left=0.07, right=0.98, top=0.89, bottom=0.22, wspace=0.25)
 
     out_png = out_dir / "nuclear_binding_energy_frequency_mapping_minimal_additional_physics.png"
+    out_pdf = out_dir / "nuclear_binding_energy_frequency_mapping_minimal_additional_physics.pdf"
     fig.savefig(out_png, bbox_inches="tight")
+    fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
 
     out_json = out_dir / "nuclear_binding_energy_frequency_mapping_minimal_additional_physics_metrics.json"
@@ -357,7 +375,7 @@ def main() -> None:
                     "note": "This is a minimal additional physics step intended to remove heavy-A overbinding while preserving A<=4 exactly under the same distance proxy.",
                 },
                 "models": [m_local, m_local_sat],
-                "outputs": {"png": str(out_png), "csv": str(out_csv)},
+                "outputs": {"png": str(out_png), "pdf": str(out_pdf), "csv": str(out_csv)},
                 "notes": [
                     "Thresholds are loaded from the frozen falsification pack (Step 7.13.17.10).",
                     "This step does not modify the thresholds; it tests whether a minimal saturation rule can bring the model within the frozen operational acceptance region.",
@@ -371,6 +389,7 @@ def main() -> None:
 
     print("[ok] wrote:")
     print(f"  {out_png}")
+    print(f"  {out_pdf}")
     print(f"  {out_csv}")
     print(f"  {out_json}")
 
@@ -379,4 +398,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

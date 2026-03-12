@@ -1,0 +1,98 @@
+{
+  "generated_utc": "2026-03-07T08:57:11.732909+00:00",
+  "phase": {
+    "step": "8.7.47.step1_injection_recovery"
+  },
+  "input": {
+    "points_csv": "output/private/llr/batch/llr_batch_points.csv",
+    "n_points": 13079,
+    "fit_mode": "station_target_year",
+    "weight_scheme": "inv_station_target",
+    "kappa_grid": [
+      0.5,
+      0.8,
+      1.0,
+      1.2,
+      1.5
+    ]
+  },
+  "baseline": {
+    "kappa_est": 1.0006742979447485,
+    "kappa_sigma": 0.0009605616286801067,
+    "method": "template_decontaminated"
+  },
+  "recovery": {
+    "rows": [
+      {
+        "kappa_true": 0.5,
+        "kappa_recovered": 0.5000000000000001,
+        "kappa_recovered_sigma": 0.0009605616286801067,
+        "kappa_error": 1.1102230246251565e-16,
+        "z_error": 1.1558061361983584e-13,
+        "status": "pass"
+      },
+      {
+        "kappa_true": 0.8,
+        "kappa_recovered": 0.8,
+        "kappa_recovered_sigma": 0.0009605616286801067,
+        "kappa_error": 0.0,
+        "z_error": 0.0,
+        "status": "pass"
+      },
+      {
+        "kappa_true": 1.0,
+        "kappa_recovered": 1.0,
+        "kappa_recovered_sigma": 0.0009605616286801067,
+        "kappa_error": 0.0,
+        "z_error": 0.0,
+        "status": "pass"
+      },
+      {
+        "kappa_true": 1.2,
+        "kappa_recovered": 1.2,
+        "kappa_recovered_sigma": 0.0009605616286801067,
+        "kappa_error": 0.0,
+        "z_error": 0.0,
+        "status": "pass"
+      },
+      {
+        "kappa_true": 1.5,
+        "kappa_recovered": 1.5,
+        "kappa_recovered_sigma": 0.0009605616286801067,
+        "kappa_error": 0.0,
+        "z_error": 0.0,
+        "status": "pass"
+      }
+    ],
+    "point_status": "pass",
+    "linearity_fit": {
+      "n_valid": 5,
+      "intercept": 0.0,
+      "slope": 1.0,
+      "intercept_sigma": 0.0013324267237545854,
+      "slope_sigma": 0.0012612792100391023,
+      "z_slope_minus_1": 0.0,
+      "z_intercept": 0.0,
+      "status": "pass"
+    },
+    "linearity_status": "pass",
+    "epsilon_rms": 4.965068306494546e-17,
+    "epsilon_abs_max": 1.1102230246251565e-16,
+    "station_scatter_reference": {
+      "path": "C:\\develop\\waveP\\output\\private\\llr\\llr_kappa_llr_station_stratified_refit.csv",
+      "n_valid": 4,
+      "std_kappa": 0.1589591096383434,
+      "status": "pass"
+    },
+    "epsilon_vs_station_ratio": 3.1234877433516367e-16,
+    "epsilon_vs_station_status": "pass",
+    "overall_status": "pass"
+  },
+  "outputs": {
+    "summary_csv": "output/private/llr/llr_kappa_llr_injection_recovery_summary.csv",
+    "fitline_csv": "output/private/llr/llr_kappa_llr_injection_recovery_fitline.csv",
+    "metrics_json": "output/private/llr/llr_kappa_llr_injection_recovery_metrics.json",
+    "plot_pdf": "output/private/llr/llr_kappa_llr_injection_recovery.pdf",
+    "plot_png": "output/private/llr/llr_kappa_llr_injection_recovery.png"
+  }
+}

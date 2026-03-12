@@ -776,8 +776,12 @@ def _plot(
 
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    fig, axes = plt.subplots(1, 3, figsize=(16.8, 5.4), constrained_layout=True)
-    ax0, ax1, ax2 = axes
+    # 図113: 2列構成から1列（縦3段）へ変更して可読性を優先する。
+    fig = plt.figure(figsize=(12.8, 14.2), constrained_layout=True)
+    grid = fig.add_gridspec(3, 1, height_ratios=[1.35, 1.05, 1.25])
+    ax0 = fig.add_subplot(grid[0, 0])
+    ax1 = fig.add_subplot(grid[1, 0])
+    ax2 = fig.add_subplot(grid[2, 0])
 
     labels = [str(r["label"]) for r in rows]
     x = np.arange(len(rows), dtype=float)
@@ -789,10 +793,10 @@ def _plot(
     ax0.scatter(x, pred, marker="s", color="#2563eb", s=60, label="P_μ-J^μ direct prediction")
     ax0.set_xticks(x)
     ax0.set_xticklabels(labels)
-    ax0.set_ylabel("diameter [μas]")
-    ax0.set_title("Direct ring diameter audit")
+    ax0.set_ylabel("diameter [μas]", fontsize=13.6)
+    ax0.set_title("Direct ring diameter audit", fontsize=14.8)
     ax0.grid(alpha=0.25)
-    ax0.legend(loc="best")
+    ax0.legend(loc="best", fontsize=12.2)
 
     for item in grids:
         obj: ObjectInput = item["object"]
@@ -816,11 +820,11 @@ def _plot(
         ax1.scatter([float(row["r_minus_rg"])], [float(row["b_minus_rg"])], s=24, marker="x")
         ax1.axvline(float(item["horizon_rg"]), color="#6b7280", linestyle=":", linewidth=0.9)
 
-    ax1.set_xlabel("radius r [r_g]")
-    ax1.set_ylabel("impact scale b [r_g]")
-    ax1.set_title("Direct impact minima from P_μ axisymmetric field")
+    ax1.set_xlabel("radius r [r_g]", fontsize=13.6)
+    ax1.set_ylabel("impact scale b [r_g]", fontsize=13.6)
+    ax1.set_title("Direct impact minima from P_μ axisymmetric field", fontsize=14.8)
     ax1.grid(alpha=0.25)
-    ax1.legend(loc="best", fontsize=8.3)
+    ax1.legend(loc="best", fontsize=12.0)
 
     y = np.arange(len(rows), dtype=float)
     asym_pred = np.asarray([float(r["ring_asymmetry_pred"]) for r in rows], dtype=float)
@@ -834,10 +838,13 @@ def _plot(
 
     ax2.set_yticks(y)
     ax2.set_yticklabels(labels)
-    ax2.set_xlabel("ring asymmetry proxy")
-    ax2.set_title("Asymmetry range check (when available)")
+    ax2.set_xlabel("ring asymmetry proxy", fontsize=13.6)
+    ax2.set_title("Asymmetry range check (when available)", fontsize=14.8)
     ax2.grid(alpha=0.25)
-    ax2.legend(loc="best")
+    ax2.legend(loc="best", fontsize=12.2)
+
+    for axis in (ax0, ax1, ax2):
+        axis.tick_params(labelsize=12.0)
 
     fig.savefig(path, dpi=160)
     plt.close(fig)

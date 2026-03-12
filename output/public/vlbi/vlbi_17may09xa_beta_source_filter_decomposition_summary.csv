@@ -1,0 +1,16 @@
+key,value
+session,17MAY09XA
+nuisance_mode,baseline_intercept_linear
+n_points_all,1734
+n_points_selected,21
+n_points_added_by_filter,1713
+beta_all,6.3332217940087849e+00
+beta_all_sigma,6.4047900057548912e-01
+beta_selected,2.2895611027443405e+01
+beta_selected_sigma,9.9149039978179605e+00
+delta_beta_all_minus_selected,-1.6562389233434619e+01
+sigma_combined_delta_beta,9.9355691651824731e+00
+abs_z_delta_beta,1.6669794108499310e+00
+status,pass
+max_abs_z_component,6.7510055674495515e+00
+max_abs_impact_component,8.8726064224983361e+00

@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T14:02:11.819863+00:00",
+  "generated_utc": "2026-03-11T23:27:19.577851+00:00",
   "sources": [
     {
       "reference": "Pikovski et al., 'Universal decoherence due to gravitational time dilation' (arXiv:1311.1095v2)",
@@ -2597,7 +2597,8 @@
     }
   },
   "outputs": {
-    "png": "C:\\develop\\waveP\\output\\public\\quantum\\gravity_induced_decoherence.png"
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\gravity_induced_decoherence.png",
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\gravity_induced_decoherence.pdf"
   },
   "notes": [
     "The ensemble model is inhomogeneous dephasing (not dynamical environment-induced decoherence).",

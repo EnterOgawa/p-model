@@ -178,8 +178,8 @@ def main() -> None:
     pos_cosmo = (0.36, 0.21)
 
     group_labels = [
-        (0.845, 0.955, "Part I 所管", "#2f6b39"),
-        (0.18, 0.615, "Part III 所管", "#9a5c0f"),
+        (0.845, 0.973, "Part I 所管", "#2f6b39"),
+        (0.140, 0.615, "Part III 所管", "#9a5c0f"),
         (0.49, 0.165, "Part II 所管", "#276749"),
     ]
     for gx, gy, text, color in group_labels:

@@ -1,0 +1,99 @@
+{
+  "generated_utc": "2026-02-16T17:26:42.237691+00:00",
+  "domain": "summary",
+  "step": "8.7.16.3 (public manifest citation lock set)",
+  "release_ref": "v0.1.2",
+  "release_ref_exists": true,
+  "git_head_short": "58587b5",
+  "origin_remote": "https://github.com/EnterOgawa/p-model.git",
+  "origin_web_base": "https://github.com/EnterOgawa/p-model",
+  "decision": "ready_for_release_citation_lock",
+  "gates": {
+    "manifest_ok": true,
+    "continuity_ok": true,
+    "continuity_status": "pass_tree_stable",
+    "required_core_missing_regression_count": 0
+  },
+  "manifest_summary": {
+    "file_count": 879,
+    "topics_count": 14,
+    "total_size_bytes": 160012227,
+    "public_tree_sha256": "c6560f8ea99155eaf9e93f3ee6e9660f2be6ac4f87407996d953319d97a7e4ef"
+  },
+  "continuity_snapshot": {
+    "path": "output/private/summary/public_manifest_snapshots/public_outputs_manifest_snapshot_v0.1.2_head-58587b5.json",
+    "label": "v0.1.2_head-58587b5",
+    "status": "pass_tree_stable",
+    "tree_hash_changed": false,
+    "topic_status_counts": {
+      "added": 0,
+      "removed": 0,
+      "changed": 0,
+      "unchanged": 14
+    }
+  },
+  "artifacts": [
+    {
+      "kind": "public_outputs_manifest_json",
+      "path": "output/public/summary/public_outputs_manifest.json",
+      "exists": true,
+      "size_bytes": 248686,
+      "sha256": "f9d129b855b096f8075ca734a1be35b45beefbe95c3a40e534cdc366fe3252a8",
+      "generated_utc": "2026-02-16T17:26:42.061612+00:00"
+    },
+    {
+      "kind": "public_outputs_manifest_topics_csv",
+      "path": "output/public/summary/public_outputs_manifest_topics.csv",
+      "exists": true,
+      "size_bytes": 286,
+      "sha256": "9911115fde5836e09d609c836c48215768bb6b0bd63217ad6f4a61bc860f1a4a",
+      "generated_utc": null
+    },
+    {
+      "kind": "public_outputs_manifest_continuity_json",
+      "path": "output/private/summary/public_outputs_manifest_continuity.json",
+      "exists": true,
+      "size_bytes": 2355,
+      "sha256": "c9f78f2d2b2b45e6513082e4e0cb3bde53825863a3cba746ca71da3581a878c0",
+      "generated_utc": "2026-02-16T17:26:42.150350+00:00"
+    },
+    {
+      "kind": "public_manifest_citation_set_csv",
+      "path": "output/private/summary/public_manifest_citation_set.csv",
+      "exists": true,
+      "size_bytes": 1110,
+      "sha256": "5b4bc1f7f15a9cea854c70c9cd6de22a371b832bf4e5659949c060d5184b7b11",
+      "generated_utc": null
+    },
+    {
+      "kind": "release_manifest_json",
+      "path": "output/private/summary/release_manifest.json",
+      "exists": true,
+      "size_bytes": 14549,
+      "sha256": "302f1655927d143ec783b52dbb16f30d6bad22d73784846e5ffc756209f6d0d1",
+      "generated_utc": "2026-02-16T17:16:47.111495+00:00"
+    },
+    {
+      "kind": "public_manifest_snapshot_json",
+      "path": "output/private/summary/public_manifest_snapshots/public_outputs_manifest_snapshot_v0.1.2_head-58587b5.json",
+      "exists": true,
+      "size_bytes": 4209,
+      "sha256": "047f63f5bfbd6a453764d3e73882d0ad42a96338b16bd2a2ddbcfa342f0e92be",
+      "generated_utc": null
+    }
+  ],
+  "citation_links": {
+    "release_tag": "https://github.com/EnterOgawa/p-model/releases/tag/v0.1.2",
+    "public_outputs_manifest_blob": "https://github.com/EnterOgawa/p-model/blob/v0.1.2/output/public/summary/public_outputs_manifest.json",
+    "public_outputs_manifest_topics_blob": "https://github.com/EnterOgawa/p-model/blob/v0.1.2/output/public/summary/public_outputs_manifest_topics.csv"
+  },
+  "outputs": {
+    "json": "output/private/summary/public_manifest_citation_set.json",
+    "csv": "output/private/summary/public_manifest_citation_set.csv"
+  },
+  "repro_commands": {
+    "public_outputs_manifest_continuity": "python -B scripts/summary/public_outputs_manifest_continuity.py",
+    "public_manifest_citation_set": "python -B scripts/summary/public_manifest_citation_set.py",
+    "release_manifest": "python -B scripts/summary/release_manifest.py"
+  }
+}

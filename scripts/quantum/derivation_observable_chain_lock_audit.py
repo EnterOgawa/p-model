@@ -176,6 +176,58 @@ def _bridge_watch_ids(bridge: Dict[str, Any]) -> List[str]:
     return sorted(set(out))
 
 
+# 関数: `_shared_bell_pairing_only_watch_eligibility` の入出力契約と処理意図を定義する。
+
+def _shared_bell_pairing_only_watch_eligibility(shared: Dict[str, Any]) -> Dict[str, Any]:
+    channels = shared.get("channels") if isinstance(shared.get("channels"), list) else []
+    channel_map: Dict[str, Dict[str, Any]] = {}
+    for row in channels:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
+        if not isinstance(row, dict):
+            continue
+
+        key = str(row.get("channel") or "")
+        # 条件分岐: `key` を満たす経路を評価する。
+        if key:
+            channel_map[key] = row
+
+    bell = channel_map.get("bell") if isinstance(channel_map.get("bell"), dict) else {}
+    bell_diag = bell.get("diagnostics") if isinstance(bell.get("diagnostics"), dict) else {}
+    bell_kpi = bell.get("kpi") if isinstance(bell.get("kpi"), dict) else {}
+
+    selection_ok = bool(bell_diag.get("selection_ok"))
+    delay_ok = bool(bell_diag.get("delay_ok"))
+    pairing_ok = bool(bell_diag.get("pairing_ok"))
+    pairing_delta_sigma_max = bell_kpi.get("pairing_delta_sigma_max")
+
+    other_channels = [name for name in channel_map.keys() if name != "bell"]
+    other_ok = True
+    for name in other_channels:
+        status = str((channel_map.get(name) or {}).get("status") or "")
+        # 条件分岐: `status not in {"pass", "watch"}` を満たす経路を評価する。
+        if status not in {"pass", "watch"}:
+            other_ok = False
+            break
+
+    bell_reject = str(bell.get("status") or "") == "reject"
+    eligible = bell_reject and selection_ok and delay_ok and (not pairing_ok) and other_ok
+    reason = (
+        "bell_pairing_only_reject"
+        if eligible
+        else "not_pairing_only_or_other_channel_not_stable"
+    )
+
+    return {
+        "eligible": eligible,
+        "reason": reason,
+        "selection_ok": selection_ok,
+        "delay_ok": delay_ok,
+        "pairing_ok": pairing_ok,
+        "other_channels_ok": other_ok,
+        "pairing_delta_sigma_max": pairing_delta_sigma_max,
+    }
+
+
 # 関数: `build_payload` の入出力契約と処理意図を定義する。
 
 def build_payload(
@@ -187,6 +239,7 @@ def build_payload(
     bridge_json: Path,
     shared_json: Path,
     deriv_pack_json: Path,
+    shared_gate_policy: str = "strict_hard",
     kwiat_watch_json: Optional[Path] = None,
     hom_watch_json: Optional[Path] = None,
 ) -> Dict[str, Any]:
@@ -226,6 +279,23 @@ def build_payload(
 
     shared_overall = shared.get("overall") if isinstance(shared.get("overall"), dict) else {}
     shared_status = str(shared_overall.get("status") or "")
+    shared_policy_eval = _shared_bell_pairing_only_watch_eligibility(shared)
+    shared_watch_demoted = (
+        shared_gate_policy == "watch_if_bell_pairing_only"
+        and shared_status == "reject"
+        and bool(shared_policy_eval.get("eligible"))
+    )
+    shared_gate_level = "watch" if shared_watch_demoted else "hard"
+    shared_expected = (
+        "pass (or watch if bell pairing-only reject)"
+        if shared_gate_level == "watch"
+        else "pass"
+    )
+    shared_note = (
+        "shared KPI overall gate; watch demotion is allowed only for bell pairing-only reject under policy."
+        if shared_gate_level == "watch"
+        else "shared KPI overall gate is hard."
+    )
 
     deriv_decision = deriv_pack.get("decision") if isinstance(deriv_pack.get("decision"), dict) else {}
     deriv_route_a = str(deriv_decision.get("route_a_gate") or "")
@@ -389,11 +459,11 @@ def build_payload(
             check_id="shared::overall_status",
             metric="shared_kpi_overall",
             value=shared_status,
-            expected="pass",
+            expected=shared_expected,
             passed=shared_status == "pass",
-            gate_level="hard",
+            gate_level=shared_gate_level,
             source="quantum_connection_shared_kpi",
-            note="量子接続共通KPIの overall.status。",
+            note=shared_note,
         ),
         _row(
             check_id="bridge::overall_not_reject",
@@ -429,6 +499,17 @@ def build_payload(
 
     hard_fail_ids = [str(row.get("id") or "") for row in checks if str(row.get("gate_level") or "") == "hard" and row.get("pass") is not True]
     watchlist = sorted(set(born_ab_watchlist + deriv_watchlist + bridge_watchlist))
+    for row in checks:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
+        if not isinstance(row, dict):
+            continue
+
+        # 条件分岐: `str(row.get("id") or "") == "shared::overall_status" and str(row.get("status") or "") == "watch"` を満たす経路を評価する。
+
+        if str(row.get("id") or "") == "shared::overall_status" and str(row.get("status") or "") == "watch":
+            watchlist = sorted(set(watchlist + ["shared::overall_status"]))
+            break
+
     route_a_gate = "A_reject" if hard_fail_ids else "A_continue"
     transition = "A_to_B" if route_a_gate == "A_reject" else "A_stay"
     overall_status = "reject" if hard_fail_ids else ("watch" if watchlist else "pass")
@@ -477,6 +558,12 @@ def build_payload(
             "overall_status": overall_status,
             "hard_fail_ids": hard_fail_ids,
             "watchlist": watchlist,
+            "shared_gate_policy": shared_gate_policy,
+            "shared_gate_policy_result": {
+                "demoted_to_watch": shared_watch_demoted,
+                "watch_eligibility": bool(shared_policy_eval.get("eligible")),
+                "watch_eligibility_reason": str(shared_policy_eval.get("reason") or ""),
+            },
             "watch_convergence": {
                 "watch_n": len(watchlist),
                 "nonhard_stable_n": len(nonhard_watch_stable),
@@ -503,6 +590,8 @@ def build_payload(
             },
             "bridge_status": bridge_status,
             "shared_status": shared_status,
+            "shared_gate_policy": shared_gate_policy,
+            "shared_gate_policy_eval": shared_policy_eval,
             "watch_stability": {
                 "kwiat_delay_signature": {
                     "decision": kwiat_watch_decision,
@@ -583,12 +672,18 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     ax.barh(y, scores, color=colors)
     ax.axvline(1.0, linestyle="--", color="#6b7280", linewidth=1.2)
     ax.set_yticks(y, labels)
-    ax.set_xlabel("consistency score (1=pass, 0=reject)")
+    ax.tick_params(axis="y", labelsize=13.6)
+    ax.set_xlabel("consistency score (1=pass, 0=reject)", fontsize=14.8)
     decision = payload.get("decision") if isinstance(payload.get("decision"), dict) else {}
     title_status = str(decision.get("overall_status") or "unknown")
     title_route = str(decision.get("route_a_gate") or "unknown")
     title_trans = str(decision.get("transition") or "unknown")
-    ax.set_title(f"Derivation-observable chain lock audit ({title_status}; {title_route}/{title_trans})")
+    ax.set_title(
+        f"Derivation-observable chain lock audit ({title_status}; {title_route}/{title_trans})",
+        fontsize=15.2,
+        pad=8.0,
+    )
+    ax.tick_params(axis="x", labelsize=13.4)
     ax.grid(axis="x", alpha=0.25, linestyle=":")
     fig.tight_layout()
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -634,6 +729,12 @@ def main(argv: Optional[List[str]] = None) -> int:
         "--deriv-pack",
         default=str(ROOT / "output" / "public" / "quantum" / "derivation_parameter_falsification_pack.json"),
         help="Input derivation-parameter falsification pack JSON.",
+    )
+    parser.add_argument(
+        "--shared-gate-policy",
+        choices=["strict_hard", "watch_if_bell_pairing_only"],
+        default="strict_hard",
+        help="Policy for shared::overall_status gate handling in chain lock.",
     )
     parser.add_argument(
         "--kwiat-watch",
@@ -697,6 +798,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         bridge_json=bridge,
         shared_json=shared,
         deriv_pack_json=deriv_pack,
+        shared_gate_policy=str(args.shared_gate_policy),
         kwiat_watch_json=kwiat_watch if (kwiat_watch and kwiat_watch.exists()) else None,
         hom_watch_json=hom_watch if (hom_watch and hom_watch.exists()) else None,
     )

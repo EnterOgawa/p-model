@@ -1,0 +1,267 @@
+{
+  "source": "PDS3 mirror (Cassini SCE1): CO-SS-RSS-1-SCE1-V1.0",
+  "base_url": "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10",
+  "generated_utc": "2026-03-06T15:11:50.043680+00:00",
+  "doy_range": {
+    "start": 162,
+    "stop": 182
+  },
+  "cors_volumes": [
+    22,
+    23,
+    24,
+    25,
+    26,
+    27
+  ],
+  "media_dirs": [
+    "ion",
+    "tro"
+  ],
+  "required_mediums": [
+    "IONCAL",
+    "TROPCAL",
+    "PLSMCAL"
+  ],
+  "medium_availability": {
+    "IONCAL": true,
+    "TROPCAL": true,
+    "PLSMCAL": true
+  },
+  "local_mediums_observed": [
+    "IONCAL",
+    "TROPCAL",
+    "PLSMCAL"
+  ],
+  "all_required_mediums_local": true,
+  "ion_files_n": 2,
+  "tro_files_n": 2,
+  "plasma_model_chpart_windows_n": 183,
+  "command_windows_n": 183,
+  "source_listing_urls_n": 12,
+  "source_listing_urls": [
+    "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0022/sce1_ancillary/ion/",
+    "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0022/sce1_ancillary/tro/",
+    "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0023/sce1_ancillary/ion/",
+    "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0023/sce1_ancillary/tro/",
+    "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0024/sce1_ancillary/ion/",
+    "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0024/sce1_ancillary/tro/",
+    "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0025/sce1_ancillary/ion/",
+    "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0025/sce1_ancillary/tro/",
+    "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0026/sce1_ancillary/ion/",
+    "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0026/sce1_ancillary/tro/",
+    "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0027/sce1_ancillary/ion/",
+    "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0027/sce1_ancillary/tro/"
+  ],
+  "files": [
+    {
+      "medium": "ion",
+      "filename": "c32easc2002_152_2002_182.ion",
+      "local_path": "C:\\develop\\waveP\\data\\cassini\\sources\\csp_media_ancillary\\files\\ion\\c32easc2002_152_2002_182.ion",
+      "size_bytes": 21600,
+      "sha256": "b210e7a2ccbf396a5c1158904382feee63309cf3233acdc8cfdbfa3d8607f366",
+      "source_url_primary": "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0022/sce1_ancillary/ion/c32easc2002_152_2002_182.ion",
+      "source_urls": [
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0022/sce1_ancillary/ion/c32easc2002_152_2002_182.ion",
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0023/sce1_ancillary/ion/c32easc2002_152_2002_182.ion",
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0024/sce1_ancillary/ion/c32easc2002_152_2002_182.ion",
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0025/sce1_ancillary/ion/c32easc2002_152_2002_182.ion",
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0026/sce1_ancillary/ion/c32easc2002_152_2002_182.ion",
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0027/sce1_ancillary/ion/c32easc2002_152_2002_182.ion"
+      ],
+      "cors_candidates": [
+        22,
+        23,
+        24,
+        25,
+        26,
+        27
+      ],
+      "label_meta": {
+        "product_id": "C32EASC2002_152_2002_182.TRO",
+        "original_product_id": "C32EASC2002_152_2002_182.TRO",
+        "start_time": "2002-152T06:00:00",
+        "stop_time": "2002-182T06:00:00",
+        "producer_id": "TSAC"
+      }
+    },
+    {
+      "medium": "ion",
+      "filename": "c32easc2002_152_2002_182.lbl",
+      "local_path": "C:\\develop\\waveP\\data\\cassini\\sources\\csp_media_ancillary\\files\\ion\\c32easc2002_152_2002_182.lbl",
+      "size_bytes": 702,
+      "sha256": "1b37ba10d6aaef87159c18bf1225db272f7a72d173b1c0020c0ba54cbb3f2431",
+      "source_url_primary": "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0022/sce1_ancillary/ion/c32easc2002_152_2002_182.lbl",
+      "source_urls": [
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0022/sce1_ancillary/ion/c32easc2002_152_2002_182.lbl",
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0023/sce1_ancillary/ion/c32easc2002_152_2002_182.lbl",
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0024/sce1_ancillary/ion/c32easc2002_152_2002_182.lbl",
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0025/sce1_ancillary/ion/c32easc2002_152_2002_182.lbl",
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0026/sce1_ancillary/ion/c32easc2002_152_2002_182.lbl",
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0027/sce1_ancillary/ion/c32easc2002_152_2002_182.lbl"
+      ],
+      "cors_candidates": [
+        22,
+        23,
+        24,
+        25,
+        26,
+        27
+      ],
+      "label_meta": {
+        "product_id": "C32EASC2002_152_2002_182.TRO",
+        "original_product_id": "C32EASC2002_152_2002_182.TRO",
+        "start_time": "2002-152T06:00:00",
+        "stop_time": "2002-182T06:00:00",
+        "producer_id": "TSAC"
+      }
+    },
+    {
+      "medium": "ion",
+      "filename": "c32easc2002_182_2002_213.ion",
+      "local_path": "C:\\develop\\waveP\\data\\cassini\\sources\\csp_media_ancillary\\files\\ion\\c32easc2002_182_2002_213.ion",
+      "size_bytes": 22320,
+      "sha256": "8bdfd1fe16bd227dfe2e81315e7b6276b3e9e281be46f11f7bb82abee176dbf6",
+      "source_url_primary": "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0027/sce1_ancillary/ion/c32easc2002_182_2002_213.ion",
+      "source_urls": [
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0027/sce1_ancillary/ion/c32easc2002_182_2002_213.ion"
+      ],
+      "cors_candidates": [
+        27
+      ],
+      "label_meta": {
+        "product_id": "C32EASC2002_182_2002_213.ION",
+        "original_product_id": "C32EASC2002_182_2002_213.ION",
+        "start_time": "2002-182T04:25:00",
+        "stop_time": "2002-213T04:42:00",
+        "producer_id": "TSAC"
+      }
+    },
+    {
+      "medium": "ion",
+      "filename": "c32easc2002_182_2002_213.lbl",
+      "local_path": "C:\\develop\\waveP\\data\\cassini\\sources\\csp_media_ancillary\\files\\ion\\c32easc2002_182_2002_213.lbl",
+      "size_bytes": 702,
+      "sha256": "fa6d9f04102e4277b61a67baf6f4565f90aa4a17e0d1b46c08439f1c04468185",
+      "source_url_primary": "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0027/sce1_ancillary/ion/c32easc2002_182_2002_213.lbl",
+      "source_urls": [
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0027/sce1_ancillary/ion/c32easc2002_182_2002_213.lbl"
+      ],
+      "cors_candidates": [
+        27
+      ],
+      "label_meta": {
+        "product_id": "C32EASC2002_182_2002_213.ION",
+        "original_product_id": "C32EASC2002_182_2002_213.ION",
+        "start_time": "2002-182T04:25:00",
+        "stop_time": "2002-213T04:42:00",
+        "producer_id": "TSAC"
+      }
+    },
+    {
+      "medium": "tro",
+      "filename": "c32easc2002_152_2002_182.lbl",
+      "local_path": "C:\\develop\\waveP\\data\\cassini\\sources\\csp_media_ancillary\\files\\tro\\c32easc2002_152_2002_182.lbl",
+      "size_bytes": 702,
+      "sha256": "0b430935eb47a08ae8984ad1dac6ecec31db8f445fa2acb259c0028d1a3a924f",
+      "source_url_primary": "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0022/sce1_ancillary/tro/c32easc2002_152_2002_182.lbl",
+      "source_urls": [
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0022/sce1_ancillary/tro/c32easc2002_152_2002_182.lbl",
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0023/sce1_ancillary/tro/c32easc2002_152_2002_182.lbl",
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0024/sce1_ancillary/tro/c32easc2002_152_2002_182.lbl",
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0025/sce1_ancillary/tro/c32easc2002_152_2002_182.lbl",
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0026/sce1_ancillary/tro/c32easc2002_152_2002_182.lbl",
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0027/sce1_ancillary/tro/c32easc2002_152_2002_182.lbl"
+      ],
+      "cors_candidates": [
+        22,
+        23,
+        24,
+        25,
+        26,
+        27
+      ],
+      "label_meta": {
+        "product_id": "C32EASC2002_152_2002_182.TRO",
+        "original_product_id": "C32EASC2002_152_2002_182.TRO",
+        "start_time": "2002-152T06:00:00",
+        "stop_time": "2002-182T06:00:00",
+        "producer_id": "TSAC"
+      }
+    },
+    {
+      "medium": "tro",
+      "filename": "c32easc2002_152_2002_182.tro",
+      "local_path": "C:\\develop\\waveP\\data\\cassini\\sources\\csp_media_ancillary\\files\\tro\\c32easc2002_152_2002_182.tro",
+      "size_bytes": 89315,
+      "sha256": "864941c835eae260b2b314cddf59704ad6563fd0097ab2186107174d3ee41283",
+      "source_url_primary": "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0022/sce1_ancillary/tro/c32easc2002_152_2002_182.tro",
+      "source_urls": [
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0022/sce1_ancillary/tro/c32easc2002_152_2002_182.tro",
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0023/sce1_ancillary/tro/c32easc2002_152_2002_182.tro",
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0024/sce1_ancillary/tro/c32easc2002_152_2002_182.tro",
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0025/sce1_ancillary/tro/c32easc2002_152_2002_182.tro",
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0026/sce1_ancillary/tro/c32easc2002_152_2002_182.tro",
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0027/sce1_ancillary/tro/c32easc2002_152_2002_182.tro"
+      ],
+      "cors_candidates": [
+        22,
+        23,
+        24,
+        25,
+        26,
+        27
+      ],
+      "label_meta": {
+        "product_id": "C32EASC2002_152_2002_182.TRO",
+        "original_product_id": "C32EASC2002_152_2002_182.TRO",
+        "start_time": "2002-152T06:00:00",
+        "stop_time": "2002-182T06:00:00",
+        "producer_id": "TSAC"
+      }
+    },
+    {
+      "medium": "tro",
+      "filename": "c32easc2002_182_2002_189.lbl",
+      "local_path": "C:\\develop\\waveP\\data\\cassini\\sources\\csp_media_ancillary\\files\\tro\\c32easc2002_182_2002_189.lbl",
+      "size_bytes": 702,
+      "sha256": "98a339fdbc8631c0743163cadd05ab3ddc11c5221b9b670bdbaee9c0b4fdc3bf",
+      "source_url_primary": "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0027/sce1_ancillary/tro/c32easc2002_182_2002_189.lbl",
+      "source_urls": [
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0027/sce1_ancillary/tro/c32easc2002_182_2002_189.lbl"
+      ],
+      "cors_candidates": [
+        27
+      ],
+      "label_meta": {
+        "product_id": "C32EASC2002_182_2002_189.TRO",
+        "original_product_id": "C32EASC2002_182_2002_189.TRO",
+        "start_time": "2002-182T06:00:00",
+        "stop_time": "2002-189T06:00:00",
+        "producer_id": "TSAC"
+      }
+    },
+    {
+      "medium": "tro",
+      "filename": "c32easc2002_182_2002_189.tro",
+      "local_path": "C:\\develop\\waveP\\data\\cassini\\sources\\csp_media_ancillary\\files\\tro\\c32easc2002_182_2002_189.tro",
+      "size_bytes": 24528,
+      "sha256": "fa00f2db0d43f6cf78870e217505d2f0c17ae3af37e2243e3f65270607ec4333",
+      "source_url_primary": "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0027/sce1_ancillary/tro/c32easc2002_182_2002_189.tro",
+      "source_urls": [
+        "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10/cors_0027/sce1_ancillary/tro/c32easc2002_182_2002_189.tro"
+      ],
+      "cors_candidates": [
+        27
+      ],
+      "label_meta": {
+        "product_id": "C32EASC2002_182_2002_189.TRO",
+        "original_product_id": "C32EASC2002_182_2002_189.TRO",
+        "start_time": "2002-182T06:00:00",
+        "stop_time": "2002-189T06:00:00",
+        "producer_id": "TSAC"
+      }
+    }
+  ],
+  "note": "PLSMCAL is operationally treated as MODEL(CHPART) windows in SCE1 ancillary ION command files."
+}

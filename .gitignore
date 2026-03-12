@@ -19,6 +19,7 @@ Thumbs.db
 # Local temp
 .tmp*/
 temp_*.pdf
+cookies.txt
 
 # Local-only docs (kept local; not tracked here)
 doc/
@@ -36,6 +37,8 @@ viking/
 output/**
 !output/public/
 !output/public/**
+output/public/mercury/messenger_beta_stage_b_arc_residuals.csv
+output/public/quantum/bell/*/normalized_events.npz
 
 # Input data caches (not tracked here)
 data/

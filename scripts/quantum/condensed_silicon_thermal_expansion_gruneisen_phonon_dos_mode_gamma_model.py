@@ -15,6 +15,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
@@ -5345,6 +5349,12 @@ def main(argv: Optional[list[str]] = None) -> None:
 
     # Plot
 
+    title_font = 14.8
+    axis_label_font = 13.4
+    tick_font = 12.2
+    legend_font = 10.8
+    annotation_font = 11.2
+
     fig, (ax0, ax1, ax2) = plt.subplots(
         3, 1, figsize=(11.0, 9.2), sharex=False, gridspec_kw={"height_ratios": [1, 2, 1]}
     )
@@ -5364,18 +5374,19 @@ def main(argv: Optional[list[str]] = None) -> None:
 
     if int(args.groups) == 3:
         ax0.axvline(nu_split_ta_thz, color="#bbbbbb", lw=1.0, ls=":", alpha=0.9, label="TA/LA split (mode-count)")
-        ax0.set_title(f"{dos_title_prefix} (per atom; mode-count splits: TA/LA/optical)")
+        ax0.set_title(f"{dos_title_prefix} (per atom; mode-count splits: TA/LA/optical)", fontsize=title_font)
     # 条件分岐: 前段条件が不成立で、`int(args.groups) == 4` を追加評価する。
     elif int(args.groups) == 4:
         ax0.axvline(nu_split_ta_thz, color="#bbbbbb", lw=1.0, ls=":", alpha=0.9, label="TA/LA split (mode-count)")
         ax0.axvline(nu_split_to_thz, color="#bbbbbb", lw=1.0, ls="-.", alpha=0.9, label="TO/LO split (mode-count)")
-        ax0.set_title(f"{dos_title_prefix} (per atom; mode-count splits: TA/LA/TO/LO)")
+        ax0.set_title(f"{dos_title_prefix} (per atom; mode-count splits: TA/LA/TO/LO)", fontsize=title_font)
     else:
-        ax0.set_title(f"{dos_title_prefix} (per atom; split at half-integral ≈ acoustic/optical mode count)")
+        ax0.set_title(f"{dos_title_prefix} (per atom; split at half-integral ≈ acoustic/optical mode count)", fontsize=title_font)
 
-    ax0.set_ylabel("DOS (1/THz)")
+    ax0.set_ylabel("DOS (1/THz)", fontsize=axis_label_font)
     ax0.grid(True, alpha=0.25)
-    ax0.legend(loc="best", fontsize=9)
+    ax0.tick_params(axis="both", labelsize=tick_font)
+    ax0.legend(loc="best", fontsize=legend_font)
 
     # Alpha(T)
     ax1.plot(temps, alpha_obs_1e8, color="#d62728", lw=2.0, label="obs: NIST TRC fit α(T)")
@@ -5591,13 +5602,13 @@ def main(argv: Optional[list[str]] = None) -> None:
             float(zero["x_cross"]) + 5,
             ax1.get_ylim()[0] * 0.75,
             f"sign change ~{zero['x_cross']:.0f} K",
-            fontsize=9,
+            fontsize=annotation_font,
             alpha=0.85,
         )
 
     ax1.axvspan(50.0, float(t_max), color="#dddddd", alpha=0.12, label="fit range (global)")
-    ax1.set_ylabel("α(T) (10^-8 / K)")
-    ax1.set_title("Si thermal expansion: phonon DOS constrained Gruneisen check")
+    ax1.set_ylabel("α(T) (10^-8 / K)", fontsize=axis_label_font)
+    ax1.set_title("Si thermal expansion: phonon DOS constrained Gruneisen check", fontsize=title_font)
     # 条件分岐: `softening_enabled and softening_global_frac is not None` を満たす経路を評価する。
     if softening_enabled and softening_global_frac is not None:
         ax1.text(
@@ -5607,24 +5618,28 @@ def main(argv: Optional[list[str]] = None) -> None:
             transform=ax1.transAxes,
             ha="left",
             va="top",
-            fontsize=9,
+            fontsize=annotation_font,
             alpha=0.9,
         )
 
     ax1.grid(True, alpha=0.25)
-    ax1.legend(loc="best", fontsize=9)
+    ax1.tick_params(axis="both", labelsize=tick_font)
+    ax1.legend(loc="best", fontsize=legend_font)
 
     # Residual z
     ax2.plot(temps, z, color="#000000", lw=1.2)
     ax2.axhline(0.0, color="#666666", lw=1.0, alpha=0.6)
     ax2.axhline(3.0, color="#d62728", lw=1.0, ls="--", alpha=0.7)
     ax2.axhline(-3.0, color="#d62728", lw=1.0, ls="--", alpha=0.7)
-    ax2.set_xlabel("Temperature (K)")
-    ax2.set_ylabel("z = (pred-obs)/σ_fit")
+    ax2.set_xlabel("Temperature (K)", fontsize=axis_label_font)
+    ax2.set_ylabel("z = (pred-obs)/σ_fit", fontsize=axis_label_font)
     ax2.grid(True, alpha=0.25)
+    ax2.tick_params(axis="both", labelsize=tick_font)
 
     fig.tight_layout()
+    out_pdf = out_dir / f"{out_tag}.pdf"
     out_png = out_dir / f"{out_tag}.png"
+    fig.savefig(out_pdf)
     fig.savefig(out_png, dpi=180)
     plt.close(fig)
 
@@ -6061,7 +6076,7 @@ def main(argv: Optional[list[str]] = None) -> None:
                     "holdout_ok": bool(holdout_ok),
                     "notes": falsification_notes,
                 },
-                "outputs": {"csv": str(out_csv), "png": str(out_png)},
+                "outputs": {"csv": str(out_csv), "pdf": str(out_pdf), "png": str(out_png)},
                 "notes": [
                     "ω-split is defined at the half-integral of D(ω) to proxy the 3+3 mode count split (acoustic vs optical) in diamond Si.",
                     "For groups=3, TA/LA split uses the 2:1 mode-count ratio within acoustic branches (2 TA, 1 LA).",
@@ -6080,6 +6095,7 @@ def main(argv: Optional[list[str]] = None) -> None:
     )
 
     print(f"[ok] wrote: {out_csv}")
+    print(f"[ok] wrote: {out_pdf}")
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_metrics}")
 

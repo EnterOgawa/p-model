@@ -399,15 +399,17 @@ def _render_png(path: Path, rows: Sequence[Dict[str, Any]], *, pi0: float, temp_
     ratios = [float(r["lpath_ratio"]) if _safe_float(r.get("lpath_ratio")) is not None else float("nan") for r in rows]
     x = np.arange(len(labels), dtype=float)
 
-    fig, axes = plt.subplots(1, 2, figsize=(12.0, 4.8), dpi=160)
+    fig, axes = plt.subplots(1, 2, figsize=(12.8, 5.2), dpi=160)
 
     valid_mask = np.isfinite(ratios)
     axes[0].bar(x[valid_mask], np.asarray(ratios)[valid_mask], color="#4c78a8")
     axes[0].axhline(1.0, color="#666666", linestyle="--", linewidth=1.0)
     axes[0].set_xticks(x)
     axes[0].set_xticklabels(labels, rotation=25, ha="right")
-    axes[0].set_ylabel("L_path / L_path,0")
-    axes[0].set_title("L_path transfer ratios")
+    axes[0].set_ylabel("L_path / L_path,0", fontsize=13.2)
+    axes[0].set_title("L_path transfer ratios", fontsize=14.2)
+    axes[0].tick_params(axis="x", labelsize=11.6)
+    axes[0].tick_params(axis="y", labelsize=11.6)
     axes[0].grid(True, axis="y", alpha=0.25)
 
     obs_rows = [r for r in rows if _safe_float(r.get("offset_obs_kpc")) is not None and _safe_float(r.get("offset_sigma_kpc")) is not None]
@@ -422,24 +424,27 @@ def _render_png(path: Path, rows: Sequence[Dict[str, Any]], *, pi0: float, temp_
         axes[1].scatter(x2, pred, color="#d62728", marker="s", label="predicted offset")
         axes[1].set_xticks(x2)
         axes[1].set_xticklabels(labels2, rotation=25, ha="right")
-        axes[1].set_ylabel("offset [kpc]")
-        axes[1].set_title("Observed vs predicted (rows with observations)")
+        axes[1].set_ylabel("offset [kpc]", fontsize=13.2)
+        axes[1].set_title("Observed vs predicted (rows with observations)", fontsize=14.2)
         axes[1].grid(True, axis="y", alpha=0.25)
-        axes[1].legend(loc="best")
+        axes[1].legend(loc="best", fontsize=12.0)
+        axes[1].tick_params(axis="x", labelsize=11.6)
+        axes[1].tick_params(axis="y", labelsize=11.6)
     else:
-        axes[1].text(0.5, 0.5, "no observed offsets in transfer table", ha="center", va="center")
+        axes[1].text(0.5, 0.5, "no observed offsets in transfer table", ha="center", va="center", fontsize=12.0)
         axes[1].set_axis_off()
 
-    fig.suptitle("Cluster-collision L_path transfer template audit")
+    fig.suptitle("Cluster-collision L_path transfer template audit", fontsize=15.4)
     fig.text(
         0.01,
         -0.02,
         f"Pi0={pi0:.6f}, temp_power={temp_power:.3f}, formula: (1+Pi0)/(r_v + Pi0*r_rho*r_T^temp_power)",
-        fontsize=8,
+        fontsize=12.0,
         va="top",
     )
     fig.tight_layout()
     fig.savefig(path, bbox_inches="tight")
+    fig.savefig(path.with_suffix(".pdf"), bbox_inches="tight")
     plt.close(fig)
 
 
@@ -497,6 +502,7 @@ def main() -> int:
     out_private_json = args.outdir / "cosmology_cluster_collision_lpath_transfer_template.json"
     out_private_csv = args.outdir / "cosmology_cluster_collision_lpath_transfer_template.csv"
     out_private_png = args.outdir / "cosmology_cluster_collision_lpath_transfer_template.png"
+    out_private_pdf = args.outdir / "cosmology_cluster_collision_lpath_transfer_template.pdf"
     out_private_template = args.outdir / "cluster_collision_lpath_transfer_input_template.csv"
     out_private_checklist = args.outdir / "cluster_collision_nonbullet_primary_registration_checklist.csv"
     out_private_primary_template = args.outdir / "cluster_collision_nonbullet_primary_registration_template.csv"
@@ -505,6 +511,7 @@ def main() -> int:
     out_public_json = args.public_outdir / "cosmology_cluster_collision_lpath_transfer_template.json"
     out_public_csv = args.public_outdir / "cosmology_cluster_collision_lpath_transfer_template.csv"
     out_public_png = args.public_outdir / "cosmology_cluster_collision_lpath_transfer_template.png"
+    out_public_pdf = args.public_outdir / "cosmology_cluster_collision_lpath_transfer_template.pdf"
     out_public_template = args.public_outdir / "cluster_collision_lpath_transfer_input_template.csv"
     out_public_checklist = args.public_outdir / "cluster_collision_nonbullet_primary_registration_checklist.csv"
     out_public_primary_template = args.public_outdir / "cluster_collision_nonbullet_primary_registration_template.csv"
@@ -990,6 +997,7 @@ def main() -> int:
     _write_csv(out_public_csv, rows_out, fieldnames)
     _render_png(out_private_png, rows_out, pi0=pi0, temp_power=temp_power)
     shutil.copy2(out_private_png, out_public_png)
+    shutil.copy2(out_private_pdf, out_public_pdf)
 
     template_rows: List[Dict[str, Any]] = []
     for case in cases:
@@ -1194,6 +1202,7 @@ def main() -> int:
             "private_json": _rel(out_private_json),
             "private_csv": _rel(out_private_csv),
             "private_png": _rel(out_private_png),
+            "private_pdf": _rel(out_private_pdf),
             "private_template_csv": _rel(out_private_template),
             "private_nonbullet_checklist_csv": _rel(out_private_checklist),
             "private_nonbullet_primary_registration_template_csv": _rel(out_private_primary_template),
@@ -1201,6 +1210,7 @@ def main() -> int:
             "public_json": _rel(out_public_json),
             "public_csv": _rel(out_public_csv),
             "public_png": _rel(out_public_png),
+            "public_pdf": _rel(out_public_pdf),
             "public_template_csv": _rel(out_public_template),
             "public_nonbullet_checklist_csv": _rel(out_public_checklist),
             "public_nonbullet_primary_registration_template_csv": _rel(out_public_primary_template),
@@ -1242,6 +1252,7 @@ def main() -> int:
                         "json": _rel(out_public_json),
                         "csv": _rel(out_public_csv),
                         "png": _rel(out_public_png),
+                        "pdf": _rel(out_public_pdf),
                         "template_csv": _rel(out_public_template),
                         "nonbullet_checklist_csv": _rel(out_public_checklist),
                         "nonbullet_primary_registration_template_csv": _rel(out_public_primary_template),
@@ -1276,6 +1287,7 @@ def main() -> int:
     print(f"[out] {out_public_json}")
     print(f"[out] {out_public_csv}")
     print(f"[out] {out_public_png}")
+    print(f"[out] {out_public_pdf}")
     print(f"[out] {out_public_template}")
     print(f"[out] {out_public_checklist}")
     print(f"[out] {out_public_primary_template}")

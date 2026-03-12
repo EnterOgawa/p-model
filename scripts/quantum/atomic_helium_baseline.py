@@ -8,6 +8,10 @@ from typing import Any
 import matplotlib.pyplot as plt
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
@@ -102,14 +106,18 @@ def main() -> None:
     lines_out.sort(key=lambda r: float(r["lambda_vac_nm"]))
 
     # ---- Figure ----
-    fig_w, fig_h, dpi = 11.5, 4.6, 180
+    plt.rcParams["pdf.fonttype"] = 42
+    plt.rcParams["ps.fonttype"] = 42
+
+    fig_w, fig_h, dpi = 11.5, 6.4, 190
     fig, ax = plt.subplots(1, 1, figsize=(fig_w, fig_h), dpi=dpi)
-    ax.set_title("Phase 7 / Step 7.12: Atomic baseline (Helium, NIST ASD)", fontsize=13)
-    ax.set_xlabel("Vacuum wavelength λ [nm] (from NIST ASD)")
+    ax.set_title("Atomic baseline (Helium, NIST ASD)", fontsize=17.2)
+    ax.set_xlabel("Vacuum wavelength λ [nm] (from NIST ASD)", fontsize=14.6)
     ax.set_yticks([])
     ax.set_xlim(350, 720)
     ax.set_ylim(0, 1)
     ax.grid(True, axis="x", alpha=0.25)
+    ax.tick_params(axis="x", labelsize=12.8)
 
     for i, r in enumerate(lines_out):
         lam = float(r["lambda_vac_nm"])
@@ -120,7 +128,7 @@ def main() -> None:
             lam + 2.0,
             y,
             f"{label}\n{lam:.3f} nm",
-            fontsize=9.6,
+            fontsize=12.8,
             ha="left",
             va="center",
             color="#2f855a",
@@ -131,12 +139,14 @@ def main() -> None:
         0.05,
         "Data: NIST ASD (He I)\nThis figure fixes baseline targets for Part III; it is not a derivation.",
         transform=ax.transAxes,
-        fontsize=9.5,
+        fontsize=12.2,
         bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor="#cccccc"),
     )
 
     fig.tight_layout()
+    out_pdf = out_dir / "atomic_helium_baseline.pdf"
     out_png = out_dir / "atomic_helium_baseline.png"
+    fig.savefig(out_pdf)
     fig.savefig(out_png)
     plt.close(fig)
 
@@ -153,9 +163,11 @@ def main() -> None:
             "This output fixes a small set of observed vacuum wavelengths as a reproducible baseline (multi-electron). "
             "P-model derivation of atomic/molecular binding is tracked in Roadmap Step 7.12+."
         ),
+        "outputs": {"pdf": str(out_pdf), "png": str(out_png)},
     }
     out_json = out_dir / "atomic_helium_baseline_metrics.json"
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[ok] wrote: {out_pdf}")
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_json}")
 
@@ -164,4 +176,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -397,7 +397,8 @@ def _plot_pt_fit(
     _set_japanese_font()
     import matplotlib.pyplot as plt
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6.8))
+    # 図41: 横2列をやめて縦1列（2段）で表示する。
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14.8, 14.2))
 
     # Panel 1: data + model curves
     colors = {"lowz": "#1f77b4", "highz": "#ff7f0e", "midz": "#7f7f7f"}
@@ -426,11 +427,12 @@ def _plot_pt_fit(
     if y_fit_lo is not None and y_fit_hi is not None:
         ax1.fill_between(x, y_fit_hi, y_fit_lo, color="#111111", alpha=0.10, label="fit ±1σ (approx)")
 
-    ax1.set_xlabel("1+z", fontsize=11)
-    ax1.set_ylabel("aging rate g = Δt_em/Δt_obs", fontsize=11)
-    ax1.set_title("Blondin+2008 Table 3: aging rate vs redshift", fontsize=13)
+    ax1.set_xlabel("1+z", fontsize=13.2)
+    ax1.set_ylabel("aging rate g = Δt_em/Δt_obs", fontsize=13.2)
+    ax1.set_title("Blondin+2008 Table 3: aging rate vs redshift", fontsize=15.8)
+    ax1.tick_params(labelsize=12.0)
     ax1.grid(True, linestyle="--", alpha=0.5)
-    ax1.legend(fontsize=9, loc="upper right")
+    ax1.legend(fontsize=11.2, loc="upper right")
 
     # Panel 2: summary bars for fits (all/highz/lowz)
     labels = ["all", "high-z", "low-z"]
@@ -445,21 +447,16 @@ def _plot_pt_fit(
     ax2.axvline(0.0, color="#d62728", linewidth=1.2, alpha=0.85, linestyle="--", label="p_t=0")
     ax2.errorbar(vals, y_pos, xerr=errs, fmt="o", capsize=4, color="#111111", ecolor="#111111")
     ax2.set_yticks(y_pos)
-    ax2.set_yticklabels(labels)
-    ax2.set_xlabel("p_t (fit)", fontsize=11)
-    ax2.set_title("p_t fit (zero-point fixed)", fontsize=13)
+    ax2.set_yticklabels(labels, fontsize=12.0)
+    ax2.set_xlabel("p_t (fit)", fontsize=13.2)
+    ax2.set_title("p_t fit (zero-point fixed)", fontsize=15.8)
+    ax2.tick_params(labelsize=12.0)
     ax2.grid(True, linestyle="--", alpha=0.5, axis="x")
-    ax2.legend(fontsize=9, loc="lower right")
+    ax2.legend(fontsize=11.2, loc="lower right")
 
-    fig.suptitle("SN time dilation audit: p_t refit from primary Table 3 (non-circular I/F)", fontsize=14)
-    fig.text(
-        0.5,
-        0.01,
-        "注：g(z) は観測時間軸を事前に (1+z) で割り戻さず、Table 3 の公表値（Δt_em/Δt_obs）をそのまま用いて p_t を自由に推定する。",
-        ha="center",
-        fontsize=10,
-    )
-    plt.tight_layout(rect=(0.0, 0.03, 1.0, 0.93))
+    fig.suptitle("SN time dilation audit: p_t refit from primary Table 3 (non-circular I/F)", fontsize=17.0)
+    # 図下注記は論文本文側へ移し、図中の重なりを回避する。
+    plt.tight_layout(rect=(0.0, 0.03, 1.0, 0.95))
 
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)
@@ -486,7 +483,8 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path) -> None:
     _set_japanese_font()
     import matplotlib.pyplot as plt
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6.8))
+    # 図41: 横2列をやめて縦1列（2段）で表示する。
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14.8, 14.2))
 
     # Left: z-scores
     ax1.axvline(0.0, color="k", linewidth=1.0, alpha=0.6)
@@ -511,11 +509,12 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path) -> None:
     )
 
     ax1.set_yticks(y)
-    ax1.set_yticklabels(labels)
-    ax1.set_xlabel("z-score（(p_t_model - p_t_obs)/σ）", fontsize=11)
-    ax1.set_title("SN time dilation：モデルのz-score", fontsize=13)
+    ax1.set_yticklabels(labels, fontsize=12.0)
+    ax1.set_xlabel("z-score（(p_t_model - p_t_obs)/σ）", fontsize=13.2)
+    ax1.set_title("SN time dilation：モデルのz-score", fontsize=15.8)
+    ax1.tick_params(labelsize=12.0)
     ax1.grid(True, linestyle="--", alpha=0.5, axis="x")
-    ax1.legend(fontsize=9, loc="lower right")
+    ax1.legend(fontsize=11.2, loc="lower right")
 
     # Right: observed p_t with reference lines
     ax2.axvline(p_frw, color="#1f77b4", linewidth=1.2, alpha=0.85, label="FRW: p_t=1")
@@ -532,21 +531,16 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path) -> None:
         label="観測（一次ソースの公表値）",
     )
     ax2.set_yticks(y)
-    ax2.set_yticklabels(labels)
-    ax2.set_xlabel("p_t", fontsize=11)
-    ax2.set_title("観測 p_t（時間伸長指数）の一次ソース制約", fontsize=13)
+    ax2.set_yticklabels(labels, fontsize=12.0)
+    ax2.set_xlabel("p_t", fontsize=13.2)
+    ax2.set_title("観測 p_t（時間伸長指数）の一次ソース制約", fontsize=15.8)
+    ax2.tick_params(labelsize=12.0)
     ax2.grid(True, linestyle="--", alpha=0.5, axis="x")
-    ax2.legend(fontsize=9, loc="lower right")
+    ax2.legend(fontsize=11.2, loc="lower right")
 
-    fig.suptitle("宇宙論（独立プローブ）：SN time dilation の制約（p_t）", fontsize=14)
-    fig.text(
-        0.5,
-        0.01,
-        "注：距離二重性（DDR）の回復を p_t の変更だけで行う場合、p_t≈3 が必要になるが、SN time dilation の一次ソース制約では強く排除される。",
-        ha="center",
-        fontsize=10,
-    )
-    plt.tight_layout(rect=(0.0, 0.03, 1.0, 0.93))
+    fig.suptitle("宇宙論（独立プローブ）：SN time dilation の制約（p_t）", fontsize=17.0)
+    # 図下注記は論文本文側へ移し、図中の重なりを回避する。
+    plt.tight_layout(rect=(0.0, 0.03, 1.0, 0.95))
 
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)

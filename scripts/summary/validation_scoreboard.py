@@ -17,7 +17,10 @@ _ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
+from scripts.quantum.figure_japanese_localizer import enable_japanese_figure_localization  # noqa: E402
 from scripts.summary import worklog  # noqa: E402
+
+enable_japanese_figure_localization()
 
 _C_M_PER_S = 299_792_458.0
 
@@ -382,6 +385,217 @@ def _load_llr_row(root: Path) -> Optional[ScoreRow]:
         detail="EDC CRD Normal Point（station×reflector, SR+Tropo+Tide+Ocean）",
         sources=[str(path).replace("\\", "/")],
         score_kind="llr_rms_m",
+    )
+
+
+# 関数: `_load_beta_cross_channel_row` の入出力契約と処理意図を定義する。
+
+def _load_beta_cross_channel_row(root: Path) -> Optional[ScoreRow]:
+    path = _first_existing(
+        [
+            root / "output" / "public" / "summary" / "beta_cross_channel_registry.json",
+            root / "output" / "private" / "summary" / "beta_cross_channel_registry.json",
+        ]
+    )
+    # 条件分岐: `path is None` を満たす経路を評価する。
+    if path is None:
+        return None
+
+    j = _read_json(path)
+    cross = j.get("cross_channel") if isinstance(j.get("cross_channel"), dict) else {}
+    beta_terminal = j.get("beta_terminal") if isinstance(j.get("beta_terminal"), dict) else {}
+    vlbi = j.get("vlbi") if isinstance(j.get("vlbi"), dict) else {}
+    llr = j.get("llr") if isinstance(j.get("llr"), dict) else {}
+    messenger = j.get("messenger") if isinstance(j.get("messenger"), dict) else {}
+    bias_components = (
+        beta_terminal.get("bias_audit_components") if isinstance(beta_terminal.get("bias_audit_components"), dict) else {}
+    )
+    policy_governance = (
+        beta_terminal.get("policy_governance") if isinstance(beta_terminal.get("policy_governance"), dict) else {}
+    )
+
+    cross_status = str(cross.get("status") or "")
+    terminal_status = str(beta_terminal.get("status") or cross_status)
+    beta_abs_z = _maybe_float(cross.get("beta_consistency_abs_z"))
+    beta_abs_z_minus_1 = _maybe_float(beta_terminal.get("beta_combined_abs_z_minus_1"))
+    active_policy_id = str(beta_terminal.get("active_policy_id") or "").strip()
+    active_policy_label = str(beta_terminal.get("active_policy_label") or "").strip()
+    active_policy_reason = str(beta_terminal.get("active_policy_selection_reason") or "").strip()
+    policy_b_hold_status = str(policy_governance.get("policy_b_hold_status") or "").strip()
+    policy_d_promotion_status = str(policy_governance.get("policy_d_promotion_status") or "").strip()
+    policy_d_promotion_ready = policy_governance.get("policy_d_promotion_ready")
+    policy_d_blockers_value = policy_governance.get("policy_d_promotion_blockers")
+    policy_d_blockers: List[str] = []
+    # 条件分岐: `isinstance(policy_d_blockers_value, list)` を満たす経路を評価する。
+    if isinstance(policy_d_blockers_value, list):
+        for blocker in policy_d_blockers_value:
+            blocker_text = str(blocker or "").strip()
+            # 条件分岐: `blocker_text` を満たす経路を評価する。
+            if blocker_text:
+                policy_d_blockers.append(blocker_text)
+
+    recommended_policy_id = str(policy_governance.get("recommended_active_policy_id") or "").strip()
+    recommended_policy_reason = str(policy_governance.get("recommended_active_policy_reason") or "").strip()
+    policy_switch_decision = (
+        policy_governance.get("policy_switch_decision")
+        if isinstance(policy_governance.get("policy_switch_decision"), dict)
+        else {}
+    )
+    policy_terminal_watch_statement = (
+        policy_governance.get("policy_terminal_watch_statement")
+        if isinstance(policy_governance.get("policy_terminal_watch_statement"), dict)
+        else {}
+    )
+    policy_switch_decision_id = str(policy_switch_decision.get("decision_id") or "").strip()
+    policy_switch_required_now = policy_switch_decision.get("switch_required_now")
+    policy_switch_allowed_now = policy_switch_decision.get("switch_allowed_now")
+    policy_switch_hold_reason = str(policy_switch_decision.get("hold_reason") or "").strip()
+    policy_switch_branch_id = ""
+    policy_switch_branch_text = ""
+    # 条件分岐: `policy_switch_decision_id == "switch_to_policy_D_now"` を満たす経路を評価する。
+    if policy_switch_decision_id == "switch_to_policy_D_now":
+        policy_switch_branch_id = "promote_path_ready"
+        policy_switch_branch_text = (
+            "if policy_D_promotion_ready=true and blockers are cleared, "
+            "switch to policy_D_exclude_plus_messenger_fusion now."
+        )
+    # 条件分岐: 前段条件が不成立で、`policy_switch_decision_id == "hold_policy_B_until_policy_D_ready"` を追加評価する。
+    elif policy_switch_decision_id == "hold_policy_B_until_policy_D_ready":
+        policy_switch_branch_id = "hold_path_not_ready"
+        policy_switch_branch_text = (
+            "if policy_D_promotion_ready=false or blockers remain, "
+            "keep policy_B_exclude_comparator_when_ineligible."
+        )
+    policy_terminal_watch_statement_id = str(policy_terminal_watch_statement.get("statement_id") or "").strip()
+    policy_terminal_watch_statement_text = str(policy_terminal_watch_statement.get("statement_text") or "").strip()
+    score = _score_lower_better(beta_abs_z_minus_1, ok_max=1.0, mixed_max=2.0)
+    # 条件分岐: `score is None` を満たす経路を評価する。
+    if score is None:
+        score = _score_lower_better(beta_abs_z, ok_max=1.0, mixed_max=2.0)
+
+    # 条件分岐: `score is None` を満たす経路を評価する。
+    if score is None:
+        score = _canonical_score_for_status(None, _status_from_gate(terminal_status))
+
+    metric_parts: List[str] = [
+        f"VLBI={str(vlbi.get('status') or '')}",
+        f"LLR={str(llr.get('status') or '')}",
+        f"MESSENGER={str(messenger.get('status') or '')}",
+        f"cross={cross_status}",
+        f"beta_terminal={terminal_status}",
+    ]
+    # 条件分岐: `beta_abs_z is not None` を満たす経路を評価する。
+    if beta_abs_z is not None:
+        metric_parts.append(f"|z(beta_vlbi-beta_llr)|={_fmt_float(beta_abs_z, digits=3)}")
+
+    beta_est = _maybe_float(beta_terminal.get("beta_combined_est"))
+    beta_sig = _maybe_float(beta_terminal.get("beta_combined_sigma"))
+    # 条件分岐: `beta_est is not None and beta_sig is not None` を満たす経路を評価する。
+    if beta_est is not None and beta_sig is not None:
+        metric_parts.append(f"beta_comb={_fmt_float(beta_est, digits=6)}+/-{_fmt_float(beta_sig, digits=6)}")
+
+    # 条件分岐: `beta_abs_z_minus_1 is not None` を満たす経路を評価する。
+    if beta_abs_z_minus_1 is not None:
+        metric_parts.append(f"|z(beta_comb-1)|={_fmt_float(beta_abs_z_minus_1, digits=3)}")
+
+    messenger_replay_z = _maybe_float(messenger.get("stage_e_replay_z_delta_beta"))
+    # 条件分岐: `messenger_replay_z is not None` を満たす経路を評価する。
+    if messenger_replay_z is not None:
+        metric_parts.append(f"messenger_replay_z={_fmt_float(messenger_replay_z, digits=3)}")
+
+    vlbi_bias = str(bias_components.get("vlbi_status") or "")
+    llr_bias = str(bias_components.get("llr_status") or "")
+    # 条件分岐: `vlbi_bias or llr_bias` を満たす経路を評価する。
+    if vlbi_bias or llr_bias:
+        metric_parts.append(f"bias(vlbi/llr)={vlbi_bias}/{llr_bias}")
+
+    messenger_bias = str(messenger.get("bias_audit_status") or "")
+    # 条件分岐: `messenger_bias` を満たす経路を評価する。
+    if messenger_bias:
+        metric_parts.append(f"bias(messenger)={messenger_bias}")
+
+    # 条件分岐: `active_policy_id` を満たす経路を評価する。
+    if active_policy_id:
+        metric_parts.append(f"active_policy={active_policy_id}")
+
+    # 条件分岐: `policy_b_hold_status` を満たす経路を評価する。
+    if policy_b_hold_status:
+        metric_parts.append(f"policy_B_hold={policy_b_hold_status}")
+
+    # 条件分岐: `policy_d_promotion_status` を満たす経路を評価する。
+    if policy_d_promotion_status:
+        promotion_ready_text = ""
+        # 条件分岐: `isinstance(policy_d_promotion_ready, bool)` を満たす経路を評価する。
+        if isinstance(policy_d_promotion_ready, bool):
+            promotion_ready_text = f",ready={str(policy_d_promotion_ready).lower()}"
+
+        metric_parts.append(f"policy_D_promotion={policy_d_promotion_status}{promotion_ready_text}")
+
+    # 条件分岐: `policy_d_blockers` を満たす経路を評価する。
+    if policy_d_blockers:
+        metric_parts.append(f"policy_D_blockers={','.join(policy_d_blockers)}")
+
+    # 条件分岐: `recommended_policy_id` を満たす経路を評価する。
+    if recommended_policy_id:
+        metric_parts.append(f"recommended_policy={recommended_policy_id}")
+    # 条件分岐: `policy_switch_decision_id` を満たす経路を評価する。
+    if policy_switch_decision_id:
+        switch_required_text = (
+            str(bool(policy_switch_required_now)).lower()
+            if isinstance(policy_switch_required_now, bool)
+            else "na"
+        )
+        switch_allowed_text = (
+            str(bool(policy_switch_allowed_now)).lower()
+            if isinstance(policy_switch_allowed_now, bool)
+            else "na"
+        )
+        metric_parts.append(
+            f"switch_decision={policy_switch_decision_id}(required={switch_required_text},allowed={switch_allowed_text})"
+        )
+    # 条件分岐: `policy_switch_branch_id` を満たす経路を評価する。
+    if policy_switch_branch_id:
+        metric_parts.append(f"switch_branch={policy_switch_branch_id}")
+    # 条件分岐: `policy_terminal_watch_statement_id` を満たす経路を評価する。
+    if policy_terminal_watch_statement_id:
+        metric_parts.append(f"watch_statement_id={policy_terminal_watch_statement_id}")
+
+    src = [str(path).replace("\\", "/")]
+    src_paths = j.get("source_paths") if isinstance(j.get("source_paths"), dict) else {}
+    for key in ("vlbi", "llr", "messenger"):
+        vals = src_paths.get(key)
+        # 条件分岐: `isinstance(vals, list)` を満たす経路を評価する。
+        if isinstance(vals, list):
+            for v in vals:
+                s = str(v or "").strip()
+                # 条件分岐: `s` を満たす経路を評価する。
+                if s:
+                    src.append(s.replace("\\", "/"))
+
+    return ScoreRow(
+        id="beta_cross_channel",
+        label="β cross-channel（VLBI+LLR+MESSENGER）",
+        status=_status_from_gate(terminal_status),
+        score=score,
+        metric=" / ".join(metric_parts),
+        detail=(
+            "VLBI終端（8.7.46.29）+ LLR（8.7.47）+ MESSENGER（8.7.48）を統合し、β導出終端ゲートで判定。"
+            + (f" active_policy={active_policy_id}" if active_policy_id else "")
+            + (f" ({active_policy_label})" if active_policy_label else "")
+            + (f" / reason={active_policy_reason}" if active_policy_reason else "")
+            + (f" / policy_B_hold={policy_b_hold_status}" if policy_b_hold_status else "")
+            + (f" / policy_D_promotion={policy_d_promotion_status}" if policy_d_promotion_status else "")
+            + (f" / policy_D_blockers={','.join(policy_d_blockers)}" if policy_d_blockers else "")
+            + (f" / recommended_policy={recommended_policy_id}" if recommended_policy_id else "")
+            + (f" / recommended_reason={recommended_policy_reason}" if recommended_policy_reason else "")
+            + (f" / switch_decision={policy_switch_decision_id}" if policy_switch_decision_id else "")
+            + (f" / switch_hold_reason={policy_switch_hold_reason}" if policy_switch_hold_reason else "")
+            + (f" / switch_branch={policy_switch_branch_id}" if policy_switch_branch_id else "")
+            + (f" / switch_branch_text={policy_switch_branch_text}" if policy_switch_branch_text else "")
+            + (f" / watch_statement={policy_terminal_watch_statement_text}" if policy_terminal_watch_statement_text else "")
+        ),
+        sources=src,
+        score_kind="abs_z",
     )
 
 
@@ -752,8 +966,11 @@ def _load_solar_deflection_row(root: Path) -> Optional[ScoreRow]:
         label="光偏向（太陽）",
         status=_status_from_abs_sigma(abs_z),
         score=abs_z,
-        metric=f"|z|={_fmt_float(abs_z, digits=3)}（PPN γ）",
-        detail=f"観測γ={_fmt_float(obs_gamma, digits=8)}±{_fmt_float(obs_sigma, digits=3)} vs 予測γ={_fmt_float(gamma_pred, digits=8)}",
+        metric=f"|z|={_fmt_float(abs_z, digits=3)}（公表 γ* 比較）",
+        detail=(
+            f"公表γ*={_fmt_float(obs_gamma, digits=8)}±{_fmt_float(obs_sigma, digits=3)} vs 予測γ={_fmt_float(gamma_pred, digits=8)}。"
+            "Reference行：主判定は `cassini`（形状整合）と `scalar_limit_reject`（hard gate）を正とする。"
+        ),
         sources=[str(metrics_path).replace("\\", "/"), str(frozen_path).replace("\\", "/")],
         score_kind="abs_z",
     )
@@ -796,8 +1013,11 @@ def _load_redshift_row(root: Path) -> Optional[ScoreRow]:
         label="GP-A / Galileo（重力赤方偏移）",
         status=_status_from_abs_sigma(worst),
         score=worst,
-        metric=f"最大|z|={_fmt_float(worst, digits=3)}（ε=0）",
-        detail="複数実験の最大|z|（P-modelの弱場一次はGRと同じ ε=0）",
+        metric=f"最大|z|={_fmt_float(worst, digits=3)}（公表 ε* 比較）",
+        detail=(
+            "複数実験の最大|z|（公表偏差 ε* と弱場予測 ε=0 の比較）。"
+            "Reference行：主判定は `cassini`（形状整合）と `scalar_limit_reject`（hard gate）を正とする。"
+        ),
         sources=[str(path).replace("\\", "/")],
         score_kind="abs_z",
     )
@@ -1694,6 +1914,76 @@ def _load_cosmology_fsigma8_growth_row(root: Path) -> Optional[ScoreRow]:
     )
 
 
+# 関数: `_load_cosmology_pantheon_hubble_row` の入出力契約と処理意図を定義する。
+
+def _load_cosmology_pantheon_hubble_row(root: Path) -> Optional[ScoreRow]:
+    path = _first_existing(
+        [
+            root / "output" / "private" / "cosmology" / "cosmology_pantheonplus_cc_direct_fit_metrics.json",
+            root / "output" / "public" / "cosmology" / "cosmology_pantheonplus_cc_direct_fit_metrics.json",
+            root / "output" / "cosmology" / "cosmology_pantheonplus_cc_direct_fit_metrics.json",
+        ]
+    )
+    # 条件分岐: `path is None` を満たす経路を評価する。
+    if path is None:
+        return None
+
+    j = _read_json(path)
+    cmp_ = j.get("comparison") if isinstance(j.get("comparison"), dict) else {}
+    models = j.get("models") if isinstance(j.get("models"), dict) else {}
+    baseline = models.get("baseline") if isinstance(models.get("baseline"), dict) else {}
+    pmodel = models.get("pmodel") if isinstance(models.get("pmodel"), dict) else {}
+
+    delta_aic = _maybe_float(cmp_.get("delta_aic_baseline_minus_pmodel"))
+    b_chi2 = _maybe_float(baseline.get("chi2_total"))
+    p_chi2 = _maybe_float(pmodel.get("chi2_total"))
+    winner = str(cmp_.get("winner") or "")
+
+    status = "info"
+    # 条件分岐: `delta_aic is not None` を満たす経路を評価する。
+    if delta_aic is not None:
+        # 判定規約: ΔAIC=AIC_baseline-AIC_P（正値でP-model優位）
+        # 条件分岐: `delta_aic > 2.0` を満たす経路を評価する。
+        if delta_aic > 2.0:
+            status = "ok"
+        # 条件分岐: 前段条件が不成立で、`delta_aic > -2.0` を追加評価する。
+        elif delta_aic > -2.0:
+            status = "mixed"
+        else:
+            status = "ng"
+
+    score = None
+    # 条件分岐: `delta_aic is not None` を満たす経路を評価する。
+    if delta_aic is not None:
+        score = max(0.0, (2.0 - float(delta_aic)) / 2.0)
+
+    metric_parts: List[str] = []
+    # 条件分岐: `b_chi2 is not None and p_chi2 is not None` を満たす経路を評価する。
+    if b_chi2 is not None and p_chi2 is not None:
+        metric_parts.append(f"χ²_total(ΛCDM/P)={_fmt_float(b_chi2, digits=4)}/{_fmt_float(p_chi2, digits=4)}")
+
+    # 条件分岐: `delta_aic is not None` を満たす経路を評価する。
+
+    if delta_aic is not None:
+        metric_parts.append(f"ΔAIC={_fmt_float(delta_aic, digits=4)}")
+
+    # 条件分岐: `winner` を満たす経路を評価する。
+
+    if winner:
+        metric_parts.append(f"winner={winner}")
+
+    return ScoreRow(
+        id="cosmo_pantheon_hubble",
+        label="宇宙論（Pantheon+ Hubble図）",
+        status=status,
+        score=score,
+        metric=" / ".join(metric_parts),
+        detail="Pantheon+ μ(z) と Cosmic Chronometers H(z) の同時fit（H_eff^2 完全式）を ΔAIC で監査。",
+        sources=[str(path).replace("\\", "/")],
+        score_kind="delta_aic_baseline_minus_pmodel",
+    )
+
+
 # 関数: `_load_cosmology_cluster_collision_row` の入出力契約と処理意図を定義する。
 
 def _load_cosmology_cluster_collision_row(root: Path) -> Optional[ScoreRow]:
@@ -2511,8 +2801,11 @@ def _load_frame_dragging_row(root: Path) -> Optional[ScoreRow]:
         label="回転（フレームドラッグ）",
         status=_status_from_abs_sigma(worst),
         score=worst,
-        metric=f"最大|z|={_fmt_float(worst, digits=3)}（μ=1）",
-        detail="GP-B / LAGEOS の μ=|Ω_obs|/|Ω_pred|（μ=1が一致）",
+        metric=f"最大|z|={_fmt_float(worst, digits=3)}（R_drag=1）",
+        detail=(
+            "GP-B / LAGEOS の R_drag=abs(Ω_obs)/abs(Ω_pred)（R_drag=1 が一致; Reference行）。"
+            "主判定は `scalar_limit_reject`（abs(z)>z_reject でReject）を正とする。"
+        ),
         sources=[str(path).replace("\\", "/")],
         score_kind="abs_z",
     )
@@ -2947,6 +3240,7 @@ def _table1_forced_status(topic: str, observable: str) -> Optional[str]:
 
 def _classify_table1_rows(table1_rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     sigma_re = re.compile(r"([0-9]+(?:\.[0-9]+)?)\s*σ")
+    delta_aic_re = re.compile(r"ΔAIC(?:[^=]*)=\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+))")
     corr_re = re.compile(r"corr\s*=\s*([0-9]+(?:\.[0-9]+)?)", re.IGNORECASE)
     pct_re = re.compile(r"([0-9]+(?:\.[0-9]+)?)\s*%")
     meter_re = re.compile(r"([0-9]+(?:\.[0-9]+)?)\s*m[（(]")
@@ -2993,6 +3287,29 @@ def _classify_table1_rows(table1_rows: Sequence[Dict[str, Any]]) -> Dict[str, An
                     status = _table1_status_from_abs_sigma(abs_sigma)
                     score_kind = "abs_sigma"
                     score_value = abs_sigma
+                except Exception:
+                    pass
+
+        # 条件分岐: `status == "info"` を満たす経路を評価する。
+
+        if status == "info":
+            m = delta_aic_re.search(text)
+            # 条件分岐: `m` を満たす経路を評価する。
+            if m:
+                try:
+                    delta_aic = float(m.group(1))
+                    # 判定規約: ΔAIC=AIC_baseline-AIC_P（正値でP-model優位）
+                    # 条件分岐: `delta_aic > 2.0` を満たす経路を評価する。
+                    if delta_aic > 2.0:
+                        status = "ok"
+                    # 条件分岐: 前段条件が不成立で、`delta_aic > -2.0` を追加評価する。
+                    elif delta_aic > -2.0:
+                        status = "mixed"
+                    else:
+                        status = "ng"
+
+                    score_kind = "delta_aic"
+                    score_value = delta_aic
                 except Exception:
                     pass
 
@@ -3113,14 +3430,17 @@ def _apply_latest_scoreboard_policy(rows: Sequence[ScoreRow]) -> List[ScoreRow]:
     status_by_id: Dict[str, str] = {
         "llr": "ok",
         "cassini": "ok",
-        "solar_deflection": "ok",
+        # 公表要旨（PPN推定値）比較は Reference 扱いに固定する。
+        "solar_deflection": "info",
         "viking": "ok",
         "mercury": "ok",
-        "redshift": "ok",
+        # 公表偏差 ε の比較は raw 時系列直接fit ではないため Reference。
+        "redshift": "info",
         "binary_pulsar": "ok",
         "gw": "ok",
         "gw_area_qnm_imr": "ok",
-        "frame_dragging": "ok",
+        # GP-B/LAGEOS の公表要旨値比較は主判定から分離し Reference。
+        "frame_dragging": "info",
         "xrism": "ok",
         "sparc_rotation": "ok",
         "cosmo_fsigma8": "ok",
@@ -3221,6 +3541,7 @@ def build_validation_scoreboard(root: Path) -> Dict[str, Any]:
     rows: List[ScoreRow] = []
     for fn in [
         _load_llr_row,
+        _load_beta_cross_channel_row,
         _load_cassini_row,
         _load_solar_deflection_row,
         _load_viking_row,
@@ -3235,6 +3556,7 @@ def build_validation_scoreboard(root: Path) -> Dict[str, Any]:
         _load_cosmology_fsigma8_growth_row,
         _load_cosmology_cmb_acoustic_row,
         _load_cosmology_cmb_polarization_phase_row,
+        _load_cosmology_pantheon_hubble_row,
         _load_bbn_row,
         _load_background_metric_case_b_row,
         _load_cosmology_cluster_collision_row,
@@ -3312,7 +3634,7 @@ def build_validation_scoreboard(root: Path) -> Dict[str, Any]:
             "notes": "OK/要改善/不一致 は“目安”。各テーマの厳密な判定は一次ソース・系統誤差・モデル仮定の確認が必要。",
         },
         "notes": [
-            "これは『全検証を1枚で俯瞰する』ための要約スコアボード。詳細は Table 1 と各章の図を参照。",
+            "これは『全検証を1枚で俯瞰する』ための要約スコアボード。詳細は検証サマリ表と各章の図を参照。",
             "OK/要改善/不一致 は、zスコア（|z|<=1/2）や相関・RMS等の暫定しきい値に基づく“目安”。",
             "宇宙論（距離二重性/Tolman）は『静的背景Pの最小モデル』の棄却度（系統・進化が支配的になり得る点に注意）。",
         ],
@@ -3326,12 +3648,15 @@ def plot_validation_scoreboard(
     payload: Dict[str, Any],
     *,
     out_png: Path,
+    out_pdf: Optional[Path] = None,
     title: str = "総合スコアボード（全検証：緑=OK / 黄=要改善 / 赤=不一致）",
     xlabel: str = "正規化スコア（0=理想, 1=OK境界, 2=要改善境界）",
-    target_fig_h_in: float = 6.0,
+    target_fig_h_in: float = 12.4,
 ) -> None:
     _set_japanese_font()
     out_png.parent.mkdir(parents=True, exist_ok=True)
+    if out_pdf is not None:
+        out_pdf.parent.mkdir(parents=True, exist_ok=True)
 
     rows_raw = payload.get("rows") or []
     rows: List[Dict[str, Any]] = [r for r in rows_raw if isinstance(r, dict)]
@@ -3387,37 +3712,37 @@ def plot_validation_scoreboard(
 
         return "\n".join(textwrap.wrap(t, width=width, break_long_words=False, break_on_hyphens=False))
 
-    row_h_nominal = 0.55
-    base_h = 1.8
+    row_h_nominal = 0.62
+    base_h = 2.2
     fig_h_ideal = row_h_nominal * float(len(ordered)) + base_h
     fig_h = max(4.2, min(fig_h_ideal, float(target_fig_h_in)))
-    fig_w = 12.5
+    fig_w = 12.0
 
-    # Split vertically into up to 3 panels (stacked), so y-labels never get clipped by neighboring axes.
-    max_rows_per_panel = max(4, int((float(target_fig_h_in) - base_h) / row_h_nominal))
-    n_panels = max(1, int(math.ceil(len(ordered) / float(max_rows_per_panel))))
-    n_panels = min(n_panels, 3)
-    rows_per_panel = int(math.ceil(len(ordered) / float(n_panels)))
+    # 図1/2は上下パネル間の余白を避けるため、単一パネルで固定する。
+    n_panels = 1
+    rows_per_panel = len(ordered)
 
     row_h_eff = (fig_h - base_h) / max(1.0, float(len(ordered)))
     # 条件分岐: `row_h_eff >= 0.40` を満たす経路を評価する。
     if row_h_eff >= 0.40:
-        font_size = 9
-        label_width = 18
+        font_size = 12
+        label_width = 20
     # 条件分岐: 前段条件が不成立で、`row_h_eff >= 0.28` を追加評価する。
     elif row_h_eff >= 0.28:
-        font_size = 8
+        font_size = 11
         label_width = 18
     else:
-        font_size = 7
-        label_width = 16
+        font_size = 10
+        label_width = 17
 
     # 条件分岐: `n_panels == 1` を満たす経路を評価する。
 
+    bar_pitch = 1.12
+
     if n_panels == 1:
         fig, ax = plt.subplots(1, 1, figsize=(fig_w, fig_h))
-        y = list(range(len(ordered)))
-        ax.barh(y, scores_clipped, color=colors, alpha=0.9)
+        y = [i * bar_pitch for i in range(len(ordered))]
+        ax.barh(y, scores_clipped, height=0.88, color=colors, alpha=0.9)
         ax.set_yticks(y)
         ax.set_yticklabels([_wrap_label(s, width=label_width) for s in labels], fontsize=font_size)
         ax.invert_yaxis()
@@ -3426,10 +3751,13 @@ def plot_validation_scoreboard(
         for x in (1.0, 2.0):
             ax.axvline(x, color="#999999", linewidth=1.0, linestyle="--")
 
-        ax.set_xlabel(xlabel)
-        ax.set_title(title)
-        fig.subplots_adjust(left=0.36, right=0.98, top=0.92, bottom=0.12)
+        ax.set_xlabel(xlabel, fontsize=13.4)
+        ax.set_title(title, fontsize=15.2)
+        ax.tick_params(axis="x", labelsize=12.0)
+        fig.subplots_adjust(left=0.38, right=0.98, top=0.91, bottom=0.13)
         fig.savefig(out_png, dpi=180)
+        if out_pdf is not None:
+            fig.savefig(out_pdf, format="pdf")
         plt.close(fig)
         return
 
@@ -3462,8 +3790,8 @@ def plot_validation_scoreboard(
         axes = [axes]
 
     for ax, sub_labels, sub_scores, sub_colors in zip(axes, panels, panels_scores, panels_colors, strict=False):
-        y = list(range(len(sub_labels)))
-        ax.barh(y, sub_scores, color=sub_colors, alpha=0.9)
+        y = [i * bar_pitch for i in range(len(sub_labels))]
+        ax.barh(y, sub_scores, height=0.88, color=sub_colors, alpha=0.9)
         ax.set_yticks(y)
         ax.set_yticklabels([_wrap_label(s, width=label_width) for s in sub_labels], fontsize=font_size)
         ax.invert_yaxis()
@@ -3473,16 +3801,23 @@ def plot_validation_scoreboard(
         for x in (1.0, 2.0):
             ax.axvline(x, color="#999999", linewidth=1.0, linestyle="--")
 
-        ax.tick_params(axis="x", labelsize=9)
+        ax.tick_params(axis="x", labelsize=11.5)
 
-    fig.suptitle(title, y=0.98)
-    fig.supxlabel(xlabel)
+    # 上段パネルのx軸ラベルは非表示にして、パネル間の余白を圧縮する。
+
+    for ax in axes[:-1]:
+        ax.tick_params(axis="x", labelbottom=False)
+
+    fig.suptitle(title, y=0.98, fontsize=15.2)
+    fig.supxlabel(xlabel, fontsize=13.4)
 
     # Note: metric details are intentionally not embedded in the PNG
-    # (they live in validation_scoreboard.json / Table 1 captions).
+    # (they live in validation_scoreboard.json / 検証サマリ表 captions).
 
-    fig.subplots_adjust(left=0.36, right=0.98, top=0.92, bottom=0.14, hspace=0.35)
+    fig.subplots_adjust(left=0.38, right=0.98, top=0.91, bottom=0.14, hspace=0.0)
     fig.savefig(out_png, dpi=180)
+    if out_pdf is not None:
+        fig.savefig(out_pdf, format="pdf")
     plt.close(fig)
 
 
@@ -3493,20 +3828,35 @@ def main() -> int:
     out_dir = root / "output" / "private" / "summary"
     default_json = out_dir / "validation_scoreboard.json"
     default_png = out_dir / "validation_scoreboard.png"
+    default_pdf = out_dir / "validation_scoreboard.pdf"
 
     ap = argparse.ArgumentParser(description="Build an 'all validations' scoreboard (overview).")
     ap.add_argument("--out-json", type=str, default=str(default_json), help="Output JSON path")
     ap.add_argument("--out-png", type=str, default=str(default_png), help="Output PNG path")
+    ap.add_argument("--out-pdf", type=str, default=str(default_pdf), help="Output PDF path")
+    ap.add_argument(
+        "--target-fig-h-in",
+        type=float,
+        default=12.4,
+        help="Target figure height in inches used by panel layout (default: 12.4).",
+    )
     args = ap.parse_args()
 
     out_json = Path(args.out_json)
     out_png = Path(args.out_png)
+    out_pdf = Path(args.out_pdf)
 
     payload = build_validation_scoreboard(root)
-    plot_validation_scoreboard(payload, out_png=out_png)
+    plot_validation_scoreboard(
+        payload,
+        out_png=out_png,
+        out_pdf=out_pdf,
+        target_fig_h_in=float(args.target_fig_h_in),
+    )
 
     payload["outputs"] = {
         "scoreboard_png": str(out_png).replace("\\", "/"),
+        "scoreboard_pdf": str(out_pdf).replace("\\", "/"),
         "scoreboard_json": str(out_json).replace("\\", "/"),
     }
     _write_json(out_json, payload)
@@ -3541,13 +3891,14 @@ def main() -> int:
                     "gw_multi_event_summary_metrics_json": root / "output" / "private" / "gw" / "gw_multi_event_summary_metrics.json",
                     "delta_saturation_constraints_json": root / "output" / "private" / "theory" / "delta_saturation_constraints.json",
                 },
-                "outputs": {"scoreboard_png": out_png, "scoreboard_json": out_json},
+                "outputs": {"scoreboard_png": out_png, "scoreboard_pdf": out_pdf, "scoreboard_json": out_json},
             }
         )
     except Exception:
         pass
 
     print(f"Wrote: {out_png}")
+    print(f"Wrote: {out_pdf}")
     print(f"Wrote: {out_json}")
     return 0
 

@@ -71,28 +71,16 @@ def _resolve_output_path(root: Path, rel: str) -> Path:
     cand_private = (root / "output" / "private" / topic / tail).resolve()
     cand_public = (root / "output" / "public" / topic / tail).resolve()
 
-    # 条件分岐: `topic == "quantum"` を満たす経路を評価する。
-    if topic == "quantum":
-        # 条件分岐: `cand_public.exists()` を満たす経路を評価する。
-        if cand_public.exists():
-            return cand_public
-
-        # 条件分岐: `cand_private.exists()` を満たす経路を評価する。
-
-        if cand_private.exists():
-            return cand_private
-
     # 条件分岐: `cand_private.exists()` を満たす経路を評価する。
-
     if cand_private.exists():
         return cand_private
 
     # 条件分岐: `cand_public.exists()` を満たす経路を評価する。
-
     if cand_public.exists():
         return cand_public
 
-    return root / Path(rel_norm)
+    # Never return legacy output/<topic>/... to keep stale mixing impossible in audits.
+    return cand_private
 
 # 関数: `_extract_result_figure_paths` の入出力契約と処理意図を定義する。
 
@@ -100,7 +88,7 @@ def _extract_result_figure_paths(manuscript_text: str) -> List[str]:
     """
     Extract `output/...png` like paths referenced in the Results chapter (4.2..4.12).
 
-    We treat these as the "Table 1 referenced figures" (入口となる代表図) because Table 1
+    We treat these as the "検証サマリ表 referenced figures" (入口となる代表図) because 検証サマリ表
     summarizes 4.2..4.12.
     """
 

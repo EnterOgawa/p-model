@@ -28,6 +28,8 @@ from typing import Any, Dict, List, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 
 ROOT = Path(__file__).resolve().parents[2]
 # 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
@@ -218,17 +220,40 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
         scores.append(float(score))
         colors.append("#2f9e44" if bool(row.get("pass")) else "#dc2626")
 
+    score_arr = np.asarray(scores, dtype=float)
+    positive_scores = score_arr[np.isfinite(score_arr) & (score_arr > 0.0)]
+    score_floor = float(np.min(positive_scores) / 10.0) if positive_scores.size else 1.0e-8
+    score_floor = max(score_floor, 1.0e-12)
+    x_max = float(max(np.max(positive_scores) if positive_scores.size else 1.0, 1.0) * 1.25)
+
+    def _safe_width(values: np.ndarray) -> np.ndarray:
+        clamped = np.where(np.isfinite(values) & (values > score_floor), values, score_floor)
+        return clamped - score_floor
+
     y = np.arange(len(labels))
-    fig, ax = plt.subplots(figsize=(11.8, 4.8), dpi=180)
-    ax.barh(y, scores, color=colors)
+    fig, ax = plt.subplots(figsize=(12.0, 5.0), dpi=180)
+    ax.barh(y, _safe_width(score_arr), left=score_floor, color=colors)
     ax.axvline(1.0, linestyle="--", color="#6b7280", linewidth=1.2)
-    ax.set_yticks(y, labels)
-    ax.set_xlabel("normalized error (<=1 is pass)")
-    ax.set_title("Action-principle EL derivation audit (gauge covariance / invariance)")
+    ax.set_xscale("log")
+    ax.set_xlim(score_floor, x_max)
+    ax.set_yticks(y, labels, fontsize=12.0)
+    ax.set_xlabel("normalized error (<=1 is pass)", fontsize=13.8)
+    ax.set_title("Action-principle EL derivation audit (gauge covariance / invariance)", fontsize=14.8, pad=8.0)
+    ax.tick_params(axis="x", labelsize=12.0)
     ax.grid(axis="x", alpha=0.25, linestyle=":")
+    ax.legend(
+        handles=[
+            Patch(facecolor="#2f9e44", label="pass"),
+            Patch(facecolor="#dc2626", label="watch/reject"),
+            Line2D([0], [0], color="#6b7280", linewidth=1.2, linestyle="--", label="threshold (=1)"),
+        ],
+        loc="lower right",
+        fontsize=11.6,
+    )
     fig.tight_layout()
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, bbox_inches="tight")
+    fig.savefig(path.with_suffix(".pdf"), bbox_inches="tight")
     plt.close(fig)
 
 

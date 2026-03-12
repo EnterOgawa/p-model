@@ -320,7 +320,7 @@ def main() -> None:
 
             writer.writerow(row)
 
-    fig, axes = plt.subplots(2, 2, figsize=(13.5, 9.2), dpi=160)
+    fig, axes = plt.subplots(2, 2, figsize=(14.2, 10.4), dpi=160)
 
     sample_count = min(n_samples_for_plot, n_trajectories)
     sample_ids = np.linspace(0, n_trajectories - 1, sample_count, dtype=int)
@@ -329,9 +329,9 @@ def main() -> None:
 
     axes[0, 0].axhline(collapse_threshold_abs_z, color="black", ls="--", lw=1.0, alpha=0.7)
     axes[0, 0].axhline(-collapse_threshold_abs_z, color="black", ls="--", lw=1.0, alpha=0.7)
-    axes[0, 0].set_title("State collapse trajectory: expectation z(t)")
-    axes[0, 0].set_xlabel("time [s]")
-    axes[0, 0].set_ylabel("expectation z")
+    axes[0, 0].set_title("State collapse trajectory: expectation z(t)", fontsize=16.4)
+    axes[0, 0].set_xlabel("time [s]", fontsize=14.6)
+    axes[0, 0].set_ylabel("expectation z", fontsize=14.6)
     axes[0, 0].set_ylim(-1.05, 1.05)
     axes[0, 0].grid(ls=":", alpha=0.35)
 
@@ -354,10 +354,10 @@ def main() -> None:
         ls="--",
         label="channel mean",
     )
-    axes[0, 1].set_title("Detector pointer channels x_k(t) (single trajectory)")
-    axes[0, 1].set_xlabel("time [s]")
-    axes[0, 1].set_ylabel("pointer x_k")
-    axes[0, 1].legend(loc="best", fontsize=8)
+    axes[0, 1].set_title("Detector pointer channels x_k(t) (single trajectory)", fontsize=16.4)
+    axes[0, 1].set_xlabel("time [s]", fontsize=14.6)
+    axes[0, 1].set_ylabel("pointer x_k", fontsize=14.6)
+    axes[0, 1].legend(loc="best", fontsize=13.8)
     axes[0, 1].grid(ls=":", alpha=0.35)
 
     # 条件分岐: `collapsed_n > 0` を満たす経路を評価する。
@@ -366,32 +366,37 @@ def main() -> None:
         # 条件分岐: `np.isfinite(collapse_time_median_s)` を満たす経路を評価する。
         if np.isfinite(collapse_time_median_s):
             axes[1, 0].axvline(collapse_time_median_s, color="black", ls="--", lw=1.0, label="median")
-            axes[1, 0].legend(loc="upper right", fontsize=9)
+            axes[1, 0].legend(loc="upper right", fontsize=13.6)
     else:
-        axes[1, 0].text(0.5, 0.5, "no collapse event in this run", ha="center", va="center", transform=axes[1, 0].transAxes)
+        axes[1, 0].text(0.5, 0.5, "no collapse event in this run", ha="center", va="center", transform=axes[1, 0].transAxes, fontsize=13.0)
 
-    axes[1, 0].set_title("Collapse-time distribution")
-    axes[1, 0].set_xlabel("collapse time [s]")
-    axes[1, 0].set_ylabel("count")
+    axes[1, 0].set_title("Collapse-time distribution", fontsize=16.4)
+    axes[1, 0].set_xlabel("collapse time [s]", fontsize=14.6)
+    axes[1, 0].set_ylabel("count", fontsize=14.6)
     axes[1, 0].grid(ls=":", alpha=0.35)
 
     color_values = np.where(collapse_states == 1, "#2ca02c", np.where(collapse_states == -1, "#d62728", "#7f7f7f"))
     axes[1, 1].scatter(final_pointer_mean, final_expect_z, s=20, alpha=0.75, c=color_values)
     axes[1, 1].axhline(0.0, color="black", ls="--", lw=1.0, alpha=0.6)
-    axes[1, 1].set_title("Final detector pointer mean vs state branch")
-    axes[1, 1].set_xlabel("final pointer mean x̄(T)")
-    axes[1, 1].set_ylabel("final expectation z(T)")
+    axes[1, 1].set_title("Final detector pointer mean vs state branch", fontsize=16.4)
+    axes[1, 1].set_xlabel("final pointer mean x̄(T)", fontsize=14.6)
+    axes[1, 1].set_ylabel("final expectation z(T)", fontsize=14.6)
     axes[1, 1].set_ylim(-1.05, 1.05)
     axes[1, 1].grid(ls=":", alpha=0.35)
 
     fig.suptitle(
         "Dynamic collapse simulation (nonlinear measurement equation; two-state + multi-DOF detector pointer)",
-        fontsize=14,
+        fontsize=18.4,
         y=0.98,
     )
+    for axis in axes.ravel():
+        axis.tick_params(labelsize=13.4)
+
     fig.tight_layout(rect=[0, 0, 1, 0.96])
     out_png = out_dir / "quantum_measurement_dynamic_collapse_simulation.png"
+    out_pdf = out_dir / "quantum_measurement_dynamic_collapse_simulation.pdf"
     fig.savefig(out_png, bbox_inches="tight")
+    fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
 
     out_metrics = out_dir / "quantum_measurement_dynamic_collapse_simulation_metrics.json"
@@ -455,6 +460,7 @@ def main() -> None:
                 "outputs": {
                     "csv": str(out_csv),
                     "png": str(out_png),
+                    "pdf": str(out_pdf),
                 },
                 "notes": [
                     "Operational simulation for measurement dynamics; not yet a first-principles derivation from microscopic P-field interactions.",
@@ -471,6 +477,7 @@ def main() -> None:
 
     print(f"[ok] wrote: {out_csv}")
     print(f"[ok] wrote: {out_png}")
+    print(f"[ok] wrote: {out_pdf}")
     print(f"[ok] wrote: {out_metrics}")
 
 

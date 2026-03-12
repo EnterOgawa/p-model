@@ -1,0 +1,6 @@
+test_id,status,evidence_files,note,keywords
+time_system_conversion,pass,161,時刻系変換（UTC/TDB/SCLK）を確認する,UTC;TDB;ET;SCLK;TIME SYSTEM;START_TIME;STOP_TIME
+dsn_station_metadata,pass,85,DSN 局メタデータを確認する,DSS;DEEP SPACE STATION;STATION;COMPLEX;ANTENNA
+range_doppler_sign_convention,pass,120,range/doppler と符号規約の語彙を確認する,DOPPLER;RANGE;SIGN;COHERENT;FREQ;FREQUENCY
+two_three_way_flag,pass,80,two-way/three-way フラグ語彙を確認する,TWO-WAY;THREE-WAY;2-WAY;3-WAY;ONE-WAY
+transponder_delay,pass,80,transponder delay 語彙を確認する,TRANSPONDER;TURNAROUND;DELAY

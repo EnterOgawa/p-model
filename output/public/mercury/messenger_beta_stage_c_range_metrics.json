@@ -1,0 +1,52 @@
+{
+  "generated_utc": "2026-03-07T15:40:05.987186+00:00",
+  "phase_step": "8.7.48.3",
+  "overall_status": "watch",
+  "data_root": "data/mercury/messenger",
+  "range_csv": "data/mercury/messenger/derived/odf_range_observations.csv",
+  "dtype_selected": 37,
+  "dtype_counts": {
+    "37": 7277
+  },
+  "n_rows_raw": 7277,
+  "n_rows_selected": 7277,
+  "n_rows_binned": 1828,
+  "n_station": 13,
+  "beta_dyn_estimate": 6776.396818618639,
+  "beta_sigma": 7655.168143725536,
+  "beta_z_from_1": 0.8850748528851075,
+  "rss": 77825175337248.42,
+  "dof": 1813,
+  "rms_observable": 206334.55144748068,
+  "status_components": {
+    "data": "pass",
+    "sigma": "watch",
+    "model": "watch"
+  },
+  "gating_policy": {
+    "data_min_rows": 500,
+    "sigma_watch_threshold": 0.1,
+    "model_status_cap": "watch_until_stage_d"
+  },
+  "pilot_model": {
+    "beta_template": "cos(2*pi*t/87.9691d) fixed-phase proxy",
+    "notes": "Stage Dでfull forward modelへ置換予定"
+  },
+  "plot": "generated",
+  "outputs_private": [
+    "output/private/mercury/messenger_beta_stage_c_range_station_counts.csv",
+    "output/private/mercury/messenger_beta_stage_c_range_coefficients.csv",
+    "output/private/mercury/messenger_beta_stage_c_range_residuals.csv",
+    "output/private/mercury/messenger_beta_stage_c_range_summary.csv",
+    "output/private/mercury/messenger_beta_stage_c_range_global_pilot.pdf",
+    "output/private/mercury/messenger_beta_stage_c_range_global_pilot.png"
+  ],
+  "outputs_public": [
+    "output/public/mercury/messenger_beta_stage_c_range_station_counts.csv",
+    "output/public/mercury/messenger_beta_stage_c_range_coefficients.csv",
+    "output/public/mercury/messenger_beta_stage_c_range_residuals.csv",
+    "output/public/mercury/messenger_beta_stage_c_range_summary.csv",
+    "output/public/mercury/messenger_beta_stage_c_range_global_pilot.pdf",
+    "output/public/mercury/messenger_beta_stage_c_range_global_pilot.png"
+  ]
+}

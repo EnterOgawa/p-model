@@ -12,6 +12,10 @@ from typing import Any, Optional
 import matplotlib.pyplot as plt
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
@@ -501,26 +505,35 @@ def main() -> None:
 
     x = list(range(len(categories)))
     w_bar = 0.38
+    title_font = 15.2
+    axis_label_font = 13.6
+    tick_font = 12.2
+    legend_font = 11.6
+
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10.8, 6.6), sharex=True, gridspec_kw={"height_ratios": [1, 1]})
 
     ax1.bar([xi - w_bar / 2 for xi in x], maxz_train, width=w_bar, color="#1f77b4", alpha=0.85, label="train")
     ax1.bar([xi + w_bar / 2 for xi in x], maxz_test, width=w_bar, color="#ff7f0e", alpha=0.85, label="test")
     ax1.axhline(3.0, color="#666666", lw=1.0, ls="--", alpha=0.7)
-    ax1.set_ylabel("max abs(z)")
-    ax1.set_title("Si α(T): temperature-split holdout (Debye+Einstein)")
+    ax1.set_ylabel("max abs(z)", fontsize=axis_label_font)
+    ax1.set_title("Si α(T): temperature-split holdout (Debye+Einstein)", fontsize=title_font)
     ax1.grid(True, axis="y", alpha=0.25)
-    ax1.legend(loc="upper right", fontsize=9)
+    ax1.tick_params(axis="both", labelsize=tick_font)
+    ax1.legend(loc="upper right", fontsize=legend_font)
 
     ax2.bar([xi - w_bar / 2 for xi in x], chi2_train, width=w_bar, color="#1f77b4", alpha=0.85, label="train")
     ax2.bar([xi + w_bar / 2 for xi in x], chi2_test, width=w_bar, color="#ff7f0e", alpha=0.85, label="test")
     ax2.axhline(2.0, color="#666666", lw=1.0, ls="--", alpha=0.7)
-    ax2.set_ylabel("reduced χ² (proxy)")
-    ax2.set_xlabel("split-model (A:50–300→300–600, B:200–600→50–200; 1=Einstein1, 2=Einstein2)")
+    ax2.set_ylabel("reduced χ² (proxy)", fontsize=axis_label_font)
+    ax2.set_xlabel("split-model (A:50–300→300–600, B:200–600→50–200; 1=Einstein1, 2=Einstein2)", fontsize=axis_label_font)
     ax2.set_xticks(x, categories)
     ax2.grid(True, axis="y", alpha=0.25)
+    ax2.tick_params(axis="both", labelsize=tick_font)
 
     fig.tight_layout()
+    out_pdf = out_dir / "condensed_silicon_thermal_expansion_gruneisen_holdout_splits.pdf"
     out_png = out_dir / "condensed_silicon_thermal_expansion_gruneisen_holdout_splits.png"
+    fig.savefig(out_pdf)
     fig.savefig(out_png, dpi=180)
     plt.close(fig)
 
@@ -549,7 +562,7 @@ def main() -> None:
                 },
                 "data_range_T_K": [int(t_min), int(t_max)],
                 "splits": split_results,
-                "outputs": {"csv": str(out_csv), "png": str(out_png)},
+                "outputs": {"csv": str(out_csv), "pdf": str(out_pdf), "png": str(out_png)},
             },
             ensure_ascii=False,
             indent=2,
@@ -559,6 +572,7 @@ def main() -> None:
     )
 
     print(f"[ok] wrote: {out_csv}")
+    print(f"[ok] wrote: {out_pdf}")
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_metrics}")
 
@@ -567,4 +581,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

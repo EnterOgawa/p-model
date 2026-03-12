@@ -1,0 +1,75 @@
+{
+  "generated_utc": "2026-03-08T05:03:52.618622+00:00",
+  "phase": {
+    "step": "8.7.47.17"
+  },
+  "inputs": {
+    "llr_metrics": "output/public/llr/llr_kappa_llr_metrics.json",
+    "injection_metrics": "output/public/llr/llr_kappa_llr_injection_recovery_metrics.json",
+    "cluster_metrics": "output/public/llr/llr_kappa_llr_cluster_robust_metrics.json",
+    "hardware_metrics": "output/public/llr/llr_kappa_llr_hardware_period_metrics.json",
+    "homogeneous_metrics": "output/public/llr/llr_kappa_llr_homogeneous_subset_metrics.json",
+    "crd_flag_metrics": "output/public/llr/llr_kappa_llr_crd_flag_unit_test_metrics.json"
+  },
+  "prerequisites": [
+    {
+      "prereq_id": "step1_injection_recovery",
+      "label": "Step1 injection/recovery",
+      "status": "pass",
+      "metric": "{'n_valid': 5, 'intercept': 0.0, 'slope': 1.0, 'intercept_sigma': 0.0013324267237545854, 'slope_sigma': 0.0012612792100391023, 'z_slope_minus_1': 0.0, 'z_intercept': 0.0, 'status': 'pass'}",
+      "note": "slope/intercept consistency of synthetic recovery"
+    },
+    {
+      "prereq_id": "step2_cluster_robust",
+      "label": "Step2 cluster robust",
+      "status": "pass",
+      "metric": "overall=pass",
+      "note": "cluster-robust station/target/policy consistency"
+    },
+    {
+      "prereq_id": "step3_hardware_period",
+      "label": "Step3 hardware-period",
+      "status": "pass",
+      "metric": "overall=pass",
+      "note": "station_target_hardware_period and pre/post boundary continuity"
+    },
+    {
+      "prereq_id": "step4_homogeneous_subset",
+      "label": "Step4 homogeneous subset",
+      "status": "pass",
+      "metric": "overall=pass",
+      "note": "subset internal consistency and stability vs reference"
+    },
+    {
+      "prereq_id": "step5_crd_flag_unit_test",
+      "label": "Step5 CRD flag test",
+      "status": "pass",
+      "metric": "overall=pass",
+      "note": "range/system-delay/COM/refraction + CRD-MeritII inversion"
+    }
+  ],
+  "promotion_decision": {
+    "promoted": true,
+    "status": "pass",
+    "rule": "promote only if all Step1-5 prerequisite gates are pass",
+    "prereq_overall_status": "pass",
+    "blocking_prerequisites": [],
+    "beta_source_if_promoted": "template_decontaminated",
+    "beta_est_candidate": 1.0006742979447485,
+    "beta_sigma_candidate": 0.0009605616286801067,
+    "beta_abs_z_minus_1_candidate": 0.7019830114129517,
+    "beta_est_effective": 1.0006742979447485,
+    "beta_sigma_effective": 0.0009605616286801067,
+    "beta_abs_z_minus_1_effective": 0.7019830114129517,
+    "hold_mode_effective": ""
+  },
+  "gate_status": {
+    "overall_status": "pass"
+  },
+  "outputs": {
+    "prereq_csv": "output/private/llr/llr_kappa_llr_beta_promotion_gate_prereq.csv",
+    "metrics_json": "output/private/llr/llr_kappa_llr_beta_promotion_gate_metrics.json",
+    "plot_pdf": "output/private/llr/llr_kappa_llr_beta_promotion_gate_audit.pdf",
+    "plot_png": "output/private/llr/llr_kappa_llr_beta_promotion_gate_audit.png"
+  }
+}

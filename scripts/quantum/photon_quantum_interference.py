@@ -11,6 +11,10 @@ from pathlib import Path
 import numpy as np
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # クラス: `Config` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Config:
@@ -235,12 +239,20 @@ def _build_hom_squeezed_light_audit(
         lw=1.4,
         capsize=4,
     )
+    panel_title_font = 14.8
+    axis_label_font = 13.6
+    tick_font = 12.4
+    legend_font = 11.8
+    note_font = 11.4
+    suptitle_font = 16.0
+
     ax0.axhline(50.0, color="0.25", ls="--", lw=1.2)
     ax0.set_xscale("log")
-    ax0.set_xlabel("D (ns)")
-    ax0.set_ylabel("visibility (%)")
-    ax0.set_title("HOM visibility (with 50% reference)")
+    ax0.set_xlabel("D (ns)", fontsize=axis_label_font)
+    ax0.set_ylabel("visibility (%)", fontsize=axis_label_font)
+    ax0.set_title("HOM visibility (with 50% reference)", fontsize=panel_title_font)
     ax0.grid(True, which="both", ls=":", lw=0.6, alpha=0.7)
+    ax0.tick_params(axis="both", labelsize=tick_font)
 
     ax1 = axes[0, 1]
     hom_rows = [r for r in rows if str(r["channel"]).startswith("hom_visibility_d")]
@@ -248,24 +260,26 @@ def _build_hom_squeezed_light_audit(
     z_vals = [float(r["metric_value"]) for r in hom_rows]
     ax1.bar(labels, z_vals, color="#ff7f0e")
     ax1.axhline(3.0, color="0.25", ls="--", lw=1.2)
-    ax1.set_ylabel("z vs 0.5 visibility")
-    ax1.set_title("HOM significance")
+    ax1.set_ylabel("z vs 0.5 visibility", fontsize=axis_label_font)
+    ax1.set_title("HOM significance", fontsize=panel_title_font)
     ax1.grid(True, axis="y", ls=":", lw=0.6, alpha=0.7)
+    ax1.tick_params(axis="both", labelsize=tick_font)
 
     ax2 = axes[1, 0]
     ax2.bar(["variance ratio"], [var_ratio], color="#2ca02c")
     ax2.axhline(0.5, color="0.25", ls="--", lw=1.2, label="3 dB threshold")
-    ax2.set_ylabel("ratio")
-    ax2.set_title("Squeezing scale")
+    ax2.set_ylabel("ratio", fontsize=axis_label_font)
+    ax2.set_title("Squeezing scale", fontsize=panel_title_font)
     ax2.grid(True, axis="y", ls=":", lw=0.6, alpha=0.7)
-    ax2.legend(frameon=True, fontsize=8, loc="upper right")
+    ax2.legend(frameon=True, fontsize=legend_font, loc="upper right")
     ax2.text(
         0.02,
         0.05,
         f"loss-only: eta >= {eta_lower_if_perfect_intrinsic:.3f}",
         transform=ax2.transAxes,
-        fontsize=9,
+        fontsize=note_font,
     )
+    ax2.tick_params(axis="both", labelsize=tick_font)
 
     ax3 = axes[1, 1]
     # 条件分岐: `np.isfinite(psd_10k) and np.isfinite(psd_100k)` を満たす経路を評価する。
@@ -273,15 +287,18 @@ def _build_hom_squeezed_light_audit(
         ax3.bar(["PSD@10kHz", "PSD@100kHz"], [psd_10k, psd_100k], color=["#1f77b4", "#7f7f7f"])
 
     ax3.set_yscale("log")
-    ax3.set_ylabel("PSD (arb.)")
-    ax3.set_title("Noise PSD scale indicator")
+    ax3.set_ylabel("PSD (arb.)", fontsize=axis_label_font)
+    ax3.set_title("Noise PSD scale indicator", fontsize=panel_title_font)
     ax3.grid(True, axis="y", ls=":", lw=0.6, alpha=0.7)
+    ax3.tick_params(axis="both", labelsize=tick_font)
 
-    fig.suptitle("Phase 7 / Step 7.16.14: HOM + squeezed-light unified audit", y=0.98)
+    fig.suptitle("HOM + squeezed-light unified audit", y=0.98, fontsize=suptitle_font)
     fig.tight_layout()
 
     out_png = out_dir / "hom_squeezed_light_unified_audit.png"
+    out_pdf = out_dir / "hom_squeezed_light_unified_audit.pdf"
     fig.savefig(out_png, bbox_inches="tight")
+    fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
 
     out_json = out_dir / "hom_squeezed_light_unified_audit_metrics.json"
@@ -305,7 +322,7 @@ def _build_hom_squeezed_light_audit(
                     "psd_at_100khz": psd_100k,
                     "psd_lf_to_hf_ratio": lf_hf_ratio,
                 },
-                "outputs": {"summary_csv": str(out_csv), "summary_png": str(out_png)},
+                "outputs": {"summary_csv": str(out_csv), "summary_png": str(out_png), "summary_pdf": str(out_pdf)},
                 "notes": [
                     "HOM significance is measured against the classical 50% reference and delay-stability between 13 ns and 1 us.",
                     "Squeezing row uses a conservative operational threshold at 3 dB (variance ratio <= 0.5).",
@@ -350,8 +367,8 @@ def main() -> None:
 
     import matplotlib.pyplot as plt
 
-    fig = plt.figure(figsize=(14.8, 4.2), dpi=160)
-    gs = fig.add_gridspec(1, 3, wspace=0.28)
+    fig = plt.figure(figsize=(15.8, 10.2), dpi=170)
+    gs = fig.add_gridspec(2, 2, wspace=0.24, hspace=0.34)
 
     # A
     ax0 = fig.add_subplot(gs[0, 0])
@@ -359,11 +376,12 @@ def main() -> None:
     sig_grid = np.asarray([_sigma_path_nm_from_visibility(v, wavelength_nm=lam_nm) for v in v_grid], dtype=float)
     ax0.plot(v_grid, sig_grid, lw=2.0, label=f"λ={lam_nm:.0f} nm")
     ax0.scatter([v0], [sigma_nm], s=40, zorder=5, label=f"Kimura+2004: V≥{v0:.2f}")
-    ax0.set_xlabel("visibility V")
-    ax0.set_ylabel("equiv. path-length noise σL (nm)")
-    ax0.set_title("Single-photon interference: V → σL")
+    ax0.set_xlabel("visibility V", fontsize=14.0)
+    ax0.set_ylabel("equiv. path-length noise σL (nm)", fontsize=14.0)
+    ax0.set_title("Single-photon interference: V → σL", fontsize=15.2)
     ax0.grid(True, ls=":", lw=0.6, alpha=0.6)
-    ax0.legend(frameon=True, fontsize=9, loc="upper right")
+    ax0.legend(frameon=True, fontsize=12.0, loc="upper right")
+    ax0.tick_params(axis="both", labelsize=12.4)
 
     # B
     ax1 = fig.add_subplot(gs[0, 1])
@@ -378,12 +396,12 @@ def main() -> None:
         label="reported (QD2; corrected)",
     )
     ax1.set_xscale("log")
-    ax1.set_xlabel("temporal separation D (ns)")
-    ax1.set_ylabel("HOM visibility (%)")
-    ax1.set_title("HOM: visibility vs separation (reported)")
+    ax1.set_xlabel("temporal separation D (ns)", fontsize=14.0)
+    ax1.set_ylabel("HOM visibility (%)", fontsize=14.0)
+    ax1.set_title("HOM: visibility vs separation (reported)", fontsize=15.2)
     ax1.grid(True, which="both", ls=":", lw=0.6, alpha=0.6)
     ax1.set_ylim(90.0, 100.0)
-    ax1.legend(frameon=True, fontsize=9, loc="lower left")
+    ax1.legend(frameon=True, fontsize=12.0, loc="lower left")
     ax1.text(
         0.02,
         0.98,
@@ -391,20 +409,21 @@ def main() -> None:
         transform=ax1.transAxes,
         va="top",
         ha="left",
-        fontsize=9,
+        fontsize=11.8,
     )
+    ax1.tick_params(axis="both", labelsize=12.4)
 
     # C
-    ax2 = fig.add_subplot(gs[0, 2])
+    ax2 = fig.add_subplot(gs[1, 0])
     ax2.plot(f_hz, psd, lw=1.2, label="Zenodo 6371310 (ExData Fig.3b)")
     ax2.axvline(1e4, color="k", lw=1.0, ls="--", alpha=0.7, label="10^4 Hz")
     ax2.set_xscale("log")
     ax2.set_yscale("log")
-    ax2.set_xlabel("frequency (Hz)")
-    ax2.set_ylabel("PSD (arb. units)")
-    ax2.set_title("Low-frequency noise PSD (for indistinguishability)")
+    ax2.set_xlabel("frequency (Hz)", fontsize=14.0)
+    ax2.set_ylabel("PSD (arb. units)", fontsize=14.0)
+    ax2.set_title("Low-frequency noise PSD (for indistinguishability)", fontsize=15.2)
     ax2.grid(True, which="both", ls=":", lw=0.6, alpha=0.6)
-    ax2.legend(frameon=True, fontsize=9, loc="lower left")
+    ax2.legend(frameon=True, fontsize=12.0, loc="lower left")
     ax2.text(
         0.02,
         0.98,
@@ -413,14 +432,36 @@ def main() -> None:
         transform=ax2.transAxes,
         va="top",
         ha="left",
-        fontsize=9,
+        fontsize=11.8,
+    )
+    ax2.tick_params(axis="both", labelsize=12.4)
+
+    ax3 = fig.add_subplot(gs[1, 1])
+    ax3.axis("off")
+    ax3.text(
+        0.02,
+        0.98,
+        (
+            "Unified summary\n"
+            "A: single-photon interference (V→σL)\n"
+            "B: HOM visibility vs delay\n"
+            "C: low-frequency PSD and squeezed-light\n"
+            "   scale indicators"
+        ),
+        transform=ax3.transAxes,
+        va="top",
+        ha="left",
+        fontsize=13.2,
+        bbox={"boxstyle": "round,pad=0.35", "facecolor": "white", "alpha": 0.9, "edgecolor": "0.8"},
     )
 
-    fig.suptitle("Phase 7 / Step 7.7: photon interference observables (visibility, HOM, squeezing/noise)", y=1.03)
-    fig.tight_layout()
+    fig.suptitle("Photon interference observables (visibility, HOM, squeezing/noise)", y=0.99, fontsize=16.6)
+    fig.tight_layout(rect=(0, 0, 1, 0.97))
 
     out_png = out_dir / "photon_quantum_interference.png"
+    out_pdf = out_dir / "photon_quantum_interference.pdf"
     fig.savefig(out_png, bbox_inches="tight")
+    fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
 
     metrics = {
@@ -495,7 +536,7 @@ def main() -> None:
             "eta_lower_if_perfect_intrinsic": eta_lower_if_perfect_intrinsic,
             "model_note": "Loss-only inequality: V_obs >= 1-η (since V_intrinsic>=0).",
         },
-        "outputs": {"png": str(out_png)},
+        "outputs": {"png": str(out_png), "pdf": str(out_pdf)},
         "notes": [
             "This script fixes key observables and provides simple mappings; it is not a full quantum-optics derivation.",
             "HOM values are taken from the paper text; Zenodo is used for the noise PSD shown as Extended Data Fig.3b.",
@@ -517,6 +558,7 @@ def main() -> None:
     )
 
     print(f"[ok] png : {out_png}")
+    print(f"[ok] pdf : {out_pdf}")
     print(f"[ok] json: {out_json}")
     print(f"[ok] csv : {unified_csv}")
     print(f"[ok] json: {unified_json}")

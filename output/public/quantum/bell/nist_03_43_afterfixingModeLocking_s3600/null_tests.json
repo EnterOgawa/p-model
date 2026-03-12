@@ -1,13 +1,13 @@
 {
-  "generated_utc": "2026-02-20T12:38:31.544988+00:00",
+  "generated_utc": "2026-03-11T13:54:42.408122+00:00",
   "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
   "supported": true,
   "baseline": {
     "param_name": "window_ns",
-    "value": 1000.0,
+    "value": 2000.0,
     "statistic_name": "CH J_prob (A1=0,B1=0)",
-    "statistic": -0.0006990843043696472,
-    "sigma_boot": 9.100388784991122e-06,
+    "statistic": -0.000982524306564714,
+    "sigma_boot": 7.67773919017981e-06,
     "delay_signature_z_max": 43.90965148631052
   },
   "tests": [
@@ -28,7 +28,7 @@
   "inputs": {
     "natural_window_frozen_json": {
       "path": "output/public/quantum/bell/nist_03_43_afterfixingModeLocking_s3600/natural_window_frozen.json",
-      "sha256": "da16bf5704e3f0682da145f6cdd03e4db4d40b98f6f9c61e53bb707f98e31708"
+      "sha256": "8ca258b5f4a117252043121e76963d9f7b19bc40eeec52a3d8f45ef27a2b22d5"
     }
   }
 }

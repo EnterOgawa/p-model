@@ -1,0 +1,47 @@
+{
+  "generated_utc": "2026-03-07T09:44:52.332525+00:00",
+  "phase": {
+    "step": "8.7.47.15"
+  },
+  "input": {
+    "points_csv": "output/private/llr/batch/llr_batch_points.csv",
+    "n_points_all": 13079,
+    "fit_mode": "station_target_year",
+    "weight_scheme": "inv_station_target",
+    "weight_floor_station": 180,
+    "weight_floor_target": 180,
+    "weight_floor_station_target": 120,
+    "max_weight_cap": 8.0,
+    "min_points_subset": 200,
+    "min_points_group": 80,
+    "apol_post_year": 2021,
+    "fullmoon_exclusion_deg": 30.0,
+    "fullmoon_gate_note": "phase model is an approximate synodic mapping used for subset gating only"
+  },
+  "reference": {
+    "subset_id": "reference_all",
+    "kappa_est": 1.5287267089537062,
+    "kappa_sigma_cluster": 0.11016131859420442
+  },
+  "subset_summary": {
+    "n_subsets": 5,
+    "subset_csv": "output/private/llr/llr_kappa_llr_homogeneous_subset_summary.csv",
+    "group_csv": "output/private/llr/llr_kappa_llr_homogeneous_subset_group_consistency.csv",
+    "max_abs_z_vs_reference": 1.129901144159035,
+    "subset_status_all": "reject",
+    "subset_internal_status_all": "pass",
+    "stability_status_vs_reference": "pass",
+    "overall_status": "pass"
+  },
+  "gate_status": {
+    "subset_fit_and_internal_gate": "reject",
+    "subset_internal_gate": "pass",
+    "subset_stability_gate": "pass",
+    "overall_status": "pass"
+  },
+  "outputs": {
+    "metrics_json": "output/private/llr/llr_kappa_llr_homogeneous_subset_metrics.json",
+    "plot_pdf": "output/private/llr/llr_kappa_llr_homogeneous_subset_audit.pdf",
+    "plot_png": "output/private/llr/llr_kappa_llr_homogeneous_subset_audit.png"
+  }
+}

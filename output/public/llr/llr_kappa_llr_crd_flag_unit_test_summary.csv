@@ -1,0 +1,6 @@
+test_id,test_label,n_a,n_b,fit_mode,note,fit_ok,status,reason,kappa_a,sigma_a,kappa_b,sigma_b,delta_a_minus_b,sigma_delta,z_delta,abs_z_delta
+com,COM Correction (1 vs 0),0,13079,station_target_year,H4 center-of-mass correction flag,False,not_testable,insufficient_contrast(min=200),,,,,,,,
+crd_vs_meritii_inversion,Quality inversion (0 vs nonzero),8724,702,station_target_year,CRD-vs-MeritII inversion proxy on record11 quality code,True,pass,,1.6906911938247067,0.08863711907328999,1.9373245358802134,0.13686489412282632,-0.2466333420555067,0.1630599218718844,-1.5125319528196857,1.5125319528196857
+range_type,Range Type (2 vs 1),13079,0,station_target_year,H4 range_type split,False,not_testable,insufficient_contrast(min=200),,,,,,,,
+refraction,Refraction (1 vs 0),0,13079,station_target_year,H4 tropospheric refraction flag,False,not_testable,insufficient_contrast(min=200),,,,,,,,
+system_delay,System Delay (1 vs 0),13079,0,station_target_year,H4 station system-delay correction flag,False,not_testable,insufficient_contrast(min=200),,,,,,,,

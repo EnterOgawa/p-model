@@ -117,14 +117,15 @@ def _render_png(
         path.write_bytes(b"")
         return
 
-    fig, axes = plt.subplots(1, 2, figsize=(12.0, 4.8), dpi=150)
+    fig, axes = plt.subplots(1, 2, figsize=(12.8, 5.2), dpi=150)
 
     labels = ["tau_free", "tau_int", "tau_damp", "tau_eff", "tau_eff_harm", "tau_from_kernel"]
     values = [tau_free, tau_int, tau_damp, tau_eff, tau_eff_harm, tau_from_kernel]
     axes[0].bar(labels, values, color=["#4c78a8", "#f58518", "#54a24b", "#e45756", "#72b7b2", "#b279a2"])
-    axes[0].set_ylabel("timescale [Gyr]")
-    axes[0].set_title("Step 8.7.25.19: tau derivation chain")
-    axes[0].tick_params(axis="x", rotation=20)
+    axes[0].set_ylabel("timescale [Gyr]", fontsize=13.2)
+    axes[0].set_title("tau derivation chain", fontsize=14.2)
+    axes[0].tick_params(axis="x", rotation=20, labelsize=11.6)
+    axes[0].tick_params(axis="y", labelsize=11.6)
     axes[0].grid(True, axis="y", alpha=0.25)
 
     rel_errs = [
@@ -135,14 +136,15 @@ def _render_png(
     err_labels = ["rel(tau_eff_harm,tau_eff)", "rel(tau_kernel_chain,tau_eff)", "rel(xi_chain,xi_derived)"]
     axes[1].bar(err_labels, rel_errs, color=["#2ca02c", "#2ca02c", "#2ca02c"])
     axes[1].axhline(0.20, color="#d62728", linestyle="--", linewidth=1.0, label="tau reconstruction gate")
-    axes[1].set_ylabel("relative error")
-    axes[1].set_title("closure residuals")
-    axes[1].tick_params(axis="x", rotation=20)
+    axes[1].set_ylabel("relative error", fontsize=13.2)
+    axes[1].set_title("closure residuals", fontsize=14.2)
+    axes[1].tick_params(axis="x", rotation=20, labelsize=11.6)
+    axes[1].tick_params(axis="y", labelsize=11.6)
     axes[1].grid(True, axis="y", alpha=0.25)
-    axes[1].legend(loc="upper right")
+    axes[1].legend(loc="upper right", fontsize=12.0)
 
-    fig.suptitle("Bullet tau/xi derivation-chain audit")
-    fig.text(0.01, -0.02, "\n".join(summary_lines), fontsize=8, va="top")
+    fig.suptitle("Bullet tau/xi derivation-chain audit", fontsize=15.4)
+    fig.text(0.01, -0.02, "\n".join(summary_lines), fontsize=12.0, va="top")
     fig.tight_layout()
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)

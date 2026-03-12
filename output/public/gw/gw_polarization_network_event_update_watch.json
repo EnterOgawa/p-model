@@ -1,8 +1,8 @@
 {
-  "generated_utc": "2026-02-22T23:47:39.015900+00:00",
+  "generated_utc": "2026-03-04T12:01:27.220525+00:00",
   "schema": "wavep.gw.polarization.network_event_update_watch.v1",
   "phase": 8,
-  "step": "8.7.19.14",
+  "step": "8.7.19.10",
   "inputs": {
     "event_list": "C:/develop/waveP/data/gw/event_list.json",
     "anchor_event": "GW200129_065458",
@@ -430,12 +430,14 @@
     "audit_json": "C:/develop/waveP/output/private/gw/gw_polarization_network_event_update_watch.json",
     "audit_csv": "C:/develop/waveP/output/private/gw/gw_polarization_network_event_update_watch.csv",
     "audit_png": "C:/develop/waveP/output/private/gw/gw_polarization_network_event_update_watch.png",
+    "audit_pdf": "C:/develop/waveP/output/private/gw/gw_polarization_network_event_update_watch.pdf",
     "audit_checklist_csv": "C:/develop/waveP/output/private/gw/gw_polarization_network_event_update_watch_checklist.csv",
     "public_copies": [
       "C:/develop/waveP/output/public/gw/gw_polarization_network_event_update_watch.json",
       "C:/develop/waveP/output/public/gw/gw_polarization_network_event_update_watch.csv",
       "C:/develop/waveP/output/public/gw/gw_polarization_network_event_update_watch.png",
-      "C:/develop/waveP/output/public/gw/gw_polarization_network_event_update_watch_checklist.csv"
+      "C:/develop/waveP/output/public/gw/gw_polarization_network_event_update_watch_checklist.csv",
+      "C:/develop/waveP/output/public/gw/gw_polarization_network_event_update_watch.pdf"
     ]
   },
   "falsification": {

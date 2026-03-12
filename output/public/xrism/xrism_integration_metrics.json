@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-13T07:50:32.929025+00:00",
+  "generated_utc": "2026-03-04T08:05:22.482670+00:00",
   "inputs": {
     "bh_summary_csv": "output/private/xrism/xrism_bh_outflow_velocity_summary.csv",
     "cluster_summary_csv": "output/private/xrism/xrism_cluster_redshift_turbulence_summary.csv",
@@ -9,8 +9,8 @@
     "targets_catalog_csv": "output/private/xrism/xrism_targets_catalog.csv"
   },
   "outputs": {
-    "integration_metrics_json": "output/private/xrism/xrism_integration_metrics.json",
-    "resolve_summary_png": "output/private/xrism/xrism_resolve_summary.png"
+    "integration_metrics_json": "output/public/xrism/xrism_integration_metrics.json",
+    "resolve_summary_png": "output/public/xrism/xrism_resolve_summary.png"
   },
   "table1_connection": {
     "policy": "XRISMは公開一次FITSからの直接再解析（distance-indicator independent）であり、採用はゲート（detected_obsids≥2 かつ sys/stat≤10）で判定する。現状は BH/AGN と銀河団の両方が adopted として固定する。"

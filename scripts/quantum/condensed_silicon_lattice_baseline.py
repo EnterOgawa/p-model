@@ -10,6 +10,10 @@ from typing import Any
 import matplotlib.pyplot as plt
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
@@ -131,16 +135,19 @@ def main() -> None:
     yerr = [float(r["sigma_A"]) for r in records]
     labels = [str(r["code"]) for r in records]
 
-    plt.figure(figsize=(7, 3.6))
-    plt.errorbar(xs, ys, yerr=yerr, fmt="o", capsize=4)
-    plt.xticks(xs, labels)
-    plt.ylabel("Value (Å)")
-    plt.title("Silicon lattice constants (NIST CODATA)")
-    plt.grid(True, alpha=0.25)
-    plt.tight_layout()
+    fig, ax = plt.subplots(figsize=(7, 3.6))
+    ax.errorbar(xs, ys, yerr=yerr, fmt="o", capsize=4)
+    ax.set_xticks(xs, labels)
+    ax.set_ylabel("Value (Å)", fontsize=10.8)
+    ax.set_title("Silicon lattice constants (NIST CODATA)", fontsize=11.4)
+    ax.tick_params(axis="both", labelsize=9.6)
+    ax.grid(True, alpha=0.25)
+    fig.tight_layout()
+    out_pdf = out_dir / "condensed_silicon_lattice_baseline.pdf"
     out_png = out_dir / "condensed_silicon_lattice_baseline.png"
-    plt.savefig(out_png, dpi=180)
-    plt.close()
+    fig.savefig(out_pdf, bbox_inches="tight")
+    fig.savefig(out_png, dpi=180, bbox_inches="tight")
+    plt.close(fig)
 
     falsification_targets = []
     sigma_multiplier = 3.0
@@ -179,6 +186,7 @@ def main() -> None:
                 "results": records,
                 "outputs": {
                     "csv": str(out_csv),
+                    "pdf": str(out_pdf),
                     "png": str(out_png),
                 },
             },
@@ -189,6 +197,7 @@ def main() -> None:
     )
 
     print(f"[ok] wrote: {out_csv}")
+    print(f"[ok] wrote: {out_pdf}")
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_metrics}")
 

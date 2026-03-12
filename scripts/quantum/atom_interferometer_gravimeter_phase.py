@@ -8,6 +8,10 @@ from pathlib import Path
 import numpy as np
 
 
+from figure_japanese_localizer import enable_japanese_figure_localization
+
+enable_japanese_figure_localization()
+
 # クラス: `Config` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Config:
@@ -88,24 +92,25 @@ def main() -> None:
     import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots(figsize=(10.8, 5.4), dpi=150)
+    panel_title_font = 14.8
+    axis_label_font = 13.6
+    tick_font = 12.4
+    legend_font = 11.8
     ax.plot(T_grid, phi_grid / (2.0 * math.pi), lw=2.0, label="k_eff g T² / 2π (cycles)")
     ax.axvline(cfg.T_s, color="#ff7f0e", ls="-.", lw=1.2, label=f"T={cfg.T_s*1e3:.0f} ms (example)")
-    ax.set_xlabel("pulse separation T (s)")
-    ax.set_ylabel("phase (cycles)")
-    ax.set_title("Atom interferometer gravimeter: phase scaling (φ ≈ k_eff g T²)")
+    ax.set_xlabel("pulse separation T (s)", fontsize=axis_label_font)
+    ax.set_ylabel("phase (cycles)", fontsize=axis_label_font)
+    ax.set_title("Atom interferometer gravimeter: phase scaling (φ ≈ k_eff g T²)", fontsize=panel_title_font)
     ax.grid(True, ls=":", lw=0.6, alpha=0.7)
-    ax.legend(frameon=True, fontsize=9, loc="upper left")
+    ax.legend(frameon=True, fontsize=legend_font, loc="upper left")
+    ax.tick_params(axis="both", labelsize=tick_font)
 
-    note = (
-        f"Model: φ_g = k_eff g T².  "
-        f"λ={cfg.lambda_m*1e9:.0f} nm ⇒ k_eff≈{keff:.3e} 1/m.  "
-        f"At T={cfg.T_s:.3f} s: φ_g≈{phi_ref/(2*math.pi):.3e} cycles."
-    )
-    fig.text(0.01, -0.02, note, fontsize=9)
     fig.tight_layout()
 
     out_png = out_dir / "atom_interferometer_gravimeter_phase.png"
+    out_pdf = out_dir / "atom_interferometer_gravimeter_phase.pdf"
     fig.savefig(out_png, bbox_inches="tight")
+    fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
 
     beta_frozen = _try_load_beta_frozen(root)
@@ -206,7 +211,7 @@ def main() -> None:
             "sensitivity_dphi_dg_rad_per_mps2": float(keff * (cfg.T_s**2)),
             "beta_phase_dependence": beta_models,
         },
-        "outputs": {"png": str(out_png)},
+        "outputs": {"png": str(out_png), "pdf": str(out_pdf)},
         "notes": [
             "The full readout includes a laser phase term (φ_L); gravimeters scan/lock φ_L to infer g.",
             "This script focuses on the magnitude/scaling of the gravity-dependent phase term.",
@@ -216,6 +221,7 @@ def main() -> None:
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(f"[ok] png : {out_png}")
+    print(f"[ok] pdf : {out_pdf}")
     print(f"[ok] json: {out_json}")
 
 

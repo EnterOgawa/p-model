@@ -302,6 +302,7 @@ def main() -> None:
 
     tag = args.out_tag
     out_png = out_dir / f"nist_belltest_trial_based__{tag}.png"
+    out_pdf = out_dir / f"nist_belltest_trial_based__{tag}.pdf"
     out_json = out_dir / f"nist_belltest_trial_based_metrics__{tag}.json"
     out_csv = out_dir / f"nist_belltest_trial_based_counts__{tag}.csv"
 
@@ -318,10 +319,15 @@ def main() -> None:
     # Plot
     import matplotlib.pyplot as plt
 
-    fig, axes = plt.subplots(1, 2, figsize=(13.8, 4.6), dpi=160)
+    fig, axes = plt.subplots(2, 1, figsize=(12.8, 9.8), dpi=170)
+    panel_title_font = 14.8
+    axis_label_font = 13.8
+    tick_font = 12.6
+    legend_font = 12.4
+    note_font = 11.6
 
     ax0 = axes[0]
-    ax0.set_title("Coincidences: coincidence-based (window) vs trial-based (sync/slot)")
+    ax0.set_title("Coincidences: coincidence-based (window) vs trial-based (sync/slot)", fontsize=panel_title_font)
 
     # 条件分岐: `sweep is not None` を満たす経路を評価する。
     if sweep is not None:
@@ -336,13 +342,14 @@ def main() -> None:
     trial_total = int(counts.n_coinc.sum())
     ax0.axhline(trial_total, color="0.2", ls="--", lw=1.0, label=f"trial-based coincidences={trial_total}")
     ax0.set_xscale("log")
-    ax0.set_xlabel("coincidence window (ns)")
-    ax0.set_ylabel("coincidences (count)")
+    ax0.set_xlabel("coincidence window (ns)", fontsize=axis_label_font)
+    ax0.set_ylabel("coincidences (count)", fontsize=axis_label_font)
     ax0.grid(True, which="both", ls=":", lw=0.6, alpha=0.6)
-    ax0.legend(frameon=True, fontsize=9)
+    ax0.legend(frameon=True, fontsize=legend_font)
+    ax0.tick_params(axis="both", labelsize=tick_font)
 
     ax1 = axes[1]
-    ax1.set_title("CH J_prob (A1=0,B1=0): window dependence")
+    ax1.set_title("CH J_prob (A1=0,B1=0): window dependence", fontsize=panel_title_font)
     # Trial-based J for A1=0,B1=0.
     j_trial = float(ch["A1=0,B1=0"]["J_prob"])
     # 条件分岐: `sweep is not None and "J_prob_A1=0_B1=0" in sweep` を満たす経路を評価する。
@@ -361,26 +368,23 @@ def main() -> None:
             float(sweep["window_ns"][idx]) * 1.06,
             float(sweep["J_prob_A1=0_B1=0"][idx]),
             f"closest\\n{float(sweep['window_ns'][idx]):g} ns",
-            fontsize=8,
+            fontsize=note_font,
             va="bottom",
         )
 
     ax1.axhline(j_trial, color="0.2", ls="--", lw=1.0, label=f"trial-based J_prob={j_trial:.3g}")
     ax1.axhline(0.0, color="0.4", ls="-", lw=0.8)
     ax1.set_xscale("log")
-    ax1.set_xlabel("coincidence window (ns)")
-    ax1.set_ylabel("J_prob")
+    ax1.set_xlabel("coincidence window (ns)", fontsize=axis_label_font)
+    ax1.set_ylabel("J_prob", fontsize=axis_label_font)
     ax1.grid(True, which="both", ls=":", lw=0.6, alpha=0.6)
-    ax1.legend(frameon=True, fontsize=9)
+    ax1.legend(frameon=True, fontsize=legend_font)
+    ax1.tick_params(axis="both", labelsize=tick_font)
 
-    note = (
-        f"hdf5={hdf5_path.name} | syncs_used={counts.n_total} (bad_sync={counts.n_bad_sync}, invalid_setting={counts.n_invalid_settings})\\n"
-        f"cfg(alice)={cfg['alice']} cfg(bob)={cfg['bob']} | best_J={ch['_best']['J_prob']:.3g} ({ch['_best']['key']})"
-    )
-    fig.text(0.01, -0.02, note, fontsize=8)
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
 
     fig.savefig(out_png, bbox_inches="tight")
+    fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
 
     metrics = {
@@ -410,7 +414,7 @@ def main() -> None:
         },
         "ch_j_variants": ch,
         "comparison": {},
-        "outputs": {"png": str(out_png), "json": str(out_json), "csv": str(out_csv)},
+        "outputs": {"png": str(out_png), "pdf": str(out_pdf), "json": str(out_json), "csv": str(out_csv)},
         "notes": [
             "This script focuses on trial-based counting using the NIST 'build' (processed) file.",
             "It is intended to quantify algorithm dependence between trial-based and coincidence-based pipelines.",
@@ -429,6 +433,7 @@ def main() -> None:
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(f"[ok] png : {out_png}")
+    print(f"[ok] pdf : {out_pdf}")
     print(f"[ok] csv : {out_csv}")
     print(f"[ok] json: {out_json}")
 
