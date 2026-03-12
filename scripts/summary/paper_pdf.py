@@ -370,6 +370,28 @@ def _apply_autofix_round(
     return False, notes
 
 
+# Function: keep papers/ limited to canonical paper PDFs only.
+
+def _prune_papers_dir(*, papers_dir: Path) -> List[str]:
+    papers_dir.mkdir(parents=True, exist_ok=True)
+    allowed_names = set(_PROFILE_TO_PDF.values())
+    removed: List[str] = []
+    for entry in list(papers_dir.iterdir()):
+        if entry.is_file() and entry.name in allowed_names and entry.suffix.lower() == ".pdf":
+            continue
+
+        if entry.is_file():
+            entry.unlink()
+            removed.append(entry.name)
+            continue
+
+        if entry.is_dir():
+            shutil.rmtree(entry)
+            removed.append(f"{entry.name}/")
+
+    return removed
+
+
 # Function: copy generated PDF into papers/ with canonical file names.
 
 def _sync_to_papers(*, pdf_src: Path, papers_dir: Path, profile: str) -> Path:
@@ -500,6 +522,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     sync_papers = True
     if not bool(args.sync_papers):
         print("[info] --sync-papers 未指定でも運用ルールにより papers 同期を強制します。")
+
+    removed_papers_entries: List[str] = []
+    if sync_papers:
+        removed_papers_entries = _prune_papers_dir(papers_dir=papers_dir)
+        for name in removed_papers_entries:
+            print(f"[info] removed from papers/: {name}")
+
     max_passes = max(1, int(args.max_passes))
     max_autofix_rounds = max(0, int(args.max_autofix_rounds))
 
@@ -554,6 +583,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             "fail_on_overfull": bool(args.fail_on_overfull),
             "sync_papers": sync_papers,
             "papers_dir": str(papers_dir),
+            "removed_papers_entries": removed_papers_entries,
         },
     }
     json_out = Path(str(args.json_out)) if args.json_out else (outdir / "paper_pdf_build.json")
