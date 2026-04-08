@@ -1,11 +1,19 @@
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pmodel_version}[2026/03/09 P-model shared version info]
+\ProvidesPackage{pmodel_version}[2026/04/08 P-model shared version info]
 
 % === ここだけ更新すれば全パートに反映される ===
-\newcommand{\PmodelDocVersion}{v1.0}
-\newcommand{\PmodelDate}{2026-03-09 UTC}
+\newcommand{\PmodelDocVersion}{v2.0}
+\newcommand{\PmodelDate}{2026/4/8 UTC}
 
 % 組み立て済みマクロ
 \newcommand{\PmodelFullDate}{%
   Document \PmodelDocVersion \quad \PmodelDate%
+}
+
+% === リンク枠の除去（公開用） ===
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=black,
+  urlcolor=blue
 }
