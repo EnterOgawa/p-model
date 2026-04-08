@@ -1,24 +1,25 @@
 # STATUS
 
-- UTC: 2026-04-08T11:02:24Z
+- UTC: 2026-04-08T11:16:29Z
 - Current official state: `vector_qball_form_factor_residual_origin_missing_action_updated_pack_trial2_v2_final_watch_positive_completed_single_frozen_action_single_alpha_global_consistency_primary_diagnostic_tables_secondary_conditional_reopen_only_next`
 - Latest completed official blocks: `.6091-.6098`
 
 ## Latest result
 
-- release 差分 Python manifest [release_script_python_diff.txt](/C:/develop/waveP/output/private/summary/release_script_python_diff.txt) の 229 本、および論文とリンクする量子 subset [quantum_scripts_paper_linked.txt](/C:/develop/waveP/output/private/summary/quantum_scripts_paper_linked.txt) の 120 本について、`py_compile` 監査を再実行し、どちらも `failed=0` を確認した。
-- `rg` で merge residue / TODO / FIXME / `NotImplementedError` を再検索し、release 対象 script 群に残存がないことを確認した。
-- `paper_html.py` の block spacing 残差 2 箇所を修正した後、`python -B scripts/summary/enforce_python_block_spacing.py --paths-file ...` と `python -B scripts/summary/enforce_python_def_class_comments.py --paths-file ...` を再監査し、release 差分 229 本で `violations=0` を確認した。
-- top-level 実行の AST 分類では、main guard 外に残るのは `enable_japanese_figure_localization()`、`matplotlib.use(...)`、`os.environ.setdefault(...)`、および `sitecustomize.py` の環境初期化フックだけであり、意図しない本計算は検出されなかった。scientific official state は unchanged である。
+- release 用 canonical public artifact を、論文本文・公開 README・公開運用文書から実際に参照される `output/public` artifact を起点に再切り分けた。manifest は [release_public_artifact_publish_set.txt](/C:/develop/waveP/output/private/summary/release_public_artifact_publish_set.txt) で、`tracked_keep=924`、`untracked_keep=66`、`total=990` を固定した。
+- 抽出では `output/public/gw/tmp_*`、`output/public/quantum/*declaration_gate*`、`output/public/quantum/*route_sync*` を publish set から除外し、stage 後の再検索でもこれらが `0` 件であることを確認した。
+- staged set の topic breakdown は `cassini=20, cosmology=42, eht=23, gps=8, gw=21, llr=50, mercury=2, pulsar=3, quantum=722, summary=34, theory=33, viking=2, vlbi=26, xrism=4`、合計 `990` である。
+- canonical public artifact は `git commit -m "release: add canonical public artifacts for paper v2.0"` で commit し、commit [7ec8481](/C:/develop/waveP/.git/refs/heads/main) を作成した。local `main` は `origin/main` に対して `ahead 3` である。scientific official state は unchanged である。
 
 ## Workflow note
 
-- 今回の branch は release-prep における公開 source の静的健全性監査であり、理論計算や再検証ではない。
-- とくに量子系は `scripts/quantum` 全体ではなく、論文本文から実際にリンクする 120 本だけを抽出した manifest を用いて、comment・compile・top-level 実行を再監査した。
+- 今回の branch は release-prep における公開 artifact の切り分けと commit 作成であり、理論計算や再検証ではない。
+- 公開可否の判断基準は「論文・README・公開運用文書と直接リンクする canonical artifact を優先し、temp/internal 補助物は除外する」である。
 
 ## Next
 
-- Paper lane: stage 済みの release surface commit に続けて、comment/compile/style 監査済み reproducibility script set を commit 対象へ切り分ける。
+- Paper lane: 残っている dirty tree の `tmp_*` / 内部監査補助物 / 未選別 public artifact を push 前に最終整理する。
+- Paper lane: 必要なら reproducibility source commit と canonical public artifact commit を最終確認したうえで push する。
 - Scientific lane: no unconditional next official branch.
 - Reopen scientifically only if a genuinely new native relativistic bound-state bridge for retained Halpha actualizes.
 - Reopen scientifically only if a genuinely new deterministic native precision correction beyond the current tree-level baselines actualizes.
