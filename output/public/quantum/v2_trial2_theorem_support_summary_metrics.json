@@ -1,0 +1,27 @@
+{
+  "generated_utc": "2026-04-07T14:28:10.914132+00:00",
+  "figure_stem": "v2_trial2_theorem_support_summary",
+  "sources": {
+    "sign_parity": "output/public/quantum/q_8_7_56_1963_1966_asymp_sign_parity_audit_declaration_gate_metrics.json",
+    "rank_one_coherence": "output/public/quantum/q_8_7_56_1783_1786_int_coh_hh_reactivation_declaration_gate_metrics.json",
+    "fixed_q_completion": "output/public/quantum/q_8_7_56_1791_1794_hh_surface_reactivation_declaration_gate_metrics.json",
+    "bulk_lattice": "output/public/quantum/q_8_7_56_2055_2058_higher_harmonic_lattice_loading_declaration_gate_metrics.json"
+  },
+  "summary": {
+    "retained_interval_over_m0": 4.0,
+    "asymptotic_audit_interval_over_m0": 8.0,
+    "mean_high_q_spacing": 0.10474767962636711,
+    "spacing_rel_gap_vs_theory": 0.0002666593965525699,
+    "root_lattice_max_abs_error": 0.0021629599620096585,
+    "exact_internal_rank_one_coherence_derived": true,
+    "rank_one_hh_threshold_for_scalar": 0.05696638060922668,
+    "exact_hh_amplitude_at_q_theory": 0.05696638060922668,
+    "exact_fh_amplitude_at_q_theory": 0.11763739373388109,
+    "exact_lambda_plus_at_q_theory": 0.2998913524347805,
+    "exact_alpha_mix_at_q_theory": 0.00715678583937324,
+    "theorem_fit_window_max_mismatch_fraction": 0.21931871208586096,
+    "theorem_extension_window_max_mismatch_fraction": 0.21625224985001,
+    "theorem_farther_window_max_mismatch_fraction": 0.24438370775281648,
+    "exact_loading_index_theorem_available": false
+  }
+}

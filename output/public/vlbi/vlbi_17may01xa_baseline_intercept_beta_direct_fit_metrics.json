@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-03-11T23:31:17.393889+00:00",
+  "generated_utc": "2026-03-20T12:47:11.604449+00:00",
   "session": "17MAY01XA_baseline_intercept",
   "method": {
     "description": "direct fit from vgosDb observables using BendSun substitution (no PPN input)",
@@ -67,33 +67,30 @@
     "sigma_weight_enabled": true,
     "nuisance_mode": "baseline_intercept",
     "ionosphere_free_enabled": true,
-    "source_filter": [
-      "0229+131",
-      "0235+164"
-    ]
+    "source_filter": []
   },
   "counts": {
     "n_common_raw": 4843,
-    "n_kept": 1029,
-    "n_rejected": 3814,
-    "n_sources_in_filter": 1538
+    "n_kept": 4010,
+    "n_rejected": 833,
+    "n_sources_in_filter": null
   },
   "fit_result": {
-    "n_points": 1029,
-    "intercept_s": -0.00021175522717783814,
-    "intercept_sigma_s": 2.6968913076504026e-09,
-    "delta_gamma": 0.2048934749088911,
-    "delta_gamma_sigma": 0.07973404389648873,
-    "gamma_est": 1.204893474908891,
-    "gamma_sigma": 0.07973404389648873,
-    "beta_est": 1.1024467374544455,
-    "beta_sigma": 0.03986702194824437,
-    "delta_beta": 0.10244673745444555,
-    "chi2": 1057776707.0888548,
-    "dof": 1007,
-    "rmse_s": 1.5438582837541347e-08,
-    "weighted_rmse_s": 1.443571501381663e-08,
-    "corr_template_residual": -0.23684982842174607,
+    "n_points": 4010,
+    "intercept_s": -0.00021176330288982356,
+    "intercept_sigma_s": 1.808436800106277e-09,
+    "delta_gamma": 0.3137396021771597,
+    "delta_gamma_sigma": 0.25086657637658427,
+    "gamma_est": 1.3137396021771597,
+    "gamma_sigma": 0.25086657637658427,
+    "beta_est": 1.1568698010885798,
+    "beta_sigma": 0.12543328818829214,
+    "delta_beta": 0.15686980108857984,
+    "chi2": 45615613217.2899,
+    "dof": 3988,
+    "rmse_s": 2.1644273572124463e-08,
+    "weighted_rmse_s": 1.7695160748921788e-08,
+    "corr_template_residual": -0.12925093340481877,
     "n_params": 22,
     "nuisance_info": {
       "requested_mode": "baseline_intercept",

@@ -1,0 +1,33 @@
+{
+  "generated_utc": "2026-04-07T14:28:12.450721+00:00",
+  "figure_stem": "v2_trial3_weak_checkpoint_summary",
+  "sources": {
+    "coupled_localization_closeout": "output/public/quantum/mass_origin_v2_t3_t2_coupled_localization_closeout_audit_metrics.json",
+    "shooting_solver": "output/public/quantum/mass_origin_v2_trial3_two_component_shooting_solver_implementation_metrics.json",
+    "coupled_radial_ode": "output/public/quantum/mass_origin_v2_trial3_two_component_coupled_radial_ode_derivation_metrics.json",
+    "spectrum_scan": "output/public/quantum/mass_origin_v2_trial3_two_component_spectrum_computation_metrics.json",
+    "charge_window_pivot": "output/public/quantum/mass_origin_v2_t3_t2_charge_window_pivot_source_inventory_metrics.json"
+  },
+  "summary": {
+    "anchor_family_or_none": {
+      "k": 17,
+      "ell": 1,
+      "s": 1
+    },
+    "exact_w_relative_error": 2.401039596805487e-05,
+    "exact_z_relative_error": 2.0718885912510303e-05,
+    "exact_w_kappa_coupled": 1.6024037199246677,
+    "exact_z_kappa_coupled": 1.6817234303593958,
+    "two_component_shooting_solver_implemented": true,
+    "localized_solution_count_total": 41,
+    "exact_vector_row_count_total": 905838,
+    "current_charge_window_or_none": [
+      39532,
+      40682
+    ],
+    "extended_charge_window_or_none": [
+      39532,
+      60000
+    ]
+  }
+}

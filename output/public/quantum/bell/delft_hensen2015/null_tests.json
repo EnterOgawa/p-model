@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-03-11T13:54:42.328835+00:00",
+  "generated_utc": "2026-04-08T09:12:26.466588+00:00",
   "dataset_id": "delft_hensen2015",
   "supported": true,
   "baseline": {
@@ -32,7 +32,7 @@
   "inputs": {
     "natural_window_frozen_json": {
       "path": "output/public/quantum/bell/delft_hensen2015/natural_window_frozen.json",
-      "sha256": "5ea47e0bd6c3ac6db566dd57e4538ad358619f194140ceb0b30150add71cdf22"
+      "sha256": "af50e81391e1270d240bf75cfb6a552e025340ce705a4c6bb0c5d57c07f25548"
     }
   }
 }

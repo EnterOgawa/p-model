@@ -1,0 +1,154 @@
+{
+  "generated_utc": "2026-03-17T11:08:19.976795+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.55.1.4",
+    "name": "gravity-quantum differential prediction table"
+  },
+  "inputs": {
+    "gravity_induced_decoherence_pikovski_comparison_json": "output/public/quantum/gravity_induced_decoherence_pikovski_comparison_metrics.json",
+    "atom_interferometer_pikovski_phase_difference_json": "output/public/quantum/atom_interferometer_pikovski_phase_difference_metrics.json",
+    "optical_clock_differential_frequency_json": "output/public/quantum/optical_clock_differential_frequency_metrics.json"
+  },
+  "intent": "Aggregate the already-frozen differential predictions from 8.7.55.1.1-.3 into a single machine-readable table with explicit 3σ rejection gates and current detectability status.",
+  "assumptions": [
+    "No new fit parameter is introduced; every row is reconstructed from the already-frozen outputs of 8.7.55.1.1-.3.",
+    "The structural decoherence row remains an entry-only parity row because no direct current precision exists for inferred (k_B T_env / chi_P) in that same regime.",
+    "The P-unique atom-interferometer row is the beta/light local channel against the arm-separation Pikovski proxy.",
+    "The optical-clock main row is the Earth Δh≈399 m chronometric-leveling case, and the strongest frozen lever-arm future row is the 0.05 AU ↔ 1 AU solar case."
+  ],
+  "formulas": {
+    "reject_gate": "Reject if |residual| > observable_specific_required_precision_1sigma_for_3sigma.",
+    "structural_parity_entry": "(k_B T_env / chi_P)_parity = Gamma_Pik / (omega_*^2 tau_free)",
+    "atom_interferometer_differential": "Delta phi_diff = phi^(P) - phi^(Pik)",
+    "optical_clock_differential": "delta(Delta f/f) = z_P - z_GR"
+  },
+  "rows": [
+    {
+      "row_id": "decoherence_structural_parity_entry",
+      "source_step": "8.7.55.1.1",
+      "channel_group": "gravity_induced_decoherence",
+      "channel_role": "structural_parity_entry",
+      "observable": "(k_B T_env / chi_P)_parity",
+      "case_id": "sigma_z_10.0mm_tau_free_1e-13s",
+      "differential_prediction_value": 3.2696756847457717e-21,
+      "differential_prediction_unit": "dimensionless",
+      "required_precision_1sigma_for_3sigma": 1.0898918949152572e-21,
+      "precision_unit": "dimensionless",
+      "current_precision": null,
+      "current_over_required": null,
+      "detectable_under_current": null,
+      "reject_gate_3sigma": "Reject structural parity if an inferred (k_B T_env / chi_P) in the same sigma_z=10.0 mm / tau_free=1e-13 s regime deviates from the frozen parity ratio by more than 1.089892e-21.",
+      "status": "entry_fixed_no_current_measurement",
+      "notes": "This row fixes the largest parity requirement from 8.7.55.1.1 and remains an entry-only structural comparison until the same regime can be inferred experimentally."
+    },
+    {
+      "row_id": "atom_interferometer_p_unique_local_arm",
+      "source_step": "8.7.55.1.2",
+      "channel_group": "atom_interferometer",
+      "channel_role": "p_unique_beta_light_local",
+      "observable": "Delta phi_diff / phi_ref",
+      "case_id": "beta_light_local_vs_pikovski_arm_proxy",
+      "differential_prediction_value": -0.00027202872424502973,
+      "differential_prediction_unit": "rad",
+      "required_precision_1sigma_for_3sigma": 3.9181637523862384e-12,
+      "precision_unit": "fractional_phase",
+      "current_precision": 1e-09,
+      "current_over_required": 255.22159439890194,
+      "detectable_under_current": false,
+      "reject_gate_3sigma": "Reject if the measured fractional atom-interferometer phase residual differs from the frozen differential prediction by more than 3σ, i.e. if |residual| > 3.918164e-12 fractional phase.",
+      "status": "p_unique_requires_255x_precision_improvement",
+      "notes": "This is the P-unique β/light local channel against the local arm-separation Pikovski proxy. Current/reference fractional precision is still 255x above the 1σ requirement."
+    },
+    {
+      "row_id": "atom_interferometer_reference_apex_envelope",
+      "source_step": "8.7.55.1.2",
+      "channel_group": "atom_interferometer",
+      "channel_role": "reference_mapping_row",
+      "observable": "Delta phi_diff / phi_ref",
+      "case_id": "reference_mapping_vs_pikovski_apex_envelope",
+      "differential_prediction_value": -0.10788687240459002,
+      "differential_prediction_unit": "rad",
+      "required_precision_1sigma_for_3sigma": 1.5539477824893974e-09,
+      "precision_unit": "fractional_phase",
+      "current_precision": 1e-09,
+      "current_over_required": 0.6435222671369416,
+      "detectable_under_current": true,
+      "reject_gate_3sigma": "Reject if the measured fractional atom-interferometer phase residual differs from the frozen differential prediction by more than 3σ, i.e. if |residual| > 1.553948e-09 fractional phase.",
+      "status": "reference_row_detectable_under_current_proxy",
+      "notes": "This row is retained as a non-P-unique reference channel. Under the frozen apex-height envelope, current precision is already inside the required 1σ band."
+    },
+    {
+      "row_id": "optical_clock_main_399m",
+      "source_step": "8.7.55.1.3",
+      "channel_group": "optical_clock",
+      "channel_role": "earth_leveling_main",
+      "observable": "delta(Delta f/f)",
+      "case_id": "earth_399m_clock_leveling",
+      "differential_prediction_value": -6.053535895941459e-23,
+      "differential_prediction_unit": "delta(f/f)",
+      "required_precision_1sigma_for_3sigma": 2.017845298647153e-23,
+      "precision_unit": "abs_delta(f/f)",
+      "current_precision": 2.892890145739408e-17,
+      "current_over_required": 1433653.0891039672,
+      "detectable_under_current": false,
+      "reject_gate_3sigma": "Reject if the measured optical-clock differential redshift residual differs from the frozen differential prediction by more than 3σ, i.e. if |residual| > 2.017845e-23 abs delta(f/f).",
+      "status": "current_optical_clock_far_from_detection",
+      "notes": "Main Earth Δh≈399 m chronometric-leveling row. Current precision is 1.43e6x above the 1σ requirement and even the 1e-21 roadmap target remains 49.6x above it."
+    },
+    {
+      "row_id": "optical_clock_solar_lever_arm",
+      "source_step": "8.7.55.1.3",
+      "channel_group": "optical_clock",
+      "channel_role": "future_lever_arm_case",
+      "observable": "delta(Delta f/f)",
+      "case_id": "sun_0p05au_to_1au",
+      "differential_prediction_value": -3.8874306884645403e-14,
+      "differential_prediction_unit": "delta(f/f)",
+      "required_precision_1sigma_for_3sigma": 1.2958102294881801e-14,
+      "precision_unit": "abs_delta(f/f)",
+      "current_precision": 2.892890145739408e-17,
+      "current_over_required": 0.0022324952218366447,
+      "detectable_under_current": true,
+      "reject_gate_3sigma": "Reject if the measured optical-clock differential redshift residual differs from the frozen differential prediction by more than 3σ, i.e. if |residual| > 1.295810e-14 abs delta(f/f).",
+      "status": "lever_arm_geometry_detectable_with_current_clock_precision",
+      "notes": "This is the strongest frozen lever-arm case from 8.7.55.1.3. The geometry is not a current Earth-leveling setup, but the required precision is already looser than today's clock benchmark."
+    }
+  ],
+  "summary": {
+    "row_count": 5,
+    "measurable_row_count": 4,
+    "rows_without_current_measurement_count": 1,
+    "current_detectable_count": 2,
+    "current_undetectable_count": 2,
+    "current_detectable_row_ids": [
+      "atom_interferometer_reference_apex_envelope",
+      "optical_clock_solar_lever_arm"
+    ],
+    "current_undetectable_row_ids": [
+      "atom_interferometer_p_unique_local_arm",
+      "optical_clock_main_399m"
+    ],
+    "hardest_current_margin_row_id": "optical_clock_main_399m",
+    "hardest_current_margin_over_required": 1433653.0891039672,
+    "best_current_margin_row_id": "optical_clock_solar_lever_arm",
+    "best_current_margin_over_required": 0.0022324952218366447,
+    "structural_parity_case_required_ratio": 3.2696756847457717e-21,
+    "optical_clock_main_target_1e_19_over_required": 4955.781301323948,
+    "optical_clock_main_target_1e_20_over_required": 495.57813013239485,
+    "optical_clock_main_target_1e_21_over_required": 49.55781301323948,
+    "best_future_case_id": "sun_0p05au_to_1au"
+  },
+  "decision": {
+    "overall_status": "differential_prediction_table_fixed",
+    "new_free_parameters_introduced": false,
+    "p_unique_detectable_under_current": false,
+    "reference_row_detectable_under_current": true,
+    "optical_clock_main_detectable_under_current": false,
+    "best_future_case_id": "sun_0p05au_to_1au",
+    "next_required_steps": [
+      "8.7.55.2",
+      "8.7.54.23"
+    ]
+  }
+}

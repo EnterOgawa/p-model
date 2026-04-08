@@ -1,0 +1,126 @@
+{
+  "generated_utc": "2026-03-13T08:57:37.604924+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.49.7",
+    "name": "Part IV quantum closeout sync pack"
+  },
+  "inputs": {
+    "quantum_v11_plus_scope_closeout_audit_metrics_json": "output/public/quantum/quantum_v11_plus_scope_closeout_audit_metrics.json",
+    "derivation_observable_chain_lock_audit_watch_policy_json": "output/public/quantum/derivation_observable_chain_lock_audit_watch_policy.json",
+    "derivation_parameter_falsification_pack_json": "output/public/quantum/derivation_parameter_falsification_pack.json",
+    "quantum_connection_born_ab_gate_json": "output/public/quantum/quantum_connection_born_ab_gate.json"
+  },
+  "intent": "Make the Part IV quantum verification materials read the v1.1+ closeout boundary explicitly, while preserving the older route-A operational guards as legacy diagnostics.",
+  "assumptions": [
+    "The v1.1+ closeout audit is the canonical boundary statement for Born / measurement / entanglement / quantum-information minimal connection.",
+    "Bell-pairing-only shared-KPI rejects remain nonblocking if the frozen watch policy demotes them to watch.",
+    "Protocol-level scope-out items are not upgraded to blocking failures inside Part IV."
+  ],
+  "summary": {
+    "closeout_overall_status": "completed_scope_fixed",
+    "born_closeout_status": "p_specific_derivation_closed_common_probability_residual",
+    "measurement_closeout_status": "effective_derivation_closed_statmech_residual",
+    "entanglement_closeout_status": "effective_audit_closed_selection_watch_retained",
+    "quantum_information_status": "minimal_connection_entry_fixed",
+    "quantum_information_protocol_status": "standard_hilbert_math_scope_out",
+    "single_event_probability_status": "residual_not_p_specific",
+    "irreversibility_status": "residual_not_p_specific",
+    "remaining_blocking_items_n": 0,
+    "shared_gate_policy": "watch_if_bell_pairing_only",
+    "shared_gate_policy_demoted_to_watch": true,
+    "legacy_route_a_gate": "A_continue",
+    "legacy_transition": "A_stay",
+    "selection_watch_active_dataset_count": 5,
+    "measurement_tau50_over_tauD": 1.3215347470616872,
+    "measurement_branch_reversal_max": 0.06770833333333333,
+    "entanglement_min_chsh_visibility_proxy": 0.8204285100624966,
+    "quantum_information_exact_proxy_pass_count": 1,
+    "quantum_information_entry_fixed_consistency_count": 2
+  },
+  "rows": [
+    {
+      "row_id": "born_closeout",
+      "status": "p_specific_derivation_closed_common_probability_residual",
+      "gate_snapshot": "A_continue/A_stay",
+      "closeout_status": "p_specific_derivation_closed_common_probability_residual",
+      "representative_metric_name": "born_max_flat_field_frequency_error",
+      "representative_metric_value": 0.0,
+      "note": "Born detection probability is fixed by the P-specific route; the only remaining residual is single-event probability foundations, not a P-specific failure."
+    },
+    {
+      "row_id": "measurement_closeout",
+      "status": "effective_derivation_closed_statmech_residual",
+      "gate_snapshot": "pointer_basis + conditioning",
+      "closeout_status": "effective_derivation_closed_statmech_residual",
+      "representative_metric_name": "measurement_tau50_over_tauD",
+      "representative_metric_value": 1.3215347470616872,
+      "note": "Measurement update shape is fixed effectively; irreversibility remains a non-P-specific residual."
+    },
+    {
+      "row_id": "entanglement_closeout",
+      "status": "effective_audit_closed_selection_watch_retained",
+      "gate_snapshot": "selection_watch_retained",
+      "closeout_status": "effective_audit_closed_selection_watch_retained",
+      "representative_metric_name": "entanglement_min_chsh_visibility_proxy",
+      "representative_metric_value": 0.8204285100624966,
+      "note": "Bell dataset connection and pair-decoherence bound are closed while keeping selection watch nonblocking."
+    },
+    {
+      "row_id": "quantum_information_closeout",
+      "status": "minimal_connection_entry_fixed",
+      "gate_snapshot": "minimal_connection_entry_fixed",
+      "closeout_status": "minimal_connection_entry_fixed",
+      "representative_metric_name": "quantum_information_min_log10_required_thermal_ratio",
+      "representative_metric_value": -23.56787885848701,
+      "note": "Quantum information is promoted from full scope-out to minimal connection: dephasing is primary, amplitude-damping origin is fixed, and depolarizing remains subleading."
+    },
+    {
+      "row_id": "part4_sync_policy",
+      "status": "pass",
+      "gate_snapshot": "A_continue/A_stay",
+      "closeout_status": "completed_scope_fixed",
+      "representative_metric_name": "measurement_branch_reversal_max",
+      "representative_metric_value": 0.06770833333333333,
+      "note": "Part IV reads legacy chain guards through the frozen watch-policy demotion for Bell-pairing-only shared-KPI rejects."
+    }
+  ],
+  "decision": {
+    "part4_quantum_sync_status": "pass",
+    "closeout_overall_status": "completed_scope_fixed",
+    "closeout_remaining_blocking_items_n": 0,
+    "selection_watch_policy": "nonblocking_watch_retained",
+    "legacy_route_status": "A_continue/A_stay",
+    "shared_gate_policy": "watch_if_bell_pairing_only",
+    "quantum_information_status": "minimal_connection_entry_fixed",
+    "quantum_information_protocol_status": "standard_hilbert_math_scope_out",
+    "single_event_probability_status": "residual_not_p_specific",
+    "nonblocking_residual": "residual_not_p_specific",
+    "nonblocking_residuals": [
+      "single_event_probability_foundations_not_p_specific",
+      "thermodynamic_limit_irreversibility_not_p_specific"
+    ],
+    "out_of_scope_items": [
+      "quantum_information_protocol_mathematics"
+    ],
+    "passes": {
+      "closeout_scope_fixed": true,
+      "closeout_overall_completed": true,
+      "no_remaining_blocking_items": true,
+      "born_ab_gate_continue": true,
+      "derivation_pack_gate_continue": true,
+      "derivation_pack_transition_stay": true,
+      "chain_watch_policy_continue": true,
+      "chain_watch_policy_transition_stay": true,
+      "shared_reject_demoted_to_watch": true,
+      "selection_watch_preserved": true,
+      "single_event_probability_classified_nonblocking": true,
+      "irreversibility_classified_nonblocking": true,
+      "quantum_information_minimal_connection_fixed": true,
+      "quantum_information_protocol_scope_preserved": true
+    },
+    "next_required_steps": [
+      "8.7.52.6"
+    ]
+  }
+}

@@ -1,10 +1,13 @@
 {
-  "generated_utc": "2026-03-08T05:22:26.552615+00:00",
+  "generated_utc": "2026-03-14T06:42:21.388195+00:00",
   "script": "scripts/theory/pmodel_core_mapping_overview.py",
   "outputs": {
-    "png_canon": "C:\\develop\\waveP\\output\\theory\\pmodel_core_mapping_overview.png",
-    "png_private": "C:\\develop\\waveP\\output\\private\\theory\\pmodel_core_mapping_overview.png",
-    "png_public": "C:\\develop\\waveP\\output\\public\\theory\\pmodel_core_mapping_overview.png",
+    "png_canon": "C:/develop/waveP/output/theory/pmodel_core_mapping_overview.png",
+    "png_private": "C:/develop/waveP/output/private/theory/pmodel_core_mapping_overview.png",
+    "png_public": "C:/develop/waveP/output/public/theory/pmodel_core_mapping_overview.png",
+    "pdf_canon": "C:/develop/waveP/output/theory/pmodel_core_mapping_overview.pdf",
+    "pdf_private": "C:/develop/waveP/output/private/theory/pmodel_core_mapping_overview.pdf",
+    "pdf_public": "C:/develop/waveP/output/public/theory/pmodel_core_mapping_overview.pdf",
     "metrics_json_canon": "C:\\develop\\waveP\\output\\theory\\pmodel_core_mapping_overview_metrics.json",
     "metrics_json_private": "C:\\develop\\waveP\\output\\private\\theory\\pmodel_core_mapping_overview_metrics.json",
     "metrics_json_public": "C:\\develop\\waveP\\output\\public\\theory\\pmodel_core_mapping_overview_metrics.json"

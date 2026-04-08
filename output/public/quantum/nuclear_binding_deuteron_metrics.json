@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-03-04T15:31:21.345743+00:00",
+  "generated_utc": "2026-04-08T09:13:07.593019+00:00",
   "phase": 7,
   "step": "7.9",
   "sources": [
@@ -66,6 +66,7 @@
     ]
   },
   "outputs": {
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_deuteron.pdf",
     "png": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_deuteron.png"
   },
   "notes": [

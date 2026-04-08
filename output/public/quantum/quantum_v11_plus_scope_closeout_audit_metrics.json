@@ -1,0 +1,147 @@
+{
+  "generated_utc": "2026-03-13T08:57:31.042335+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.50.7",
+    "name": "Quantum v1.1+ scope closeout audit"
+  },
+  "inputs": {
+    "born_phase_diffusion_metrics_json": "output/public/quantum/born_phase_diffusion_audit_metrics.json",
+    "born_linear_detector_response_metrics_json": "output/public/quantum/born_linear_detector_response_audit_metrics.json",
+    "measurement_pointer_basis_grounding_metrics_json": "output/public/quantum/quantum_measurement_pointer_basis_grounding_audit_metrics.json",
+    "measurement_conditioning_kraus_metrics_json": "output/public/quantum/quantum_measurement_conditioning_kraus_audit_metrics.json",
+    "measurement_dynamic_collapse_stability_audit_json": "output/public/quantum/quantum_measurement_dynamic_collapse_stability_audit.json",
+    "entanglement_source_dynamics_metrics_json": "output/public/quantum/entanglement_source_dynamics_three_wave_mixing_metrics.json",
+    "entanglement_bell_dataset_connection_metrics_json": "output/public/quantum/entanglement_bell_dataset_connection_audit_metrics.json",
+    "quantum_information_direct_p_evaluation_metrics_json": "output/public/quantum/quantum_information_direct_p_evaluation_metrics.json",
+    "quantum_information_error_channel_mapping_metrics_json": "output/public/quantum/quantum_information_error_channel_mapping_metrics.json"
+  },
+  "intent": "Freeze the v1.1+ quantum closeout boundary by separating the already-closed P-specific derivations, the quantum-information minimal connection, the common probability/statistical residuals, and the remaining protocol-level scope-out items.",
+  "assumptions": [
+    "A1/A2/C1/C2/B1/B2/B3 are already frozen and become the sole evidence base for this closeout.",
+    "Single-event probability assignment is treated as a common foundations-of-probability residual rather than a P-model-specific gap.",
+    "Microscopic irreversibility is not re-derived here; only the coarse-grained one-way behavior of the reduced detector record is audited.",
+    "Selection watch remains a diagnostic guard and is not optimized away.",
+    "Quantum-information protocol mathematics remains standard Hilbert-space structure and is not rederived in P language."
+  ],
+  "formulas": {
+    "born_closeout_rule": "A1 + A2 + C1 + C2 => p(x) propto |psi(x)|^2 is fixed by the P-specific route; the remaining single-event issue belongs to common probability foundations.",
+    "measurement_scope_rule": "r_coh << 1, tau50/tauD = O(1), pointer consensus -> 1, and branch reversal << 1 support effective one-way measurement dynamics.",
+    "irreversibility_boundary": "The unresolved issue is not the form of the update rule but why Tr_E looks irreversible in the thermodynamic limit (Loschmidt/Poincare class).",
+    "entanglement_scope_rule": "B1 + B2 + B3 freeze source dynamics, Bell-dataset connection, and integrated pair-dephasing bounds while preserving selection watch.",
+    "quantum_information_minimal_connection_rule": "Gamma_deph = omega_*^2 (k_B T_env / chi_P) tau_free fixes T2 / gate-loss / pair-depth at minimal-connection level, while C1 fixes amplitude-damping origin and depolarizing stays subleading."
+  },
+  "summary": {
+    "born_probe_rows_with_phase_mixing": 20,
+    "born_probe_rows_total": 36,
+    "born_critical_thermal_ratio_min": 1.0000000000000001e-24,
+    "born_critical_thermal_ratio_max": 0.001,
+    "born_max_flat_field_frequency_error": 0.0,
+    "born_max_relative_nonlinear_correction_bound": 0.004900000000000001,
+    "measurement_coherence_suppression_ratio": 0.027557990132461064,
+    "measurement_tau_D_s": 0.02996515989310687,
+    "measurement_tau50_reference_s": 0.0396,
+    "measurement_tau50_over_tauD": 1.3215347470616872,
+    "measurement_tau50_cv": 0.03802155547208065,
+    "measurement_pointer_consensus_min": 0.953125,
+    "measurement_branch_reversal_max": 0.06770833333333333,
+    "measurement_epsilon_response_nominal": 0.034375000000000044,
+    "measurement_epsilon_response_upper_bound": 0.07499999999999996,
+    "measurement_stability_run_count": 18,
+    "entanglement_min_effective_schmidt_rank": 1.1548528626963794,
+    "entanglement_min_chsh_visibility_proxy": 0.8204285100624966,
+    "entanglement_max_pair_decoherence_budget": 0.1979285019707404,
+    "entanglement_selection_watch_active_dataset_count": 5,
+    "quantum_information_exact_proxy_pass_count": 1,
+    "quantum_information_entry_fixed_consistency_count": 2,
+    "quantum_information_min_log10_required_thermal_ratio": -23.56787885848701,
+    "quantum_information_max_log10_required_thermal_ratio": -9.425663509547254,
+    "quantum_information_error_origin_status": "minimal_connection_error_origin_fixed",
+    "quantum_information_dominant_dephasing_count": 3
+  },
+  "scope": {
+    "closed_in_scope": [
+      "Born detection probability p(x) propto |psi(x)|^2",
+      "pointer basis grounding as detector stable modes",
+      "diagonal Lueders/Kraus recovery from decoherence plus conditioning",
+      "entanglement source dynamics via three-wave mixing",
+      "Bell-dataset connection and integrated pair-decoherence bound"
+    ],
+    "minimal_connection_in_scope": [
+      "quantum-information T2 / gate-fidelity / pair-depth connection from Gamma_deph",
+      "dephasing-primary, amplitude-origin-fixed, depolarizing-not-primary error-channel map"
+    ],
+    "nonblocking_residuals": [
+      "single_event_probability_foundations_not_p_specific",
+      "thermodynamic_limit_irreversibility_not_p_specific"
+    ],
+    "out_of_scope": [
+      "quantum_information_protocol_mathematics"
+    ]
+  },
+  "routes": [
+    {
+      "route_id": "born",
+      "closeout_status": "p_specific_derivation_closed_common_probability_residual",
+      "representative_metric_name": "max_flat_field_frequency_error",
+      "representative_metric_value": 0.0,
+      "support_metric_name": "max_relative_nonlinear_correction_bound",
+      "support_metric_value": 0.004900000000000001,
+      "residual_scope": "single_event_probability_foundations_not_p_specific"
+    },
+    {
+      "route_id": "measurement",
+      "closeout_status": "effective_derivation_closed_statmech_residual",
+      "representative_metric_name": "coherence_suppression_ratio",
+      "representative_metric_value": 0.027557990132461064,
+      "support_metric_name": "tau50_cv",
+      "support_metric_value": 0.03802155547208065,
+      "residual_scope": "thermodynamic_limit_irreversibility_not_p_specific"
+    },
+    {
+      "route_id": "entanglement",
+      "closeout_status": "effective_audit_closed_selection_watch_retained",
+      "representative_metric_name": "min_chsh_visibility_proxy",
+      "representative_metric_value": 0.8204285100624966,
+      "support_metric_name": "max_chsh_pair_decoherence_budget",
+      "support_metric_value": 0.1979285019707404,
+      "residual_scope": "selection_watch_retained_nonblocking"
+    }
+  ],
+  "decision": {
+    "born_closeout_status": "p_specific_derivation_closed_common_probability_residual",
+    "measurement_closeout_status": "effective_derivation_closed_statmech_residual",
+    "entanglement_closeout_status": "effective_audit_closed_selection_watch_retained",
+    "quantum_information_status": "minimal_connection_entry_fixed",
+    "quantum_information_protocol_status": "standard_hilbert_math_scope_out",
+    "single_event_probability_status": "residual_not_p_specific",
+    "irreversibility_status": "residual_not_p_specific",
+    "overall_closeout_status": "completed_scope_fixed",
+    "v11_plus_scope_boundary_fixed": true,
+    "full_first_principles_derivation": false,
+    "passes": {
+      "born_a1_closed": true,
+      "born_a2_closed": true,
+      "measurement_c1_closed": true,
+      "measurement_c2_closed": true,
+      "measurement_env_seed_stability_confirmed": true,
+      "entanglement_b1_closed": true,
+      "entanglement_b2_closed": true,
+      "entanglement_b3_closed": true,
+      "selection_watch_preserved": true,
+      "no_new_pmodel_free_parameters": true,
+      "quantum_information_minimal_connection_fixed": true
+    },
+    "remaining_blocking_items": [],
+    "nonblocking_residuals": [
+      "single_event_probability_foundations_not_p_specific",
+      "thermodynamic_limit_irreversibility_not_p_specific"
+    ],
+    "out_of_scope_items": [
+      "quantum_information_protocol_mathematics"
+    ],
+    "next_required_steps": [
+      "8.7.52.6"
+    ]
+  }
+}

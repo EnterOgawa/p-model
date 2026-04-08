@@ -1,7 +1,7 @@
 {
-  "generated_utc": "2026-03-08T04:41:00.853170+00:00",
+  "generated_utc": "2026-03-13T09:08:55.956712+00:00",
   "phase": 8,
-  "step": "8.7.22.8",
+  "step": "8.7.22.22",
   "title": "Weak-interaction beta-decay Route A/B quantitative audit (DoF-equalized + holdout + CKM update watchpack)",
   "inputs": {
     "beta_qvalue_full_csv": {
@@ -872,14 +872,14 @@
         "exists": true,
         "path": "output/public/quantum/weak_interaction_ckm_first_row_audit.json",
         "size_bytes": 2358,
-        "mtime_utc": "2026-03-08T04:26:26.675735+00:00",
+        "mtime_utc": "2026-03-12T10:16:48.928293+00:00",
         "sha256": "44B8EB18107088F1D4D93C9D67A484F15CE95952C06B09D0BA6B530D43021EC6"
       },
       "previous_input_signature": {
         "exists": true,
         "path": "output/public/quantum/weak_interaction_ckm_first_row_audit.json",
         "size_bytes": 2358,
-        "mtime_utc": "2026-03-08T04:26:26.675735+00:00",
+        "mtime_utc": "2026-03-12T10:16:48.928293+00:00",
         "sha256": "44B8EB18107088F1D4D93C9D67A484F15CE95952C06B09D0BA6B530D43021EC6"
       },
       "update_event_detected": false,
@@ -934,7 +934,7 @@
   },
   "notes": [
     "Legacy rows keep pre-existing all-channel/per-channel gate metrics for continuity.",
-    "Step 8.7.22.8 keeps DoF-equalized calibration (same 2-parameter affine map) for Route A/B.",
+    "Step 8.7.22.22 keeps DoF-equalized calibration (same 2-parameter affine map) for Route A/B.",
     "Holdout is nuclide-level deterministic split and is used as the primary hard/watch gate.",
     "Overfit guard uses p95 gap (holdout-train) for Qβ and logft-proxy.",
     "CKM gate and PMNS gate are loaded when their audit JSONs are available.",

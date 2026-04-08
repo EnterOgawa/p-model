@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-03-12T03:01:42.726960+00:00",
+  "generated_utc": "2026-04-06T11:05:22.596776+00:00",
   "inputs": {
     "label_count_scanned": 14,
     "label_count_missing": 0
@@ -61,7 +61,7 @@
   "record_level_media_state_extractable": true,
   "parser_media_hook_mode": "external_csp_join_ready",
   "external_csp_availability": {
-    "generated_utc": "2026-03-12T03:01:42.726931+00:00",
+    "generated_utc": "2026-04-06T11:05:22.596752+00:00",
     "required_mediums": [
       "IONCAL",
       "TROPCAL",

@@ -1,0 +1,353 @@
+{
+  "generated_utc": "2026-03-20T11:50:39.690200+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.55.3.122",
+    "name": "Post-Newtonian rotation-curve profile quantification"
+  },
+  "inputs": {
+    "sparc_rotation_curve_points_csv": "output/public/cosmology/sparc_rotation_curve_pmodel_audit_points.csv",
+    "sparc_rotation_curve_galaxy_summary_csv": "output/public/cosmology/sparc_rotation_curve_pmodel_audit_galaxy_summary.csv",
+    "mass_origin_direct_kappa_bridge_statement_freeze_json": "output/public/quantum/mass_origin_direct_kappa_bridge_statement_freeze_metrics.json"
+  },
+  "intent": "Quantify the radial profile associated with the already-frozen SPARC correction by comparing baryon-only and P-model corrected rotation curves across the radius and low-acceleration windows.",
+  "formulas": {
+    "delta_v_rot": "Delta V_rot(r) = V_P(r) - V_bar(r)",
+    "delta_g_rot": "Delta g_rot(r) = (V_P(r)^2 - V_bar(r)^2)/r",
+    "pn_window_rule": "use the operational low-acceleration window g_bar <= a0_derived as the post-Newtonian relevance proxy"
+  },
+  "rows": [
+    {
+      "row_id": "postnewtonian_rotation_profile_quantified",
+      "status": "pass",
+      "metric": "post-Newtonian rotation profile quantified",
+      "value": 1.0,
+      "note": "The radial profile is frozen from the existing SPARC point table."
+    },
+    {
+      "row_id": "postnewtonian_low_accel_window_available",
+      "status": "pass",
+      "metric": "low-acceleration post-Newtonian window available",
+      "value": 2607.0,
+      "note": "The direct a0 scale defines a non-empty low-acceleration window in the SPARC point table."
+    },
+    {
+      "row_id": "postnewtonian_global_residual_improvement_fraction",
+      "status": "pass",
+      "metric": "global residual improvement fraction",
+      "value": 0.7679150693010911,
+      "note": "More than half of the points move closer to observation under the P-model corrected curve."
+    }
+  ],
+  "summary": {
+    "point_count": 3391,
+    "galaxy_count": 175,
+    "low_accel_point_count": 2607,
+    "low_accel_point_fraction": 0.768799764081392,
+    "global_mean_delta_v_rot_km_s": 13.209183817218921,
+    "global_mean_delta_accel_m_s2": -8.011436982176422e-11,
+    "global_fraction_points_improved": 0.7679150693010911,
+    "low_accel_mean_delta_v_rot_km_s": 30.136195335364153,
+    "low_accel_mean_delta_accel_m_s2": 1.7880464630156973e-11,
+    "low_accel_fraction_points_improved": 0.761795166858458,
+    "median_delta_chi2_baryon_minus_pmodel_by_galaxy": 478.4336882422671,
+    "radial_profile_bins": [
+      {
+        "bin": "0_to_2_kpc",
+        "radius_kpc_min": 0.0,
+        "radius_kpc_max": 2.0,
+        "count": 707,
+        "mean_delta_v_rot_km_s": -8.719714384005048,
+        "mean_delta_accel_m_s2": -2.9894080296576184e-10,
+        "median_abs_resid_baryon_km_s": 11.42120968896588,
+        "median_abs_resid_pmodel_km_s": 8.777365349273708,
+        "fraction_points_improved": 0.6265912305516266
+      },
+      {
+        "bin": "2_to_5_kpc",
+        "radius_kpc_min": 2.0,
+        "radius_kpc_max": 5.0,
+        "count": 808,
+        "mean_delta_v_rot_km_s": -2.323581958373209,
+        "mean_delta_accel_m_s2": -7.645885024147387e-11,
+        "median_abs_resid_baryon_km_s": 28.02911896335042,
+        "median_abs_resid_pmodel_km_s": 10.666063901510867,
+        "fraction_points_improved": 0.8032178217821783
+      },
+      {
+        "bin": "5_to_10_kpc",
+        "radius_kpc_min": 5.0,
+        "radius_kpc_max": 10.0,
+        "count": 827,
+        "mean_delta_v_rot_km_s": 7.508530277713684,
+        "mean_delta_accel_m_s2": -1.91452457433309e-11,
+        "median_abs_resid_baryon_km_s": 30.94023928440356,
+        "median_abs_resid_pmodel_km_s": 11.694160642019227,
+        "fraction_points_improved": 0.7799274486094316
+      },
+      {
+        "bin": "10_to_20_kpc",
+        "radius_kpc_min": 10.0,
+        "radius_kpc_max": 20.0,
+        "count": 566,
+        "mean_delta_v_rot_km_s": 27.97972917271663,
+        "mean_delta_accel_m_s2": 1.2698208712893017e-11,
+        "median_abs_resid_baryon_km_s": 35.55805148120942,
+        "median_abs_resid_pmodel_km_s": 12.213911465639633,
+        "fraction_points_improved": 0.773851590106007
+      },
+      {
+        "bin": "20plus_kpc",
+        "radius_kpc_min": 20.0,
+        "radius_kpc_max": null,
+        "count": 483,
+        "mean_delta_v_rot_km_s": 63.74441690397445,
+        "mean_delta_accel_m_s2": 2.092754187275197e-11,
+        "median_abs_resid_baryon_km_s": 64.68686158133227,
+        "median_abs_resid_pmodel_km_s": 18.153186724935807,
+        "fraction_points_improved": 0.8881987577639752
+      }
+    ],
+    "postnewtonian_window_bins": [
+      {
+        "bin": "0_to_2_kpc",
+        "radius_kpc_min": 0.0,
+        "radius_kpc_max": 2.0,
+        "count": 495,
+        "mean_delta_v_rot_km_s": 9.456474784054366,
+        "mean_delta_accel_m_s2": 1.648243224224022e-11,
+        "median_abs_resid_baryon_km_s": 6.934132887256929,
+        "median_abs_resid_pmodel_km_s": 6.446483628581696,
+        "fraction_points_improved": 0.5151515151515151
+      },
+      {
+        "bin": "2_to_5_kpc",
+        "radius_kpc_min": 2.0,
+        "radius_kpc_max": 5.0,
+        "count": 559,
+        "mean_delta_v_rot_km_s": 19.248072105560464,
+        "mean_delta_accel_m_s2": 1.7947521508409096e-11,
+        "median_abs_resid_baryon_km_s": 21.46670421016035,
+        "median_abs_resid_pmodel_km_s": 8.795808276105511,
+        "fraction_points_improved": 0.7674418604651163
+      },
+      {
+        "bin": "5_to_10_kpc",
+        "radius_kpc_min": 5.0,
+        "radius_kpc_max": 10.0,
+        "count": 553,
+        "mean_delta_v_rot_km_s": 27.885032353694132,
+        "mean_delta_accel_m_s2": 1.695263946142254e-11,
+        "median_abs_resid_baryon_km_s": 31.79340130910412,
+        "median_abs_resid_pmodel_km_s": 9.55042404696568,
+        "fraction_points_improved": 0.8426763110307414
+      },
+      {
+        "bin": "10_to_20_kpc",
+        "radius_kpc_min": 10.0,
+        "radius_kpc_max": 20.0,
+        "count": 517,
+        "mean_delta_v_rot_km_s": 32.71848676589289,
+        "mean_delta_accel_m_s2": 1.729224460542315e-11,
+        "median_abs_resid_baryon_km_s": 35.61768234097694,
+        "median_abs_resid_pmodel_km_s": 12.105906466710636,
+        "fraction_points_improved": 0.7872340425531915
+      },
+      {
+        "bin": "20plus_kpc",
+        "radius_kpc_min": 20.0,
+        "radius_kpc_max": null,
+        "count": 483,
+        "mean_delta_v_rot_km_s": 63.74441690397445,
+        "mean_delta_accel_m_s2": 2.092754187275197e-11,
+        "median_abs_resid_baryon_km_s": 64.68686158133227,
+        "median_abs_resid_pmodel_km_s": 18.153186724935807,
+        "fraction_points_improved": 0.8881987577639752
+      }
+    ]
+  },
+  "decision": {
+    "overall_status": "postnewtonian_rotation_curve_profile_quantified",
+    "dark_matter_branch_active": true,
+    "profile_quantification_ready": true,
+    "next_required_artifacts": [
+      "mass_origin_dark_matter_elimination_declaration_gate"
+    ]
+  },
+  "evidence": {
+    "point_row_sample": [
+      {
+        "galaxy": "CamB",
+        "radius_kpc": 0.16,
+        "delta_v_rot_km_s": 4.999855343924837,
+        "delta_accel_m_s2": 1.3335099390211171e-11,
+        "resid_baryon_km_s": -2.0939135642175373,
+        "resid_pmodel_km_s": -7.0937689081423745,
+        "pmodel_improves_residual": false,
+        "gbar_bestfit_pmodel_m_s2": 2.2388417349362413e-12,
+        "in_postnewtonian_window": true
+      },
+      {
+        "galaxy": "F583-1",
+        "radius_kpc": 4.09,
+        "delta_v_rot_km_s": 23.983305049707607,
+        "delta_accel_m_s2": 1.3908558305298812e-11,
+        "resid_baryon_km_s": 37.397057818220205,
+        "resid_pmodel_km_s": 13.413752768512595,
+        "pmodel_improves_residual": true,
+        "gbar_bestfit_pmodel_m_s2": 2.7610688699500044e-12,
+        "in_postnewtonian_window": true
+      },
+      {
+        "galaxy": "NGC1090",
+        "radius_kpc": 22.57,
+        "delta_v_rot_km_s": 53.88883948009217,
+        "delta_accel_m_s2": 2.4228558882060302e-11,
+        "resid_baryon_km_s": 35.38440242779424,
+        "resid_pmodel_km_s": -18.50443705229793,
+        "pmodel_improves_residual": true,
+        "gbar_bestfit_pmodel_m_s2": 1.5049467820610845e-11,
+        "in_postnewtonian_window": true
+      },
+      {
+        "galaxy": "NGC3198",
+        "radius_kpc": 1.93,
+        "delta_v_rot_km_s": 3.0852760480636476,
+        "delta_accel_m_s2": 8.51484626738398e-12,
+        "resid_baryon_km_s": -3.7363222499637487,
+        "resid_pmodel_km_s": -6.821598298027396,
+        "pmodel_improves_residual": false,
+        "gbar_bestfit_pmodel_m_s2": 6.27219568314829e-11,
+        "in_postnewtonian_window": true
+      },
+      {
+        "galaxy": "NGC4183",
+        "radius_kpc": 12.31,
+        "delta_v_rot_km_s": 46.109420965658686,
+        "delta_accel_m_s2": 2.4173542765925405e-11,
+        "resid_baryon_km_s": 34.484543064815995,
+        "resid_pmodel_km_s": -11.62487790084269,
+        "pmodel_improves_residual": true,
+        "gbar_bestfit_pmodel_m_s2": 1.0664733713371384e-11,
+        "in_postnewtonian_window": true
+      },
+      {
+        "galaxy": "NGC6503",
+        "radius_kpc": 22.03,
+        "delta_v_rot_km_s": 60.14814565449041,
+        "delta_accel_m_s2": 1.5138321929123297e-11,
+        "resid_baryon_km_s": 59.52987845695667,
+        "resid_pmodel_km_s": -0.6182671975337399,
+        "pmodel_improves_residual": true,
+        "gbar_bestfit_pmodel_m_s2": 3.0293224038854713e-12,
+        "in_postnewtonian_window": true
+      },
+      {
+        "galaxy": "UGC02916",
+        "radius_kpc": 3.17,
+        "delta_v_rot_km_s": -65.68679826293146,
+        "delta_accel_m_s2": -3.8845716521371313e-10,
+        "resid_baryon_km_s": -112.07440938950731,
+        "resid_pmodel_km_s": -46.38761112657585,
+        "pmodel_improves_residual": true,
+        "gbar_bestfit_pmodel_m_s2": 6.093729390012075e-10,
+        "in_postnewtonian_window": false
+      },
+      {
+        "galaxy": "UGC04499",
+        "radius_kpc": 1.82,
+        "delta_v_rot_km_s": 14.71055109144612,
+        "delta_accel_m_s2": 2.2109563780133557e-11,
+        "resid_baryon_km_s": 10.25229060612449,
+        "resid_pmodel_km_s": -4.458260485321631,
+        "pmodel_improves_residual": true,
+        "gbar_bestfit_pmodel_m_s2": 1.2672548352491485e-11,
+        "in_postnewtonian_window": true
+      },
+      {
+        "galaxy": "UGC06787",
+        "radius_kpc": 9.09,
+        "delta_v_rot_km_s": -7.507315888205113,
+        "delta_accel_m_s2": -1.1644809667984826e-11,
+        "resid_baryon_km_s": 31.709841930554944,
+        "resid_pmodel_km_s": 39.21715781876006,
+        "pmodel_improves_residual": false,
+        "gbar_bestfit_pmodel_m_s2": 1.0089194338597062e-10,
+        "in_postnewtonian_window": true
+      },
+      {
+        "galaxy": "UGC08837",
+        "radius_kpc": 3.68,
+        "delta_v_rot_km_s": 26.56216074726941,
+        "delta_accel_m_s2": 2.1622319381947106e-11,
+        "resid_baryon_km_s": 13.663495692469127,
+        "resid_pmodel_km_s": -12.898665054800283,
+        "pmodel_improves_residual": true,
+        "gbar_bestfit_pmodel_m_s2": 7.000600697884421e-12,
+        "in_postnewtonian_window": true
+      }
+    ],
+    "galaxy_summary_sample": [
+      {
+        "galaxy": "CamB",
+        "delta_chi2_baryon_minus_pmodel": -216.79813546669422,
+        "chi2_dof_baryon": 2.129517361594334,
+        "chi2_dof_pmodel": 26.218199080115916
+      },
+      {
+        "galaxy": "F565-V2",
+        "delta_chi2_baryon_minus_pmodel": 254.67110193892358,
+        "chi2_dof_baryon": 37.801753931549,
+        "chi2_dof_pmodel": 1.4201679402742016
+      },
+      {
+        "galaxy": "NGC0100",
+        "delta_chi2_baryon_minus_pmodel": 478.4336882422671,
+        "chi2_dof_baryon": 24.822321467565093,
+        "chi2_dof_pmodel": 2.039764884599991
+      },
+      {
+        "galaxy": "NGC2998",
+        "delta_chi2_baryon_minus_pmodel": 1419.2951687315217,
+        "chi2_dof_baryon": 119.70663927294989,
+        "chi2_dof_pmodel": 10.530087832063591
+      },
+      {
+        "galaxy": "NGC4068",
+        "delta_chi2_baryon_minus_pmodel": -52.92273217349251,
+        "chi2_dof_baryon": 2.5655696409327686,
+        "chi2_dof_pmodel": 11.38602500318152
+      },
+      {
+        "galaxy": "NGC5985",
+        "delta_chi2_baryon_minus_pmodel": 4113.213450376619,
+        "chi2_dof_baryon": 277.089731609514,
+        "chi2_dof_pmodel": 152.44689977991948
+      },
+      {
+        "galaxy": "UGC01281",
+        "delta_chi2_baryon_minus_pmodel": 422.87200175571854,
+        "chi2_dof_baryon": 17.972271657233204,
+        "chi2_dof_pmodel": 1.057391587004462
+      },
+      {
+        "galaxy": "UGC05253",
+        "delta_chi2_baryon_minus_pmodel": 18390.071816886393,
+        "chi2_dof_baryon": 257.2569871002257,
+        "chi2_dof_pmodel": 5.338195088083289
+      },
+      {
+        "galaxy": "UGC06818",
+        "delta_chi2_baryon_minus_pmodel": 47.52473051093858,
+        "chi2_dof_baryon": 14.21564615584443,
+        "chi2_dof_pmodel": 8.275054841977108
+      },
+      {
+        "galaxy": "UGC07608",
+        "delta_chi2_baryon_minus_pmodel": 158.86313409452214,
+        "chi2_dof_baryon": 21.403823026028473,
+        "chi2_dof_pmodel": 1.5459312642132046
+      }
+    ]
+  }
+}

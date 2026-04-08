@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-03-12T07:07:47.190059+00:00",
+  "generated_utc": "2026-04-06T11:08:48.134663+00:00",
   "kind": "cmb_polarization_phase_audit",
   "decision_rule": {
     "phase_hard_gate": "|Δφ_EE-0.5|<=0.12 and |Δφ_TE-0.25|<=0.12 and TE signs alternate",

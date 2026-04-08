@@ -1,8 +1,7 @@
 {
-  "generated_utc": "2026-02-13T02:59:59.450331+00:00",
+  "generated_utc": "2026-04-08T07:58:00.647567+00:00",
   "argv": [
-    "C:\\develop\\waveP\\scripts\\cassini\\cassini_fig2_overlay.py",
-    "--no-sweep"
+    "scripts/cassini/cassini_fig2_overlay.py"
   ],
   "requested_source": "pds_tdf",
   "effective_source": "pds_tdf_processed_plasma",
@@ -51,7 +50,14 @@
     "tdf_detrend_exclude_inner_days": 5.0,
     "tdf_reconstruct_shapiro": true,
     "tdf_reconstruct_beta": 1.0000105000000001,
-    "tdf_reconstruct_beta_source": "output/theory/frozen_parameters.json:beta"
+    "tdf_reconstruct_beta_source": "output/theory/frozen_parameters.json:beta",
+    "tdf_direct_beta_fit": false,
+    "tdf_direct_beta_ref": 1.0,
+    "tdf_direct_beta_window_days": 10.0,
+    "tdf_direct_beta_use_bin_count_weights": true,
+    "odf_direct_beta_fit": false,
+    "odf_direct_beta_ref": 1.0,
+    "odf_direct_beta_window_days": 10.0
   },
   "inputs": {
     "model_csv": "C:\\develop\\waveP\\output\\private\\cassini\\cassini_shapiro_y_full.csv",
@@ -63,12 +69,20 @@
   "outputs": {
     "points_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_fig2_matched_points.csv",
     "metrics_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_fig2_metrics.csv",
-    "best_beta_by_rmse10": null,
+    "best_beta_by_rmse10": 1.000015000000004,
     "pds_extracted_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_sce1_tdf_extracted.csv",
     "pds_processed_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_sce1_tdf_paperlike.csv",
     "pds_dual_binned_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_sce1_tdf_dual_binned.csv",
     "pds_binned_merged_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_sce1_tdf_binned_merged.csv",
-    "pds_vs_digitized_metrics_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_pds_vs_digitized_metrics.csv"
+    "pds_vs_digitized_metrics_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_pds_vs_digitized_metrics.csv",
+    "tdf_direct_fit_points_csv": null,
+    "tdf_direct_fit_metrics_json": null,
+    "tdf_direct_fit_plot_png": "C:\\develop\\waveP\\output\\cassini\\cassini_tdf_delta_beta_fit.png",
+    "tdf_direct_fit_plot_pdf": "C:\\develop\\waveP\\output\\cassini\\cassini_tdf_delta_beta_fit.pdf",
+    "odf_direct_fit_points_csv": null,
+    "odf_direct_fit_metrics_json": null,
+    "odf_direct_fit_plot_png": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_beta_direct_fit.png",
+    "odf_direct_fit_plot_pdf": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_beta_direct_fit.pdf"
   },
   "counts": {
     "n_observed_points": 193,

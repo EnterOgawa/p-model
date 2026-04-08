@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-03-11T13:56:33.652838+00:00",
+  "generated_utc": "2026-04-08T09:13:05.700148+00:00",
   "phase": 7,
   "step": "7.8",
   "sources": [
@@ -240,7 +240,8 @@
     }
   },
   "outputs": {
-    "png": "C:\\develop\\waveP\\output\\public\\quantum\\qed_vacuum_precision.png"
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\qed_vacuum_precision.png",
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\qed_vacuum_precision.pdf"
   },
   "notes": [
     "This step fixes observables and primary sources; it does not claim a derivation of QED from P-model.",

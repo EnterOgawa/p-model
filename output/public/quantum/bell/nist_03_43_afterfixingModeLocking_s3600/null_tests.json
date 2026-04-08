@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-03-11T13:54:42.408122+00:00",
+  "generated_utc": "2026-04-08T09:12:26.528546+00:00",
   "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
   "supported": true,
   "baseline": {
@@ -28,7 +28,7 @@
   "inputs": {
     "natural_window_frozen_json": {
       "path": "output/public/quantum/bell/nist_03_43_afterfixingModeLocking_s3600/natural_window_frozen.json",
-      "sha256": "8ca258b5f4a117252043121e76963d9f7b19bc40eeec52a3d8f45ef27a2b22d5"
+      "sha256": "c2eaeb8f300835d83704ce7bc92a55c1b345b19c94f82e988e31bc3c743774d3"
     }
   }
 }

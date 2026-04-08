@@ -1,0 +1,76 @@
+{
+  "generated_utc": "2026-03-20T11:50:39.688816+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.55.3.117",
+    "name": "Direct kappa_a background-wave bridge route contract"
+  },
+  "inputs": {
+    "pbg_metrics_json": "output/public/cosmology/cosmology_redshift_pbg_metrics.json",
+    "sparc_rotation_curve_pmodel_audit_json": "output/public/cosmology/sparc_rotation_curve_pmodel_audit_metrics.json",
+    "part2_astrophysics_markdown": "doc/paper/11_part2_astrophysics.md"
+  },
+  "intent": "Freeze the direct no-new-free-parameter route that derives kappa_a from the background P-wave angular-to-cyclic conversion instead of resuming the statement-literal residual loop.",
+  "formulas": {
+    "selected_direct_bridge_route": "background_p_wave_angular_to_cyclic_kappa_a",
+    "kappa_a_formula": "kappa_a = 1/(2*pi)",
+    "fallback_hold_branch": "8.7.55.3.113-.116"
+  },
+  "rows": [
+    {
+      "row_id": "direct_kappa_bridge_route_contract_complete",
+      "status": "pass",
+      "metric": "direct kappa_a bridge route contract complete",
+      "value": 1.0,
+      "note": "The third-route pivot is frozen as a direct background-wave bridge."
+    },
+    {
+      "row_id": "direct_kappa_bridge_new_free_parameter_count",
+      "status": "pass",
+      "metric": "new free parameter count",
+      "value": 0.0,
+      "note": "The adopted direct bridge introduces no new parameter."
+    },
+    {
+      "row_id": "direct_kappa_bridge_fallback_hold_available",
+      "status": "pass",
+      "metric": "fallback hold branch available",
+      "value": 1.0,
+      "note": "The previous terminal-atom loop remains available only if the direct bridge fails or stays ambiguous."
+    }
+  ],
+  "summary": {
+    "selected_direct_bridge_route": "background_p_wave_angular_to_cyclic_kappa_a",
+    "kappa_a_value": 0.15915494309189535,
+    "new_free_parameters_introduced": [],
+    "fallback_hold_branch": "8.7.55.3.113-.116",
+    "split_contract_ready": true
+  },
+  "decision": {
+    "overall_status": "direct_kappa_bridge_route_contract_frozen",
+    "dark_matter_branch_active": true,
+    "resume_old_residual_loop": false,
+    "next_required_artifacts": [
+      "mass_origin_direct_kappa_bridge_source_inventory",
+      "mass_origin_direct_kappa_bridge_statement_freeze"
+    ]
+  },
+  "evidence": {
+    "pbg_definition_line": {
+      "P_factorization": "P(x,t)=P_bg(t) P_local(x)",
+      "redshift_relation": "1+z = P_em/P_obs",
+      "P_bg_model": "P_bg(t) ∝ exp(-H0^(P) (t-t0))",
+      "H0P_definition": "H0^(P) = - (d/dt ln P_bg)|t0"
+    },
+    "part2_operational_line": {
+      "pattern": "a_0=\\kappa_a c H_{0}^{(P)}",
+      "line": 1587,
+      "text": "赤方偏移写像で固定した $H_{0}^{(P)}$（$a_0=\\kappa_a c H_{0}^{(P)}$ の変換に使用）。"
+    },
+    "sparc_note_fixed_kappa_line": {
+      "pattern": "candidate_rar_pbg_a0_fixed_kappa",
+      "line": 79,
+      "text": "として `a0` を **SPARC から fit しない**候補（`candidate_rar_pbg_a0_fixed_kappa`）を freeze-test に追加した。"
+    }
+  }
+}

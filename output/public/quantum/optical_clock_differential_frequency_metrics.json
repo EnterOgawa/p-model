@@ -1,0 +1,188 @@
+{
+  "generated_utc": "2026-03-17T10:57:27.229761+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.55.1.3",
+    "name": "optical clock differential frequency audit"
+  },
+  "inputs": {
+    "optical_clock_metrics_json": "output/public/quantum/optical_clock_chronometric_leveling_metrics.json",
+    "gravity_quantum_delta_json": "output/public/quantum/gravity_quantum_interference_delta_predictions.json"
+  },
+  "intent": "Freeze the P-model-vs-GR optical-clock differential observable at Δh≈399 m, including the weak-field second-order expansion requested in the roadmap, and compare it with current and roadmap precision targets.",
+  "assumptions": [
+    "The main benchmark remains the already-frozen chronometric-leveling case with Δh≈399 m and σ(Δf/f)≈2.89e-17.",
+    "The exact comparison uses the stationary-clock maps exp(-x) and sqrt(1-2x), with x = GM/(c^2 r).",
+    "The second-order comparison is formed by truncating both stationary-clock rates to O(x^2) before taking the altitude ratio.",
+    "Roadmap precision targets 1e-19 / 1e-20 / 1e-21 are used only as sensitivity probes, not as claimed achieved measurements."
+  ],
+  "formulas": {
+    "pmodel_exact": "(dτ/dt)_P = exp(-x)",
+    "gr_exact": "(dτ/dt)_GR = sqrt(1-2x)",
+    "pmodel_second_order": "(dτ/dt)_P ≈ 1 - x + x^2/2",
+    "gr_second_order": "(dτ/dt)_GR ≈ 1 - x - x^2/2",
+    "redshift": "1 + z = (dτ/dt)_high / (dτ/dt)_low",
+    "differential": "delta(Δf/f) = z_P - z_GR",
+    "required_precision": "sigma_abs,1sigma <= |delta(Δf/f)| / 3"
+  },
+  "baseline_clock_case": {
+    "delta_u_geodetic_m2_s2": 3915.88,
+    "delta_u_clock_m2_s2": 3918.1,
+    "height_scale_m": 399.308632407601,
+    "current_sigma_abs_delta_f_over_f": 2.892890145739408e-17
+  },
+  "case_rows": [
+    {
+      "case_id": "earth_399m_clock_leveling",
+      "label": "Earth field, Δh≈399 m chronometric leveling",
+      "r_low_m": 6378137.0,
+      "r_high_m": 6378536.308632407,
+      "x_low": 6.953485068002884e-10,
+      "x_high": 6.953049766473094e-10,
+      "delta_x_linear": 4.3530152979e-14,
+      "z_p_exact": 4.3530152979031745e-14,
+      "z_gr_exact": 4.353015303951933e-14,
+      "delta_z_exact": -6.053535895941459e-23,
+      "delta_z_exact_recomputed": -6.053535895943952e-23,
+      "delta_z_exact_match_abs_error": 2.493223518094072e-35,
+      "z_p_second_order": 4.353015297900095e-14,
+      "z_gr_second_order": 4.3530153039536304e-14,
+      "delta_z_second_order": -6.053535893839359e-23,
+      "p_specific_second_order_term": 9.474265862241128e-28,
+      "gr_specific_second_order_term": 6.053630636497982e-23,
+      "delta_z_exact_over_z_gr_exact": -1.390653483447598e-09,
+      "delta_z_second_order_over_z_gr_second_order": -1.3906534829641487e-09,
+      "required_abs_precision_exact_1sigma_for_3sigma": 2.017845298647153e-23,
+      "required_abs_precision_second_order_1sigma_for_3sigma": 2.017845297946453e-23
+    },
+    {
+      "case_id": "earth_400km_iss_like",
+      "label": "Earth field, ground↔ISS-like 400 km",
+      "r_low_m": 6378137.0,
+      "r_high_m": 6778137.0,
+      "x_low": 6.953485068002884e-10,
+      "x_high": 6.543137205868915e-10,
+      "delta_x_linear": 4.10347862133969e-11,
+      "z_p_exact": 4.103478621423888e-11,
+      "z_gr_exact": 4.1034786269621934e-11,
+      "delta_z_exact": -5.538310103701481e-20,
+      "delta_z_exact_recomputed": -5.538310103817414e-20,
+      "delta_z_exact_match_abs_error": 1.1593376041482015e-30,
+      "z_p_second_order": 4.1034786214238825e-11,
+      "z_gr_second_order": 4.103478626962193e-11,
+      "delta_z_second_order": -5.538310101948127e-20,
+      "p_specific_second_order_term": 8.419268304546713e-22,
+      "gr_specific_second_order_term": 5.622502784993594e-20,
+      "delta_z_exact_over_z_gr_exact": -1.34966222738718e-09,
+      "delta_z_second_order_over_z_gr_second_order": -1.3496622269598954e-09,
+      "required_abs_precision_exact_1sigma_for_3sigma": 1.8461033679004937e-20,
+      "required_abs_precision_second_order_1sigma_for_3sigma": 1.8461033673160425e-20
+    },
+    {
+      "case_id": "sun_0p3au_to_1au",
+      "label": "Solar potential lever arm, 0.3 AU ↔ 1 AU",
+      "r_low_m": 44879361210.0,
+      "r_high_m": 149597870700.0,
+      "x_low": 3.2902095717025956e-08,
+      "x_high": 9.870628715107787e-09,
+      "delta_x_linear": 2.303146700191817e-08,
+      "z_p_exact": 2.303146726714241e-08,
+      "z_gr_exact": 2.3031468252261063e-08,
+      "delta_z_exact": -9.851186448213995e-16,
+      "delta_z_exact_recomputed": -9.851186602380993e-16,
+      "delta_z_exact_match_abs_error": 1.541669979604905e-23,
+      "z_p_second_order": 2.3031467267142402e-08,
+      "z_gr_second_order": 2.303146825226105e-08,
+      "delta_z_second_order": -9.851186486859626e-16,
+      "p_specific_second_order_term": 2.652242323903225e-16,
+      "gr_specific_second_order_term": 1.2503428810762851e-15,
+      "delta_z_exact_over_z_gr_exact": -4.2772724432133743e-08,
+      "delta_z_second_order_over_z_gr_second_order": -4.2772724599928674e-08,
+      "required_abs_precision_exact_1sigma_for_3sigma": 3.283728816071332e-16,
+      "required_abs_precision_second_order_1sigma_for_3sigma": 3.2837288289532085e-16
+    },
+    {
+      "case_id": "sun_0p05au_to_1au",
+      "label": "Solar potential lever arm, 0.05 AU ↔ 1 AU",
+      "r_low_m": 7479893535.0,
+      "r_high_m": 149597870700.0,
+      "x_low": 1.9741257430215572e-07,
+      "x_high": 9.870628715107787e-09,
+      "delta_x_linear": 1.8754194558704792e-07,
+      "z_p_exact": 1.8754196317303975e-07,
+      "z_gr_exact": 1.8754200204735243e-07,
+      "delta_z_exact": -3.8874306884645403e-14,
+      "delta_z_exact_recomputed": -3.887431272866902e-14,
+      "delta_z_exact_match_abs_error": 5.844023618705519e-21,
+      "z_p_second_order": 1.8754196317303843e-07,
+      "z_gr_second_order": 1.875420020473486e-07,
+      "delta_z_second_order": -3.8874310164484765e-14,
+      "p_specific_second_order_term": 1.758599049456642e-14,
+      "gr_specific_second_order_term": 5.646030065905118e-14,
+      "delta_z_exact_over_z_gr_exact": -2.072832030172635e-07,
+      "delta_z_second_order_over_z_gr_second_order": -2.072832205058267e-07,
+      "required_abs_precision_exact_1sigma_for_3sigma": 1.2958102294881801e-14,
+      "required_abs_precision_second_order_1sigma_for_3sigma": 1.2958103388161588e-14
+    }
+  ],
+  "precision_reference_rows": [
+    {
+      "precision_case_id": "current_optical_clock",
+      "label": "current optical clock leveling",
+      "current_precision_abs": 2.892890145739408e-17,
+      "required_precision_abs": 2.017845298647153e-23,
+      "current_over_required": 1433653.0891039672,
+      "detectable": false
+    },
+    {
+      "precision_case_id": "roadmap_target_1e-19",
+      "label": "roadmap target 1e-19",
+      "current_precision_abs": 1e-19,
+      "required_precision_abs": 2.017845298647153e-23,
+      "current_over_required": 4955.781301323948,
+      "detectable": false
+    },
+    {
+      "precision_case_id": "roadmap_target_1e-20",
+      "label": "roadmap target 1e-20",
+      "current_precision_abs": 1e-20,
+      "required_precision_abs": 2.017845298647153e-23,
+      "current_over_required": 495.57813013239485,
+      "detectable": false
+    },
+    {
+      "precision_case_id": "roadmap_target_1e-21",
+      "label": "roadmap target 1e-21",
+      "current_precision_abs": 1e-21,
+      "required_precision_abs": 2.017845298647153e-23,
+      "current_over_required": 49.55781301323948,
+      "detectable": false
+    }
+  ],
+  "summary": {
+    "main_case_exact_delta_z": -6.053535895941459e-23,
+    "main_case_second_order_delta_z": -6.053535893839359e-23,
+    "main_case_exact_vs_second_order_abs_gap": 2.1021001072506213e-32,
+    "main_case_required_abs_precision_exact_1sigma_for_3sigma": 2.017845298647153e-23,
+    "main_case_required_abs_precision_second_order_1sigma_for_3sigma": 2.017845297946453e-23,
+    "current_margin_over_required_exact": 1433653.0891039672,
+    "roadmap_target_1e_19_over_required_exact": 4955.781301323948,
+    "roadmap_target_1e_20_over_required_exact": 495.57813013239485,
+    "roadmap_target_1e_21_over_required_exact": 49.55781301323948,
+    "most_accessible_case_id": "sun_0p05au_to_1au",
+    "most_accessible_required_abs_precision_exact_1sigma_for_3sigma": 1.2958102294881801e-14,
+    "largest_exact_difference_case_id": "sun_0p05au_to_1au",
+    "largest_exact_difference_abs_delta_z": 3.8874306884645403e-14
+  },
+  "decision": {
+    "overall_status": "optical_clock_differential_observable_fixed",
+    "new_free_parameters_introduced": false,
+    "main_case_detectable_under_current": false,
+    "main_case_detectable_under_1e_19": false,
+    "main_case_detectable_under_1e_20": false,
+    "main_case_detectable_under_1e_21": false,
+    "next_required_steps": [
+      "8.7.55.1.4"
+    ]
+  }
+}

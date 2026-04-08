@@ -1,0 +1,80 @@
+{
+  "generated_utc": "2026-04-08T06:24:31.819688+00:00",
+  "figure_profile": {
+    "template": "part2_single_panel_tall",
+    "font_profile": "part5_future_predictions",
+    "figure_size_inches": {
+      "width": 6.6929,
+      "height": 7.55
+    }
+  },
+  "rows": [
+    {
+      "label": "銀河回転曲線\n(独立 sample)",
+      "start": 2026.0,
+      "end": 2032.0,
+      "span": "2026-2032",
+      "score": "Pass"
+    },
+    {
+      "label": "量子計算デコヒーレンス\n(platform benchmark)",
+      "start": 2026.0,
+      "end": 2032.0,
+      "span": "2026-2032",
+      "score": "Reference"
+    },
+    {
+      "label": "重力波偏光\n(LIGO/Virgo/KAGRA)",
+      "start": 2027.0,
+      "end": 2030.0,
+      "span": "2027-2030",
+      "score": "Watch"
+    },
+    {
+      "label": "距離指標前提検証\n(標準サイレン/JWST)",
+      "start": 2027.0,
+      "end": 2030.0,
+      "span": "2027-2030",
+      "score": "Watch"
+    },
+    {
+      "label": "弱場重力量子\n(原子干渉計/時計)",
+      "start": 2026.0,
+      "end": 2035.6,
+      "span": "2026-2035+",
+      "score": "Watch"
+    },
+    {
+      "label": "宇宙論 ln(1+z)\n(DESI/Euclid/Roman)",
+      "start": 2027.0,
+      "end": 2035.0,
+      "span": "2027-2035",
+      "score": "Watch"
+    },
+    {
+      "label": "ブラックホール影\n(ngEHT/BHEX)",
+      "start": 2030.0,
+      "end": 2031.0,
+      "span": "2030-2031",
+      "score": "Watch"
+    },
+    {
+      "label": "マクロ量子干渉\n(MAQRO/OTIMA)",
+      "start": 2035.0,
+      "end": 2037.2,
+      "span": "2035+",
+      "score": "Reference"
+    }
+  ],
+  "notes": [
+    "Part V の未来予測タイムライン図（PDFベクター正本）。",
+    "数値は Part II / Part III-A / Part III-B / Part IV の frozen value を reader-facing roadmap へ再整理した目安。",
+    "Part II baseline の fixed-template route で source-level 再生成した。"
+  ],
+  "canonical_public": true,
+  "outputs": {
+    "public_pdf": "output/public/summary/part5_future_predictions_timeline.pdf",
+    "public_png": "output/public/summary/part5_future_predictions_timeline.png",
+    "public_metrics": "output/public/summary/part5_future_predictions_timeline_metrics.json"
+  }
+}

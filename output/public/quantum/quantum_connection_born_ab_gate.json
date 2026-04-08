@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-03-04T11:38:44.859421+00:00",
+  "generated_utc": "2026-03-14T11:36:05.641573+00:00",
   "phase": {
     "phase": 7,
     "step": "7.21.3",
@@ -87,6 +87,21 @@
       "normalized_score": 0.3338887327706417,
       "source": "born_route_a_proxy_constraints_pack",
       "note": "可視度差分の決着力監視（log10正規化；1桁以内をwatch閾値）。未達でも即棄却には使わない。"
+    },
+    {
+      "id": "statistical_bridge_mc_max_abs_frequency_error",
+      "channel": "unknown",
+      "proxy": "born_bridge",
+      "metric": "phase_randomized_frequency_max_abs_error",
+      "value": 0.005207625742030042,
+      "threshold": 0.02,
+      "operator": "<=",
+      "pass": true,
+      "gate": false,
+      "status": "pass",
+      "normalized_score": 0.2603812871015021,
+      "source": "born_route_a_proxy_constraints_pack",
+      "note": "位相ランダム化 + 線形検出応答の toy Monte Carlo が target frequency を 2e-2 以内で再現することを確認する。"
     },
     {
       "id": "cow_residual_fraction",
@@ -205,6 +220,11 @@
       "watch": 0,
       "reject": 0
     },
+    "unknown": {
+      "pass": 1,
+      "watch": 0,
+      "reject": 0
+    },
     "cow": {
       "pass": 2,
       "watch": 0,
@@ -227,6 +247,6 @@
       "selected_metric": "numeric_coverage_ratio_targeted",
       "selected_threshold": 1.0
     },
-    "criteria_n": 11
+    "criteria_n": 12
   }
 }

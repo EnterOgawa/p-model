@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-03-12T09:03:16.157013+00:00",
+  "generated_utc": "2026-04-07T14:28:10.472509+00:00",
   "phase": {
     "phase": 8,
     "step": "8.7.13",
@@ -18,15 +18,15 @@
     "hom_noise_psd_watch_audit_json": "output/public/quantum/hom_noise_psd_watch_audit.json"
   },
   "input_hashes_sha256": {
-    "action_principle_el_derivation_audit_json": "7c82b74b02dd603a856d533d7acb258828ab4d3b6ce42c869912c921a936b77b",
-    "nonrelativistic_reduction_schrodinger_mapping_audit_json": "46b16f672ff5cead40aba80e17f765223b3fd2727d5cd0dd390bc7a2b1b6148b",
-    "born_route_a_proxy_constraints_pack_json": "e95781f059fc4dfd64ca210bb0c94aac3f53001dfd2a747b1cdb764b776ccd59",
-    "quantum_connection_born_ab_gate_json": "955e8ca2a45fc965770d988ce8989e1b21eb100eeaaa656c398b38d254a65147",
+    "action_principle_el_derivation_audit_json": "6d42ea61d83fc372ee65d59a45a7a52e7be7d05a56c30c52df512aed25ca36fe",
+    "nonrelativistic_reduction_schrodinger_mapping_audit_json": "5dbdc0e5cd80a22c965489d2011b0d426b7186c151fc19e9cf1f873a08d4273e",
+    "born_route_a_proxy_constraints_pack_json": "4817dfcc1f4d61e20dde0643a0df8d87890cb081fc9838becdc6338a2058886d",
+    "quantum_connection_born_ab_gate_json": "a477107aa94cebeb6bcb6d1c808fd0a61e4cfd45ce762729a58716231426a190",
     "quantum_connection_bridge_table_json": "610e159e7cc4eac918b2e0e49a6bc0de9191afe86c9c8bfe2d9894243911da4d",
-    "quantum_connection_shared_kpi_json": "b4299ac173db3e74f66ebe9f2e7b236c1554081e77f62edd33c74adf1fae851c",
-    "derivation_parameter_falsification_pack_json": "ce26ea7e4afc908356f4181f6b98b871b529cb0abcb97d1d7b3bc276f3867663",
+    "quantum_connection_shared_kpi_json": "89693e421e05ecb61855bfb337f05effd989db8593d20f5de59e111cb7bc7b4a",
+    "derivation_parameter_falsification_pack_json": "5ae143b62517b9e32a1ffad97a7678f50377c5f92ab73523144d7a27c509b2b4",
     "bell_kwiat_delay_signature_watch_audit_json": "662fedf146dc2de16a2e3fcf3c75ef537f83e6a8d980e8435b6ff7c709678f5d",
-    "hom_noise_psd_watch_audit_json": "191bffa0e90a2416563da8c9fc5dad54bc79a227a6476e2d9309cb18080e2cba"
+    "hom_noise_psd_watch_audit_json": "16fcb39b0e2e64005352a5c28724da17753b86ec6df13c9777e7dfa3690f3b8a"
   },
   "checks": [
     {

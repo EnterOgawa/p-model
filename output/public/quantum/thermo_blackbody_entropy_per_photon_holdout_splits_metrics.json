@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-03-04T11:44:53.999129+00:00",
+  "generated_utc": "2026-04-07T12:50:23.100735+00:00",
   "phase": 7,
   "step": "7.20.6",
   "inputs": {
@@ -135,7 +135,8 @@
   ],
   "outputs": {
     "csv": "C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_entropy_per_photon_holdout_splits.csv",
-    "png": "C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_entropy_per_photon_holdout_splits.png"
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_entropy_per_photon_holdout_splits.png",
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_entropy_per_photon_holdout_splits.pdf"
   },
   "notes": [
     "Analytic holdout for blackbody entropy per photon s/n = (2π^4/(45 ζ(3))) k_B.",

@@ -1,0 +1,94 @@
+{
+  "generated_utc": "2026-03-20T11:50:39.688911+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.55.3.120",
+    "name": "Dark-matter post-Newtonian gate direct-bridge retry"
+  },
+  "inputs": {
+    "mass_origin_direct_kappa_bridge_statement_freeze_json": "output/public/quantum/mass_origin_direct_kappa_bridge_statement_freeze_metrics.json",
+    "sparc_rotation_curve_pmodel_audit_json": "output/public/cosmology/sparc_rotation_curve_pmodel_audit_metrics.json"
+  },
+  "intent": "Re-evaluate the third-route gate after freezing the direct kappa_a bridge and determine whether the dark-matter-elimination branch is now closeable.",
+  "formulas": {
+    "close_rule": "close if SPARC operational pass remains true, the direct kappa_a bridge is frozen, and the bridge introduces no new free parameter"
+  },
+  "rows": [
+    {
+      "row_id": "dark_matter_postnewtonian_operational_sparc_pass_direct_bridge",
+      "status": "pass",
+      "metric": "operational SPARC pass retained on direct bridge retry",
+      "value": 1.0,
+      "note": "The P-model corrected SPARC audit remains preferred over baryon-only."
+    },
+    {
+      "row_id": "kappa_a_first_principles_derivation_ready_direct_bridge",
+      "status": "pass",
+      "metric": "first-principles kappa_a derivation ready on direct bridge retry",
+      "value": 1.0,
+      "note": "The bridge is ready because the background exponential law, the operational relation, and the direct 1/(2*pi) derivation are now frozen together."
+    },
+    {
+      "row_id": "dark_matter_postnewtonian_branch_closeable_direct_bridge",
+      "status": "pass",
+      "metric": "dark-matter post-Newtonian branch closeable on direct bridge retry",
+      "value": 1.0,
+      "note": "The branch becomes closeable once the direct bridge and SPARC pass coexist without a new parameter."
+    }
+  ],
+  "summary": {
+    "sparc_operational_pass_still_available": true,
+    "kappa_a_first_principles_derivation_ready": true,
+    "dark_matter_postnewtonian_branch_closeable": true,
+    "recommended_next_route_or_none": "8.7.55.3.121"
+  },
+  "decision": {
+    "overall_status": "dark_matter_postnewtonian_direct_bridge_gate_refreshed",
+    "dark_matter_branch_active": true,
+    "advance_to_dark_matter_closeout": true,
+    "fallback_needed": false,
+    "next_required_artifacts": [
+      "mass_origin_direct_kappa_sparc_equality_audit",
+      "mass_origin_postnewtonian_rotation_curve_profile"
+    ]
+  },
+  "evidence": {
+    "sparc_fit_summary": {
+      "baryon_only": {
+        "chi2": 360860.5686799679,
+        "chi2_dof": 106.44854533332386,
+        "dof": 3390.0,
+        "max_abs_pull": 45.24881104365897,
+        "median_abs_residual_km_s": 31.53367927504482,
+        "rms_residual_km_s": 47.34461983556302,
+        "upsilon_1sigma": [
+          0.9399999999999996,
+          0.9399999999999996
+        ],
+        "upsilon_best": 0.9399999999999996
+      },
+      "comparison": {
+        "better_model_by_chi2": "pmodel_corrected",
+        "chi2_dof_ratio_pmodel_over_baryon": 0.20051842718682003,
+        "delta_chi2_baryon_minus_pmodel": 288501.3750145193
+      },
+      "galaxy_level_summary": {
+        "median_chi2_dof_baryon": 43.97506483458249,
+        "median_chi2_dof_pmodel": 7.096778154661975
+      },
+      "pmodel_corrected": {
+        "chi2": 72359.1936654486,
+        "chi2_dof": 21.34489488656301,
+        "dof": 3390.0,
+        "max_abs_pull": 24.90148218659571,
+        "median_abs_residual_km_s": 11.531527485060163,
+        "rms_residual_km_s": 22.769703271856685,
+        "upsilon_1sigma": [
+          0.5399999999999998,
+          0.5399999999999998
+        ],
+        "upsilon_best": 0.5399999999999998
+      }
+    }
+  }
+}

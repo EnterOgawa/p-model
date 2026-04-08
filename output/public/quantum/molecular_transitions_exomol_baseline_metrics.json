@@ -1,13 +1,13 @@
 {
-  "generated_utc": "2026-03-11T13:56:09.197247+00:00",
+  "generated_utc": "2026-04-07T06:08:04.794778+00:00",
   "phase": 7,
   "step": "7.12",
-  "title": "Molecular transition baseline (primary line lists; representative transitions)",
+  "title": "分子遷移の代表基準（一次線リストから各分子 2 本を抽出）",
   "selection": {
     "method": "top_n_by_Einstein_A_desc",
     "top_n_per_molecule": 10
   },
-  "note": "Representative transitions are selected objectively by descending Einstein A from primary line lists (ExoMol for H2/HD; MOLAT for D2). This output fixes a small baseline target set for future molecular-binding derivations.",
+  "note": "一次線リストから Einstein A の大きい順に top-N を選び、そのうち本文図では各分子 2 遷移だけを表示する。残りの上位遷移は selected CSV と metrics JSON に保持し、将来の分子束縛再導出で参照できるようにする。",
   "datasets": [
     {
       "molecule": "H2",
@@ -668,6 +668,7 @@
     }
   ],
   "outputs": {
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\molecular_transitions_exomol_baseline.pdf",
     "png": "C:\\develop\\waveP\\output\\public\\quantum\\molecular_transitions_exomol_baseline.png",
     "csv": "C:\\develop\\waveP\\output\\public\\quantum\\molecular_transitions_exomol_baseline_selected.csv"
   }

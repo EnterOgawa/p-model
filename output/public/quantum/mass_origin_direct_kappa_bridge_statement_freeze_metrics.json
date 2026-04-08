@@ -1,0 +1,73 @@
+{
+  "generated_utc": "2026-03-20T11:50:39.688897+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.55.3.119",
+    "name": "Direct kappa_a bridge statement freeze"
+  },
+  "inputs": {
+    "mass_origin_direct_kappa_bridge_source_inventory_json": "output/public/quantum/mass_origin_direct_kappa_bridge_source_inventory_metrics.json",
+    "pbg_metrics_json": "output/public/cosmology/cosmology_redshift_pbg_metrics.json",
+    "sparc_rotation_curve_pmodel_audit_json": "output/public/cosmology/sparc_rotation_curve_pmodel_audit_metrics.json"
+  },
+  "intent": "Freeze the direct bridge statement that turns the background P-wave exponential law into the derived SPARC coefficient kappa_a = 1/(2*pi).",
+  "formulas": {
+    "omega_background": "omega_bg = H0^(P)",
+    "background_wavelength": "lambda_bg = 2*pi*c/H0^(P)",
+    "acceleration_scale": "a0 = c^2/lambda_bg = c*H0^(P)/(2*pi)",
+    "derived_kappa": "kappa_a = 1/(2*pi)"
+  },
+  "rows": [
+    {
+      "row_id": "direct_kappa_bridge_statement_available",
+      "status": "pass",
+      "metric": "direct kappa_a bridge statement available",
+      "value": 1.0,
+      "note": "The direct bridge statement is frozen from already-frozen background and SPARC operational rules."
+    },
+    {
+      "row_id": "direct_kappa_bridge_operational_numeric_match",
+      "status": "pass",
+      "metric": "derived bridge numerically matches operational SPARC values",
+      "value": 1.0,
+      "note": "The derived kappa_a and a0 equal the values already used in the SPARC operational audit."
+    },
+    {
+      "row_id": "direct_kappa_bridge_new_parameter_count",
+      "status": "pass",
+      "metric": "new free parameter count after direct bridge freeze",
+      "value": 0.0,
+      "note": "No new parameter enters the direct bridge statement."
+    }
+  ],
+  "summary": {
+    "vector_exact_hierarchy_to_kappa_a_bridge_statement_available": true,
+    "kappa_a_value": 0.15915494309189535,
+    "h0p_si_s^-1": 2.2685455026110557e-18,
+    "omega_bg_si_s^-1": 2.2685455026110557e-18,
+    "lambda_bg_m": 8.303344875122864e+26,
+    "a0_derived_m_s2": 1.0824013602391998e-10,
+    "kappa_a_derivation_source": "background P-wave angular-to-cyclic conversion",
+    "direct_bridge_statement": "The MOND-like acceleration scale a0 = kappa_a c H0^(P) is not a free parameter. With the late-time background law P_bg(t) ∝ exp(-H0^(P) (t-t0)), identify the background angular frequency as omega_bg = H0^(P), define the cyclic wavelength lambda_bg = 2*pi*c/H0^(P), and obtain a0 = c^2/lambda_bg = c*H0^(P)/(2*pi). Therefore kappa_a = 1/(2*pi), and no new free parameter is introduced.",
+    "new_free_parameters_introduced": [],
+    "statement_is_inference_from_frozen_background_exponential_law": true
+  },
+  "decision": {
+    "overall_status": "direct_kappa_bridge_statement_frozen",
+    "dark_matter_branch_active": true,
+    "kappa_a_derivation_ready": true,
+    "fallback_needed": false,
+    "next_required_artifacts": [
+      "mass_origin_dark_matter_postnewtonian_direct_bridge_retry"
+    ]
+  },
+  "evidence": {
+    "background_model": {
+      "P_factorization": "P(x,t)=P_bg(t) P_local(x)",
+      "redshift_relation": "1+z = P_em/P_obs",
+      "P_bg_model": "P_bg(t) ∝ exp(-H0^(P) (t-t0))",
+      "H0P_definition": "H0^(P) = - (d/dt ln P_bg)|t0"
+    },
+    "operational_formula": "a0 = kappa * c * H0^(P)"
+  }
+}

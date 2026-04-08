@@ -8,7 +8,7 @@ part2_4_16,approx_order,1,1,0,pass
 part2_4_16,boundary_conditions,0,1,-1,reject
 part2_4_16,closure_gate,1,1,0,pass
 part4_12,artifact_links,0,1,-1,reject
-part4_12,script_link,1,1,0,pass
+part4_12,script_link,0,1,-1,reject
 cross,caseb_nonlinear_pde_closure_pass,1,1,0,pass
 cross,caseb_boundary_closure_pass,1,1,0,pass
 cross,direct_boundary_closure_pass,1,1,0,pass

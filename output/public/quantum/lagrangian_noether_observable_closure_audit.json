@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-03-12T09:03:18.783746+00:00",
+  "generated_utc": "2026-04-07T14:28:10.504774+00:00",
   "phase": {
     "phase": 8,
     "step": "8.7.21.1",
@@ -13,10 +13,10 @@
     "derivation_observable_chain_lock_audit_json": "output/public/quantum/derivation_observable_chain_lock_audit.json"
   },
   "input_hashes_sha256": {
-    "action_principle_el_derivation_audit_json": "7c82b74b02dd603a856d533d7acb258828ab4d3b6ce42c869912c921a936b77b",
-    "nonrelativistic_reduction_schrodinger_mapping_audit_json": "46b16f672ff5cead40aba80e17f765223b3fd2727d5cd0dd390bc7a2b1b6148b",
-    "derivation_parameter_falsification_pack_json": "ce26ea7e4afc908356f4181f6b98b871b529cb0abcb97d1d7b3bc276f3867663",
-    "derivation_observable_chain_lock_audit_json": "1704dc81b74c53e0c121b09978ff2bb88470c96a800edb27fc32bc9b4242b391"
+    "action_principle_el_derivation_audit_json": "6d42ea61d83fc372ee65d59a45a7a52e7be7d05a56c30c52df512aed25ca36fe",
+    "nonrelativistic_reduction_schrodinger_mapping_audit_json": "c311837abd26fa7e285523199d7a4b27afa9d56c5a04cc187b891bee79fc15e2",
+    "derivation_parameter_falsification_pack_json": "5ae143b62517b9e32a1ffad97a7678f50377c5f92ab73523144d7a27c509b2b4",
+    "derivation_observable_chain_lock_audit_json": "5cd946614b06c49f17f980d6540463e18cb20edddc5e6e69c1a835f17d7967f0"
   },
   "assumptions": [
     "Boundary variation is fixed to zero at the audit boundary.",

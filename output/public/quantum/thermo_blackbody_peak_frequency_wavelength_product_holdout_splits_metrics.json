@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-03-12T09:04:10.266767+00:00",
+  "generated_utc": "2026-04-07T12:51:14.206043+00:00",
   "phase": 8,
   "step": "8.7.12",
   "inputs": {
@@ -137,7 +137,8 @@
   ],
   "outputs": {
     "csv": "C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_peak_frequency_wavelength_product_holdout_splits.csv",
-    "png": "C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_peak_frequency_wavelength_product_holdout_splits.png"
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_peak_frequency_wavelength_product_holdout_splits.png",
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_peak_frequency_wavelength_product_holdout_splits.pdf"
   },
   "notes": [
     "Analytic holdout for the mixed Wien observable ν_max(T)·λ_max(T), expected to be temperature-independent.",

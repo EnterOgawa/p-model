@@ -1,0 +1,73 @@
+{
+  "generated_utc": "2026-03-20T11:50:39.689346+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.55.3.121",
+    "name": "Direct kappa_a SPARC equality audit"
+  },
+  "inputs": {
+    "pbg_metrics_json": "output/public/cosmology/cosmology_redshift_pbg_metrics.json",
+    "sparc_rotation_curve_pmodel_audit_json": "output/public/cosmology/sparc_rotation_curve_pmodel_audit_metrics.json",
+    "sparc_rar_note_markdown": "doc/cosmology/SPARC_RAR_BTFR.md"
+  },
+  "intent": "Formally confirm that the operational SPARC coefficient already used in Part II is numerically identical to the direct background-wave derivation kappa_a = 1/(2*pi).",
+  "formulas": {
+    "operational_kappa": "kappa_operational = a0_operational / (c H0^(P))",
+    "derived_kappa": "kappa_derived = 1/(2*pi)",
+    "operational_a0": "a0_operational = kappa_operational c H0^(P)",
+    "derived_a0": "a0_derived = c H0^(P)/(2*pi)"
+  },
+  "rows": [
+    {
+      "row_id": "direct_kappa_operational_numeric_equality",
+      "status": "pass",
+      "metric": "operational and derived kappa_a numerical equality",
+      "value": 1.0,
+      "note": "The SPARC operational coefficient equals 1/(2*pi) within machine precision."
+    },
+    {
+      "row_id": "direct_a0_operational_numeric_equality",
+      "status": "pass",
+      "metric": "operational and derived a0 numerical equality",
+      "value": 1.0,
+      "note": "The SPARC operational acceleration scale equals c*H0^(P)/(2*pi) within machine precision."
+    },
+    {
+      "row_id": "direct_kappa_sparc_equality_audit_complete",
+      "status": "pass",
+      "metric": "direct kappa_a SPARC equality audit complete",
+      "value": 1.0,
+      "note": "This audit confirms that the operational Part II value was already the derived background-wave value."
+    }
+  ],
+  "summary": {
+    "operational_kappa_value": 0.15915494309189535,
+    "derived_kappa_value": 0.15915494309189535,
+    "kappa_abs_difference": 0.0,
+    "operational_a0_m_s2": 1.0824013602391996e-10,
+    "derived_a0_m_s2": 1.0824013602391998e-10,
+    "a0_abs_difference_m_s2": 1.2924697071141057e-26,
+    "operational_and_derived_kappa_equal": true,
+    "operational_and_derived_a0_equal": true
+  },
+  "decision": {
+    "overall_status": "direct_kappa_sparc_operational_equality_frozen",
+    "dark_matter_branch_active": true,
+    "equality_audit_pass": true,
+    "next_required_artifacts": [
+      "mass_origin_postnewtonian_rotation_curve_profile"
+    ]
+  },
+  "evidence": {
+    "part2_operational_line": {
+      "pattern": "a_0=\\kappa_a c H_{0}^{(P)}",
+      "line": 1587,
+      "text": "赤方偏移写像で固定した $H_{0}^{(P)}$（$a_0=\\kappa_a c H_{0}^{(P)}$ の変換に使用）。"
+    },
+    "sparc_note_fixed_kappa_line": {
+      "pattern": "κ=1/(2π)",
+      "line": 77,
+      "text": "- `a0 = κ c H0^(P)`（既定：κ=1/(2π)）"
+    }
+  }
+}

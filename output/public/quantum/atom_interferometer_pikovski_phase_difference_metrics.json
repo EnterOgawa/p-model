@@ -1,0 +1,126 @@
+{
+  "generated_utc": "2026-03-17T10:43:01.302471+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.55.1.2",
+    "name": "atom interferometer differential phase vs Pikovski proxy"
+  },
+  "inputs": {
+    "atom_interferometer_metrics_json": "output/public/quantum/atom_interferometer_gravimeter_phase_metrics.json",
+    "gravity_quantum_delta_json": "output/public/quantum/gravity_quantum_interference_delta_predictions.json"
+  },
+  "intent": "Freeze the atom-interferometer differential phase comparison between the already-frozen P-model correction channels and a Pikovski-style time-dilation phase proxy without introducing any new carrier or geometry fit.",
+  "assumptions": [
+    "The P-model side keeps two already-frozen channels: the Part III 4.3 weak-field mapping reference row and the β/light local differential row.",
+    "The Pikovski side is evaluated as an operational phase proxy phi_Pik ≈ omega_carrier g delta_z T / c^2, using the Raman carrier frequency from lambda=852 nm.",
+    "Two geometry choices are frozen: the local arm-separation scale from the unified atom audit and the apex-height envelope from the atom-fountain geometry.",
+    "The current atom-interferometer precision reference remains the existing fractional phase benchmark 1e-9 from gravity_quantum_interference_delta_predictions.json."
+  ],
+  "formulas": {
+    "pmodel_reference_row": "delta_phi_ref = phi_ref * delta_z_over_z_GR  (already frozen in Part III 4.3 / unified audit)",
+    "pmodel_beta_light_row": "delta_phi_beta ≈ (beta-1) * k_eff * g^3 * T^4 / c^2",
+    "pikovski_proxy": "phi_Pik ≈ omega_carrier * g * delta_z * T / c^2",
+    "differential": "Delta phi_diff = phi^(P) - phi^(Pik)",
+    "required_precision": "sigma_phase,1sigma <= |Delta phi_diff| / 3"
+  },
+  "frozen_setup": {
+    "lambda_m": 8.52e-07,
+    "omega_carrier_rad_s": 2210858647076118.8,
+    "g_m_per_s2": 9.80665,
+    "T_s": 0.4,
+    "phi_ref_rad": 23142534.90803857,
+    "current_fractional_phase_precision": 1e-09,
+    "current_abs_phase_precision_rad": 0.023142534908038574,
+    "arm_separation_scale_m": 0.0028191262616496385,
+    "apex_height_m": 0.7845320000000001,
+    "pmodel_reference_phase_rad": -0.03218425417664365,
+    "pmodel_beta_light_phase_rad": 4.1602569473973726e-14,
+    "pikovski_arm_separation_proxy_phase_rad": 0.0002720287242866323,
+    "pikovski_apex_height_envelope_phase_rad": 0.07570261822794637
+  },
+  "comparison_rows": [
+    {
+      "pmodel_case_id": "pmodel_reference_mapping",
+      "pmodel_phase_rad": -0.03218425417664365,
+      "pikovski_case_id": "pikovski_arm_separation_proxy",
+      "pikovski_phase_rad": 0.0002720287242866323,
+      "delta_phi_diff_rad": -0.03245628290093028,
+      "delta_phi_diff_over_phi_ref": -1.4024515045521903e-09,
+      "required_abs_phase_precision_1sigma_for_3sigma_rad": 0.01081876096697676,
+      "required_fractional_phase_precision_1sigma_for_3sigma": 4.6748383485073e-10,
+      "current_abs_phase_precision_rad": 0.023142534908038574,
+      "current_fractional_phase_precision": 1e-09,
+      "current_over_required_precision": 2.1391113990482795,
+      "detectable_under_current_precision": false
+    },
+    {
+      "pmodel_case_id": "pmodel_reference_mapping",
+      "pmodel_phase_rad": -0.03218425417664365,
+      "pikovski_case_id": "pikovski_apex_height_envelope",
+      "pikovski_phase_rad": 0.07570261822794637,
+      "delta_phi_diff_rad": -0.10788687240459002,
+      "delta_phi_diff_over_phi_ref": -4.661843347468192e-09,
+      "required_abs_phase_precision_1sigma_for_3sigma_rad": 0.03596229080153001,
+      "required_fractional_phase_precision_1sigma_for_3sigma": 1.5539477824893974e-09,
+      "current_abs_phase_precision_rad": 0.023142534908038574,
+      "current_fractional_phase_precision": 1e-09,
+      "current_over_required_precision": 0.6435222671369416,
+      "detectable_under_current_precision": true
+    },
+    {
+      "pmodel_case_id": "pmodel_beta_light_local",
+      "pmodel_phase_rad": 4.1602569473973726e-14,
+      "pikovski_case_id": "pikovski_arm_separation_proxy",
+      "pikovski_phase_rad": 0.0002720287242866323,
+      "delta_phi_diff_rad": -0.00027202872424502973,
+      "delta_phi_diff_over_phi_ref": -1.1754491257158714e-11,
+      "required_abs_phase_precision_1sigma_for_3sigma_rad": 9.067624141500991e-05,
+      "required_fractional_phase_precision_1sigma_for_3sigma": 3.9181637523862384e-12,
+      "current_abs_phase_precision_rad": 0.023142534908038574,
+      "current_fractional_phase_precision": 1e-09,
+      "current_over_required_precision": 255.22159439890194,
+      "detectable_under_current_precision": false
+    },
+    {
+      "pmodel_case_id": "pmodel_beta_light_local",
+      "pmodel_phase_rad": 4.1602569473973726e-14,
+      "pikovski_case_id": "pikovski_apex_height_envelope",
+      "pikovski_phase_rad": 0.07570261822794637,
+      "delta_phi_diff_rad": -0.07570261822790476,
+      "delta_phi_diff_over_phi_ref": -3.27114633417316e-09,
+      "required_abs_phase_precision_1sigma_for_3sigma_rad": 0.025234206075968255,
+      "required_fractional_phase_precision_1sigma_for_3sigma": 1.0903821113910533e-09,
+      "current_abs_phase_precision_rad": 0.023142534908038574,
+      "current_fractional_phase_precision": 1e-09,
+      "current_over_required_precision": 0.9171096898538179,
+      "detectable_under_current_precision": true
+    }
+  ],
+  "summary": {
+    "row_count": 4,
+    "tightest_current_over_required_precision": 0.6435222671369416,
+    "tightest_case": {
+      "pmodel_case_id": "pmodel_reference_mapping",
+      "pikovski_case_id": "pikovski_apex_height_envelope"
+    },
+    "loosest_current_over_required_precision": 255.22159439890194,
+    "loosest_case": {
+      "pmodel_case_id": "pmodel_beta_light_local",
+      "pikovski_case_id": "pikovski_arm_separation_proxy"
+    },
+    "beta_light_vs_arm_proxy_delta_phi_rad": -0.00027202872424502973,
+    "beta_light_vs_apex_envelope_delta_phi_rad": -0.07570261822790476,
+    "reference_vs_arm_proxy_delta_phi_rad": -0.03245628290093028,
+    "reference_vs_apex_envelope_delta_phi_rad": -0.10788687240459002
+  },
+  "decision": {
+    "overall_status": "atom_interferometer_differential_proxy_fixed",
+    "new_free_parameters_introduced": false,
+    "p_unique_channel_fixed": true,
+    "legacy_reference_row_retained": true,
+    "next_required_steps": [
+      "8.7.55.1.3",
+      "8.7.55.1.4"
+    ]
+  }
+}

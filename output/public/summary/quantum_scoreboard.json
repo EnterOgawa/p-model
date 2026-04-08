@@ -1,13 +1,13 @@
 {
-  "generated_utc": "2026-03-12T09:03:06.312957+00:00",
+  "generated_utc": "2026-04-06T10:53:48.649506+00:00",
   "profile": "part3_quantum",
   "inputs": {
     "paper_table1_quantum_results_json": "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
   },
   "rows": [
     {
-      "id": "bell_selection__1",
-      "label": "Bell（公開一次データ; selection感度）",
+      "id": "row_1__1",
+      "label": "ベル（公開一次）",
       "status": "ng",
       "score": 3.0,
       "metric": "Weihs1998 Δ|S|≈0.423 / Delft2015 ΔS≈0.788 / Delft2016 ΔS≈1.44 / NIST ΔJ≈0.001 / Kwiat2013 ΔJ≈0.000123",
@@ -114,8 +114,8 @@
       "score_kind": "table1_quantum_proxy"
     },
     {
-      "id": "h_i__10",
-      "label": "原子・分子（基準値）：H I",
+      "id": "row_10__10",
+      "label": "原子・分子（基準値）",
       "status": "mixed",
       "score": 1.5,
       "metric": "Lyα=121.567 nm / Hγ=434.169 nm / Hβ=486.266 nm / Hα=656.466 nm / Hα multiplet=656.452–656.466 nm (N=5) / Hβ multiplet=486.264–486.27 nm (N=3) / source=atomic_hydrogen_baseline_metrics.json",
@@ -126,8 +126,20 @@
       "score_kind": "table1_quantum_proxy"
     },
     {
-      "id": "he_i__11",
-      "label": "原子・分子（基準値）：He I",
+      "id": "row_11__11",
+      "label": "原子・分子（基準値）",
+      "status": "mixed",
+      "score": 1.5,
+      "metric": "f=1420.4057517667 MHz / σ=1.000e-03 Hz / frac=7.04e-13 / λ=21.106114 cm / source=atomic_hydrogen_hyperfine_baseline_metrics.json",
+      "detail": "H I hyperfine（21 cm）",
+      "sources": [
+        "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
+      ],
+      "score_kind": "table1_quantum_proxy"
+    },
+    {
+      "id": "row_12__12",
+      "label": "原子・分子（基準値）",
       "status": "mixed",
       "score": 1.5,
       "metric": "447.273=447.273 nm / 501.708=501.708 nm / 587.725=587.725 nm / 668.000=668 nm / source=atomic_helium_baseline_metrics.json",
@@ -138,8 +150,8 @@
       "score_kind": "table1_quantum_proxy"
     },
     {
-      "id": "h2__12",
-      "label": "原子・分子（基準値）：H2",
+      "id": "row_13__13",
+      "label": "原子・分子（基準値）",
       "status": "mixed",
       "score": 1.5,
       "metric": "ωe=4401.213 cm^-1 / ωexe=121.336 cm^-1 / Be=60.853 cm^-1 / αe=3.0622 cm^-1 / D(dist)=0.0471 cm^-1 / re=0.74144 Å / D0(Morse,derived)≈4.6793 eV / source=molecular_h2_baseline_metrics.json",
@@ -150,8 +162,8 @@
       "score_kind": "table1_quantum_proxy"
     },
     {
-      "id": "hd__13",
-      "label": "原子・分子（基準値）：HD",
+      "id": "row_14__14",
+      "label": "原子・分子（基準値）",
       "status": "mixed",
       "score": 1.5,
       "metric": "ωe=3813.15 cm^-1 / ωexe=91.65 cm^-1 / Be=45.655 cm^-1 / αe=1.986 cm^-1 / D(dist)=0.02605 cm^-1 / re=0.74142 Å / D0(Morse,derived)≈4.6839 eV / source=molecular_hd_baseline_metrics.json",
@@ -162,8 +174,8 @@
       "score_kind": "table1_quantum_proxy"
     },
     {
-      "id": "d2__14",
-      "label": "原子・分子（基準値）：D2",
+      "id": "row_15__15",
+      "label": "原子・分子（基準値）",
       "status": "mixed",
       "score": 1.5,
       "metric": "ωe=3115.5 cm^-1 / ωexe=61.82 cm^-1 / Be=30.4436 cm^-1 / αe=1.0786 cm^-1 / D(dist)=0.01141 cm^-1 / re=0.74152 Å / D0(Morse,derived)≈4.6755 eV / source=molecular_d2_baseline_metrics.json",
@@ -174,8 +186,8 @@
       "score_kind": "table1_quantum_proxy"
     },
     {
-      "id": "d0__15",
-      "label": "原子・分子（基準値）：D0",
+      "id": "row_16__16",
+      "label": "原子・分子（基準値）",
       "status": "mixed",
       "score": 1.5,
       "metric": "H2(N=1)=4.4634 eV (35999.6 cm^-1) / HD(N=0)=4.5137 eV (36405.8 cm^-1) / D2(N=0)=4.5562 eV (36748.4 cm^-1) / source=molecular_dissociation_d0_spectroscopic_metrics.json",
@@ -186,8 +198,8 @@
       "score_kind": "table1_quantum_proxy"
     },
     {
-      "id": "lines__16",
-      "label": "原子・分子（基準値）：lines",
+      "id": "row_17__17",
+      "label": "原子・分子（基準値）",
       "status": "mixed",
       "score": 1.5,
       "metric": "H2(RACPPK): top10, A_max=5.5060e-06 s^-1, ν̃=2778.364537–2970.994204 cm^-1 / HD(ADJSAAM): top10, A_max=1.1879e-03 s^-1, ν̃=1287.580183–4996.782991 cm^-1 / D2(ARLSJ1999 (FUV; B/C/B′/D→X)): top10, A_max=5.2740e+08 s^-1, ν̃=79203.7–80262.5 cm^-1 / D2 #1: C−(v=11,J=1) → X(v=17,J=1) (ν̃=7.93e+04 cm^-1, A=5.2740e+08 s^-1) / H2 #1: v=0,J=28 → v=0,J=26 (ν̃=2903.823 cm^-1, A=5.5060e-06 s^-1) / HD #1: v=9,J=23,qb → v=7,J=22,b (ν̃=3246.098 cm^-1, A=1.1879e-03 s^-1) / source=molecular_transitions_exomol_baseline_metrics.json",
@@ -198,11 +210,11 @@
       "score_kind": "table1_quantum_proxy"
     },
     {
-      "id": "deuteron_np__17",
+      "id": "deuteron_np__18",
       "label": "原子核（波動干渉＋deuteron+np散乱）",
       "status": "ng",
       "score": 3.0,
-      "metric": "B≈2.224566 MeV / eq18 (GWU/SAID): Rc≈0.531 fm, Vc≈100 MeV, R1≈0.731 fm, R2≈2.35 fm, V1t≈251.8 MeV, V2t≈21.4 MeV, V1s≈554.1 MeV, V2s≈121.268 MeV, v2t≈0.17 (Δ≈0.007), r_s(fit)≈2.8079 (Δ≈0.1819), v2s(pred)≈1.191 (Δ≈1.196) / eq19 (Nijmegen): Rc≈0.274 fm, Vc≈858.5 MeV, R1≈0.488 fm, R2≈2.746 fm, V1t≈608.8 MeV, V2t≈13.7 MeV, V1s≈350.8 MeV, V2s≈10.769 MeV, v2t≈0.047 (Δ≈0.007), r_s(fit)≈2.6771 (Δ≈-0.000882), v2s(pred)≈0.52 (Δ≈1) / envelope_ok(r_s)=no / envelope_ok(v2s)=no / P-SEMF: median abs(ΔB)≈75.15 MeV, median σ_req,rel≈2.7% / P-Yukawa proxy: median abs(ΔB)≈1150.06 MeV, median σ_req,rel≈33.43% / AME2020(all): N=3554, median(B_pred/B_obs)≈0.064, p16–p84≈0.033–0.181 / falsification: global-R: z_median≈-3.22, z_ΔA≈-2.61 / local-spacing: z_median≈5.63, z_ΔA≈2.39 / source=nuclear_effective_potential_repulsive_core_two_range_metrics.json",
+      "metric": "B≈2.224566 MeV / eq18 (GWU/SAID): Rc≈0.531 fm, Vc≈100 MeV, R1≈0.731 fm, R2≈2.35 fm, V1t≈251.8 MeV, V2t≈21.4 MeV, V1s≈554.1 MeV, V2s≈121.268 MeV, v2t≈0.17 (Δ≈0.007), r_s(fit)≈2.8079 (Δ≈0.1819), v2s(pred)≈1.191 (Δ≈1.196) / eq19 (Nijmegen): Rc≈0.274 fm, Vc≈858.5 MeV, R1≈0.488 fm, R2≈2.746 fm, V1t≈608.8 MeV, V2t≈13.7 MeV, V1s≈350.8 MeV, V2s≈10.769 MeV, v2t≈0.047 (Δ≈0.007), r_s(fit)≈2.6771 (Δ≈-0.000882), v2s(pred)≈0.52 (Δ≈1) / envelope_ok(r_s)=no / envelope_ok(v2s)=no / P-SEMF: median abs(ΔB)≈75.15 MeV, median σ_req,rel≈2.7% / P-Yukawa proxy: median abs(ΔB)≈1150.06 MeV, median σ_req,rel≈33.43% / wave-I/F(deuteron): B≈2.224566 MeV, Δm/m=Δω/ω≈0.001185 / wave-I/F mapping: B=ħΔω, Δm=ħΔω/c^2 / AME2020(all): N=3554, median(B_pred/B_obs)≈0.064, p16–p84≈0.033–0.181 / falsification: global-R: z_median≈-3.22, z_ΔA≈-2.61 / local-spacing: z_median≈5.63, z_ΔA≈2.39 / source=nuclear_effective_potential_repulsive_core_two_range_metrics.json",
       "detail": "結合エネルギー B.E. + (a_t,r_t,v2)（低エネルギー）",
       "sources": [
         "C:/develop/waveP/output/private/summary/paper_table1_quantum_results.json"
@@ -210,8 +222,8 @@
       "score_kind": "table1_quantum_proxy"
     },
     {
-      "id": "bell_time_tag__18",
-      "label": "Bell（計画）：time-tag",
+      "id": "bell__19",
+      "label": "Bell（計画）",
       "status": "ok",
       "score": 0.5,
       "metric": "入手できたものから統合（追加time-tag）",
@@ -222,8 +234,8 @@
       "score_kind": "table1_quantum_proxy"
     },
     {
-      "id": "bell_cov_sys__19",
-      "label": "Bell（計画）：cov+sys",
+      "id": "bell__20",
+      "label": "Bell（計画）",
       "status": "mixed",
       "score": 1.5,
       "metric": "共分散/系統/長期整合を固定（横断）",
@@ -234,7 +246,7 @@
       "score_kind": "table1_quantum_proxy"
     },
     {
-      "id": "row_20__20",
+      "id": "row_21__21",
       "label": "量子（計画）",
       "status": "mixed",
       "score": 1.5,

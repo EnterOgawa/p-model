@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-03-11T13:54:43.026275+00:00",
+  "generated_utc": "2026-04-08T09:12:27.228055+00:00",
   "dataset_id": "kwiat2013_prl111_130406_05082013_15",
   "supported": true,
   "baseline": {
@@ -28,7 +28,7 @@
   "inputs": {
     "natural_window_frozen_json": {
       "path": "output/public/quantum/bell/kwiat2013_prl111_130406_05082013_15/natural_window_frozen.json",
-      "sha256": "98902e8bafd67d227001dadfb91d65eda9135c3cd1b8ff997f8dc4ab6862373d"
+      "sha256": "c14b14d4d4b5b0ea1e4fd371bc1b0729e81047992beb10796dce2433925397d8"
     },
     "delay_signature_ref_samples_npz": {
       "path": "output/public/quantum/bell/kwiat2013_prl111_130406_05082013_15/delay_signature_ref_samples.npz",

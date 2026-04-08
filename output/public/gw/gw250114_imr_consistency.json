@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T14:01:12.578442+00:00",
+  "generated_utc": "2026-03-14T03:42:02.682878+00:00",
   "status": "ok",
   "event": {
     "resolved_common_name": "GW250114_082203",
@@ -12,11 +12,11 @@
     "posterior": "C:/develop/waveP/data/gw/gw250114/posterior_samples_NRSur7dq4.h5"
   },
   "sources": {
-    "event_json_url": "https://gwosc.org/eventapi/json/O4_Discovery_Papers/GW250114_082203/v3",
+    "event_json_url": "https://gwosc.org/eventapi/json/O4_Discovery_Papers/GW250114_082203/v1",
     "posterior_url": "https://zenodo.org/api/records/16877102/files/posterior_samples_NRSur7dq4.h5/content",
     "posterior_ref": "https://doi.org/10.5281/zenodo.16877101",
     "sha256": {
-      "ringdown_json": "a774bcb47e2672258fd5530528601c78877540f33ef28c5935a7dc55befdde11",
+      "ringdown_json": "fa38316c4b94ccb3d6b14ddfd0e4a3332ba5c339ca9bc0afa6555fbd45b12e0b",
       "event_json": "179e27f941aa36108fb0769ca5837abb79ec72929783febc9bcf535747a89ddf",
       "posterior": "55b4a47c2c71580e9ef0cd1ff9fa9d32e64813657e9ea31f32e24cda53922d62"
     },
