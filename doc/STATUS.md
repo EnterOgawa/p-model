@@ -1,6 +1,6 @@
 # STATUS
 
-- UTC: 2026-04-08T13:04:46Z
+- UTC: 2026-04-08T13:09:05Z
 - Current official state: `vector_qball_form_factor_residual_origin_missing_action_updated_pack_trial2_v2_final_watch_positive_completed_single_frozen_action_single_alpha_global_consistency_primary_diagnostic_tables_secondary_conditional_reopen_only_next`
 - Latest completed official blocks: `.6091-.6098`
 
@@ -13,6 +13,7 @@
 - release 後の微修正として Part V 図2の接続線と丸の重なり順を正し、丸を線の手前に固定した。さらに左右パネルの小タイトルを少し下げ、メインタイトルとの間隔を詰めた。結果は [part5_fig2_title_lower_page006-06.png](/C:/develop/waveP/output/private/summary/page_audit/part5_fig2_title_lower/part5_fig2_title_lower_page006-06.png) で確認した。
 - 追加の微修正として Part V 図5下段の `P-model の予測` 注記から白背景を外した。結果は [part5_fig5_nobox_page012-12.png](/C:/develop/waveP/output/private/summary/page_audit/part5_fig5_nobox/part5_fig5_nobox_page012-12.png) で確認した。
 - README の follow-up 修正として、誤ってスコアボード表へ混入していた `独立銀河回転曲線 / 量子計算実験 / 弱場重力量子` の 3 行を未来予測表へ移し、Part V の説明を `5項目` から `8項目` へ更新した。その後 `root -> public` 同期を再実行して README 正本をそろえた。
+- README の再 follow-up 修正として、冒頭へ追加された α の歴史的背景段落は保持したまま、再発していた同じ 3 行の表混入と Part V の `5項目` への逆戻りを修正し、再度 `root -> public` 同期を実行した。
 
 ## Workflow note
 
