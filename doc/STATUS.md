@@ -1,25 +1,25 @@
 # STATUS
 
-- UTC: 2026-04-08T11:16:29Z
+- UTC: 2026-04-08T12:18:00Z
 - Current official state: `vector_qball_form_factor_residual_origin_missing_action_updated_pack_trial2_v2_final_watch_positive_completed_single_frozen_action_single_alpha_global_consistency_primary_diagnostic_tables_secondary_conditional_reopen_only_next`
 - Latest completed official blocks: `.6091-.6098`
 
 ## Latest result
 
-- release 用 canonical public artifact を、論文本文・公開 README・公開運用文書から実際に参照される `output/public` artifact を起点に再切り分けた。manifest は [release_public_artifact_publish_set.txt](/C:/develop/waveP/output/private/summary/release_public_artifact_publish_set.txt) で、`tracked_keep=924`、`untracked_keep=66`、`total=990` を固定した。
-- 抽出では `output/public/gw/tmp_*`、`output/public/quantum/*declaration_gate*`、`output/public/quantum/*route_sync*` を publish set から除外し、stage 後の再検索でもこれらが `0` 件であることを確認した。
-- staged set の topic breakdown は `cassini=20, cosmology=42, eht=23, gps=8, gw=21, llr=50, mercury=2, pulsar=3, quantum=722, summary=34, theory=33, viking=2, vlbi=26, xrism=4`、合計 `990` である。
-- canonical public artifact は `git commit -m "release: add canonical public artifacts for paper v2.0"` で commit し、commit [7ec8481](/C:/develop/waveP/.git/refs/heads/main) を作成した。local `main` は `origin/main` に対して `ahead 3` である。scientific official state は unchanged である。
+- release commit 群を `origin/main` へ push し、tag `v0.2.0` も公開した。remote `main` は commit `a97628c`、remote tag `v0.2.0` は tag object `ac09bfa` を指している。
+- push 前の dirty tree は `output/public` の temp/internal 残差と `scripts/` の未追跡残差に分かれていたため、それぞれ `git stash` で退避した。保持中の stash は `pre-tag leftover untracked scripts` と `pre-tag leftover public temp artifacts` の 2 本である。
+- GitHub push 経路は HTTPS から SSH へ切り替え、`ssh.github.com:443` を使う構成へ変更した。repo local の `core.sshCommand` は `C:/Users/ogawa/.ssh/id_ed25519_wavep_release` を使う。
+- push 後に root [README.md](/C:/develop/waveP/README.md) と [output/public/README.md](/C:/develop/waveP/output/public/README.md) の同期ずれを確認し、public 側だけに残っていた `W/Z ボソン質量` の説明と末尾の `数式閉包` 説明を root 正本へ取り込んだうえで、`python -B scripts/summary/sync_public_readme.py --direction root-to-public` を再実行して一致させた。scientific official state は unchanged である。
 
 ## Workflow note
 
-- 今回の branch は release-prep における公開 artifact の切り分けと commit 作成であり、理論計算や再検証ではない。
-- 公開可否の判断基準は「論文・README・公開運用文書と直接リンクする canonical artifact を優先し、temp/internal 補助物は除外する」である。
+- 今回の branch は release-prep の完了と公開 surface の最終同期であり、理論計算や再検証ではない。
+- 公開運用の判断基準は「root README を正本とし、public README は必ず `root -> public` 同期で一致させる」である。
 
 ## Next
 
-- Paper lane: 残っている dirty tree の `tmp_*` / 内部監査補助物 / 未選別 public artifact を push 前に最終整理する。
-- Paper lane: 必要なら reproducibility source commit と canonical public artifact commit を最終確認したうえで push する。
+- Paper lane: release 後に stash 2 本を保持したまま解析を再開する場合は、必要な方だけ `git stash apply` で戻して branch を切る。
+- Paper lane: README・release note・GitHub Releases 本文などの公開案内文面を必要に応じて整える。
 - Scientific lane: no unconditional next official branch.
 - Reopen scientifically only if a genuinely new native relativistic bound-state bridge for retained Halpha actualizes.
 - Reopen scientifically only if a genuinely new deterministic native precision correction beyond the current tree-level baselines actualizes.
