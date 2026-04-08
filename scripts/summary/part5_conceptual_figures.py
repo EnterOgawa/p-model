@@ -155,7 +155,13 @@ def _draw_gw(paths: dict[str, Path]) -> dict[str, Any]:
         "note": get_wavep_font_size("note", name="part5_future_predictions"),
         "legend": get_wavep_font_size("legend", name="part5_future_predictions"),
     }
-    fig.suptitle("重力波偏光の判別条件", fontsize=get_wavep_font_size("suptitle", name="part5_future_predictions"), y=0.97)
+    fig.suptitle(
+        "重力波偏光の判別条件",
+        fontsize=get_wavep_font_size("suptitle", name="part5_future_predictions"),
+        x=0.515,
+        y=0.97,
+        ha="center",
+    )
 
     panels = [
         (axes[0], "検出器2台（現在）", [("H1", 0.22, 0.72), ("L1", 0.74, 0.28)], "方向が足りず\n偏光を分けにくい"),
@@ -165,12 +171,14 @@ def _draw_gw(paths: dict[str, Path]) -> dict[str, Any]:
         ax.set_xlim(0, 1)
         ax.set_ylim(0, 1)
         ax.axis("off")
-        ax.set_title(title, fontsize=sizes["title"], pad=8.0)
-        for idx, (label, x, y) in enumerate(nodes):
-            for other_label, ox, oy in nodes[idx + 1 :]:
-                ax.plot([x, ox], [y, oy], color="#B5BCC8", lw=1.4)
-            ax.add_patch(Circle((x, y), 0.055, fc="#E8EEF8", ec=GR_COLOR, lw=1.7))
-            ax.text(x, y, label, ha="center", va="center", fontsize=sizes["axis"])
+        ax.set_title(title, fontsize=sizes["title"], pad=2.0, y=0.96)
+        # 先に接続線をまとめて描き、後から検出器ノードを重ねて丸が手前に見えるようにする。
+        for idx, (_, x, y) in enumerate(nodes):
+            for _, ox, oy in nodes[idx + 1 :]:
+                ax.plot([x, ox], [y, oy], color="#B5BCC8", lw=1.4, zorder=1)
+        for label, x, y in nodes:
+            ax.add_patch(Circle((x, y), 0.055, fc="#E8EEF8", ec=GR_COLOR, lw=1.7, zorder=3))
+            ax.text(x, y, label, ha="center", va="center", fontsize=sizes["axis"], zorder=4)
         ax.text(0.50, 0.08, note, ha="center", va="center", fontsize=sizes["note"])
 
     return _finalize_figure(fig, paths=paths)
@@ -277,7 +285,6 @@ def _draw_macro(paths: dict[str, Path]) -> dict[str, Any]:
         ha="center",
         va="center",
         arrowprops={"arrowstyle": "->", "lw": 1.0, "color": OBS_COLOR},
-        bbox={"boxstyle": "round,pad=0.18", "fc": "white", "ec": "none", "alpha": 0.92},
     )
     bottom.set_xlabel("質量", fontsize=sizes["axis"])
     bottom.set_ylabel("干渉縞の見えやすさ", fontsize=sizes["axis"])
