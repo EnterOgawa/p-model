@@ -1,3 +1,10 @@
+"""
+目的: 量子 topic の condensed silicon thermal expansion gruneisen phonon dos mode gamma model に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -6,6 +13,7 @@ import csv
 import hashlib
 import json
 import math
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -5351,12 +5359,21 @@ def main(argv: Optional[list[str]] = None) -> None:
 
     title_font = 14.8
     axis_label_font = 13.4
-    tick_font = 12.2
+    tick_font = 13.2
     legend_font = 10.8
     annotation_font = 11.2
 
+    fig_h_in = 9.8
+    hspace = 0.42
+    alpha_legend_y = 0.90
+    # 条件分岐: `int(args.groups) == 3` を満たす経路を評価する。
+    if int(args.groups) == 3:
+        fig_h_in = 10.35
+        hspace = 0.50
+        alpha_legend_y = 0.84
+
     fig, (ax0, ax1, ax2) = plt.subplots(
-        3, 1, figsize=(11.0, 9.2), sharex=False, gridspec_kw={"height_ratios": [1, 2, 1]}
+        3, 1, figsize=(11.0, fig_h_in), sharex=False, gridspec_kw={"height_ratios": [1, 2, 1]}
     )
 
     # DOS (per atom), converted to per-THz for readability.
@@ -5624,7 +5641,7 @@ def main(argv: Optional[list[str]] = None) -> None:
 
     ax1.grid(True, alpha=0.25)
     ax1.tick_params(axis="both", labelsize=tick_font)
-    ax1.legend(loc="best", fontsize=legend_font)
+    ax1.legend(loc="upper right", bbox_to_anchor=(0.985, alpha_legend_y), fontsize=legend_font)
 
     # Residual z
     ax2.plot(temps, z, color="#000000", lw=1.2)
@@ -5636,11 +5653,21 @@ def main(argv: Optional[list[str]] = None) -> None:
     ax2.grid(True, alpha=0.25)
     ax2.tick_params(axis="both", labelsize=tick_font)
 
-    fig.tight_layout()
+    fig.subplots_adjust(left=0.11, right=0.985, top=0.955, bottom=0.08, hspace=hspace)
     out_pdf = out_dir / f"{out_tag}.pdf"
     out_png = out_dir / f"{out_tag}.png"
-    fig.savefig(out_pdf)
-    fig.savefig(out_png, dpi=180)
+    normalize_backup = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+    try:
+        with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+            fig.savefig(out_pdf)
+            fig.savefig(out_png, dpi=180)
+    finally:
+        if normalize_backup is None:
+            os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = normalize_backup
+
     plt.close(fig)
 
     # Metrics

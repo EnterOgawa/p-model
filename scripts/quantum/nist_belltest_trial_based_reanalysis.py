@@ -1,12 +1,30 @@
+"""
+目的: 量子 topic の nist belltest trial based reanalysis に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
 import csv
 import json
+import os
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
+
+enable_japanese_figure_localization()
 
 
 # クラス: `TrialCounts` の責務と境界条件を定義する。
@@ -319,15 +337,19 @@ def main() -> None:
     # Plot
     import matplotlib.pyplot as plt
 
-    fig, axes = plt.subplots(2, 1, figsize=(12.8, 9.8), dpi=170)
-    panel_title_font = 14.8
-    axis_label_font = 13.8
-    tick_font = 12.6
-    legend_font = 12.4
-    note_font = 11.6
+    fig, axes = plt.subplots(2, 1, dpi=170)
+    apply_wavep_figure_layout(fig, template="part2_two_panel_quantum_spacious")
+    fig.set_size_inches(fig.get_figwidth(), 5.55, forward=True)
+    fig.subplots_adjust(left=0.155, right=0.985, top=0.895, bottom=0.115, hspace=0.36)
+    panel_title_font = get_wavep_font_size("title") * 0.88
+    axis_label_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    legend_font = get_wavep_font_size("legend")
+    note_font = get_wavep_font_size("note")
+    suptitle_font = get_wavep_font_size("suptitle") + 2.0
 
     ax0 = axes[0]
-    ax0.set_title("Coincidences: coincidence-based (window) vs trial-based (sync/slot)", fontsize=panel_title_font)
+    ax0.set_title("coincidence-base と trial-base の一致", fontsize=panel_title_font, pad=7.5)
 
     # 条件分岐: `sweep is not None` を満たす経路を評価する。
     if sweep is not None:
@@ -336,20 +358,24 @@ def main() -> None:
             sweep["pairs_total"],
             marker="o",
             lw=1.4,
-            label="coincidence-based pairs_total (greedy, PPS-aligned)",
+            label="coincidence-base pairs_total",
         )
 
     trial_total = int(counts.n_coinc.sum())
-    ax0.axhline(trial_total, color="0.2", ls="--", lw=1.0, label=f"trial-based coincidences={trial_total}")
+    ax0.axhline(trial_total, color="0.2", ls="--", lw=1.0, label=f"trial-base coincidences={trial_total}")
     ax0.set_xscale("log")
-    ax0.set_xlabel("coincidence window (ns)", fontsize=axis_label_font)
-    ax0.set_ylabel("coincidences (count)", fontsize=axis_label_font)
+    ax0.set_ylabel("coincidences (件数)", fontsize=axis_label_font)
     ax0.grid(True, which="both", ls=":", lw=0.6, alpha=0.6)
     ax0.legend(frameon=True, fontsize=legend_font)
     ax0.tick_params(axis="both", labelsize=tick_font)
+    ax0.set_xlabel("")
+    ax0.xaxis.label.set_visible(False)
+    ax0.tick_params(axis="x", labelbottom=False)
+    for tick_label in ax0.get_xticklabels():
+        tick_label.set_visible(False)
 
     ax1 = axes[1]
-    ax1.set_title("CH J_prob (A1=0,B1=0): window dependence", fontsize=panel_title_font)
+    ax1.set_title("CH J_prob（A1=0,B1=0）の窓幅依存", fontsize=panel_title_font, pad=7.5)
     # Trial-based J for A1=0,B1=0.
     j_trial = float(ch["A1=0,B1=0"]["J_prob"])
     # 条件分岐: `sweep is not None and "J_prob_A1=0_B1=0" in sweep` を満たす経路を評価する。
@@ -359,7 +385,7 @@ def main() -> None:
             sweep["J_prob_A1=0_B1=0"],
             marker="o",
             lw=1.4,
-            label="coincidence-based J_prob",
+            label="coincidence-base J_prob",
         )
         # closest match point
         idx = int(np.argmin(np.abs(sweep["J_prob_A1=0_B1=0"] - j_trial)))
@@ -367,24 +393,34 @@ def main() -> None:
         ax1.text(
             float(sweep["window_ns"][idx]) * 1.06,
             float(sweep["J_prob_A1=0_B1=0"][idx]),
-            f"closest\\n{float(sweep['window_ns'][idx]):g} ns",
+            f"最接近\\n{float(sweep['window_ns'][idx]):g} ns",
             fontsize=note_font,
             va="bottom",
         )
 
-    ax1.axhline(j_trial, color="0.2", ls="--", lw=1.0, label=f"trial-based J_prob={j_trial:.3g}")
+    ax1.axhline(j_trial, color="0.2", ls="--", lw=1.0, label=f"trial-base J_prob={j_trial:.3g}")
     ax1.axhline(0.0, color="0.4", ls="-", lw=0.8)
     ax1.set_xscale("log")
-    ax1.set_xlabel("coincidence window (ns)", fontsize=axis_label_font)
+    ax1.set_xlabel("coincidence 窓幅 (ns)", fontsize=axis_label_font)
     ax1.set_ylabel("J_prob", fontsize=axis_label_font)
     ax1.grid(True, which="both", ls=":", lw=0.6, alpha=0.6)
     ax1.legend(frameon=True, fontsize=legend_font)
     ax1.tick_params(axis="both", labelsize=tick_font)
 
-    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    fig.suptitle("NIST Bell test：trial-base 集計との差分", y=0.992, fontsize=suptitle_font)
 
-    fig.savefig(out_png, bbox_inches="tight")
-    fig.savefig(out_pdf, bbox_inches="tight")
+    normalize_backup = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+    try:
+        with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+            fig.savefig(out_png)
+            fig.savefig(out_pdf)
+    finally:
+        if normalize_backup is None:
+            del os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"]
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = normalize_backup
+
     plt.close(fig)
 
     metrics = {

@@ -17,7 +17,9 @@ REM   build_materials.bat quick
 REM   build_materials.bat quick-nodocx
 REM   build_materials.bat 1  (Part I only)
 REM   build_materials.bat 2  (Part II only)
-REM   build_materials.bat 3  (Part III only)
+REM   build_materials.bat 3  (Part III-A + III-B)
+REM   build_materials.bat 3a (Part III-A only)
+REM   build_materials.bat 3b (Part III-B only)
 REM   build_materials.bat 4  (Part IV only)
 REM   build_materials.bat 5  (Part V only)
 REM
@@ -87,7 +89,9 @@ set "PB_EXTRA_ARGS="
 
 if "%MODE%"=="1" goto mode1
 if "%MODE%"=="2" goto mode2
-if "%MODE%"=="3" goto mode3
+if /I "%MODE%"=="3" goto mode3family
+if /I "%MODE%"=="3a" goto mode3a
+if /I "%MODE%"=="3b" goto mode3b
 if "%MODE%"=="4" goto mode4
 if "%MODE%"=="5" goto mode5
 goto dispatch
@@ -105,11 +109,18 @@ set "DOCX_NAME=pmodel_paper_part2_astrophysics.docx"
 set "DOCX_HTML_NAME=pmodel_paper_part2_astrophysics_docx.html"
 goto single_profile
 
-:mode3
-set "PROFILE=part3_quantum"
-set "HTML_NAME=pmodel_paper_part3_quantum.html"
-set "DOCX_NAME=pmodel_paper_part3_quantum.docx"
-set "DOCX_HTML_NAME=pmodel_paper_part3_quantum_docx.html"
+:mode3a
+set "PROFILE=part3a_quantum_foundations"
+set "HTML_NAME=pmodel_paper_part3a_quantum_foundations.html"
+set "DOCX_NAME=pmodel_paper_part3a_quantum_foundations.docx"
+set "DOCX_HTML_NAME=pmodel_paper_part3a_quantum_foundations_docx.html"
+goto single_profile
+
+:mode3b
+set "PROFILE=part3b_quantum_verification"
+set "HTML_NAME=pmodel_paper_part3b_quantum_verification.html"
+set "DOCX_NAME=pmodel_paper_part3b_quantum_verification.docx"
+set "DOCX_HTML_NAME=pmodel_paper_part3b_quantum_verification_docx.html"
 goto single_profile
 
 :mode4
@@ -132,13 +143,15 @@ if /I "%MODE%"=="quick-nodocx" goto quick_nodocx
 
 echo [err] Unknown mode: "%MODE%"
 echo [hint] Usage: build_materials.bat [full^|quick^|quick-nodocx]
-echo [hint]        build_materials.bat [1^|2^|3^|4^|5]
+echo [hint]        build_materials.bat [1^|2^|3^|3a^|3b^|4^|5]
 goto fail
 
 :single_profile
 echo [info] Mode=%MODE% (single paper)
 echo [info] PROFILE=%PROFILE%
 echo [info] ROOT=%ROOT%
+
+if /I "%PROFILE%"=="part4_verification" goto single_profile_part4_direct
 
 echo.
 echo === paper_build (%PROFILE%) ===
@@ -165,6 +178,80 @@ echo [info] DOCX auto-generation is disabled by policy. Skipping DOCX export for
 
 echo.
 echo [ok] Done (profile=%PROFILE%)
+goto ok
+
+:single_profile_part4_direct
+echo.
+echo === part4 direct rerender default ===
+echo [info] Part IV is rerendered from existing canonical artifacts by default.
+echo [info] Use paper_build.py explicitly only when upstream refresh is intended.
+set "WAVEP_FIGURE_LANG=ja"
+set "WAVEP_MPL_FORCE_JA_TEXT=1"
+
+echo.
+echo === paper_lint (%PROFILE%) ===
+python -B scripts\summary\paper_lint.py --manuscript doc\paper\13_part4_verification.md
+if errorlevel 1 goto fail
+
+echo.
+echo === paper_html (%PROFILE%) ===
+python -B scripts\summary\paper_html.py --profile %PROFILE% --mode publish --outdir output\private\summary
+if errorlevel 1 goto fail
+
+echo.
+echo === paper_latex (%PROFILE%) ===
+python -B scripts\summary\paper_latex.py --profile %PROFILE% --outdir output\private\summary
+if errorlevel 1 goto fail
+
+echo.
+echo === paper_tex_audit (%PROFILE%) ===
+python -B scripts\summary\paper_tex_audit.py --profile %PROFILE% --outdir output\private\summary
+if errorlevel 1 goto fail
+
+echo.
+echo === paper_pdf (%PROFILE%) ===
+python -B scripts\summary\paper_pdf.py --profile %PROFILE% --outdir output\private\summary %PDF_COMMON_ARGS%
+if errorlevel 1 goto fail
+
+echo.
+echo [ok] Done (profile=%PROFILE%, route=direct-rerender)
+goto ok
+
+:mode3family
+echo [info] Mode=3 (Part III-A + Part III-B)
+echo [info] ROOT=%ROOT%
+
+echo.
+echo === paper_build (part3a_quantum_foundations) ===
+python -B scripts\summary\paper_build.py --profile part3a_quantum_foundations --figure-lang ja --mode publish --outdir output\private\summary --skip-docx --skip-lint
+if errorlevel 1 goto fail
+
+echo.
+echo === paper_build (part3b_quantum_verification) ===
+python -B scripts\summary\paper_build.py --profile part3b_quantum_verification --figure-lang ja --mode publish --outdir output\private\summary --skip-docx --skip-lint
+if errorlevel 1 (
+  echo [warn] paper_build part3b_quantum_verification failed; retrying with --skip-tables
+  python -B scripts\summary\paper_build.py --profile part3b_quantum_verification --figure-lang ja --mode publish --outdir output\private\summary --skip-docx --skip-lint --skip-tables
+  if errorlevel 1 goto fail
+)
+
+echo.
+echo === latex_paper (part3a_quantum_foundations / part3b_quantum_verification) ===
+python -B scripts\summary\paper_latex.py --profile part3a_quantum_foundations --outdir output\private\summary
+if errorlevel 1 goto fail
+python -B scripts\summary\paper_latex.py --profile part3b_quantum_verification --outdir output\private\summary
+if errorlevel 1 goto fail
+echo.
+echo === paper_tex_audit (part3a_quantum_foundations / part3b_quantum_verification) ===
+python -B scripts\summary\paper_tex_audit.py --profile part3a_quantum_foundations --profile part3b_quantum_verification --outdir output\private\summary
+if errorlevel 1 goto fail
+echo.
+echo === paper_pdf (part3a_quantum_foundations / part3b_quantum_verification) ===
+python -B scripts\summary\paper_pdf.py --profile part3a_quantum_foundations --profile part3b_quantum_verification --outdir output\private\summary %PDF_COMMON_ARGS%
+if errorlevel 1 goto fail
+
+echo.
+echo [ok] Done (Part III-A + Part III-B)
 goto ok
 
 :full
@@ -197,7 +284,7 @@ if errorlevel 1 goto fail
 
 echo.
 echo === validation_scoreboard ===
-python -B scripts\summary\validation_scoreboard.py
+python -B scripts\summary\validation_scoreboard.py --target-fig-h-in 9.2
 if errorlevel 1 goto fail
 
 echo.
@@ -215,11 +302,20 @@ if errorlevel 1 (
 )
 
 echo.
-echo === paper_build (part3_quantum) ===
-python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\private\summary --skip-docx --skip-lint
+echo === paper_build (part3a_quantum_foundations) ===
+python -B scripts\summary\paper_build.py --profile part3a_quantum_foundations --figure-lang ja --mode publish --outdir output\private\summary --skip-docx --skip-lint
 if errorlevel 1 (
-  echo [warn] paper_build part3_quantum failed; retrying with --skip-tables
-  python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\private\summary --skip-docx --skip-lint --skip-tables
+  echo [warn] paper_build part3a_quantum_foundations failed; retrying with --skip-tables
+  python -B scripts\summary\paper_build.py --profile part3a_quantum_foundations --figure-lang ja --mode publish --outdir output\private\summary --skip-docx --skip-lint --skip-tables
+  if errorlevel 1 goto fail
+)
+
+echo.
+echo === paper_build (part3b_quantum_verification) ===
+python -B scripts\summary\paper_build.py --profile part3b_quantum_verification --figure-lang ja --mode publish --outdir output\private\summary --skip-docx --skip-lint
+if errorlevel 1 (
+  echo [warn] paper_build part3b_quantum_verification failed; retrying with --skip-tables
+  python -B scripts\summary\paper_build.py --profile part3b_quantum_verification --figure-lang ja --mode publish --outdir output\private\summary --skip-docx --skip-lint --skip-tables
   if errorlevel 1 goto fail
 )
 
@@ -234,24 +330,26 @@ python -B scripts\summary\paper_build.py --profile part5_future_predictions --mo
 if errorlevel 1 goto fail
 
 echo.
-echo === latex_paper (paper/part2/part3/part4/part5) ===
+echo === latex_paper (paper/part2/part3a/part3b/part4/part5) ===
 python -B scripts\summary\paper_latex.py --profile paper --outdir output\private\summary
 if errorlevel 1 goto fail
 python -B scripts\summary\paper_latex.py --profile part2_astrophysics --outdir output\private\summary
 if errorlevel 1 goto fail
-python -B scripts\summary\paper_latex.py --profile part3_quantum --outdir output\private\summary
+python -B scripts\summary\paper_latex.py --profile part3a_quantum_foundations --outdir output\private\summary
+if errorlevel 1 goto fail
+python -B scripts\summary\paper_latex.py --profile part3b_quantum_verification --outdir output\private\summary
 if errorlevel 1 goto fail
 python -B scripts\summary\paper_latex.py --profile part4_verification --outdir output\private\summary
 if errorlevel 1 goto fail
 python -B scripts\summary\paper_latex.py --profile part5_future_predictions --outdir output\private\summary
 if errorlevel 1 goto fail
 echo.
-echo === paper_tex_audit (paper/part2/part3/part4/part5) ===
-python -B scripts\summary\paper_tex_audit.py --profile paper --profile part2_astrophysics --profile part3_quantum --profile part4_verification --profile part5_future_predictions --outdir output\private\summary
+echo === paper_tex_audit (paper/part2/part3a/part3b/part4/part5) ===
+python -B scripts\summary\paper_tex_audit.py --profile paper --profile part2_astrophysics --profile part3a_quantum_foundations --profile part3b_quantum_verification --profile part4_verification --profile part5_future_predictions --outdir output\private\summary
 if errorlevel 1 goto fail
 echo.
-echo === paper_pdf (paper/part2/part3/part4/part5) ===
-python -B scripts\summary\paper_pdf.py --profile paper --profile part2_astrophysics --profile part3_quantum --profile part4_verification --profile part5_future_predictions --outdir output\private\summary %PDF_COMMON_ARGS%
+echo === paper_pdf (paper/part2/part3a/part3b/part4/part5) ===
+python -B scripts\summary\paper_pdf.py --profile paper --profile part2_astrophysics --profile part3a_quantum_foundations --profile part3b_quantum_verification --profile part4_verification --profile part5_future_predictions --outdir output\private\summary %PDF_COMMON_ARGS%
 if errorlevel 1 goto fail
 
 echo.
@@ -281,11 +379,20 @@ if errorlevel 1 (
 )
 
 echo.
-echo === paper_build (part3_quantum) ===
-python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\private\summary --skip-docx --skip-lint
+echo === paper_build (part3a_quantum_foundations) ===
+python -B scripts\summary\paper_build.py --profile part3a_quantum_foundations --figure-lang ja --mode publish --outdir output\private\summary --skip-docx --skip-lint
 if errorlevel 1 (
-  echo [warn] paper_build part3_quantum failed; retrying with --skip-tables
-  python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\private\summary --skip-docx --skip-lint --skip-tables
+  echo [warn] paper_build part3a_quantum_foundations failed; retrying with --skip-tables
+  python -B scripts\summary\paper_build.py --profile part3a_quantum_foundations --figure-lang ja --mode publish --outdir output\private\summary --skip-docx --skip-lint --skip-tables
+  if errorlevel 1 goto fail
+)
+
+echo.
+echo === paper_build (part3b_quantum_verification) ===
+python -B scripts\summary\paper_build.py --profile part3b_quantum_verification --figure-lang ja --mode publish --outdir output\private\summary --skip-docx --skip-lint
+if errorlevel 1 (
+  echo [warn] paper_build part3b_quantum_verification failed; retrying with --skip-tables
+  python -B scripts\summary\paper_build.py --profile part3b_quantum_verification --figure-lang ja --mode publish --outdir output\private\summary --skip-docx --skip-lint --skip-tables
   if errorlevel 1 goto fail
 )
 
@@ -300,24 +407,26 @@ python -B scripts\summary\paper_build.py --profile part5_future_predictions --mo
 if errorlevel 1 goto fail
 
 echo.
-echo === latex_paper (paper/part2/part3/part4/part5) ===
+echo === latex_paper (paper/part2/part3a/part3b/part4/part5) ===
 python -B scripts\summary\paper_latex.py --profile paper --outdir output\private\summary
 if errorlevel 1 goto fail
 python -B scripts\summary\paper_latex.py --profile part2_astrophysics --outdir output\private\summary
 if errorlevel 1 goto fail
-python -B scripts\summary\paper_latex.py --profile part3_quantum --outdir output\private\summary
+python -B scripts\summary\paper_latex.py --profile part3a_quantum_foundations --outdir output\private\summary
+if errorlevel 1 goto fail
+python -B scripts\summary\paper_latex.py --profile part3b_quantum_verification --outdir output\private\summary
 if errorlevel 1 goto fail
 python -B scripts\summary\paper_latex.py --profile part4_verification --outdir output\private\summary
 if errorlevel 1 goto fail
 python -B scripts\summary\paper_latex.py --profile part5_future_predictions --outdir output\private\summary
 if errorlevel 1 goto fail
 echo.
-echo === paper_tex_audit (paper/part2/part3/part4/part5) ===
-python -B scripts\summary\paper_tex_audit.py --profile paper --profile part2_astrophysics --profile part3_quantum --profile part4_verification --profile part5_future_predictions --outdir output\private\summary
+echo === paper_tex_audit (paper/part2/part3a/part3b/part4/part5) ===
+python -B scripts\summary\paper_tex_audit.py --profile paper --profile part2_astrophysics --profile part3a_quantum_foundations --profile part3b_quantum_verification --profile part4_verification --profile part5_future_predictions --outdir output\private\summary
 if errorlevel 1 goto fail
 echo.
-echo === paper_pdf (paper/part2/part3/part4/part5) ===
-python -B scripts\summary\paper_pdf.py --profile paper --profile part2_astrophysics --profile part3_quantum --profile part4_verification --profile part5_future_predictions --outdir output\private\summary %PDF_COMMON_ARGS%
+echo === paper_pdf (paper/part2/part3a/part3b/part4/part5) ===
+python -B scripts\summary\paper_pdf.py --profile paper --profile part2_astrophysics --profile part3a_quantum_foundations --profile part3b_quantum_verification --profile part4_verification --profile part5_future_predictions --outdir output\private\summary %PDF_COMMON_ARGS%
 if errorlevel 1 goto fail
 
 echo.
@@ -343,8 +452,13 @@ python -B scripts\summary\paper_build.py --profile part2_astrophysics --mode pub
 if errorlevel 1 goto fail
 
 echo.
-echo === paper_build (part3_quantum) ===
-python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\private\summary --skip-docx --skip-lint
+echo === paper_build (part3a_quantum_foundations) ===
+python -B scripts\summary\paper_build.py --profile part3a_quantum_foundations --figure-lang ja --mode publish --outdir output\private\summary --skip-docx --skip-lint
+if errorlevel 1 goto fail
+
+echo.
+echo === paper_build (part3b_quantum_verification) ===
+python -B scripts\summary\paper_build.py --profile part3b_quantum_verification --figure-lang ja --mode publish --outdir output\private\summary --skip-docx --skip-lint
 if errorlevel 1 goto fail
 
 echo.
@@ -358,12 +472,14 @@ python -B scripts\summary\paper_build.py --profile part5_future_predictions --mo
 if errorlevel 1 goto fail
 
 echo.
-echo === latex_paper (paper/part2/part3/part4/part5) ===
+echo === latex_paper (paper/part2/part3a/part3b/part4/part5) ===
 python -B scripts\summary\paper_latex.py --profile paper --outdir output\private\summary
 if errorlevel 1 goto fail
 python -B scripts\summary\paper_latex.py --profile part2_astrophysics --outdir output\private\summary
 if errorlevel 1 goto fail
-python -B scripts\summary\paper_latex.py --profile part3_quantum --outdir output\private\summary
+python -B scripts\summary\paper_latex.py --profile part3a_quantum_foundations --outdir output\private\summary
+if errorlevel 1 goto fail
+python -B scripts\summary\paper_latex.py --profile part3b_quantum_verification --outdir output\private\summary
 if errorlevel 1 goto fail
 python -B scripts\summary\paper_latex.py --profile part4_verification --outdir output\private\summary
 if errorlevel 1 goto fail
@@ -371,13 +487,13 @@ python -B scripts\summary\paper_latex.py --profile part5_future_predictions --ou
 if errorlevel 1 goto fail
 
 echo.
-echo === paper_tex_audit (paper/part2/part3/part4/part5) ===
-python -B scripts\summary\paper_tex_audit.py --profile paper --profile part2_astrophysics --profile part3_quantum --profile part4_verification --profile part5_future_predictions --outdir output\private\summary
+echo === paper_tex_audit (paper/part2/part3a/part3b/part4/part5) ===
+python -B scripts\summary\paper_tex_audit.py --profile paper --profile part2_astrophysics --profile part3a_quantum_foundations --profile part3b_quantum_verification --profile part4_verification --profile part5_future_predictions --outdir output\private\summary
 if errorlevel 1 goto fail
 
 echo.
-echo === paper_pdf (paper/part2/part3/part4/part5) ===
-python -B scripts\summary\paper_pdf.py --profile paper --profile part2_astrophysics --profile part3_quantum --profile part4_verification --profile part5_future_predictions --outdir output\private\summary %PDF_COMMON_ARGS%
+echo === paper_pdf (paper/part2/part3a/part3b/part4/part5) ===
+python -B scripts\summary\paper_pdf.py --profile paper --profile part2_astrophysics --profile part3a_quantum_foundations --profile part3b_quantum_verification --profile part4_verification --profile part5_future_predictions --outdir output\private\summary %PDF_COMMON_ARGS%
 if errorlevel 1 goto fail
 
 echo.

@@ -1,3 +1,10 @@
+"""
+目的: 量子 topic の nuclear a dependence mean field に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -3348,6 +3355,8 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
       - This step keeps the frozen C3 values from Step 7.13.15.1 (radii-equilibrium freeze).
       - It does NOT refit to B/A. The goal is to make "where it fails" visible at scale.
     """
+    root = Path(__file__).resolve().parents[2]
+
     # 条件分岐: `domain_min_a < 1` を満たす経路を評価する。
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
@@ -4112,9 +4121,9 @@ def _run_step_7_13_15_7(
         raise SystemExit(f"[fail] invalid 7.13.15.6 row structure: per_eq missing: {metrics_7156_path}")
 
     eq_keys = sorted([str(k) for k in sample["per_eq"].keys()], key=int)
-    # 条件分岐: `set(eq_keys) != {"18", "19"}` を満たす経路を評価する。
-    if set(eq_keys) != {"18", "19"}:
-        raise SystemExit(f"[fail] Step 7.13.15.7 expects per_eq with eq18/eq19; got: {eq_keys}")
+    # 条件分岐: `not eq_keys` を満たす経路を評価する。
+    if not eq_keys:
+        raise SystemExit(f"[fail] Step 7.13.15.7 expects at least one per_eq branch; got: {eq_keys}")
 
     # 関数: `median` の入出力契約と処理意図を定義する。
 
@@ -4446,7 +4455,12 @@ def _run_step_7_13_15_7(
     ax.scatter(xs_non, ys_non, s=10, alpha=0.35, label="Δ(B/A) mean (non-magic)")
     ax.scatter(xs_magic, ys_magic, s=10, alpha=0.55, label="Δ(B/A) mean (magic Z/N)")
     ax.axhline(0.0, color="k", linewidth=1)
-    ax.set_title("Residual after adding surface term (mean over eq18/eq19)")
+    residual_title = "Residual after adding surface term (mean over eq18/eq19)"
+    # 条件分岐: `set(eq_keys) != {"18", "19"}` を満たす経路を評価する。
+    if set(eq_keys) != {"18", "19"}:
+        residual_title = "Residual after adding surface term (mean over available eq branches)"
+
+    ax.set_title(residual_title)
     ax.set_xlabel("A^(1/3)")
     ax.set_ylabel("Δ(B/A) (MeV)")
     ax.grid(True, alpha=0.3)
@@ -4597,7 +4611,7 @@ def _run_step_7_13_15_7(
                     "x_fm5": "1/(6*rho^2*R_sharp)",
                     "fit": "C3_est_from_radii ≈ C3_inf + C_surf * x  (radii-only; no B/A)",
                     "predict": "C3_eff=C3_inf+C_surf*x;  E_total/A=E_base/A+C3_eff*rho^2=E_base/A+C3_inf*rho^2+C_surf/(6R_sharp);  B/A_pred=-E_total/A",
-                    "sigma_set": "0.5*|pred(eq18)-pred(eq19)| (no choosing eq)",
+        "sigma_set": "0.5*|pred(eq18)-pred(eq19)| when both branches exist; otherwise 0.0 for a single canonical branch",
                 },
                 "fit_by_eq": fit_by_eq,
                 "diag": diag,

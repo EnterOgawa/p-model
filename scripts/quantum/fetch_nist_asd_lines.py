@@ -1,3 +1,10 @@
+"""
+目的: 量子 topic の fetch nist asd lines に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -131,13 +138,13 @@ def _as_float(s: str | None) -> float | None:
         return None
 
 
-# 関数: `_derive_lambda_from_obs_nu_A` の入出力契約と処理意図を定義する。
+# 関数: `_derive_lambda_from_invA` の入出力契約と処理意図を定義する。
 
-def _derive_lambda_from_obs_nu_A(nu_invA: float) -> float | None:
+def _derive_lambda_from_invA(nu_invA: float) -> float | None:
     # 条件分岐: `nu_invA == 0.0` を満たす経路を評価する。
     if nu_invA == 0.0:
         return None
-    # NIST "obs_nu(A)" values are negative in this output; wavelength is positive.
+    # NIST "obs_nu(A)" / "ritz_wn(A)" values are negative in this output; wavelength is positive.
 
     return -1.0 / nu_invA
 
@@ -147,12 +154,14 @@ def _derive_lambda_from_obs_nu_A(nu_invA: float) -> float | None:
 def _pick_line_for_target(rows: list[dict[str, str]], target: TargetLine) -> dict[str, Any] | None:
     candidates: list[dict[str, Any]] = []
     for r in rows:
-        nu = _as_float(r.get("obs_nu(A)"))
-        # 条件分岐: `nu is None` を満たす経路を評価する。
-        if nu is None:
+        obs_nu = _as_float(r.get("obs_nu(A)"))
+        ritz_nu = _as_float(r.get("ritz_wn(A)"))
+        selected_nu = obs_nu if obs_nu is not None else ritz_nu
+        # 条件分岐: `selected_nu is None` を満たす経路を評価する。
+        if selected_nu is None:
             continue
 
-        lam = _derive_lambda_from_obs_nu_A(nu)
+        lam = _derive_lambda_from_invA(selected_nu)
         # 条件分岐: `lam is None` を満たす経路を評価する。
         if lam is None:
             continue
@@ -169,11 +178,13 @@ def _pick_line_for_target(rows: list[dict[str, str]], target: TargetLine) -> dic
                 "lambda_vac_A": float(lam),
                 "delta_A": float(lam - target.approx_lambda_vac_A),
                 "Aki_s^-1": aki,
-                "nu_obs_invA": float(nu),
+                "selected_nu_invA": float(selected_nu),
+                "selected_nu_source": ("obs_nu(A)" if obs_nu is not None else "ritz_wn(A)"),
+                "nu_obs_invA": (float(obs_nu) if obs_nu is not None else None),
                 "nu_obs_unc_invA": (abs(float(unc_nu)) if unc_nu is not None else None),
                 "Acc": (r.get("Acc") or None),
                 "Type": (r.get("Type") or None),
-                "ritz_nu_invA": _as_float(r.get("ritz_wn(A)")),
+                "ritz_nu_invA": ritz_nu,
                 "ritz_unc_invA": _as_float(r.get("unc_ritz_wn")),
                 "raw": r,
             }
@@ -302,8 +313,9 @@ def main(argv: list[str] | None = None) -> int:
         "raw_file": str(raw_path),
         "raw_sha256": _sha256(raw_path),
         "notes": [
-            "The NIST ASD 'lines1.pl' output uses obs_nu(A) (negative) in this configuration. "
-            "We convert via lambda_vac_A = -1/obs_nu(A).",
+            "The NIST ASD 'lines1.pl' output uses negative inverse-Angstrom spectral positions. "
+            "We convert via lambda_vac_A = -1/nu_invA and fall back from obs_nu(A) to ritz_wn(A) "
+            "when the observed column is blank.",
             "This extracted_values.json is meant as an offline-stable baseline (fixed targets), not a full theory derivation.",
         ],
     }
@@ -338,43 +350,59 @@ def main(argv: list[str] | None = None) -> int:
             TargetLine(id="He_I_587.73nm", approx_lambda_vac_A=5877.250, window_A=5.0),
             TargetLine(id="He_I_668.00nm", approx_lambda_vac_A=6679.995, window_A=5.0),
         ]
+    # 条件分岐: 前段条件が不成立で、`spectra.strip().lower() in ("he ii", "he 2", "he2", "helium ii", "helium 2")` を追加評価する。
+    elif spectra.strip().lower() in ("he ii", "he 2", "he2", "helium ii", "helium 2"):
+        # Hydrogenic helium ion (He+) fixed visible/UV baselines; vacuum wavelengths in Å.
+        targets = [
+            TargetLine(id="He_II_320.39nm", approx_lambda_vac_A=3203.873, window_A=3.0),
+            TargetLine(id="He_II_468.67nm", approx_lambda_vac_A=4686.689, window_A=3.0),
+            TargetLine(id="He_II_656.16nm", approx_lambda_vac_A=6561.580, window_A=3.0),
+        ]
 
-        selected: list[dict[str, Any]] = []
-        for t in targets:
-            best = _pick_line_for_target(rows, t)
-            # 条件分岐: `best is None` を満たす経路を評価する。
-            if best is None:
-                continue
+    selected: list[dict[str, Any]] = []
+    for t in targets:
+        best = _pick_line_for_target(rows, t)
+        # 条件分岐: `best is None` を満たす経路を評価する。
+        if best is None:
+            continue
 
-            lam_A = float(best["lambda_vac_A"])
-            nu = float(best["nu_obs_invA"])
-            unc_nu = best.get("nu_obs_unc_invA")
-            lam_unc_A = None
-            # 条件分岐: `unc_nu is not None and nu != 0.0` を満たす経路を評価する。
-            if unc_nu is not None and nu != 0.0:
-                lam_unc_A = abs(float(unc_nu)) / (nu * nu)
+        lam_A = float(best["lambda_vac_A"])
+        selected_nu = float(best["selected_nu_invA"])
+        lam_unc_A = None
+        freq_unc_hz = None
+        obs_unc_nu = best.get("nu_obs_unc_invA")
+        ritz_unc_nu = best.get("ritz_unc_invA")
+        unc_nu = obs_unc_nu if obs_unc_nu is not None else ritz_unc_nu
+        # 条件分岐: `unc_nu is not None and selected_nu != 0.0` を満たす経路を評価する。
+        if unc_nu is not None and selected_nu != 0.0:
+            lam_unc_A = abs(float(unc_nu)) / (selected_nu * selected_nu)
+            freq_unc_hz = abs(float(unc_nu)) * 1.0e10 * 299_792_458.0
 
-            best_out = {
-                "id": t.id,
-                "approx_lambda_vac_A": float(t.approx_lambda_vac_A),
-                "selected": {
-                    "lambda_vac_A": lam_A,
-                    "lambda_vac_nm": lam_A / 10.0,
-                    "lambda_vac_unc_A": lam_unc_A,
-                    "nu_obs_invA": nu,
-                    "nu_obs_unc_invA": unc_nu,
-                    "Aki_s^-1": best.get("Aki_s^-1"),
-                    "Acc": best.get("Acc"),
-                    "Type": best.get("Type"),
-                    "ritz_nu_invA": best.get("ritz_nu_invA"),
-                    "ritz_unc_invA": best.get("ritz_unc_invA"),
-                },
-            }
-            selected.append(best_out)
+        best_out = {
+            "id": t.id,
+            "approx_lambda_vac_A": float(t.approx_lambda_vac_A),
+            "selected": {
+                "lambda_vac_A": lam_A,
+                "lambda_vac_nm": lam_A / 10.0,
+                "lambda_vac_unc_A": lam_unc_A,
+                "frequency_hz": 299_792_458.0 / (lam_A * 1.0e-10),
+                "frequency_unc_hz": freq_unc_hz,
+                "selected_nu_invA": selected_nu,
+                "selected_nu_source": best.get("selected_nu_source"),
+                "nu_obs_invA": best.get("nu_obs_invA"),
+                "nu_obs_unc_invA": obs_unc_nu,
+                "Aki_s^-1": best.get("Aki_s^-1"),
+                "Acc": best.get("Acc"),
+                "Type": best.get("Type"),
+                "ritz_nu_invA": best.get("ritz_nu_invA"),
+                "ritz_unc_invA": best.get("ritz_unc_invA"),
+            },
+        }
+        selected.append(best_out)
 
-        extracted["selected_lines"] = selected
-        extracted_path.write_text(json.dumps(extracted, ensure_ascii=False, indent=2), encoding="utf-8")
-        print(f"[ok] extracted: {extracted_path}")
+    extracted["selected_lines"] = selected
+    extracted_path.write_text(json.dumps(extracted, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[ok] extracted: {extracted_path}")
 
     manifest = {
         "generated_utc": extracted["generated_utc"],

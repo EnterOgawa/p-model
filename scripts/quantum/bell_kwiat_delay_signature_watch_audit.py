@@ -1,3 +1,10 @@
+"""
+目的: 量子 topic の bell kwiat delay signature watch audit に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -53,23 +60,9 @@ def _fmt_float(x: float, digits: int = 6) -> str:
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
-        import matplotlib.font_manager as fm
+        from scripts.utils.plot_style import install_wavep_cjk_font_override
 
-        preferred = [
-            "Yu Gothic",
-            "Meiryo",
-            "BIZ UDGothic",
-            "MS Gothic",
-            "Yu Mincho",
-            "MS Mincho",
-        ]
-        available = {f.name for f in fm.fontManager.ttflist}
-        chosen = [name for name in preferred if name in available]
-        # 条件分岐: `not chosen` を満たす経路を評価する。
-        if not chosen:
-            return
-
-        mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+        install_wavep_cjk_font_override(preferred_name="Noto Sans CJK JP")
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         return
