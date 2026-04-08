@@ -3,9 +3,11 @@
 """
 born_route_a_proxy_constraints.py
 
-Step 8.7.2:
-Born則ルートA（導出チャレンジ）を、観測proxy（位相・可視度・選別感度）で
-同一ゲート評価し、A継続 / A棄却→B移行 を機械判定する。
+Step 8.7.2 / 8.7.49.5:
+Born則ルートA（導出チャレンジ）を、観測proxy（位相・可視度・選別感度）と
+位相ランダム化 + 線形検出応答の statistical bridge で同一パック化し、
+A継続 / A棄却→B移行 と「完全導出か、条件付きbridge止まりか」を
+再現可能な形で固定する。
 
 出力:
   - output/public/quantum/born_route_a_proxy_constraints_pack.json
@@ -34,8 +36,18 @@ if str(ROOT) not in sys.path:
 
 from scripts.summary import worklog  # noqa: E402
 
+try:
+    import matplotlib as mpl
+    from scripts.utils.plot_style import install_wavep_cjk_font_override  # noqa: E402
+
+    install_wavep_cjk_font_override(preferred_name="Noto Sans CJK JP")
+    mpl.rcParams["axes.unicode_minus"] = False
+except Exception:
+    pass
+
 
 # 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -120,6 +132,134 @@ def _extract_row(rows: List[Dict[str, Any]], channel: str) -> Optional[Dict[str,
     return None
 
 
+# 関数: `_normalize_weights` の入出力契約と処理意図を定義する。
+
+def _normalize_weights(weights: List[float]) -> List[float]:
+    positives = [float(max(w, 0.0)) for w in weights]
+    total = float(sum(positives))
+    # 条件分岐: `total <= 0.0` を満たす経路を評価する。
+    if total <= 0.0:
+        raise ValueError("weights must contain at least one positive entry")
+
+    return [w / total for w in positives]
+
+
+# 関数: `_simulate_phase_randomized_case` の入出力契約と処理意図を定義する。
+
+def _simulate_phase_randomized_case(
+    *,
+    case_id: str,
+    target_weights: List[float],
+    submode_counts: List[int],
+    shots: int,
+    seed: int,
+) -> Dict[str, Any]:
+    weights = np.asarray(_normalize_weights(target_weights), dtype=float)
+    counts = np.asarray(submode_counts, dtype=int)
+    # 条件分岐: `weights.size != counts.size` を満たす経路を評価する。
+    if weights.size != counts.size:
+        raise ValueError("target_weights and submode_counts must have the same length")
+
+    # 条件分岐: `np.any(counts <= 0)` を満たす経路を評価する。
+
+    if np.any(counts <= 0):
+        raise ValueError("submode_counts must all be positive")
+
+    amplitudes = [np.full(int(n), float(np.sqrt(w / n)), dtype=float) for w, n in zip(weights, counts)]
+    rng = np.random.default_rng(seed)
+    mean_intensity = np.zeros_like(weights)
+
+    for _ in range(shots):
+        shot_intensity = np.zeros_like(weights)
+        for idx, amp in enumerate(amplitudes):
+            phases = rng.uniform(0.0, 2.0 * np.pi, size=amp.size)
+            complex_amplitude = np.sum(amp * np.exp(1j * phases))
+            shot_intensity[idx] = float(np.abs(complex_amplitude) ** 2)
+
+        mean_intensity += shot_intensity
+
+    mean_intensity /= float(shots)
+    predicted_frequency = mean_intensity / float(np.sum(mean_intensity))
+    residual = predicted_frequency - weights
+    cross_term_residual = mean_intensity - weights
+
+    return {
+        "case_id": case_id,
+        "shots": int(shots),
+        "seed": int(seed),
+        "target_frequency": weights.tolist(),
+        "submode_counts": counts.tolist(),
+        "mean_intensity": mean_intensity.tolist(),
+        "predicted_frequency": predicted_frequency.tolist(),
+        "max_abs_frequency_error": float(np.max(np.abs(residual))),
+        "l1_frequency_error": float(np.sum(np.abs(residual))),
+        "max_abs_cross_term_residual": float(np.max(np.abs(cross_term_residual))),
+    }
+
+
+# 関数: `_build_statistical_bridge` の入出力契約と処理意図を定義する。
+
+def _build_statistical_bridge() -> Dict[str, Any]:
+    cases = [
+        _simulate_phase_randomized_case(
+            case_id="two_path_balanced",
+            target_weights=[0.5, 0.5],
+            submode_counts=[8, 8],
+            shots=8192,
+            seed=2026031301,
+        ),
+        _simulate_phase_randomized_case(
+            case_id="three_bin_skewed",
+            target_weights=[0.15, 0.35, 0.5],
+            submode_counts=[3, 5, 7],
+            shots=12288,
+            seed=2026031302,
+        ),
+        _simulate_phase_randomized_case(
+            case_id="gaussian_profile_7bin",
+            target_weights=[0.009172, 0.069913, 0.239062, 0.363706, 0.239062, 0.069913, 0.009172],
+            submode_counts=[4, 4, 4, 4, 4, 4, 4],
+            shots=16384,
+            seed=2026031303,
+        ),
+    ]
+    max_abs_frequency_error = max(float(case["max_abs_frequency_error"]) for case in cases)
+    max_abs_cross_term_residual = max(float(case["max_abs_cross_term_residual"]) for case in cases)
+    tolerance = 0.02
+    monte_carlo_pass = bool(max_abs_frequency_error <= tolerance)
+
+    return {
+        "status": "partial_bridge_fixed_operational_rule_retained",
+        "assumptions": [
+            "psi is the normalized positive-frequency envelope fluctuation fixed in 8.7.49.2.",
+            "Micro-phases are sufficiently mixed across sub-events so ensemble cross-terms average out.",
+            "Single-shot detector response is linear in the transported local energy density.",
+            "Single-shot backreaction on the P-field is negligible in the same regime where the operational Born rule was adopted.",
+        ],
+        "what_is_fixed": [
+            "|psi|^2 can be read as normalized envelope-energy density in the frequentist limit under the assumptions above.",
+            "The bridge explains why count frequencies track |psi|^2 without claiming a full microscopic derivation.",
+        ],
+        "what_remains_open": [
+            "Why phase mixing follows generically from P dynamics rather than from an external ergodic assumption.",
+            "Why detector linearity should emerge microscopically for arbitrary measurement devices.",
+            "Why conditioning/state update reduces to the Lueders/Kraus form.",
+        ],
+        "monte_carlo": {
+            "tolerance_max_abs_frequency_error": tolerance,
+            "max_abs_frequency_error": max_abs_frequency_error,
+            "max_abs_cross_term_residual": max_abs_cross_term_residual,
+            "pass": monte_carlo_pass,
+            "cases": cases,
+        },
+        "decision": {
+            "born_route": "partial_bridge_only",
+            "full_first_principles_derivation": False,
+            "operational_born_rule_retained": True,
+        },
+    }
+
+
 # 関数: `build_pack` の入出力契約と処理意図を定義する。
 
 def build_pack() -> Dict[str, Any]:
@@ -152,6 +292,10 @@ def build_pack() -> Dict[str, Any]:
     visibility_ratio_log10 = float(np.log10(visibility_ratio_raw)) if visibility_ratio_raw is not None and visibility_ratio_raw > 0 else None
     visibility_ref_channel = str(precision_gap_watch.get("visibility_reference_channel") or "atom_gravimeter")
     molecular_z = _as_float((row_molecular or {}).get("metric_value"))
+    statistical_bridge = _build_statistical_bridge()
+    statistical_bridge_max_abs_frequency_error = _as_float(
+        ((statistical_bridge.get("monte_carlo") if isinstance(statistical_bridge.get("monte_carlo"), dict) else {}).get("max_abs_frequency_error"))
+    )
 
     datasets = bell.get("datasets") if isinstance(bell.get("datasets"), list) else []
     fast_prefixes = ("weihs1998_", "nist_")
@@ -239,6 +383,16 @@ def build_pack() -> Dict[str, Any]:
             gate=False,
             note="可視度差分の決着力監視（log10正規化；1桁以内をwatch閾値）。未達でも即棄却には使わない。",
         ),
+        _criterion(
+            cid="statistical_bridge_mc_max_abs_frequency_error",
+            proxy="born_bridge",
+            metric="phase_randomized_frequency_max_abs_error",
+            value=statistical_bridge_max_abs_frequency_error,
+            threshold=0.02,
+            operator="<=",
+            gate=False,
+            note="位相ランダム化 + 線形検出応答の toy Monte Carlo が target frequency を 2e-2 以内で再現することを確認する。",
+        ),
     ]
 
     hard_fail = [c["id"] for c in criteria if c.get("gate") and c.get("pass") is False]
@@ -258,8 +412,9 @@ def build_pack() -> Dict[str, Any]:
 
     return {
         "generated_utc": _iso_utc_now(),
-        "phase": {"phase": 8, "step": "8.7.2", "name": "Born route-A proxy constraints packaging"},
-        "intent": "Freeze an operational machine gate for Born route-A using phase/visibility/selection proxies.",
+        "phase": {"phase": 8, "step": "8.7.49.5", "name": "Born route-A statistical bridge + proxy constraints packaging"},
+        "lineage": {"origin_step": "8.7.2"},
+        "intent": "Freeze the conditional statistical bridge for Born rule plus the operational machine gate using phase/visibility/selection proxies.",
         "inputs": {
             "matter_wave_interference_precision_audit_metrics_json": _rel(matter_path),
             "bell_falsification_pack_json": _rel(bell_pack_path),
@@ -272,6 +427,7 @@ def build_pack() -> Dict[str, Any]:
             "hard_unknown_ids": hard_unknown,
             "watchlist": watchlist,
             "rule": "A_to_B if any hard gate fails/unknown; otherwise A_continue.",
+            "born_statistical_bridge": statistical_bridge.get("decision"),
         },
         "diagnostics": {
             "fast_switching_datasets": fast_rows,
@@ -283,6 +439,7 @@ def build_pack() -> Dict[str, Any]:
                 "ratio_log10": visibility_ratio_log10,
                 "threshold_log10": 1.0,
             },
+            "statistical_bridge": statistical_bridge,
         },
     }
 
@@ -304,6 +461,14 @@ def _write_csv(path: Path, criteria: List[Dict[str, Any]]) -> None:
 # 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, payload: Dict[str, Any]) -> None:
+    display_labels = {
+        "phase_alpha_consistency": "位相: 原子反跳 α\n整合",
+        "phase_molecular_scaling": "位相: 分子同位体\nスケーリング",
+        "selection_delay_signature_fast": "選別: 高速切替\n遅延指標",
+        "selection_sweep_sensitivity_fast": "選別: 高速切替\n感度掃引",
+        "visibility_atom_precision_gap": "可視度: 原子干渉計\n精度差",
+        "statistical_bridge_mc_max_abs_frequency_error": "Born橋渡し:\nモンテカルロ最大誤差",
+    }
     crit = payload.get("criteria") if isinstance(payload.get("criteria"), list) else []
     score_rows = []
     for row in crit:
@@ -329,7 +494,7 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
 
         score_rows.append((cid, score, row.get("pass"), bool(row.get("gate"))))
 
-    labels = [r[0] for r in score_rows]
+    labels = [display_labels.get(r[0], r[0]) for r in score_rows]
     scores = [r[1] for r in score_rows]
     colors = []
     for _, _, passed, gate in score_rows:
@@ -343,18 +508,23 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
             colors.append("#dc2626")
 
     y = np.arange(len(labels))
-    fig, ax = plt.subplots(figsize=(11.5, 5.5), dpi=180)
+    decision_label = {
+        "A_continue": "A継続",
+        "A_reject": "A棄却",
+        "unknown": "不明",
+    }.get(str(payload.get("decision", {}).get("route_a_gate", "unknown")), str(payload.get("decision", {}).get("route_a_gate", "unknown")))
+    fig, ax = plt.subplots(figsize=(11.8, 5.8), dpi=180)
     ax.barh(y, scores, color=colors)
     ax.axvline(1.0, linestyle="--", color="#6b7280", linewidth=1.2)
     ax.set_yticks(y, labels)
-    ax.tick_params(axis="y", labelsize=13.6)
-    ax.set_xlabel("normalized score (<=1 is pass)", fontsize=14.8)
+    ax.tick_params(axis="y", labelsize=14.8)
+    ax.set_xlabel("正規化スコア（1以下で通過）", fontsize=15.2)
     ax.set_title(
-        f"Born route-A proxy gate: {payload.get('decision', {}).get('route_a_gate', 'unknown')}",
-        fontsize=15.6,
+        f"Born 経路A プロキシ判定（{decision_label}）",
+        fontsize=16.0,
         pad=8.0,
     )
-    ax.tick_params(axis="x", labelsize=13.4)
+    ax.tick_params(axis="x", labelsize=14.4)
     ax.grid(axis="x", alpha=0.25, linestyle=":")
     fig.tight_layout()
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -365,7 +535,7 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
 # 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
-    ap = argparse.ArgumentParser(description="Freeze Born route-A proxy constraints and machine gate (A_continue vs A_to_B).")
+    ap = argparse.ArgumentParser(description="Freeze Born route-A statistical bridge and proxy gate (A_continue vs A_to_B).")
     ap.add_argument(
         "--out-json",
         type=str,
@@ -389,6 +559,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     out_json = Path(args.out_json)
     out_csv = Path(args.out_csv)
     out_png = Path(args.out_png)
+    out_pdf = Path(args.out_png).with_suffix(".pdf")
     # 条件分岐: `not out_json.is_absolute()` を満たす経路を評価する。
     if not out_json.is_absolute():
         out_json = (ROOT / out_json).resolve()
@@ -403,21 +574,28 @@ def main(argv: Optional[List[str]] = None) -> int:
     if not out_png.is_absolute():
         out_png = (ROOT / out_png).resolve()
 
+    # 条件分岐: `not out_pdf.is_absolute()` を満たす経路を評価する。
+
+    if not out_pdf.is_absolute():
+        out_pdf = (ROOT / out_pdf).resolve()
+
     payload = build_pack()
     out_json.parent.mkdir(parents=True, exist_ok=True)
     out_json.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     _write_csv(out_csv, payload.get("criteria") if isinstance(payload.get("criteria"), list) else [])
     _plot(out_png, payload)
+    _plot(out_pdf, payload)
 
     print(f"[ok] wrote: {_rel(out_json)}")
     print(f"[ok] wrote: {_rel(out_csv)}")
     print(f"[ok] wrote: {_rel(out_png)}")
+    print(f"[ok] wrote: {_rel(out_pdf)}")
 
     try:
         worklog.append_event(
             {
                 "event_type": "quantum_born_route_a_proxy_constraints",
-                "phase": "8.7.2",
+                "phase": "8.7.49.5",
                 "inputs": payload.get("inputs"),
                 "outputs": {
                     "born_route_a_proxy_constraints_pack_json": _rel(out_json),

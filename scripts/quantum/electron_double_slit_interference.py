@@ -1,8 +1,17 @@
+"""
+目的: 量子 topic の electron double slit interference に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import csv
 import json
 import math
+import os
+import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -11,6 +20,11 @@ import numpy as np
 
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
 
 enable_japanese_figure_localization()
 
@@ -270,13 +284,16 @@ def build_matter_wave_interference_precision_audit(
 
     import matplotlib.pyplot as plt
 
-    fig, axes = plt.subplots(2, 2, figsize=(12.5, 8.0), dpi=140)
+    fig, axes = plt.subplots(2, 2, dpi=140)
+    apply_wavep_figure_layout(fig, template="part2_quad_panel_spacious")
+    fig.set_size_inches(fig.get_figwidth(), 6.60, forward=True)
+    fig.subplots_adjust(left=0.115, right=0.985, top=0.885, bottom=0.120, wspace=0.34, hspace=0.52)
 
-    panel_title_font = 14.8
-    axis_label_font = 13.6
-    tick_font = 12.4
-    legend_font = 11.8
-    suptitle_font = 16.0
+    panel_title_font = get_wavep_font_size("title")
+    axis_label_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    legend_font = get_wavep_font_size("legend")
+    suptitle_font = get_wavep_font_size("suptitle")
 
     ax0 = axes[0, 0]
     ax0.bar(
@@ -285,7 +302,7 @@ def build_matter_wave_interference_precision_audit(
         color=["#1f77b4", "#7f7f7f"],
     )
     ax0.set_ylabel("mrad", fontsize=axis_label_font)
-    ax0.set_title("Electron double-slit angular scales", fontsize=panel_title_font)
+    ax0.set_title("電子二重スリットの角スケール", fontsize=panel_title_font, pad=5.0)
     ax0.grid(True, axis="y", ls=":", lw=0.6, alpha=0.7)
     ax0.tick_params(axis="both", labelsize=tick_font)
 
@@ -294,7 +311,7 @@ def build_matter_wave_interference_precision_audit(
     z_values: list[float] = []
     # 条件分岐: `alpha_z_abs is not None and np.isfinite(alpha_z_abs)` を満たす経路を評価する。
     if alpha_z_abs is not None and np.isfinite(alpha_z_abs):
-        z_labels.append("atom α-consistency")
+        z_labels.append("原子 α 整合")
         z_values.append(float(alpha_z_abs))
 
     for row in rows:
@@ -302,7 +319,7 @@ def build_matter_wave_interference_precision_audit(
         if row["channel"] == "molecular_isotopic_scaling" and isinstance(row["metric_value"], (int, float)):
             # 条件分岐: `np.isfinite(float(row["metric_value"]))` を満たす経路を評価する。
             if np.isfinite(float(row["metric_value"])):
-                z_labels.append("molecular scaling")
+                z_labels.append("分子スケーリング")
                 z_values.append(float(row["metric_value"]))
 
     # 条件分岐: `z_values` を満たす経路を評価する。
@@ -312,7 +329,7 @@ def build_matter_wave_interference_precision_audit(
 
     ax1.axhline(3.0, color="0.25", ls="--", lw=1.2)
     ax1.set_ylabel("z", fontsize=axis_label_font)
-    ax1.set_title("Cross-channel consistency (|z|)", fontsize=panel_title_font)
+    ax1.set_title("クロスチャネル整合（|z|）", fontsize=panel_title_font, pad=5.0)
     ax1.grid(True, axis="y", ls=":", lw=0.6, alpha=0.7)
     ax1.tick_params(axis="x", labelrotation=18, labelsize=tick_font)
     ax1.tick_params(axis="y", labelsize=tick_font)
@@ -328,7 +345,7 @@ def build_matter_wave_interference_precision_audit(
     ax2.axhline(1.0, color="0.25", ls="--", lw=1.2)
     ax2.set_yscale("log")
     ax2.set_ylabel("current / required(3σ)", fontsize=axis_label_font)
-    ax2.set_title("Atom-interferometer precision gap", fontsize=panel_title_font)
+    ax2.set_title("原子干渉計の精度ギャップ", fontsize=panel_title_font, pad=5.0)
     ax2.grid(True, axis="y", ls=":", lw=0.6, alpha=0.7)
     ax2.tick_params(axis="y", labelsize=tick_font)
 
@@ -338,18 +355,27 @@ def build_matter_wave_interference_precision_audit(
         ax3.hist(molecular_dev_abs, bins=min(8, max(3, len(molecular_dev_abs))), color="#17becf", alpha=0.85)
 
     ax3.set_xlabel("abs(meas/pred - 1)", fontsize=axis_label_font)
-    ax3.set_ylabel("count", fontsize=axis_label_font)
-    ax3.set_title("Molecular isotopic scaling residuals", fontsize=panel_title_font)
+    ax3.set_ylabel("件数", fontsize=axis_label_font)
+    ax3.set_title("分子の同位体スケーリング残差", fontsize=panel_title_font, pad=5.0)
     ax3.grid(True, axis="y", ls=":", lw=0.6, alpha=0.7)
     ax3.tick_params(axis="both", labelsize=tick_font)
 
-    fig.suptitle("Matter-wave interference precision audit", y=0.98, fontsize=suptitle_font)
-    fig.tight_layout()
+    fig.suptitle("物質波干渉の精度監査", y=0.992, fontsize=suptitle_font)
 
     out_png = out_dir / "matter_wave_interference_precision_audit.png"
     out_pdf = out_dir / "matter_wave_interference_precision_audit.pdf"
-    fig.savefig(out_png, bbox_inches="tight")
-    fig.savefig(out_pdf, bbox_inches="tight")
+    normalize_backup = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+    try:
+        with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+            fig.savefig(out_png)
+            fig.savefig(out_pdf)
+    finally:
+        if normalize_backup is None:
+            del os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"]
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = normalize_backup
+
     plt.close(fig)
 
     metrics = {
@@ -386,7 +412,7 @@ def build_matter_wave_interference_precision_audit(
 # 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
-    root = Path(__file__).resolve().parents[2]
+    root = ROOT
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -429,30 +455,33 @@ def main() -> None:
     # Plot
     import matplotlib.pyplot as plt
 
-    fig, ax = plt.subplots(figsize=(10.8, 5.4), dpi=150)
+    fig, ax = plt.subplots(dpi=150)
+    apply_wavep_figure_layout(fig, template="part2_single_panel")
 
-    panel_title_font = 15.2
-    axis_label_font = 14.0
-    tick_font = 12.8
-    legend_font = 12.2
-    ax.plot(theta_mrad, p12_n, lw=2.0, label="P12 (double-slit; coherent)")
-    ax.plot(theta_mrad, p1p2_n, lw=1.6, ls="--", label="P1+P2 (sum of single-slit)")
-    ax.plot(theta_mrad, p1_n, lw=1.2, ls=":", label="P1 (single-slit envelope)")
+    panel_title_font = get_wavep_font_size("title")
+    axis_label_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    legend_font = get_wavep_font_size("legend")
+    ax.plot(theta_mrad, p12_n, lw=2.0, label="P12（二重スリット；coherent）")
+    ax.plot(theta_mrad, p1p2_n, lw=1.6, ls="--", label="P1+P2（単スリット和）")
+    ax.plot(theta_mrad, p1_n, lw=1.2, ls=":", label="P1（単スリット包絡）")
 
     ax.axhline(0.0, color="0.25", lw=1.0)
-    ax.set_xlabel("diffraction angle θ (mrad)", fontsize=axis_label_font)
-    ax.set_ylabel("normalized intensity (arb.)", fontsize=axis_label_font)
-    ax.set_title("Electron double-slit diffraction (arXiv:1210.6243v1; 600 eV; 50 nm slits, 280 nm sep.)", fontsize=panel_title_font)
+    ax.set_xlabel("回折角 θ (mrad)", fontsize=axis_label_font)
+    ax.set_ylabel("規格化強度 (arb.)", fontsize=axis_label_font)
+    ax.set_title(
+        "電子二重スリット回折（600 eV；50 nm slit，280 nm sep.）",
+        fontsize=panel_title_font,
+        pad=13.5,
+    )
     ax.grid(True, ls=":", lw=0.6, alpha=0.7)
     ax.legend(frameon=True, fontsize=legend_font, loc="upper right")
     ax.tick_params(axis="both", labelsize=tick_font)
 
-    fig.tight_layout()
-
     out_png = out_dir / "electron_double_slit_interference.png"
     out_pdf = out_dir / "electron_double_slit_interference.pdf"
-    fig.savefig(out_png, bbox_inches="tight")
-    fig.savefig(out_pdf, bbox_inches="tight")
+    fig.savefig(out_png)
+    fig.savefig(out_pdf)
     plt.close(fig)
 
     src_pdf = root / "data" / "quantum" / "sources" / "arxiv_1210.6243v1.pdf"

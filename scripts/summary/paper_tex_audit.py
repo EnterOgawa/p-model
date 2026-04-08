@@ -20,6 +20,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -30,12 +31,14 @@ _ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from scripts.summary import worklog
+from scripts.summary import paper_profile_content as profile_content, worklog
 
 _PROFILE_TO_TEX = {
     "paper": "pmodel_paper.tex",
     "part2_astrophysics": "pmodel_paper_part2_astrophysics.tex",
     "part3_quantum": "pmodel_paper_part3_quantum.tex",
+    "part3a_quantum_foundations": "pmodel_paper_part3a_quantum_foundations.tex",
+    "part3b_quantum_verification": "pmodel_paper_part3b_quantum_verification.tex",
     "part4_verification": "pmodel_paper_part4_verification.tex",
     "part5_future_predictions": "pmodel_paper_part5_future_predictions.tex",
 }
@@ -71,11 +74,14 @@ _SUSPICIOUS_LITERAL_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     ("glued_partial_subscript_p", re.compile(r"\\partial_(?:\\[A-Za-z]+|[A-Za-z])P\b")),
 ]
 
+_DISPLAY_MATH_RE = re.compile(r"(?<!\\)\$\$(.+?)(?<!\\)\$\$", flags=re.DOTALL)
 _MATH_SEGMENT_RE = re.compile(r"(?<!\\)\$(.+?)(?<!\\)\$", flags=re.DOTALL)
 _SNAKE_IN_MATH_RE = re.compile(r"(?<!\\)\b[A-Za-z][A-Za-z0-9.]*_(?:[A-Za-z0-9.]+_)+[A-Za-z0-9.]+\b")
 _DANGEROUS_TEXT_UNDERSCORE_RE = re.compile(r"(?<!\\)\b[A-Za-z]+_[A-Za-z0-9]+(?:_[A-Za-z0-9]+)+\b")
 _LABEL_RE = re.compile(r"\\label\{([^{}]+)\}")
 _TEXTTT_RE = re.compile(r"\\texttt\{([^{}]*)\}")
+_NOLINKURL_RE = re.compile(r"\\nolinkurl\{([^{}]*)\}")
+_URL_RE = re.compile(r"\\url\{([^{}]*)\}")
 _INLINE_MATH_RE = re.compile(r"(?<!\\)\$(.+?)(?<!\\)\$")
 _PLAIN_DV_VECTOR_RE = re.compile(r"\bdv\s*=\s*\[\s*ξ0\s*,\s*ξ2\s*\]\s*\+\s*cov\b")
 _PLAIN_Z_SCORE_RANGE_RE = re.compile(
@@ -164,6 +170,28 @@ def _pick_engine(choice: str) -> Tuple[str | None, str]:
             return found, "auto"
 
     return None, "missing"
+
+
+# 関数: `_prepare_tex_cache_env` の入出力契約と処理意図を定義する。
+
+def _prepare_tex_cache_env(base_dir: Path) -> Dict[str, str]:
+    env = os.environ.copy()
+    temp_root = Path(tempfile.gettempdir()).resolve()
+    cache_root = temp_root / "wavep_tex_cache"
+    luaotfload_cache = cache_root / "luaotfload"
+
+    for path in (cache_root, luaotfload_cache):
+        path.mkdir(parents=True, exist_ok=True)
+
+    env["TEXMFVAR"] = str(cache_root)
+    env["TEXMFCONFIG"] = str(cache_root)
+    env["TEXMFCACHE"] = str(cache_root)
+    env["LUAOTFLOAD_CACHE"] = str(luaotfload_cache)
+    env["TEMP"] = str(cache_root)
+    env["TMP"] = str(cache_root)
+    env.setdefault("HOME", str(temp_root))
+    env.setdefault("USERPROFILE", str(temp_root))
+    return env
 
 
 # 関数: `_strip_comment` の入出力契約と処理意図を定義する。
@@ -272,6 +300,15 @@ def _looks_like_pseudo_math_texttt(text: str) -> bool:
     return has_var and (has_cmp or has_math_ops or has_equal)
 
 
+# 関数: `_mask_literal_code_spans` の入出力契約と処理意図を定義する。
+
+def _mask_literal_code_spans(tex_text: str) -> str:
+    masked = _TEXTTT_RE.sub("", tex_text)
+    masked = _NOLINKURL_RE.sub("", masked)
+    masked = _URL_RE.sub("", masked)
+    return masked
+
+
 # 関数: `_static_audit` の入出力契約と処理意図を定義する。
 
 def _static_audit(tex_text: str) -> Dict[str, Any]:
@@ -289,7 +326,10 @@ def _static_audit(tex_text: str) -> Dict[str, Any]:
         if pattern.search(tex_text):
             errors.append(f"{key}_detected")
 
-    for m in _MATH_SEGMENT_RE.finditer(tex_text):
+    tex_for_math_scan = _mask_literal_code_spans(tex_text)
+    tex_for_math_scan = _DISPLAY_MATH_RE.sub("", tex_for_math_scan)
+
+    for m in _MATH_SEGMENT_RE.finditer(tex_for_math_scan):
         seg = m.group(1)
         bad = _SNAKE_IN_MATH_RE.search(seg)
         # 条件分岐: `bad` を満たす経路を評価する。
@@ -403,9 +443,11 @@ def _run_compile(
         f"-output-directory={str(build_dir)}",
         str(tex_path.resolve()),
     ]
+    env = _prepare_tex_cache_env(tex_path.parent)
     proc = subprocess.run(
         cmd,
         cwd=str(tex_path.parent.resolve()),
+        env=env,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
@@ -509,7 +551,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Strict post-build TeX audit for paper profiles.")
     ap.add_argument(
         "--profile",
-        choices=list(_PROFILE_TO_TEX.keys()),
+        choices=list(profile_content.PAPER_PROFILES),
         action="append",
         help="target profile (repeatable). default: all profiles",
     )

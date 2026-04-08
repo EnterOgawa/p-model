@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+"""
+目的: 理論 topic の delta saturation constraints に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -17,6 +24,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.utils.plot_style import resolve_wavep_cjk_font_family  # noqa: E402
 
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
@@ -31,6 +39,19 @@ def _set_japanese_font() -> None:
         import matplotlib as mpl
         import matplotlib.font_manager as fm
 
+        preferred = resolve_wavep_cjk_font_family(preferred_name="Noto Sans CJK JP")
+        if preferred:
+            mpl.rcParams["font.family"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["axes.unicode_minus"] = False
+            mpl.rcParams["font.size"] = 14.2
+            mpl.rcParams["axes.titlesize"] = 19.6
+            mpl.rcParams["axes.labelsize"] = 15.6
+            mpl.rcParams["xtick.labelsize"] = 13.6
+            mpl.rcParams["ytick.labelsize"] = 13.6
+            mpl.rcParams["legend.fontsize"] = 13.2
+            return
+
         preferred = [
             "Yu Gothic",
             "Meiryo",
@@ -44,6 +65,7 @@ def _set_japanese_font() -> None:
         # 条件分岐: `chosen` を満たす経路を評価する。
         if chosen:
             mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = chosen + ["DejaVu Sans"]
 
         mpl.rcParams["axes.unicode_minus"] = False
         mpl.rcParams["font.size"] = 14.2
@@ -247,6 +269,7 @@ def main() -> int:
         ]
         if len(labels_compact) != len(labels):
             labels_compact = labels
+
         x = list(range(len(labels)))
 
         gamma_vals = [float(r["gamma_obs"]) for r in rows]
@@ -301,6 +324,7 @@ def main() -> int:
             fig.suptitle("速度項の飽和 δ：既存観測との整合（P-model 差分予測）", fontsize=23.2)
             ax0.set_ylim(0, max(log_gamma_max, max(v for v in log_gamma if math.isfinite(v))) + 1.0)
             ax1.set_ylim(min(log_delta_adopted, min(v for v in log_delta_upper if math.isfinite(v))) - 5.0, 0.0)
+
         fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.9))
         png_path = out_dir / "delta_saturation_constraints.png"
         pdf_path = out_dir / "delta_saturation_constraints.pdf"

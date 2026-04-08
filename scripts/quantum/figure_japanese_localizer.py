@@ -180,7 +180,11 @@ _BASE_GLOSSARY: list[tuple[str, str]] = [
 
 _STEM_SPECIFIC_GLOSSARY: dict[str, list[tuple[str, str]]] = {
     "bell_selection_sensitivity_summary": [
+        (r"Weihs 1998: \|S\| vs window \([^)]+\)", "Weihs 1998: |S| と窓幅"),
         (r"\|S\| vs window", "|S| と窓幅"),
+        (r"NIST: CH J_prob vs window\s*\|\s*KS\(A\)=[^|]+\|\s*KS\(B\)=[^\n]+", "NIST: CH J_prob と窓幅"),
+        (r"NIST: CH J_prob vs window", "NIST: CH J_prob と窓幅"),
+        (r"Delft \(event-ready\): CHSH S vs start offset", "Delft: CHSH S と開始オフセット"),
         (r"CHSH S vs start offset", "CHSH S と開始オフセット"),
         (r"Bell selection sensitivity summary", "Bell 選別感度要約"),
     ],
@@ -207,7 +211,10 @@ _STEM_SPECIFIC_GLOSSARY: dict[str, list[tuple[str, str]]] = {
         (r"HOM squeezed-light unified audit", "HOM スクイーズド光統合監査"),
     ],
     "qed_vacuum_precision": [
-        (r"Vacuum \+ QED precision observables", "真空 + QED 精密観測量"),
+        (r"Vacuum \+ QED precision observables(?:\s*\([^)]+\))?", "真空 + QED 精密観測量"),
+        (r"Casimir: sphere–plate force scale", "Casimir: 球-平板スケール"),
+        (r"Lamb shift: scaling\s*\(why Z>1 helps\)", "Lamb シフト: Z 依存スケール"),
+        (r"nuclear-size term\s*\(example; Table 4\)", "核サイズ項（例; Table 4）"),
         (r"alpha precision cross-check", "α 精度クロスチェック"),
     ],
     "atomic_hydrogen_baseline": [
@@ -269,6 +276,7 @@ def _ordered_patterns(
 
 
 # 関数: `_pattern_to_display` の入出力契約と処理意図を定義する。
+
 def _pattern_to_display(pattern: str) -> str:
     text = pattern
     replacements = (
@@ -290,6 +298,7 @@ def _pattern_to_display(pattern: str) -> str:
 
 
 # 関数: `_reverse_patterns` の入出力契約と処理意図を定義する。
+
 def _reverse_patterns(patterns: Iterable[tuple[str, str]]) -> list[tuple[re.Pattern[str], str]]:
     reverse_pairs = [(re.escape(localized), _pattern_to_display(pattern)) for pattern, localized in patterns]
     return _ordered_patterns(reverse_pairs, ignore_case=False)
@@ -304,7 +313,146 @@ _STEM_PATTERNS_EN = {stem: _reverse_patterns(patterns) for stem, patterns in _ST
 _FONT_CACHE: str | None = None
 
 
+# 関数: `_reserve_suptitle_gap_if_needed` の入出力契約と処理意図を定義する。
+def _reserve_suptitle_gap_if_needed(fig, *, profile_name: str) -> None:
+    normalized = str(profile_name or "").strip().lower()
+    if normalized not in {
+        "part3_quantum",
+        "part3a_quantum_foundations",
+        "part3b_quantum_verification",
+    }:
+        return
+
+    suptitle = getattr(fig, "_suptitle", None)
+    if suptitle is None:
+        return
+
+    try:
+        title_text = str(suptitle.get_text() or "").strip()
+    except Exception:
+        return
+
+    if not title_text:
+        return
+
+    axes = [ax for ax in getattr(fig, "axes", []) if getattr(ax, "get_visible", lambda: True)()]
+    if not axes:
+        return
+
+    # 関数: `_union_bbox` の入出力契約と処理意図を定義する。
+
+    def _union_bbox(items):
+        valid = [bbox for bbox in items if bbox is not None]
+        if not valid:
+            return None
+
+        x0 = min(float(bbox.x0) for bbox in valid)
+        y0 = min(float(bbox.y0) for bbox in valid)
+        x1 = max(float(bbox.x1) for bbox in valid)
+        y1 = max(float(bbox.y1) for bbox in valid)
+        return (x0, y0, x1, y1)
+
+    # 関数: `_group_axes_by_row` の入出力契約と処理意図を定義する。
+
+    def _group_axes_by_row(visible_axes):
+        ordered = sorted(visible_axes, key=lambda ax: (-float(ax.get_position().y0), float(ax.get_position().x0)))
+        rows: list[list[object]] = []
+        tolerance = 0.03
+        for ax in ordered:
+            y0 = float(ax.get_position().y0)
+            if rows and abs(float(rows[-1][0].get_position().y0) - y0) <= tolerance:
+                rows[-1].append(ax)
+            else:
+                rows.append([ax])
+
+        return rows
+
+    if normalized == "part3b_quantum_verification":
+        min_suptitle_gap = 0.075
+        min_interrow_gap = 0.055
+        min_top = 0.18
+        max_iter = 10
+    else:
+        min_suptitle_gap = 0.020
+        min_interrow_gap = 0.014
+        min_top = 0.44
+        max_iter = 4
+
+    try:
+        for _ in range(max_iter):
+            fig.canvas.draw()
+            renderer = fig.canvas.get_renderer()
+            suptitle_bbox = suptitle.get_window_extent(renderer=renderer).transformed(fig.transFigure.inverted())
+            rows = _group_axes_by_row(axes)
+            if not rows:
+                return
+
+            top_row_boxes = [
+                ax.get_tightbbox(renderer).transformed(fig.transFigure.inverted())
+                for ax in rows[0]
+            ]
+            top_row_union = _union_bbox(top_row_boxes)
+            if top_row_union is None:
+                return
+
+            top_gap = float(suptitle_bbox.y0) - float(top_row_union[3])
+            need_top_delta = 0.0
+            need_hspace_delta = 0.0
+            if top_gap < min_suptitle_gap:
+                need_top_delta = max(need_top_delta, min_suptitle_gap - top_gap + 0.018)
+
+            for upper_row, lower_row in zip(rows, rows[1:]):
+                upper_boxes = [
+                    ax.get_tightbbox(renderer).transformed(fig.transFigure.inverted())
+                    for ax in upper_row
+                ]
+                upper_union = _union_bbox(upper_boxes)
+                if upper_union is None:
+                    continue
+
+                lower_title_boxes = []
+                for ax in lower_row:
+                    try:
+                        title_text = str(ax.get_title() or "").strip()
+                    except Exception:
+                        title_text = ""
+
+                    if not title_text:
+                        continue
+
+                    try:
+                        title_box = ax.title.get_window_extent(renderer=renderer).transformed(fig.transFigure.inverted())
+                    except Exception:
+                        continue
+
+                    lower_title_boxes.append(title_box)
+
+                lower_union = _union_bbox(lower_title_boxes)
+                if lower_union is None:
+                    continue
+
+                inter_gap = float(upper_union[1]) - float(lower_union[3])
+                if inter_gap < min_interrow_gap:
+                    need_hspace_delta = max(need_hspace_delta, min_interrow_gap - inter_gap + 0.020)
+
+            if need_top_delta <= 0.0 and need_hspace_delta <= 0.0:
+                return
+
+            subplotpars = fig.subplotpars
+            avg_axes_height = sum(float(ax.get_position().height) for ax in axes) / max(len(axes), 1)
+            hspace_units = 0.0
+            if need_hspace_delta > 0.0 and avg_axes_height > 1e-6:
+                hspace_units = need_hspace_delta / avg_axes_height
+
+            new_top = max(min_top, float(subplotpars.top) - need_top_delta)
+            new_hspace = float(subplotpars.hspace) + hspace_units
+            fig.subplots_adjust(top=new_top, hspace=new_hspace)
+    except Exception:
+        return
+
+
 # 関数: `_normalize_locale` の入出力契約と処理意図を定義する。
+
 def _normalize_locale(raw: str | None, *, default: str = "ja") -> str:
     if raw is None or not raw.strip():
         return default
@@ -312,14 +460,18 @@ def _normalize_locale(raw: str | None, *, default: str = "ja") -> str:
     normalized = raw.strip().lower()
     if normalized in {"ja", "jp", "japanese", "ja-jp", "ja_jp"}:
         return "ja"
+
     if normalized in {"en", "english", "en-us", "en_us", "en-gb", "en_gb"}:
         return "en"
+
     if normalized in {"source", "off", "none"}:
         return "source"
+
     return default
 
 
 # 関数: `get_figure_language` の入出力契約と処理意図を定義する。
+
 def get_figure_language(*, default: str = "ja") -> str:
     for env_name in _LOCALE_ENV_NAMES:
         raw = os.getenv(env_name, "").strip()
@@ -333,6 +485,7 @@ def get_figure_language(*, default: str = "ja") -> str:
 
 
 # 関数: `_normalize_spacing` の入出力契約と処理意図を定義する。
+
 def _normalize_spacing(text: str, *, target: str) -> str:
     text = re.sub(r"[ ]{2,}", " ", text)
     if target == "ja":
@@ -346,23 +499,28 @@ def _normalize_spacing(text: str, *, target: str) -> str:
         text = text.replace("。", ". ")
         text = re.sub(r"\s+\.", ".", text)
         text = re.sub(r"\s+,", ",", text)
+
     return text.strip()
 
 
 # 関数: `_target_patterns` の入出力契約と処理意図を定義する。
+
 def _target_patterns(stem: str | None, *, target: str) -> tuple[list[tuple[re.Pattern[str], str]], list[tuple[re.Pattern[str], str]]]:
     if target == "en":
         base_patterns = _BASE_PATTERNS_EN
         stem_patterns = _STEM_PATTERNS_EN.get(stem or "", [])
         return stem_patterns, base_patterns
+
     if target == "ja":
         base_patterns = _BASE_PATTERNS_JA
         stem_patterns = _STEM_PATTERNS_JA.get(stem or "", [])
         return stem_patterns, base_patterns
+
     return [], []
 
 
 # 関数: `_translate_segment` の入出力契約と処理意図を定義する。
+
 def _translate_segment(text: str, *, stem: str | None, target: str) -> str:
     if target == "source":
         return text
@@ -371,12 +529,15 @@ def _translate_segment(text: str, *, stem: str | None, target: str) -> str:
     stem_patterns, base_patterns = _target_patterns(stem, target=target)
     for pattern, repl in stem_patterns:
         result = pattern.sub(repl, result)
+
     for pattern, repl in base_patterns:
         result = pattern.sub(repl, result)
+
     return _normalize_spacing(result, target=target)
 
 
 # 関数: `translate_plot_text` の入出力契約と処理意図を定義する。
+
 def translate_plot_text(text: str, *, stem: str | None = None, target: str | None = None) -> str:
     if not text:
         return text
@@ -388,33 +549,27 @@ def translate_plot_text(text: str, *, stem: str | None = None, target: str | Non
         if idx % 2 == 1:
             translated.append(part)
             continue
+
         translated.append(_translate_segment(part, stem=stem, target=active_target))
+
     return "".join(translated)
 
 
 # 関数: `_pick_japanese_font` の入出力契約と処理意図を定義する。
+
 def _pick_japanese_font() -> str | None:
     global _FONT_CACHE
     if _FONT_CACHE is not None:
         return _FONT_CACHE or None
 
     try:
-        from matplotlib import font_manager as fm
+        from scripts.utils.plot_style import resolve_wavep_cjk_font_family
 
-        preferred = [
-            "Yu Gothic",
-            "Meiryo",
-            "BIZ UDGothic",
-            "MS Gothic",
-            "Noto Sans CJK JP",
-            "Noto Sans JP",
-            "IPAexGothic",
-        ]
-        available = {font.name for font in fm.fontManager.ttflist}
-        for name in preferred:
-            if name in available:
-                _FONT_CACHE = name
-                return name
+        preferred_name = str(os.getenv("WAVEP_MPL_CJK_FONT", "")).strip() or None
+        resolved = resolve_wavep_cjk_font_family(preferred_name=preferred_name)
+        if resolved:
+            _FONT_CACHE = resolved
+            return resolved
     except Exception:
         pass
 
@@ -423,6 +578,7 @@ def _pick_japanese_font() -> str | None:
 
 
 # 関数: `_restore_original_font_if_needed` の入出力契約と処理意図を定義する。
+
 def _restore_original_font_if_needed(artist: object) -> None:
     original_family = getattr(artist, "_wavep_original_fontfamily", None)
     if not original_family:
@@ -435,6 +591,7 @@ def _restore_original_font_if_needed(artist: object) -> None:
 
 
 # 関数: `_apply_japanese_font_if_needed` の入出力契約と処理意図を定義する。
+
 def _apply_japanese_font_if_needed(artist: object, text: str) -> None:
     if not _JAPANESE_CHAR_RE.search(text):
         _restore_original_font_if_needed(artist)
@@ -451,6 +608,7 @@ def _apply_japanese_font_if_needed(artist: object, text: str) -> None:
 
 
 # 関数: `_localize_figure_texts` の入出力契約と処理意図を定義する。
+
 def _localize_figure_texts(fig: object, *, stem: str | None, target: str) -> None:
     try:
         from matplotlib.text import Text
@@ -492,13 +650,23 @@ def _localize_figure_texts(fig: object, *, stem: str | None, target: str) -> Non
 
 
 # 関数: `_vector_pdf_sidecar_enabled` の入出力契約と処理意図を定義する。
+
 def _vector_pdf_sidecar_enabled() -> bool:
     raw = os.getenv("WAVEP_MPL_AUTOSAVE_VECTOR_PDF", "").strip().lower()
     return raw in _TRUE_VALUES
 
 
 # 関数: `enable_figure_text_localization` の入出力契約と処理意図を定義する。
+
 def enable_figure_text_localization(*, default_lang: str = "ja") -> None:
+    try:
+        from scripts.utils.plot_style import install_wavep_cjk_font_override
+
+        preferred_name = str(os.getenv("WAVEP_MPL_CJK_FONT", "")).strip() or None
+        install_wavep_cjk_font_override(preferred_name=preferred_name)
+    except Exception:
+        pass
+
     try:
         from matplotlib.figure import Figure
     except Exception:
@@ -521,11 +689,36 @@ def enable_figure_text_localization(*, default_lang: str = "ja") -> None:
 
         target_lang = get_figure_language(default=default_lang)
         _localize_figure_texts(self, stem=stem, target=target_lang)
-        result = original_savefig(self, fname, *args, **kwargs)
+        save_kwargs = dict(kwargs)
+        profile_name = str(os.getenv("WAVEP_MPL_FONT_PROFILE", "")).strip()
+        try:
+            from scripts.utils.plot_style import (
+                normalize_wavep_export_canvas_to_textwidth,
+                should_wavep_export_normalize_to_textwidth,
+            )
+        except Exception:
+            normalize_wavep_export_canvas_to_textwidth = None
+            should_wavep_export_normalize_to_textwidth = None
+
+        disable_canvas_normalize = str(os.getenv("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", "")).strip().lower()
+        if (
+            target_path is not None
+            and disable_canvas_normalize not in {"1", "true", "yes", "on"}
+            and should_wavep_export_normalize_to_textwidth is not None
+            and should_wavep_export_normalize_to_textwidth(profile_name=profile_name)
+        ):
+            _reserve_suptitle_gap_if_needed(self, profile_name=profile_name)
+            if str(save_kwargs.get("bbox_inches", "")).strip().lower() == "tight":
+                save_kwargs.pop("bbox_inches", None)
+
+            if normalize_wavep_export_canvas_to_textwidth is not None:
+                normalize_wavep_export_canvas_to_textwidth(self, profile_name=profile_name)
+
+        result = original_savefig(self, fname, *args, **save_kwargs)
 
         if target_path is not None and target_path.suffix.lower() == ".png" and not _vector_pdf_sidecar_enabled():
             pdf_target = target_path.with_suffix(".pdf")
-            pdf_kwargs = dict(kwargs)
+            pdf_kwargs = dict(save_kwargs)
             pdf_kwargs["format"] = "pdf"
             pdf_kwargs.pop("dpi", None)
             original_savefig(self, pdf_target, *args, **pdf_kwargs)
@@ -537,5 +730,6 @@ def enable_figure_text_localization(*, default_lang: str = "ja") -> None:
 
 
 # 関数: `enable_japanese_figure_localization` の入出力契約と処理意図を定義する。
+
 def enable_japanese_figure_localization() -> None:
     enable_figure_text_localization(default_lang="ja")

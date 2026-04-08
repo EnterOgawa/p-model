@@ -1,9 +1,18 @@
+"""
+目的: 量子 topic の qed vacuum precision に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import hashlib
 import json
 import math
+import os
 import re
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -11,6 +20,11 @@ import numpy as np
 
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
 
 enable_japanese_figure_localization()
 
@@ -168,11 +182,14 @@ def _extract_alpha_inverse(*, pdf_path: Path) -> tuple[float, float, str]:
 
 
 # 関数: `_fmt_sci_no_e` の入出力契約と処理意図を定義する。
+
 def _fmt_sci_no_e(value: float, *, digits: int = 2) -> str:
     if not math.isfinite(value):
         return "n/a"
+
     if value == 0.0:
         return "0"
+
     exp = int(math.floor(math.log10(abs(value))))
     coeff = value / (10.0**exp)
     return f"{coeff:.{digits}f}×10^{exp}"
@@ -181,7 +198,7 @@ def _fmt_sci_no_e(value: float, *, digits: int = 2) -> str:
 # 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
-    root = Path(__file__).resolve().parents[2]
+    root = ROOT
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -296,57 +313,66 @@ def main() -> None:
 
     import matplotlib.pyplot as plt
 
-    fig = plt.figure(figsize=(12.8, 16.4), dpi=170)
-    gs = fig.add_gridspec(4, 1, hspace=0.38)
+    fig = plt.figure(dpi=170)
+    apply_wavep_figure_layout(fig, template="part2_four_panel_spacious")
+    fig.set_size_inches(fig.get_figwidth(), 8.40, forward=True)
+    fig.subplots_adjust(left=0.120, right=0.985, top=0.910, bottom=0.085, hspace=0.56)
+    gs = fig.add_gridspec(4, 1)
+    title_font = get_wavep_font_size("title") * 0.88
+    axis_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    legend_font = get_wavep_font_size("legend")
+    note_font = get_wavep_font_size("note")
+    suptitle_font = get_wavep_font_size("suptitle") + 2.0
 
     # Panel A: Casimir force magnitude vs separation
     ax0 = fig.add_subplot(gs[0, 0])
-    ax0.plot(a_nm, force_n, lw=2.0, label="ideal conductor (PFA)")
+    ax0.plot(a_nm, force_n, lw=2.0, label="理想導体（PFA）")
     ax0.set_xscale("log")
     ax0.set_yscale("log")
-    ax0.set_xlabel("separation a (nm)", fontsize=12.5)
-    ax0.set_ylabel("|F| (N)", fontsize=12.5)
-    ax0.set_title("Casimir: sphere–plate force scale", fontsize=13.5)
+    ax0.set_xlabel("間隔 a (nm)", fontsize=axis_font)
+    ax0.set_ylabel("|F| (N)", fontsize=axis_font)
+    ax0.set_title("Casimir：球-平板スケール", fontsize=title_font, pad=5.0)
     ax0.grid(True, which="both", ls=":", lw=0.6, alpha=0.6)
-    ax0.legend(frameon=True, fontsize=10.5, loc="lower left")
+    ax0.legend(frameon=True, fontsize=legend_font, loc="lower left")
     ax0.text(
         0.02,
         0.98,
         (
             f"R≈{radius_m*1e6:.1f} μm (Roy+2000)\n"
             "F≈π^3 ħ c R / (360 a^3)\n"
-            f"reported precision ~{cfg.casimir_force_rel_precision*100:.0f}% (closest a)"
+            f"報告精度 ≈ {cfg.casimir_force_rel_precision*100:.0f}%（最小 a）"
         ),
         transform=ax0.transAxes,
         va="top",
         ha="left",
-        fontsize=10.5,
+        fontsize=note_font,
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.85, "edgecolor": "0.85"},
     )
-    ax0.tick_params(axis="both", labelsize=11)
+    ax0.tick_params(axis="both", labelsize=tick_font)
 
     # Panel B: Lamb shift scaling factors
     ax1 = fig.add_subplot(gs[1, 0])
-    ax1.plot(z, z4_rel, marker="o", lw=1.8, label="Lamb shift ~ Z^4")
-    ax1.plot(z, z6_rel, marker="o", lw=1.8, label="unknown 2-loop ~ Z^6")
+    ax1.plot(z, z4_rel, marker="o", lw=1.8, label="Lamb shift ∝ Z^4")
+    ax1.plot(z, z6_rel, marker="o", lw=1.8, label="未知 2-loop ∝ Z^6")
     ax1.set_yscale("log")
-    ax1.set_xlabel("Z", fontsize=12.5)
-    ax1.set_ylabel("relative scale (Z=1 → 1)", fontsize=12.5)
-    ax1.set_title("Lamb shift: scaling (why Z>1 helps)", fontsize=13.5)
+    ax1.set_xlabel("Z", fontsize=axis_font)
+    ax1.set_ylabel("相対スケール（Z=1 → 1）", fontsize=axis_font)
+    ax1.set_title("Lamb シフト：Z 依存スケール", fontsize=title_font, pad=5.0)
     ax1.grid(True, which="both", ls=":", lw=0.6, alpha=0.6)
-    ax1.legend(frameon=True, fontsize=10.5, loc="upper left")
+    ax1.legend(frameon=True, fontsize=legend_font, loc="upper left")
     ax1.scatter([2, 7], [2**4, 7**4], s=45, zorder=5, color="#1f77b4")
     ax1.scatter([2, 7], [2**6, 7**6], s=45, zorder=5, color="#ff7f0e")
     ax1.text(
         0.02,
         0.02,
-        "Source: physics/0009069v1 (scaling statements)",
+        "出典: physics/0009069v1（スケーリング記述）",
         transform=ax1.transAxes,
         va="bottom",
         ha="left",
-        fontsize=10.5,
+        fontsize=note_font,
     )
-    ax1.tick_params(axis="both", labelsize=11)
+    ax1.tick_params(axis="both", labelsize=tick_font)
 
     # Panel C: nuclear-size contributions (example numbers) + atomic gravity order check
     ax2 = fig.add_subplot(gs[2, 0])
@@ -355,17 +381,17 @@ def main() -> None:
     ax2.set_yscale("log")
     ax2.set_xticks(x)
     ax2.set_xticklabels(nucl_labels, rotation=15, ha="right")
-    ax2.set_ylabel("ΔE_nucl(2s) (MHz)", fontsize=12.5)
-    ax2.set_title("Nuclear-size term (example; Table 4)", fontsize=13.5)
+    ax2.set_ylabel("ΔE_nucl(2s) (MHz)", fontsize=axis_font)
+    ax2.set_title("核サイズ項（例; Table 4）", fontsize=title_font, pad=5.0)
     ax2.grid(True, which="both", ls=":", lw=0.6, alpha=0.6)
     ax2.text(
         0.02,
         0.98,
-        "Used as an example of\nnon-QED systematics (radius)",
-        transform=ax2.transAxes,
-        va="top",
-        ha="left",
-        fontsize=10.5,
+            "非QED系統（半径）の例",
+            transform=ax2.transAxes,
+            va="top",
+            ha="left",
+        fontsize=note_font,
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.85, "edgecolor": "0.85"},
     )
     try:
@@ -375,7 +401,7 @@ def main() -> None:
             # 条件分岐: `deltaE_grav_h_eV is not None and deltaE_grav_h_eV > 0` を満たす経路を評価する。
             if deltaE_grav_h_eV is not None and deltaE_grav_h_eV > 0:
                 extra = (
-                    "\nH 1S–2S precision (Parthey+2011):\n"
+                    "\nH 1S–2S precision（Parthey+2011）:\n"
                     f"σf={sigma_1s2s_hz} Hz ⇒ hσ≈{_fmt_sci_no_e(sigma_1s2s_e_ev, digits=2)} eV\n"
                     f"ratio (hσ / ΔE_grav(H))≈{_fmt_sci_no_e(ratio_sigma_to_grav_h, digits=2)}"
                 )
@@ -384,7 +410,7 @@ def main() -> None:
                 0.02,
                 0.02,
                 (
-                    "Atomic gravity (order):\n"
+                    "原子重力のオーダー:\n"
                     f"|φ|/c^2 ~ {_fmt_sci_no_e(h_case['phi_over_c2_abs'], digits=2)} (H), "
                     f"{_fmt_sci_no_e(u_case['phi_over_c2_abs'], digits=2)} (U)\n"
                     f"ΔE ~ {_fmt_sci_no_e(h_case['deltaE_eV_abs'], digits=2)}–"
@@ -394,25 +420,26 @@ def main() -> None:
                 transform=ax2.transAxes,
                 va="bottom",
                 ha="left",
-                fontsize=10.0,
+                fontsize=note_font,
                 bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.85, "edgecolor": "0.85"},
             )
     except Exception:
         pass
-    ax2.tick_params(axis="both", labelsize=11)
+
+    ax2.tick_params(axis="both", labelsize=tick_font)
 
     # Panel D: alpha^{-1} (recoil vs electron g-2)
 
     ax3 = fig.add_subplot(gs[3, 0])
-    labels = ["Recoil (Rb; 0812.3139)", "g-2 (e−; 0801.1134)"]
+    labels = ["反跳（Rb; 0812.3139）", "g-2（e−; 0801.1134）"]
     y = np.array([alpha_inv_recoil, alpha_inv_g2], dtype=float)
     yerr = np.array([alpha_inv_recoil_sigma, alpha_inv_g2_sigma], dtype=float)
     xx = np.arange(2, dtype=float)
     ax3.errorbar(xx, y, yerr=yerr, fmt="o", capsize=4, elinewidth=1.8, color="#1f77b4", ecolor="#1f77b4")
     ax3.set_xticks(xx)
     ax3.set_xticklabels(labels)
-    ax3.set_ylabel("alpha^{-1}", fontsize=12.5)
-    ax3.set_title("α precision cross-check (recoil vs g-2)", fontsize=13.5)
+    ax3.set_ylabel("alpha^{-1}", fontsize=axis_font)
+    ax3.set_title("α 精度クロスチェック", fontsize=title_font, pad=5.0)
     ax3.grid(True, ls=":", lw=0.6, alpha=0.7)
     ax3.text(
         0.02,
@@ -420,21 +447,32 @@ def main() -> None:
         (
             f"Δ(alpha^-1) = {_fmt_sci_no_e(alpha_inv_delta, digits=3)} ± "
             f"{_fmt_sci_no_e(alpha_inv_delta_sigma, digits=3)} (z={alpha_inv_z:+.2f})\n"
-            f"epsilon_needed (recoil) ≈ {epsilon_required*1e9:+.2f} ppb"
+            f"必要な epsilon（recoil）≈ {epsilon_required*1e9:+.2f} ppb"
         ),
         transform=ax3.transAxes,
-        fontsize=10.5,
+        fontsize=note_font,
         va="bottom",
         ha="left",
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.85, "edgecolor": "0.85"},
     )
-    ax3.tick_params(axis="both", labelsize=11)
+    ax3.tick_params(axis="both", labelsize=tick_font)
 
-    fig.suptitle("Vacuum + QED precision observables (Casimir, Lamb, H 1S–2S, α)", y=0.995, fontsize=15)
-    fig.tight_layout(rect=(0, 0, 1, 0.985))
+    fig.suptitle("真空 + QED 精密観測量", y=0.992, fontsize=suptitle_font)
 
     out_png = out_dir / "qed_vacuum_precision.png"
-    fig.savefig(out_png, bbox_inches="tight")
+    out_pdf = out_dir / "qed_vacuum_precision.pdf"
+    prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+    try:
+        with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+            fig.savefig(out_png)
+            fig.savefig(out_pdf)
+    finally:
+        if prev_disable_normalize is None:
+            os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = prev_disable_normalize
+
     plt.close(fig)
 
     metrics = {
@@ -581,7 +619,7 @@ def main() -> None:
                 "epsilon_units": "dimensionless (fractional scaling in recoil-based h/m)",
             },
         },
-        "outputs": {"png": str(out_png)},
+        "outputs": {"png": str(out_png), "pdf": str(out_pdf)},
         "notes": [
             "This step fixes observables and primary sources; it does not claim a derivation of QED from P-model.",
             "A P-model quantum interpretation must reproduce Casimir/Lamb phenomenology (or be falsified by precision comparisons).",
@@ -591,6 +629,7 @@ def main() -> None:
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(f"[ok] png : {out_png}")
+    print(f"[ok] pdf : {out_pdf}")
     print(f"[ok] json: {out_json}")
 
 

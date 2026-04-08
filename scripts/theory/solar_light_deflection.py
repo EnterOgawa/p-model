@@ -1,9 +1,18 @@
+"""
+目的: 理論 topic の solar light deflection に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
 import csv
 import json
 import math
+import shutil
+import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -11,6 +20,13 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
+
+
+_ROOT = Path(__file__).resolve().parents[2]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
+from scripts.utils.plot_style import apply_wavep_figure_layout
 
 
 # Physical constants
@@ -233,7 +249,7 @@ def compute(beta: float, measurements: List[GammaMeasurement]) -> Tuple[Dict[str
 # 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
-    root = Path(__file__).resolve().parents[2]
+    root = _ROOT
     default_outdir = root / "output" / "private" / "theory"
     default_measurements = root / "data" / "theory" / "solar_light_deflection_measurements.json"
 
@@ -282,8 +298,8 @@ def main() -> int:
     fig, (ax1, ax2) = plt.subplots(
         2,
         1,
-        figsize=(11.4, 10.8),
-        gridspec_kw={"height_ratios": [1.18, 1.0]},
+        figsize=(10.4, 7.35),
+        gridspec_kw={"height_ratios": [1.12, 1.0]},
     )
 
     # Left: alpha(b)
@@ -313,7 +329,7 @@ def main() -> int:
     ax1.set_xlim(1.0, 10.0)
     ax1.set_xlabel("インパクトパラメータ b [太陽半径 R_sun]", fontsize=15.0)
     ax1.set_ylabel("偏向角 α [角秒]", fontsize=15.0)
-    ax1.set_title("太陽重力による光の偏向（弱場）", fontsize=18.0)
+    ax1.set_title("太陽重力による光の偏向（弱場）", fontsize=18.0, pad=8.0)
     ax1.grid(True, alpha=0.3)
     ax1.tick_params(axis="both", labelsize=13.4)
     ax1.legend(fontsize=12.4, loc="upper right")
@@ -352,13 +368,12 @@ def main() -> int:
 
     ax2.set_xlabel("年", fontsize=15.0)
     ax2.set_ylabel("PPN γ（光偏向の強さ）", fontsize=15.0)
-    ax2.set_title("光偏向パラメータ γ（観測）", fontsize=18.0)
+    ax2.set_title("光偏向パラメータ γ（観測）", fontsize=18.0, pad=8.0)
     ax2.grid(True, alpha=0.3)
     ax2.tick_params(axis="both", labelsize=13.4)
     ax2.legend(fontsize=12.4, loc="lower right")
 
-    fig.suptitle("太陽重力による光の偏向：曲線（理論）と γ（観測）", y=0.992, fontsize=16.8)
-    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.968), h_pad=2.1)
+    apply_wavep_figure_layout(fig, template="part2_two_panel")
 
     png_path = outdir / "solar_light_deflection.png"
     pdf_path = outdir / "solar_light_deflection.pdf"
@@ -368,6 +383,15 @@ def main() -> int:
 
     out_rows_csv = outdir / "solar_light_deflection_measurements.csv"
     _write_measurements_csv(out_rows_csv, obs_rows)
+
+    public_dir = root / "output" / "public" / "theory"
+    public_dir.mkdir(parents=True, exist_ok=True)
+    public_png = public_dir / png_path.name
+    public_pdf = public_dir / pdf_path.name
+    public_csv = public_dir / out_rows_csv.name
+    shutil.copy2(png_path, public_png)
+    shutil.copy2(pdf_path, public_pdf)
+    shutil.copy2(out_rows_csv, public_csv)
 
     payload = {
         "generated_utc": datetime.now(timezone.utc).isoformat(),
@@ -380,7 +404,14 @@ def main() -> int:
         "input": {"measurements_json": str(Path(args.measurements)) if args.measurements else None},
         "metrics": metrics,
         "observations": obs_rows,
-        "outputs": {"plot_png": str(png_path), "plot_pdf": str(pdf_path), "measurements_csv": str(out_rows_csv)},
+        "outputs": {
+            "plot_png": str(png_path),
+            "plot_pdf": str(pdf_path),
+            "measurements_csv": str(out_rows_csv),
+            "public_plot_png": str(public_png),
+            "public_plot_pdf": str(public_pdf),
+            "public_measurements_csv": str(public_csv),
+        },
     }
     json_path = outdir / "solar_light_deflection_metrics.json"
     _write_json(json_path, payload)

@@ -1,12 +1,21 @@
+"""
+目的: 量子 topic の nuclear binding energy frequency mapping differential quantification に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import csv
 import json
 import math
+import os
 from pathlib import Path
 
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
 
 enable_japanese_figure_localization()
 
@@ -248,14 +257,16 @@ def main() -> None:
     rel_semf = [float(r["required_relative_precision_SEMF"]) if r["required_relative_precision_SEMF"] else float("nan") for r in rows_out]
     rel_yuk = [float(r["required_relative_precision_Yukawa"]) if r["required_relative_precision_Yukawa"] else float("nan") for r in rows_out]
 
-    axis_label_font = 18.0
-    panel_title_font = 19.4
-    legend_font = 15.4
-    tick_font = 15.6
-    compact_tick_font = 15.0
-    suptitle_font = 20.6
+    axis_label_font = get_wavep_font_size("axis")
+    panel_title_font = get_wavep_font_size("title") * 0.82
+    legend_font = get_wavep_font_size("legend")
+    tick_font = get_wavep_font_size("tick")
+    compact_tick_font = get_wavep_font_size("tick") * 0.94
+    suptitle_font = get_wavep_font_size("suptitle") + 2.0
 
     fig = plt.figure(figsize=(14.4, 11.4))
+    apply_wavep_figure_layout(fig, template="part2_quad_panel_spacious")
+    fig.set_size_inches(fig.get_figwidth(), 8.70, forward=True)
     gs = fig.add_gridspec(2, 2)
 
     ax0 = fig.add_subplot(gs[0, 0])
@@ -309,13 +320,23 @@ def main() -> None:
     ax3.legend(loc="upper left", fontsize=legend_font)
     ax3.tick_params(axis="both", labelsize=tick_font)
 
-    fig.suptitle("quantitative differential predictions and precision targets", y=0.99, fontsize=suptitle_font)
-    fig.subplots_adjust(left=0.06, right=0.98, top=0.93, bottom=0.09, wspace=0.22, hspace=0.32)
+    fig.suptitle("quantitative differential predictions and precision targets", y=0.992, fontsize=suptitle_font)
+    fig.subplots_adjust(left=0.085, right=0.985, top=0.905, bottom=0.095, wspace=0.24, hspace=0.64)
 
     out_png = out_dir / "nuclear_binding_energy_frequency_mapping_differential_quantification.png"
     out_pdf = out_dir / "nuclear_binding_energy_frequency_mapping_differential_quantification.pdf"
-    fig.savefig(out_png, bbox_inches="tight")
-    fig.savefig(out_pdf, bbox_inches="tight")
+    prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+    try:
+        with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+            fig.savefig(out_png)
+            fig.savefig(out_pdf)
+    finally:
+        if prev_disable_normalize is None:
+            os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = prev_disable_normalize
+
     plt.close(fig)
 
     group_stats = {}

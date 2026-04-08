@@ -1,12 +1,21 @@
+"""
+目的: 量子 topic の nuclear near field interference two mode model に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
 import json
 import math
+import os
 from pathlib import Path
 
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
 
 enable_japanese_figure_localization()
 
@@ -180,20 +189,28 @@ def main() -> None:
     plt.rcParams["ps.fonttype"] = 42
 
     fig = plt.figure(figsize=(14.8, 8.2), dpi=170, constrained_layout=False)
-    gs = fig.add_gridspec(1, 2, wspace=0.22)
+    apply_wavep_figure_layout(fig, template="part2_side_by_side")
+    fig.set_size_inches(fig.get_figwidth(), 5.75, forward=True)
+    gs = fig.add_gridspec(1, 2, wspace=0.24)
+    panel_title_font = get_wavep_font_size("title") * 0.82
+    axis_label_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    legend_font = get_wavep_font_size("legend")
+    note_font = get_wavep_font_size("note")
+    suptitle_font = get_wavep_font_size("suptitle") + 3.0
 
     ax0 = fig.add_subplot(gs[0, 0])
     ax0.plot(rs, js, lw=2.2, color="tab:blue", label="J_E(R) (MeV)")
     ax0.axvline(r0_fm, color="0.35", lw=1.2, ls=":", alpha=0.85, label="R0")
     ax0.axhline(j_at_r0_mev, color="tab:blue", lw=1.2, ls="--", alpha=0.65, label="J_E(R0)=E_B/2")
-    ax0.set_xlabel("R (fm)", fontsize=14.6)
-    ax0.set_ylabel("coupling energy J_E (MeV)", fontsize=14.6)
-    ax0.set_title("Near-field interference proxy: coupling envelope", fontsize=15.8)
+    ax0.set_xlabel("R (fm)", fontsize=axis_label_font)
+    ax0.set_ylabel("coupling energy J_E (MeV)", fontsize=axis_label_font)
+    ax0.set_title("Near-field interference proxy: coupling envelope", fontsize=panel_title_font, pad=6.0)
     ax0.grid(True, ls=":", lw=0.6, alpha=0.6)
-    ax0.legend(frameon=True, fontsize=12.2, loc="upper right")
+    ax0.legend(frameon=True, fontsize=legend_font, loc="upper right")
     ax0.text(
-        0.02,
-        0.98,
+        0.42,
+        0.58,
         (
             "Two-mode convention (fixed):\n"
             "  Δω = 2 J(R0)\n"
@@ -203,22 +220,22 @@ def main() -> None:
             f"L = {L_fm:.3f} fm (λ_π proxy)"
         ),
         transform=ax0.transAxes,
-        va="top",
+        va="center",
         ha="left",
-        fontsize=11.8,
+        fontsize=note_font,
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.88, "edgecolor": "0.85"},
     )
-    ax0.tick_params(axis="both", labelsize=12.8)
+    ax0.tick_params(axis="both", labelsize=tick_font)
 
     ax1 = fig.add_subplot(gs[0, 1])
     ax1.plot(rs, splits, lw=2.2, color="tab:orange", label="E_split(R)=2J_E(R)")
     ax1.axvline(r0_fm, color="0.35", lw=1.2, ls=":", alpha=0.85)
     ax1.axhline(b_mev, color="tab:orange", lw=1.2, ls="--", alpha=0.65, label="E_B at R0")
-    ax1.set_xlabel("R (fm)", fontsize=14.6)
-    ax1.set_ylabel("splitting energy E_split (MeV)", fontsize=14.6)
-    ax1.set_title("Binding scale from mode splitting", fontsize=15.8)
+    ax1.set_xlabel("R (fm)", fontsize=axis_label_font)
+    ax1.set_ylabel("splitting energy E_split (MeV)", fontsize=axis_label_font)
+    ax1.set_title("Binding scale from mode splitting", fontsize=panel_title_font, pad=6.0)
     ax1.grid(True, ls=":", lw=0.6, alpha=0.6)
-    ax1.legend(frameon=True, fontsize=12.2, loc="upper right")
+    ax1.legend(frameon=True, fontsize=legend_font, loc="upper right")
     ax1.text(
         0.02,
         0.02,
@@ -230,18 +247,28 @@ def main() -> None:
         transform=ax1.transAxes,
         va="bottom",
         ha="left",
-        fontsize=11.8,
+        fontsize=note_font,
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.88, "edgecolor": "0.85"},
     )
-    ax1.tick_params(axis="both", labelsize=12.8)
+    ax1.tick_params(axis="both", labelsize=tick_font)
 
-    fig.suptitle("nuclear force as near-field interference (two-mode proxy)", y=0.965, fontsize=17.4)
-    fig.subplots_adjust(left=0.07, right=0.98, top=0.86, bottom=0.09, wspace=0.24)
+    fig.suptitle("nuclear force as near-field interference (two-mode proxy)", y=0.986, fontsize=suptitle_font)
+    fig.subplots_adjust(left=0.095, right=0.985, top=0.880, bottom=0.095, wspace=0.24)
 
     out_pdf = out_dir / "nuclear_near_field_interference_two_mode_model.pdf"
     out_png = out_dir / "nuclear_near_field_interference_two_mode_model.png"
-    fig.savefig(out_pdf, bbox_inches="tight")
-    fig.savefig(out_png, bbox_inches="tight")
+    prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+    try:
+        with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+            fig.savefig(out_pdf)
+            fig.savefig(out_png)
+    finally:
+        if prev_disable_normalize is None:
+            os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = prev_disable_normalize
+
     plt.close(fig)
 
     out_json = out_dir / "nuclear_near_field_interference_two_mode_model_metrics.json"

@@ -1,3 +1,10 @@
+"""
+目的: 量子 topic の quantum measurement dynamic collapse stability audit に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -24,8 +31,22 @@ if str(_ROOT) not in sys.path:
 from scripts.quantum.quantum_measurement_dynamic_collapse_simulation import _safe_corr, _simulate_trajectory  # noqa: E402
 from scripts.summary import worklog  # noqa: E402
 
+try:
+    from scripts.utils.plot_style import install_wavep_cjk_font_override, resolve_wavep_cjk_font_family  # noqa: E402
+
+    install_wavep_cjk_font_override(preferred_name="Noto Sans CJK JP")
+    preferred_cjk = resolve_wavep_cjk_font_family(preferred_name="Noto Sans CJK JP")
+    if preferred_cjk:
+        matplotlib.rcParams["font.family"] = [preferred_cjk, "DejaVu Sans"]
+        matplotlib.rcParams["font.sans-serif"] = [preferred_cjk, "DejaVu Sans"]
+
+    matplotlib.rcParams["axes.unicode_minus"] = False
+except Exception:
+    pass
+
 
 # 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -364,42 +385,42 @@ def _plot(
     ax_tau, ax_branch, ax_consensus, ax_collapse = axes
 
     ax_tau.bar(x, tau50_s * 1000.0, color=colors, alpha=0.9)
-    ax_tau.axhline(float(tau50_ref_s) * 1000.0, color="#4c78a8", ls="--", lw=1.2, label="ref tau50")
+    ax_tau.axhline(float(tau50_ref_s) * 1000.0, color="#4c78a8", ls="--", lw=1.2, label="基準 τ50")
     ax_tau.axhline(float(tau50_ref_s) * float(tau50_ratio_min) * 1000.0, color="#999999", ls=":", lw=1.0)
     ax_tau.axhline(float(tau50_ref_s) * float(tau50_ratio_max) * 1000.0, color="#999999", ls=":", lw=1.0)
-    ax_tau.set_ylabel("tau50 [ms]", fontsize=13.4)
-    ax_tau.set_title("Collapse-time median stability", fontsize=14.8)
+    ax_tau.set_ylabel("τ50 [ms]", fontsize=13.4)
+    ax_tau.set_title("収束時刻中央値の安定性", fontsize=14.8)
     ax_tau.grid(True, axis="y", alpha=0.25)
     ax_tau.legend(loc="upper right", fontsize=11.8)
 
     ax_branch.bar(x, branch_reversal, color=colors, alpha=0.9)
-    ax_branch.axhline(float(max_branch_reversal), color="#d62728", ls="--", lw=1.2, label="max branch reversal")
-    ax_branch.set_ylabel("branch reversal fraction", fontsize=13.4)
-    ax_branch.set_title("Branch-stability gate", fontsize=14.8)
+    ax_branch.axhline(float(max_branch_reversal), color="#d62728", ls="--", lw=1.2, label="最大枝反転率")
+    ax_branch.set_ylabel("枝反転率", fontsize=13.4)
+    ax_branch.set_title("状態分枝安定性ゲート", fontsize=14.8)
     ax_branch.grid(True, axis="y", alpha=0.25)
     ax_branch.legend(loc="upper right", fontsize=11.8)
 
     ax_consensus.bar(x, pointer_consensus, color=colors, alpha=0.9)
-    ax_consensus.axhline(float(min_pointer_consensus), color="#d62728", ls="--", lw=1.2, label="min pointer consensus")
-    ax_consensus.set_ylabel("pointer consensus", fontsize=13.4)
-    ax_consensus.set_title("Pointer majority consensus", fontsize=14.8)
+    ax_consensus.axhline(float(min_pointer_consensus), color="#d62728", ls="--", lw=1.2, label="最小ポインタ合意率")
+    ax_consensus.set_ylabel("ポインタ合意率", fontsize=13.4)
+    ax_consensus.set_title("ポインタ多数決合意", fontsize=14.8)
     ax_consensus.grid(True, axis="y", alpha=0.25)
     ax_consensus.legend(loc="upper right", fontsize=11.8)
 
     ax_collapse.bar(x, collapse_fraction, color=colors, alpha=0.9)
-    ax_collapse.axhline(float(min_collapse_fraction), color="#d62728", ls="--", lw=1.2, label="min collapse fraction")
-    ax_collapse.set_ylabel("collapse fraction", fontsize=13.4)
-    ax_collapse.set_title("Collapse success gate", fontsize=14.8)
+    ax_collapse.axhline(float(min_collapse_fraction), color="#d62728", ls="--", lw=1.2, label="最小収束率")
+    ax_collapse.set_ylabel("崩壊率", fontsize=13.4)
+    ax_collapse.set_title("収束成功ゲート", fontsize=14.8)
     ax_collapse.grid(True, axis="y", alpha=0.25)
     ax_collapse.legend(loc="upper right", fontsize=11.8)
 
     for ax in axes:
         ax.set_xticks(x)
         ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=11.4)
-        ax.set_xlabel("run (seed-env_scale)", fontsize=12.2)
+        ax.set_xlabel("実行条件（seed-env_scale）", fontsize=12.2)
         ax.tick_params(axis="y", labelsize=11.4)
 
-    fig.suptitle("Dynamic-collapse env-coupled stability audit", fontsize=16.4)
+    fig.suptitle("動的収束の環境結合安定性監査", fontsize=16.4)
     fig.tight_layout(rect=[0.01, 0.01, 0.99, 0.97])
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200, bbox_inches="tight")

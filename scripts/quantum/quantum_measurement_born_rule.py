@@ -1,48 +1,82 @@
+"""
+目的: 量子 topic の quantum measurement born rule に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+import shutil
+import sys
 
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
 
+ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
-from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.plot_style import (  # noqa: E402
+    apply_paper_style,
+    apply_wavep_figure_layout,
+    get_wavep_font_size,
+    resolve_wavep_cjk_font_family,
+)
+from scripts.quantum.figure_japanese_localizer import enable_japanese_figure_localization  # noqa: E402
 
 enable_japanese_figure_localization()
 
 # クラス: `Config` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Config:
-    fig_w_in: float = 11.0
-    fig_h_in: float = 6.2
     dpi: int = 180
 
 
 # 関数: `_configure_japanese_font` の入出力契約と処理意図を定義する。
+
 def _configure_japanese_font() -> None:
     import matplotlib as mpl
-    from matplotlib import font_manager as fm
 
-    candidates = [
-        "Yu Gothic",
-        "Meiryo",
-        "MS Gothic",
-        "MS PGothic",
-        "Noto Sans CJK JP",
-        "Noto Sans JP",
-        "IPAexGothic",
-    ]
-    available = {f.name for f in fm.fontManager.ttflist}
-    for name in candidates:
-        if name in available:
-            mpl.rcParams["font.family"] = name
-            mpl.rcParams["font.sans-serif"] = [name] + list(mpl.rcParams.get("font.sans-serif", []))
-            break
+    preferred = resolve_wavep_cjk_font_family(preferred_name="Noto Sans CJK JP")
+    if preferred:
+        mpl.rcParams["font.family"] = [preferred, "DejaVu Sans"]
+        mpl.rcParams["font.sans-serif"] = [preferred, "DejaVu Sans"]
 
     mpl.rcParams["axes.unicode_minus"] = False
+
+
+# 関数: `_save_figure_bundle` の入出力契約と処理意図を定義する。
+
+def _save_figure_bundle(*, fig, stem: str) -> dict[str, str]:
+    out_public = ROOT / "output" / "public" / "quantum"
+    out_private = ROOT / "output" / "private" / "quantum"
+    out_canon = ROOT / "output" / "quantum"
+    outputs = {
+        "png_public": out_public / f"{stem}.png",
+        "png_private": out_private / f"{stem}.png",
+        "png_canon": out_canon / f"{stem}.png",
+        "pdf_public": out_public / f"{stem}.pdf",
+        "pdf_private": out_private / f"{stem}.pdf",
+        "pdf_canon": out_canon / f"{stem}.pdf",
+    }
+    for path in outputs.values():
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        fig.savefig(outputs["png_public"], dpi=220)
+        fig.savefig(outputs["pdf_public"])
+
+    for key in ["png_private", "png_canon", "pdf_private", "pdf_canon"]:
+        source_key = "png_public" if key.startswith("png_") else "pdf_public"
+        shutil.copy2(outputs[source_key], outputs[key])
+
+    return {key: str(value.relative_to(ROOT)).replace("\\", "/") for key, value in outputs.items()}
 
 
 # 関数: `_add_box` の入出力契約と処理意図を定義する。
@@ -58,7 +92,15 @@ def _add_box(ax, x: float, y: float, w: float, h: float, text: str, *, fc: str, 
         facecolor=fc,
     )
     ax.add_patch(box)
-    ax.text(x + w / 2.0, y + h / 2.0, text, ha="center", va="center", fontsize=10.5)
+    ax.text(
+        x + w / 2.0,
+        y + h / 2.0,
+        text,
+        ha="center",
+        va="center",
+        fontsize=get_wavep_font_size("base"),
+        linespacing=1.14,
+    )
 
 
 # 関数: `_add_arrow` の入出力契約と処理意図を定義する。
@@ -71,20 +113,23 @@ def _add_arrow(ax, x0: float, y0: float, x1: float, y1: float) -> None:
 # 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
-    root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "public" / "quantum"
+    out_dir = ROOT / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    apply_paper_style()
     _configure_japanese_font()
     cfg = Config()
 
-    fig = plt.figure(figsize=(cfg.fig_w_in, cfg.fig_h_in), dpi=cfg.dpi)
+    fig = plt.figure(dpi=cfg.dpi)
+    apply_wavep_figure_layout(fig, template="paper_diagram")
+    fig.subplots_adjust(top=0.905, bottom=0.125)
     ax = fig.add_subplot(111)
     ax.set_axis_off()
     ax.set_xlim(0.0, 1.0)
     ax.set_ylim(0.0, 1.0)
 
-    fig.suptitle("量子測定の位置づけ（Born則と状態更新）", fontsize=13)
+    suptitle = fig.suptitle("量子測定の位置づけ（Born則と状態更新）", fontsize=get_wavep_font_size("suptitle"))
+    suptitle.set_fontsize(12.4)
 
     # Boxes
     _add_box(
@@ -159,15 +204,13 @@ def main() -> None:
         0.05,
         "初期版では、導出済み要素と採用要素の境界を固定し、\n"
         "「半古典的」という批判に対する検証入口を明示する。Born則と更新則の第一原理導出は今後の課題。",
-        fontsize=9.5,
+        fontsize=get_wavep_font_size("note"),
         ha="left",
         va="bottom",
         color="#333333",
     )
 
-    out_png = out_dir / "quantum_measurement_born_rule_flow.png"
-    fig.tight_layout()
-    fig.savefig(out_png)
+    outputs = _save_figure_bundle(fig=fig, stem="quantum_measurement_born_rule_flow")
     plt.close(fig)
 
     metrics = {
@@ -224,14 +267,16 @@ def main() -> None:
             "Spin/charge/EM/strong interactions (Step 7.11+)",
         ],
         "outputs": {
-            "figure_png": str(out_png.relative_to(root)),
+            "figure_png": outputs["png_public"],
+            "figure_pdf": outputs["pdf_public"],
         },
     }
 
     out_json = out_dir / "quantum_measurement_born_rule_metrics.json"
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    print(f"Wrote: {out_png}")
+    print(f"Wrote: {ROOT / outputs['png_public']}")
+    print(f"Wrote: {ROOT / outputs['pdf_public']}")
     print(f"Wrote: {out_json}")
 
 

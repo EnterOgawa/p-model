@@ -1,3 +1,10 @@
+"""
+目的: Part IV のラベル整合監査表を再生成する。
+入力: 検証 registry と Part IV の caption/label 対応を読む。
+出力: output/public/summary の label parity audit artifact を更新する。
+前提: Part IV の表題・caption 整合確認に使う監査面を正とする。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -22,6 +29,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.utils.plot_style import apply_paper_style, get_wavep_font_size  # noqa: E402
 
 MARK_START = "<!-- DELTA_UNIT:START table1_part4_label_parity_82351 -->"
 MARK_END = "<!-- DELTA_UNIT:END table1_part4_label_parity_82351 -->"
@@ -83,11 +91,13 @@ def _unescape_cell(text: str) -> str:
 
 
 # 関数: `_part4_ref` の入出力契約と処理意図を定義する。
+
 def _part4_ref(label: str) -> str:
     return rf"\ref{{sec:p4:{label}}}"
 
 
 # 関数: `_part4_section_for_row` の入出力契約と処理意図を定義する。
+
 def _part4_section_for_row(topic: str, observable: str, dataset: str = "") -> str:
     t = str(topic).strip()
     o = str(observable).strip()
@@ -99,66 +109,82 @@ def _part4_section_for_row(topic: str, observable: str, dataset: str = "") -> st
         return _part4_ref("llr-time-tag-s4")
 
     # 条件分岐: `t.startswith("Cassini") or t.startswith("Viking") or t.startswith("Mercury") or t.startswith("GPS")` を満たす経路を評価する。
+
     if t.startswith("Cassini") or t.startswith("Viking") or t.startswith("Mercury") or t.startswith("GPS"):
         return _part4_ref("cassini-viking-mercury-gps-llr-public-pack-s6")
 
     # 条件分岐: `t.startswith("光偏向") or t.startswith("重力赤方偏移")` を満たす経路を評価する。
+
     if t.startswith("光偏向") or t.startswith("重力赤方偏移"):
         return _part4_ref("cassini-viking-mercury-gps-llr-public-pack-s6")
 
     # 条件分岐: `t.startswith("宇宙論（距離二重性）") or t.startswith("宇宙論（銀河団衝突オフセット）")` を満たす経路を評価する。
+
     if t.startswith("宇宙論（距離二重性）") or t.startswith("宇宙論（銀河団衝突オフセット）"):
         return _part4_ref("cosmo-ddr-s5")
 
     # 条件分岐: `t.startswith("銀河回転曲線（SPARC）")` を満たす経路を評価する。
+
     if t.startswith("銀河回転曲線（SPARC）"):
         return _part4_ref("cosmo-ddr-s5")
 
     # 条件分岐: `t.startswith("宇宙論") or t.startswith("JWST/MAST")` を満たす経路を評価する。
+
     if t.startswith("宇宙論") or t.startswith("JWST/MAST"):
         return _part4_ref("bao-sn-cmb-ap-s8")
 
     # 条件分岐: `t.startswith("量子（Bell）") or "Bell" in t` を満たす経路を評価する。
+
     if t.startswith("量子（Bell）") or "Bell" in t:
         return _part4_ref("bell-test-s3")
 
     # 条件分岐: `t.startswith("量子（核質量）")` を満たす経路を評価する。
+
     if t.startswith("量子（核質量）"):
         return _part4_ref("z-n-s10")
 
     # 条件分岐: `t.startswith("量子（核物理/BBN）")` を満たす経路を評価する。
+
     if t.startswith("量子（核物理/BBN）"):
         return _part4_ref("z-n-s10")
 
     # 条件分岐: `t.startswith("量子（物性）")` を満たす経路を評価する。
+
     if t.startswith("量子（物性）"):
         return _part4_ref("materials-s11")
 
     # 条件分岐: `t.startswith("量子（熱力学）")` を満たす経路を評価する。
+
     if t.startswith("量子（熱力学）"):
         return _part4_ref("12-s12")
 
     # 条件分岐: `t.startswith("回転")` を満たす経路を評価する。
+
     if t.startswith("回転"):
         return f"{_part4_ref('part-i-s7')} / {_part4_ref('eht-s9')}"
 
     # 条件分岐: `t.startswith("EHT") or t.startswith("連星パルサー") or t.startswith("重力波") or t.startswith("強場") or t.startswith("XRISM")` を満たす経路を評価する。
+
     if t.startswith("EHT") or t.startswith("連星パルサー") or t.startswith("重力波") or t.startswith("強場") or t.startswith("XRISM"):
         return _part4_ref("eht-s9")
 
     # 条件分岐: `t.startswith("背景計量")` を満たす経路を評価する。
+
     if t.startswith("背景計量"):
         return _part4_ref("eht-s9")
 
     # 条件分岐: `t.startswith("BBN")` を満たす経路を評価する。
+
     if t.startswith("BBN"):
         return _part4_ref("z-n-s10")
 
     # 条件分岐: `t.startswith("速度飽和")` を満たす経路を評価する。
+
     if t.startswith("速度飽和"):
         return _part4_ref("part-i-s7")
 
     # 条件分岐: `o` を満たす経路を評価する。
+
     if o:
         return _part4_ref("z-n-s10")
 
@@ -166,6 +192,7 @@ def _part4_section_for_row(topic: str, observable: str, dataset: str = "") -> st
 
 
 # 関数: `_normalize_table1_rows` の入出力契約と処理意図を定義する。
+
 def _normalize_table1_rows(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
     Normalize row labels so (topic, observable) duplicates are split by dataset/experiment.
@@ -200,6 +227,7 @@ def _normalize_table1_rows(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
 
 # 関数: `_build_marker_block` の入出力契約と処理意図を定義する。
+
 def _build_marker_block(rows: List[Dict[str, Any]], *, public_figure_ref: str) -> str:
     lines: List[str] = [
         MARK_START,
@@ -310,19 +338,20 @@ def _extract_block_pairs(text: str) -> List[Tuple[str, str, str]]:
 # 関数: `_plot_summary` の入出力契約と処理意図を定義する。
 
 def _plot_summary(*, out_png: Path, n_rows: int, n_ok: int, n_missing: int, n_extra: int) -> None:
-    labels = ["table1 rows", "matched", "missing", "extra"]
+    apply_paper_style()
+    labels = ["表行数", "一致", "不足", "余剰"]
     values = np.asarray([float(n_rows), float(n_ok), float(n_missing), float(n_extra)], dtype=float)
     colors = ["#4c78a8", "#54a24b", "#e45756", "#f58518"]
-    title_font = 13.2
-    axis_label_font = 11.8
-    tick_font = 10.8
+    title_font = get_wavep_font_size("title", name="part4_verification")
+    axis_label_font = get_wavep_font_size("axis", name="part4_verification")
+    tick_font = get_wavep_font_size("tick", name="part4_verification")
     fig, ax = plt.subplots(figsize=(8.5, 4.8))
     x = np.arange(len(labels), dtype=float)
     ax.bar(x, values, color=colors, alpha=0.9)
     ax.set_xticks(x)
     ax.set_xticklabels(labels, fontsize=tick_font)
-    ax.set_ylabel("count", fontsize=axis_label_font)
-    ax.set_title("検証サマリ表 vs Part IV label parity audit", fontsize=title_font)
+    ax.set_ylabel("件数", fontsize=axis_label_font)
+    ax.set_title("検証サマリ表と Part IV ラベル整合監査", fontsize=title_font)
     ax.grid(True, axis="y", alpha=0.25)
     ax.tick_params(axis="y", labelsize=tick_font)
     fig.tight_layout()
@@ -428,6 +457,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             row_label = f"{row['topic']}｜{row['observable']}｜{dataset_cell}"
         else:
             row_label = f"{row['topic']}｜{row['observable']}"
+
         csv_rows.append(
             {
                 "row_no": idx,
@@ -446,6 +476,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             row_label = f"{topic}｜{observable}｜{dataset_cell}"
         else:
             row_label = f"{topic}｜{observable}"
+
         csv_rows.append(
             {
                 "row_no": f"extra_{idx}",

@@ -1,3 +1,10 @@
+"""
+目的: 重力波 topic の gw polarization network coverage expansion audit に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -87,6 +94,24 @@ def _fmt(v: Any, digits: int = 6) -> str:
         return f"{x:.{digits}g}"
 
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
+
+
+# 関数: `_format_subset_label` の入出力契約と処理意図を定義する。
+
+def _short_event_tag(event_id: str) -> str:
+    text = str(event_id).strip()
+    if text.startswith("GW") and "_" in text:
+        return text[2:].split("_", 1)[0]
+
+    return text
+
+
+# 関数: `_format_subset_label` の入出力契約と処理意図を定義する。
+
+def _format_subset_label(label: str) -> str:
+    parts = [segment.strip() for segment in str(label).split(",") if segment.strip()]
+    short_parts = [_short_event_tag(part) for part in parts]
+    return "\n".join(short_parts) if short_parts else str(label)
 
 
 # 関数: `_parse_events` の入出力契約と処理意図を定義する。
@@ -258,17 +283,23 @@ def _as_metric_row(subset: Tuple[str, ...], payload: Dict[str, Any], gate_scalar
 # 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(rows: List[Dict[str, Any]], gate_scalar_max: float, out_png: Path) -> None:
-    labels = [str(row.get("subset_events", "")) for row in rows]
+    labels = [_format_subset_label(str(row.get("subset_events", ""))) for row in rows]
     y_scalar = np.asarray([_safe_float(row.get("best_u2_scalar_overlap_proxy")) for row in rows], dtype=float)
     y_usable = np.asarray([float(row.get("best_coverage_n_usable_events", 0)) for row in rows], dtype=float)
     pass_found = np.asarray([float(row.get("best_gate_found", 0)) for row in rows], dtype=float)
-    title_fs = 18.2
-    label_fs = 16.2
-    legend_fs = 14.6
-    tick_fs = 14.2
+    title_fs = 16.4
+    label_fs = 13.0
+    legend_fs = 12.0
+    tick_fs = 11.0
 
     x = np.arange(len(rows), dtype=float)
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(15.4, 9.4), sharex=True, gridspec_kw={"height_ratios": [2, 1]})
+    fig, (ax1, ax2) = plt.subplots(
+        2,
+        1,
+        figsize=(11.2, 8.8),
+        sharex=True,
+        gridspec_kw={"height_ratios": [1.45, 1.75]},
+    )
 
     colors = []
     for value in y_scalar:
@@ -287,10 +318,10 @@ def _plot(rows: List[Dict[str, Any]], gate_scalar_max: float, out_png: Path) -> 
     ax1.bar(x, y_scalar, color=colors, alpha=0.9)
     ax1.axhline(float(gate_scalar_max), color="#2ca02c", linestyle="--", linewidth=1.4, label=f"gate scalar<{_fmt(gate_scalar_max)}")
     ax1.axhline(0.5, color="#f2c744", linestyle=":", linewidth=1.2, label="watch boundary = 0.5")
-    ax1.set_ylabel("best scalar_overlap_proxy (usable>=2)", fontsize=label_fs)
+    ax1.set_ylabel("best scalar_overlap_proxy\n(usable>=2)", fontsize=label_fs)
     ax1.set_title("GW polarization coverage expansion audit (subset sweep)", fontsize=title_fs)
     ax1.grid(True, axis="y", alpha=0.25)
-    ax1.legend(loc="upper right", frameon=True, fontsize=legend_fs)
+    ax1.legend(loc="upper left", frameon=True, fontsize=legend_fs)
     ax1.tick_params(axis="y", labelsize=tick_fs)
 
     width = 0.42
@@ -300,15 +331,19 @@ def _plot(rows: List[Dict[str, Any]], gate_scalar_max: float, out_png: Path) -> 
     ax2.set_ylabel("coverage / gate", fontsize=label_fs)
     ax2.set_ylim(0.0, max(3.0, float(np.nanmax(y_usable)) + 0.8 if y_usable.size else 3.0))
     ax2.grid(True, axis="y", alpha=0.25)
-    ax2.legend(loc="upper right", frameon=True, fontsize=legend_fs)
+    ax2.legend(loc="upper left", frameon=True, fontsize=legend_fs)
 
     ax2.set_xticks(x)
-    ax2.set_xticklabels(labels, rotation=35, ha="right", fontsize=tick_fs)
+    ax2.set_xticklabels(labels, rotation=0, ha="center", fontsize=tick_fs)
+    for tick in ax2.get_xticklabels():
+        tick.set_linespacing(0.9)
+
+    ax2.tick_params(axis="x", pad=1.0)
     ax2.tick_params(axis="y", labelsize=tick_fs)
-    fig.tight_layout(h_pad=1.1)
+    fig.subplots_adjust(left=0.16, right=0.97, top=0.88, bottom=0.19, hspace=0.36)
     out_png.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_png, dpi=180, bbox_inches="tight")
-    fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight")
+    fig.savefig(out_png, dpi=180)
+    fig.savefig(out_png.with_suffix(".pdf"))
     plt.close(fig)
 
 

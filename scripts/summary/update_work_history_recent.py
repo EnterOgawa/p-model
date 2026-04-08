@@ -1,10 +1,29 @@
+"""
+目的: WORK_HISTORY 末尾から recent 版を再生成して運用参照を軽量化する。
+入力: doc/WORK_HISTORY.md を読む。
+出力: doc/WORK_HISTORY_RECENT.md を更新する。
+前提: recent は直近ログの抜粋であり、全文正本は WORK_HISTORY にある。
+"""
+
 from __future__ import annotations
 
 import re
 from pathlib import Path
 
 
+# 関数: `[work]` 行から時刻キーを抽出する。
+def _extract_work_timestamp(line: str) -> str:
+    """Return the sortable ISO timestamp from one `[work]` line when present."""
+    match = re.match(r"^\[work\]\s+(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2}))", line)
+    # 条件分岐: `match` を満たす経路を評価する。
+    if match:
+        return match.group(1)
+
+    return ""
+
+
 # 関数: `_split_history_blocks` の入出力契約と処理意図を定義する。
+
 def _split_history_blocks(text: str) -> tuple[str, list[str]]:
     match = re.search(r"^##\s+20\d\d-\d\d-\d\d", text, flags=re.M)
     # 条件分岐: `not match` を満たす経路を評価する。
@@ -38,12 +57,14 @@ def _split_history_blocks(text: str) -> tuple[str, list[str]]:
 
 
 # 関数: `_extract_recent_work_lines` の入出力契約と処理意図を定義する。
+
 def _extract_recent_work_lines(text: str, limit: int = 3) -> list[str]:
     work_lines = [
         line.rstrip()
         for line in text.splitlines()
         if line.startswith("[work] ")
     ]
+    work_lines.sort(key=_extract_work_timestamp)
     return work_lines[-limit:]
 
 

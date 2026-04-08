@@ -21,11 +21,11 @@ from typing import Optional, Sequence
 _ROOT = Path(__file__).resolve().parents[2]
 
 _PMODEL_VERSION_STYLE_DEFAULT = r"""\NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pmodel_version}[2026/03/09 P-model shared version info]
+\ProvidesPackage{pmodel_version}[2026/04/08 P-model shared version info]
 
 % === ここだけ更新すれば全パートに反映される ===
-\newcommand{\PmodelDocVersion}{v1.0}
-\newcommand{\PmodelDate}{2026-03-09 UTC}
+\newcommand{\PmodelDocVersion}{v2.0}
+\newcommand{\PmodelDate}{2026/4/8 UTC}
 
 % 組み立て済みマクロ
 \newcommand{\PmodelFullDate}{%
@@ -36,7 +36,7 @@ _PMODEL_VERSION_STYLE_DEFAULT = r"""\NeedsTeXFormat{LaTeX2e}
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from scripts.summary import worklog
+from scripts.summary import paper_profile_content as profile_content, worklog
 
 try:
     from sitecustomize import _translate_wavep_text_to_japanese as _translate_wavep_figure_text_to_japanese
@@ -45,11 +45,13 @@ except Exception:
 
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
+
 def _repo_root() -> Path:
     return _ROOT
 
 
 # 関数: `_ensure_pmodel_version_style` の入出力契約と処理意図を定義する。
+
 def _ensure_pmodel_version_style(*, root: Path, outdir: Path) -> Path:
     src = root / "pmodel_version.sty"
     dst = outdir / "pmodel_version.sty"
@@ -90,6 +92,7 @@ def _safe_label(text: str) -> str:
 
 
 # 関数: `_compact_label` の入出力契約と処理意図を定義する。
+
 def _compact_label(label: str, *, max_len: int = 64) -> str:
     # 条件分岐: `len(label) <= max_len` を満たす経路を評価する。
     if len(label) <= max_len:
@@ -178,6 +181,7 @@ def _section_label_hint(raw_title: str, stripped_title: str) -> str:
         return "section-map"
 
     # 条件分岐: Part4 の「Part III 検証サマリ表 行ラベル整合」見出しを固定ラベルへ写像する。
+
     if "検証サマリ表" in raw_title and "行ラベル整合" in raw_title:
         return "part-iii-scoreboard-label-parity"
 
@@ -224,10 +228,16 @@ def _build_section_label(
     profile_prefix = ""
     if profile == "part2_astrophysics":
         profile_prefix = "p2"
-    elif profile == "part3_quantum":
+    elif profile in {
+        profile_content.PART3_COMPAT_PROFILE,
+        profile_content.PART3A_PROFILE,
+        profile_content.PART3B_PROFILE,
+    }:
         profile_prefix = "p3"
+
     if profile_prefix and candidate in {"2-2-s2-2", "conclusion-s7"}:
         candidate = f"{profile_prefix}-{candidate}"
+
     n = used_labels.get(candidate, 0) + 1
     used_labels[candidate] = n
     return candidate if n == 1 else f"{candidate}-{n}"
@@ -315,6 +325,7 @@ def _heading_pdf_text(title: str) -> str:
 
 
 # 関数: `_restore_literal_refs` の入出力契約と処理意図を定義する。
+
 def _restore_literal_refs(tex_body: str) -> str:
     return _LITERAL_REF_RE.sub(r"\\ref{\1}", tex_body)
 
@@ -384,12 +395,19 @@ def _fallback_caption_from_path(raw_path: str) -> str:
 
         return "Observation-theory comparison figure."
 
+    # 条件分岐: `normalized.lower() == "xrism resolve summary"` を満たす経路を評価する。
+
+    if normalized.lower() == "xrism resolve summary":
+        return "XRISM Resolve 要約。"
+
     token_map = {
         "llr": "LLR",
         "eht": "EHT",
         "gw": "重力波",
         "cosmology": "宇宙論",
         "quantum": "量子",
+        "thermo": "熱力学",
+        "blackbody": "黒体",
         "nuclear": "核",
         "xrism": "XRISM",
         "gps": "GPS",
@@ -397,6 +415,26 @@ def _fallback_caption_from_path(raw_path: str) -> str:
         "viking": "Viking",
         "mercury": "Mercury",
         "pulsar": "連星パルサー",
+        "photon": "光子",
+        "energy": "エネルギー",
+        "free": "自由",
+        "enthalpy": "エンタルピー",
+        "entropy": "エントロピー",
+        "momentum": "運動量",
+        "pressure": "圧力",
+        "flux": "流束",
+        "density": "密度",
+        "ratio": "比",
+        "peak": "ピーク",
+        "frequency": "周波数",
+        "wavelength": "波長",
+        "product": "積",
+        "heat": "熱",
+        "capacity": "容量",
+        "helmholtz": "ヘルムホルツ",
+        "per": "当たり",
+        "splits": "分割",
+        "holdout": "ホールドアウト",
         "scoreboard": "総合スコア",
         "residual": "残差",
         "constraints": "制約",
@@ -414,12 +452,16 @@ def _fallback_caption_from_path(raw_path: str) -> str:
     text = " ".join(words).strip()
     if _should_localize_figure_caption_to_japanese() and _translate_wavep_figure_text_to_japanese is not None:
         text = _translate_wavep_figure_text_to_japanese(text)
-        return f"{text}の比較結果を示す。"
+        if text.endswith(("。", "！", "？")):
+            return text
+
+        return f"{text}。"
 
     return f"Comparison result for {text}."
 
 
 # 関数: `_normalize_figure_caption` の入出力契約と処理意図を定義する。
+
 def _normalize_figure_caption(caption: str, raw_path: str) -> str:
     text = (caption or "").strip()
     text = re.sub(r"[:：]\s*$", "", text).strip()
@@ -445,6 +487,7 @@ def _is_image_markdown_line(stripped: str) -> bool:
 
 
 # 関数: `_count_prose_lines_between_headings` の入出力契約と処理意図を定義する。
+
 def _count_prose_lines_between_headings(lines: list[str], start_index: int, end_index: int) -> int:
     """
     Count prose-like markdown lines between headings.
@@ -469,6 +512,7 @@ def _count_prose_lines_between_headings(lines: list[str], start_index: int, end_
             continue
 
         # 条件分岐: `in_math` を満たす経路を評価する。
+
         if in_math:
             if stripped == "$$" or stripped.endswith("$$"):
                 in_math = False
@@ -477,23 +521,27 @@ def _count_prose_lines_between_headings(lines: list[str], start_index: int, end_
             continue
 
         # 条件分岐: `not stripped` を満たす経路を評価する。
+
         if not stripped:
             i += 1
             continue
 
         # 条件分岐: `stripped.startswith("```")` を満たす経路を評価する。
+
         if stripped.startswith("```"):
             in_code = True
             i += 1
             continue
 
         # 条件分岐: `stripped == "$$"` を満たす経路を評価する。
+
         if stripped == "$$":
             in_math = True
             i += 1
             continue
 
         # 条件分岐: `stripped.startswith("$$")` を満たす経路を評価する。
+
         if stripped.startswith("$$"):
             if not (stripped.endswith("$$") and len(stripped) > 4):
                 in_math = True
@@ -502,36 +550,43 @@ def _count_prose_lines_between_headings(lines: list[str], start_index: int, end_
             continue
 
         # 条件分岐: `re.match(r"^(#{1,6})\\s+", stripped)` を満たす経路を評価する。
+
         if re.match(r"^(#{1,6})\s+", stripped):
             i += 1
             continue
 
         # 条件分岐: `_is_image_markdown_line(stripped)` を満たす経路を評価する。
+
         if _is_image_markdown_line(stripped):
             i += 1
             continue
 
         # 条件分岐: `re.match(r"^\\s*[-*]\\s+(.+)$", raw) or re.match(r"^\\s*\\d+[.)]\\s+(.+)$", raw)` を満たす経路を評価する。
+
         if re.match(r"^\s*[-*]\s+(.+)$", raw) or re.match(r"^\s*\d+[.)]\s+(.+)$", raw):
             i += 1
             continue
 
         # 条件分岐: `"|" in raw and (i + 1) < end and _is_table_separator(lines[i + 1])` を満たす経路を評価する。
+
         if "|" in raw and (i + 1) < end and _is_table_separator(lines[i + 1]):
             i += 1
             continue
 
         # 条件分岐: `_is_table_separator(raw)` を満たす経路を評価する。
+
         if _is_table_separator(raw):
             i += 1
             continue
 
         # 条件分岐: `re.match(r"^[-*_]{3,}\\s*$", stripped)` を満たす経路を評価する。
+
         if re.match(r"^[-*_]{3,}\s*$", stripped):
             i += 1
             continue
 
         # 条件分岐: `stripped in {"<!-- LATEX_CLEARPAGE -->", r"\\clearpage", r"\\newpage"}` を満たす経路を評価する。
+
         if stripped in {"<!-- LATEX_CLEARPAGE -->", r"\clearpage", r"\newpage"}:
             i += 1
             continue
@@ -596,12 +651,26 @@ def _extract_following_caption(lines: list[str], start_index: int) -> tuple[str,
 # 関数: `_resolve_image_path` の入出力契約と処理意図を定義する。
 
 # Prefer vector/pdf assets globally whenever available.
+
 _FIGURE_EXT_SEARCH_ORDER = (".pdf", ".png", ".jpg", ".jpeg")
-_PDF_PREFERRED_PROFILES = {"paper", "part2_astrophysics", "part3_quantum", "part4_verification", "part5_future_predictions"}
+_PDF_PREFERRED_PROFILES = {
+    "paper",
+    "part2_astrophysics",
+    profile_content.PART3_COMPAT_PROFILE,
+    profile_content.PART3A_PROFILE,
+    profile_content.PART3B_PROFILE,
+    "part4_verification",
+    "part5_future_predictions",
+}
 
 
 # 関数: `_copy_private_asset_to_public_if_needed` の入出力契約と処理意図を定義する。
-def _copy_private_asset_to_public_if_needed(private_path: Path, public_path: Path) -> bool:
+def _copy_private_asset_to_public_if_needed(
+    private_path: Path,
+    public_path: Path,
+    *,
+    preserve_existing_public: bool = False,
+) -> bool:
     # 条件分岐: `not private_path.exists()` を満たす経路を評価する。
     if not private_path.exists():
         return False
@@ -612,14 +681,18 @@ def _copy_private_asset_to_public_if_needed(private_path: Path, public_path: Pat
         try:
             private_stat = private_path.stat()
             public_stat = public_path.stat()
-            needs_copy = (
-                private_stat.st_mtime_ns > public_stat.st_mtime_ns
-                or private_stat.st_size != public_stat.st_size
-            )
+            if preserve_existing_public:
+                needs_copy = private_stat.st_mtime_ns > public_stat.st_mtime_ns
+            else:
+                needs_copy = (
+                    private_stat.st_mtime_ns > public_stat.st_mtime_ns
+                    or private_stat.st_size != public_stat.st_size
+                )
         except Exception:
             needs_copy = True
 
     # 条件分岐: `needs_copy` を満たす経路を評価する。
+
     if needs_copy:
         public_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(private_path, public_path)
@@ -628,6 +701,7 @@ def _copy_private_asset_to_public_if_needed(private_path: Path, public_path: Pat
 
 
 # 関数: `_sync_public_mirror_for_output_reference` の入出力契約と処理意図を定義する。
+
 def _sync_public_mirror_for_output_reference(raw_path: str, *, root: Path) -> None:
     normalized = _normalize_tex_path(raw_path.strip())
     # 条件分岐: `not normalized.startswith("output/")` を満たす経路を評価する。
@@ -635,6 +709,7 @@ def _sync_public_mirror_for_output_reference(raw_path: str, *, root: Path) -> No
         return
 
     # 条件分岐: `normalized.startswith("output/private/")` を満たす経路を評価する。
+
     if normalized.startswith("output/private/"):
         return
 
@@ -646,6 +721,7 @@ def _sync_public_mirror_for_output_reference(raw_path: str, *, root: Path) -> No
         suffixes.append(path_obj.suffix.lower())
 
     # 条件分岐: `normalized.startswith("output/public/")` を満たす経路を評価する。
+
     explicit_public = normalized.startswith("output/public/")
     if explicit_public:
         tail = normalized[len("output/public/") :]
@@ -671,13 +747,15 @@ def _sync_public_mirror_for_output_reference(raw_path: str, *, root: Path) -> No
         seen.add(key)
         # 明示的に output/public/... を参照している場合は public を正本として扱う。
         # public が欠けているときだけ private から補完し、既存 public を private で上書きしない。
-        if explicit_public and public_path.exists():
-            continue
-
-        _copy_private_asset_to_public_if_needed(private_path, public_path)
+        _copy_private_asset_to_public_if_needed(
+            private_path,
+            public_path,
+            preserve_existing_public=explicit_public,
+        )
 
 
 # 関数: `_resolve_image_path` の入出力契約と処理意図を定義する。
+
 def _resolve_image_path(raw_path: str, *, root: Path) -> tuple[str, bool]:
     normalized = _normalize_tex_path(raw_path.strip())
     # 条件分岐: `normalized.startswith("http://") or normalized.startswith("https://")` を満たす経路を評価する。
@@ -698,6 +776,7 @@ def _resolve_image_path(raw_path: str, *, root: Path) -> tuple[str, bool]:
         candidate_paths.append(path_obj)
 
     # 関数: `add_candidate_variants` の入出力契約と処理意図を定義する。
+
     def add_candidate_variants(path_obj: Path) -> None:
         # Prefer vector/pdf assets first, then bitmap fallbacks.
         base = path_obj.with_suffix("") if path_obj.suffix else path_obj
@@ -707,6 +786,7 @@ def _resolve_image_path(raw_path: str, *, root: Path) -> tuple[str, bool]:
         add_candidate(path_obj)
 
     # 関数: `add_candidate_variants_across_roots` の入出力契約と処理意図を定義する。
+
     def add_candidate_variants_across_roots(path_objs: list[Path]) -> None:
         bases = [(p.with_suffix("") if p.suffix else p) for p in path_objs]
         # Keep extension priority global across roots: any PDF is preferred over any PNG/JPG.
@@ -810,10 +890,14 @@ def _render_bibliography_section(profile: str = "") -> str:
     lines: list[str] = [""]
     # Part3 は「章（section）直前のみ改ページ」を運用固定とするため、
     # 文献節直前の強制改ページを入れない。
-    if profile != "part3_quantum":
+    if profile not in {
+        profile_content.PART3_COMPAT_PROFILE,
+        profile_content.PART3A_PROFILE,
+        profile_content.PART3B_PROFILE,
+    }:
         lines.append(r"\clearpage")
 
-    lines += [r"\section*{References}", r"\begin{thebibliography}{99}"]
+    lines += [r"\begin{thebibliography}{99}"]
     ordered_used = [key for key in _REFERENCE_ORDER if key in _USED_REFERENCE_KEYS]
     for key in ordered_used:
         ref_text = _REFERENCE_TEXT.get(key, "").strip()
@@ -830,6 +914,7 @@ def _render_bibliography_section(profile: str = "") -> str:
 
 
 # 関数: `_convert_raster_image_to_pdf` の入出力契約と処理意図を定義する。
+
 def _convert_raster_image_to_pdf(src_image: Path, dst_pdf: Path) -> bool:
     """
     Convert a raster image to PDF for TeX inclusion.
@@ -841,6 +926,7 @@ def _convert_raster_image_to_pdf(src_image: Path, dst_pdf: Path) -> bool:
         Image = None
 
     # 条件分岐: `Image is not None` を満たす経路を評価する。
+
     if Image is not None:
         try:
             with Image.open(src_image) as im:
@@ -982,8 +1068,9 @@ def _render_figure_block(
     # Part4 の検証サマリ表ラベル整合監査図は、本文要件に合わせてキャプション/ラベルを固定する。
     custom_label_base = ""
     if profile == "part4_verification" and image_stem == "table1_part4_label_parity_audit":
-        caption_text = _convert_inline("検証サマリ表 Part IV ラベル整合監査の比較結果を示す。")
+        caption_text = _convert_inline("検証サマリ表 Part IV ラベル整合監査。")
         custom_label_base = "fig:p4:scoreboard-part4-label-parity-audit"
+
     if profile == "part2_astrophysics" and image_stem == "delta_saturation_constraints":
         custom_label_base = "fig:p2:delta-saturation-constraints"
 
@@ -995,13 +1082,17 @@ def _render_figure_block(
         label_base = f"fig:p4:{label_slug}"
     else:
         label_base = f"fig:{label_slug}"
+
     label_count = used_figure_labels.get(label_base, 0) + 1
     used_figure_labels[label_base] = label_count
     figure_label = label_base if label_count == 1 else f"{label_base}-{label_count}"
     # Keep the resolved extension explicitly so PDF preference stays deterministic.
     includegraphics_target = _normalize_tex_path(tex_path)
     includegraphics_opts = r"width=\linewidth"
-    if profile == "part3_quantum":
+    if profile in {
+        profile_content.PART3_COMPAT_PROFILE,
+        profile_content.PART3A_PROFILE,
+    }:
         includegraphics_opts = r"width=\linewidth"
         # Part3 指定図の可読性改善（図内フォントをさらに少し大きく見せる）。
         part3_mild_upscale_indices = {
@@ -1013,6 +1104,7 @@ def _render_figure_block(
         if figure_index in part3_mild_upscale_indices:
             includegraphics_opts = r"width=1.04\linewidth"
         # Part3 の凡例/注記が小さい図は、追加で表示スケールを上げる。
+
         part3_legend_note_upscale_indices = {
             3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
             29, 30, 31, 33, 35, 36, 37, 38, 39, 40, 41,
@@ -1022,6 +1114,7 @@ def _render_figure_block(
         if figure_index in part3_legend_note_upscale_indices:
             includegraphics_opts = r"width=1.08\linewidth"
         # ユーザー指定図は、フォント可読性を優先してさらに拡大する。
+
         part3_target_font_upscale_indices = {
             2, 3, 4, 5, 9, 13, 16, 17, 18, 19,
             29, 30, 31, 33, 35, 36, 37, 38, 39, 40, 41,
@@ -1029,35 +1122,21 @@ def _render_figure_block(
         }
         if figure_index in part3_target_font_upscale_indices:
             includegraphics_opts = r"width=1.12\linewidth"
-    if profile == "part2_astrophysics":
-        # Part II default: keep readability while still preventing page overflow.
-        includegraphics_opts = r"width=\linewidth,height=0.62\paperheight,keepaspectratio"
-    elif profile == "part4_verification":
-        # Part IV default: 余白維持を優先し、本文幅内に収める。
-        includegraphics_opts = r"width=\linewidth,height=0.78\paperheight,keepaspectratio"
+    elif profile == profile_content.PART3B_PROFILE:
+        includegraphics_opts = r"width=\linewidth"
 
-    part2_height_overrides = {
-        # Extra cap for figures that tend to overflow or crowd captions.
-        "validation_scoreboard": r"width=\linewidth,height=0.68\paperheight,keepaspectratio",
-        "cassini_pds_vs_digitized": r"width=\linewidth,height=0.58\paperheight,keepaspectratio",
-        "solar_light_deflection": r"width=\linewidth,height=0.68\paperheight,keepaspectratio",
-        "viking_p_model_vs_measured_no_arrow": r"width=\linewidth,height=0.66\paperheight,keepaspectratio",
-        "mercury_orbit": r"width=\linewidth,height=0.80\paperheight,keepaspectratio",
-        "fek_relativistic_broadening_isco_constraints": r"width=\linewidth,height=0.66\paperheight,keepaspectratio",
-        "sparc_rotation_curve_pmodel_audit": r"width=\linewidth,height=0.64\paperheight,keepaspectratio",
-        "cosmology_bao_xi_multipole_peakfit": r"width=\linewidth,height=0.77\paperheight,keepaspectratio",
-        "cosmology_cmb_polarization_phase_audit": r"width=\linewidth,height=0.80\paperheight,keepaspectratio",
-        "cosmology_fsigma8_growth_mapping": r"width=\linewidth,height=0.64\paperheight,keepaspectratio",
-    }
+    if profile == "part2_astrophysics":
+        # Part II default: width 基準で統一し、図ごとの縮尺差を抑える。
+        includegraphics_opts = r"width=\linewidth"
+    elif profile == "part4_verification":
+        # Part IV も Part II baseline と同じ width 基準へそろえ、図ごとの縮尺差を抑える。
+        includegraphics_opts = r"width=\linewidth"
+
+    part2_height_overrides = {}
     if profile == "part2_astrophysics" and image_stem in part2_height_overrides:
         includegraphics_opts = part2_height_overrides[image_stem]
 
     part4_size_overrides = {
-        # Part4 図1/図2は本文幅に揃え、余白超過を避ける。
-        "validation_scoreboard": r"width=\linewidth,height=0.72\paperheight,keepaspectratio",
-        "quantum_scoreboard": r"width=\linewidth,height=0.72\paperheight,keepaspectratio",
-        # Part4 図3も本文幅に固定する。
-        "table1_part4_label_parity_audit": r"width=\linewidth,height=0.74\paperheight,keepaspectratio",
         # Part4 図11/95/99: 1列化した縦長図のページ内収まりを安定化。
         "lagrangian_noether_rotational_closure_audit": r"width=\linewidth,height=0.86\paperheight,keepaspectratio",
         "llr_operational_metrics_audit": r"width=\linewidth,height=0.86\paperheight,keepaspectratio",
@@ -1071,34 +1150,31 @@ def _render_figure_block(
         "nuclear_effective_potential_pion_constrained_barrier_tail_kq_scan",
         "nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan",
     }
-    # Part3 図23-28（eq18/eq19）サイズを統一し、図23のみ縦方向を追加拡大する。
     part3_height_overrides = {
-        "nuclear_effective_potential_two_range_fit_as_rs_eq18": r"width=\linewidth,height=0.98\textheight,keepaspectratio",
-        "nuclear_effective_potential_two_range_fit_as_rs_eq19": r"width=\linewidth,height=0.98\textheight,keepaspectratio",
-        "nuclear_effective_potential_pion_constrained_barrier_tail_kq_scan_eq18": r"width=\linewidth,height=0.98\textheight,keepaspectratio",
-        "nuclear_effective_potential_pion_constrained_barrier_tail_kq_scan_eq19": r"width=\linewidth,height=0.98\textheight,keepaspectratio",
-        "nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan_eq18": r"width=\linewidth,height=0.98\textheight,keepaspectratio",
-        "nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan_eq19": r"width=\linewidth,height=0.98\textheight,keepaspectratio",
         # 図71: 横幅は本文幅に揃え、縮小率を抑えて可読性を優先する。
         "systematics_decomposition_15items": r"width=\linewidth,height=0.88\textheight,keepaspectratio",
     }
-    if profile == "part3_quantum" and image_stem in part3_height_overrides:
+    if profile in {
+        profile_content.PART3_COMPAT_PROFILE,
+        profile_content.PART3A_PROFILE,
+        profile_content.PART3B_PROFILE,
+    } and image_stem in part3_height_overrides:
         includegraphics_opts = part3_height_overrides[image_stem]
     # Backward compatibility for non-eq split filenames.
     elif image_stem in tall_part3_figures:
         includegraphics_opts = r"width=\linewidth"
 
-    # Part4 図1/図2は最終段でも本文幅に固定し、見た目と余白を一致させる。
-    if profile == "part4_verification" and (
-        "validation_scoreboard" in image_stem or "quantum_scoreboard" in image_stem
-    ):
-        includegraphics_opts = r"width=\linewidth,height=0.72\paperheight,keepaspectratio"
-
     # Keep strict in-text ordering for figure-adjacent explanations/supplements.
+
     figure_float_spec = "H"
 
     includegraphics_line = r"\includegraphics[" + includegraphics_opts + "]{" + includegraphics_target + "}"
-    if profile in {"part3_quantum", "part4_verification"} and "width=1." in includegraphics_opts:
+    if profile in {
+        profile_content.PART3_COMPAT_PROFILE,
+        profile_content.PART3A_PROFILE,
+        profile_content.PART3B_PROFILE,
+        "part4_verification",
+    } and "width=1." in includegraphics_opts:
         includegraphics_line = r"\makebox[\linewidth][c]{" + includegraphics_line + "}"
 
     return [
@@ -1395,6 +1471,7 @@ def _looks_like_artifact_code(s: str) -> bool:
 
 
 # 関数: `_looks_like_wrappable_code_literal` の入出力契約と処理意図を定義する。
+
 def _looks_like_wrappable_code_literal(s: str) -> bool:
     candidate = s.strip()
     if not candidate:
@@ -1416,6 +1493,7 @@ def _looks_like_wrappable_code_literal(s: str) -> bool:
 
 
 # 関数: `_render_code_literal` の入出力契約と処理意図を定義する。
+
 def _render_code_literal(payload: str) -> str:
     code = payload.strip()
     if not code:
@@ -1423,6 +1501,9 @@ def _render_code_literal(payload: str) -> str:
 
     if "://" in code:
         return r"\url{" + code + "}"
+
+    if any(token in code for token in ("^", "{", "}", "∪")):
+        return r"\texttt{\detokenize{" + code + r"}}"
 
     if _looks_like_wrappable_code_literal(code):
         return r"\nolinkurl{" + code + "}"
@@ -1762,6 +1843,7 @@ def _normalize_math_command_spacing(text: str) -> str:
 
 
 # 関数: `_compact_display_math` の入出力契約と処理意図を定義する。
+
 def _compact_display_math(math_body: str) -> str:
     compact = re.sub(r"\s+", "", math_body)
     compact = compact.replace(r"\,", "")
@@ -1823,12 +1905,14 @@ _DISPLAY_MATH_BLOCK_RE = re.compile(r"\\\[\n(?P<body>.*?)\n\\\]", flags=re.DOTAL
 def _apply_part2_selective_equation_numbering(tex_body: str) -> str:
     used_rule_keys: set[str] = set()
 
+    # 関数: `repl` の入出力契約と処理意図を定義する。
     def repl(match: re.Match[str]) -> str:
         body = match.group("body")
         compact = _compact_display_math(body)
         for rule_key, required_tokens, exact_match in _PART2_REQUIRED_EQUATION_RULES:
             if rule_key in used_rule_keys:
                 continue
+
             if exact_match:
                 if compact != required_tokens[0]:
                     continue
@@ -1865,6 +1949,11 @@ _PART3_REQUIRED_EQUATION_RULES: tuple[tuple[str, tuple[str, ...], bool], ...] = 
     ("eq:continuous-measurement", (r"d|\psi\rangle=\left[-iHdt-\frac{\gamma_{m}}{2}\left(M-\langleM\rangle\right)^2dt+\sqrt{\gamma_{m}}\left(M-\langleM\rangle\right)dW_t\right]|\psi\rangle",), False),
     ("eq:lagrangian-em", (r"\mathcal{L}=\lvertD_\muP\rvert^2-V(\lvertP\rvert)-\frac{1}{4}F_{\mu\nu}F^{\mu\nu}",), False),
     ("eq:schrodinger-em", (r"\frac{(-i\hbar\nabla-qA)^2}{2m}+qA_0+m\phi",), False),
+    ("eq:alpha-selector", (r"\alpha_{q_*}(\beta_*)=\alpha_{R}(\beta_*)",), False),
+    ("eq:alpha-finite-invariant", (r"\alpha(\beta)=", r"36(1+\beta^2)^2"), False),
+    ("eq:alpha-p-frozen", (r"\alpha_{P,\mathrm{frozen}}=0.007302943961943229",), False),
+    ("eq:weak-flavor-unified", (r"i\hbar\frac{d}{dt}\Psi_{f}", r"H^{(P)}_{\rmflavor}[P,\nablaP,\partial_tP]\right)\Psi_{f}"), False),
+    ("eq:weak-beta-observable-map", (r"Q_\beta^{(P)}=Q_\beta^{(\mathrm{EW})}+\DeltaQ_\beta^{(P)}", r"\Gamma_\beta^{(P)}=\Gamma_\beta^{(\mathrm{EW})}\left(1+\eta_\beta^{(P)}\right)"), False),
     ("eq:total-action", (r"\begin{aligned}S_{\mathrm{total}}", r"\mathcal{L}_{\mathrm{total}}^{\mathrm{vec}}"), False),
     # 4 結果
     ("eq:clock-comparison", (r"\ln\left(\frac{P}{P_0}\right)=x", r"\left(\frac{d\tau}{dt}\right)_{\rmGR}=\sqrt{1-2x}"), False),
@@ -1878,6 +1967,12 @@ _PART3_REQUIRED_EQUATION_RULES: tuple[tuple[str, tuple[str, ...], bool], ...] = 
     ("eq:chsh", (r"E(a,b)\equiv\frac{N_{++}+N_{--}-N_{+-}-N_{-+}}", r"S\equivE(a,b)-E(a,b')+E(a',b)+E(a',b')"), False),
     ("eq:ch-prob", (r"J_{\mathrm{prob}}\equivP_{++}(a,b)-P_{++}(a,b')+P_{++}(a',b)+P_{++}(a',b')-P_{+}(a')-P_{+}(b)",), False),
     ("eq:z-delay", (r"dt\equivt_{B}-t_{A}-\mathrm{offset},\qquadz_{\mathrm{delay}}\equiv\frac{\lvert\Delta\mathrm{median}\rvert}{\sigma_{\Delta\mathrm{median}}}",), False),
+    ("eq:tunneling-transmission", (r"T_{\mathrm{exact}}=", r"V_0^2\sinh^2(", r"4E(V_0-E)"), False),
+    ("eq:beta-z-scores", (r"z_{Q_\beta}=", r"z_{\logft}="), False),
+    ("eq:delta-ckm", (r"\Delta_{\mathrm{CKM}}=", r"\left|V_{ud}\right|^2+\left|V_{us}\right|^2+\left|V_{ub}\right|^2-1"), False),
+    ("eq:delta-pmns", (r"\Delta_{\mathrm{PMNS}}=", r"\left|U_{e1}\right|^2+\left|U_{e2}\right|^2+\left|U_{e3}\right|^2-1"), False),
+    ("eq:beta-q-map", (r"Q_\beta^{(P)}=Q_\beta^{(A)}+\DeltaQ_\beta^{(P)}", r"\DeltaQ_\beta^{(P)}:="), False),
+    ("eq:beta-gamma-map", (r"\Gamma_\beta^{(P)}:=", r"\Gamma_\beta^{(A)}\left|1+\lambda_{\mathrm{rot}}\mathcal{M}_{L}^{(P)}\right|^2"), False),
     ("eq:bbn-kinetics", (r"\frac{dX_n}{dt}=-\Gamma_{np}(T)\left[X_{n}-X_{n}^{\mathrm{eq}}(T)\right]",), False),
     ("eq:bbn-freeze", (r"A_{w}T_{F}^5=C_{F}(T_{F})\frac{q_{B}}{t_{B}}\left(\frac{T_{F}}{T_{B}}\right)^{1/q_{B}}",), False),
     ("eq:yp", (r"Y_{p}=\frac{2(n/p)_N}{1+(n/p)_N}",), False),
@@ -1888,12 +1983,14 @@ _PART3_REQUIRED_EQUATION_RULES: tuple[tuple[str, tuple[str, ...], bool], ...] = 
 def _apply_part3_selective_equation_numbering(tex_body: str) -> str:
     used_labels: set[str] = set()
 
+    # 関数: `repl` の入出力契約と処理意図を定義する。
     def repl(match: re.Match[str]) -> str:
         body = match.group("body")
         compact = _compact_display_math(body)
         for eq_label, required_tokens, exact_match in _PART3_REQUIRED_EQUATION_RULES:
             if eq_label in used_labels:
                 continue
+
             if exact_match:
                 if compact != required_tokens[0]:
                     continue
@@ -1996,6 +2093,7 @@ def _postprocess_latex_body(body: str) -> str:
         normalized = normalized.replace(token, rendered)
 
     # 関数: `_texttt_allowbreak` の入出力契約と処理意図を定義する。
+
     def _texttt_allowbreak(match: re.Match[str]) -> str:
         payload = match.group(1)
         if r"\allowbreak" in payload or len(payload) < 20:
@@ -2026,6 +2124,7 @@ def _postprocess_latex_body(body: str) -> str:
 
 
 # 関数: `_protect_verbatim_tex_commands` の入出力契約と処理意図を定義する。
+
 def _protect_verbatim_tex_commands(text: str, *, commands: tuple[str, ...]) -> tuple[str, dict[str, str]]:
     token_map: dict[str, str] = {}
     protected = text
@@ -2033,6 +2132,7 @@ def _protect_verbatim_tex_commands(text: str, *, commands: tuple[str, ...]) -> t
     for command in commands:
         pattern = re.compile(rf"\\{command}\{{([^{{}}]*)\}}")
 
+        # 関数: `repl` の入出力契約と処理意図を定義する。
         def repl(match: re.Match[str]) -> str:
             nonlocal token_index
             key = f"@@VERBATIM{token_index}@@"
@@ -2079,6 +2179,7 @@ def _convert_inline(text: str) -> str:
             return make_token(_escape_tex(payload))
 
         # backtick code spans should preserve machine-readable artifacts before any math heuristics run.
+
         if _looks_like_artifact_code(payload):
             return make_token(_render_code_literal(payload))
 
@@ -2372,6 +2473,12 @@ def _render_table(
         width = max(0.08, min(0.42, round((0.97 / ncols) - 0.03, 3)))
         colspec = "".join(r">{\raggedright\arraybackslash}p{" + f"{width}\\linewidth" + "}" for _ in range(ncols))
 
+    part3_profile = profile in {
+        "part3_quantum",
+        "part3a_quantum_foundations",
+        "part3b_quantum_verification",
+    }
+
     compact_table = ncols >= 4
     table_font = r"\normalsize"
     if part3_diff_summary_table or part3_born_result_table:
@@ -2387,6 +2494,12 @@ def _render_table(
     elif eht_kappa_main_result_table or cosmology_ddr_result_table:
         table_font = r"\scriptsize"
     # 条件分岐: `ncols >= 7` を満たす経路を評価する。
+    elif part3_profile and ncols >= 8:
+        # Part III の wide table は tiny だと紙面確認で可読性が落ちやすい。
+        table_font = r"\scriptsize"
+    elif part3_profile and ncols >= 5:
+        # Part III の 5-7 列表は footnotesize を標準にし、必要なら改行で吸収する。
+        table_font = r"\footnotesize"
     elif ncols >= 7:
         table_font = r"\tiny"
     # 条件分岐: 前段条件が不成立で、`ncols >= 5` を追加評価する。
@@ -2428,10 +2541,13 @@ def _render_table(
         table_label = label_text.strip()
         if not table_label:
             table_label = "tab:" + _compact_label(_safe_label(normalized_caption), max_len=52)
+
         if profile == "part4_verification" and not table_label.startswith("p4:"):
             table_label = f"p4:{table_label}"
+
         out.append(r"\caption{" + _convert_inline(normalized_caption) + "}")
         out.append(r"\label{" + table_label + r"} \\")
+
     out += [r"\toprule"]
     out.append(header_row)
     out += [
@@ -2461,6 +2577,7 @@ def _render_table(
 
 
 # 関数: `_split_protocol_triplet` の入出力契約と処理意図を定義する。
+
 def _split_protocol_triplet(text: str) -> Optional[tuple[str, str, str]]:
     compact = " ".join(text.strip().split())
     m = re.match(
@@ -2515,7 +2632,11 @@ def _markdown_to_latex(
         # 条件分岐: `paragraph` を満たす経路を評価する。
         if paragraph:
             joined = " ".join(s.strip() for s in paragraph if s.strip())
-            if profile == "part3_quantum":
+            if profile in {
+                profile_content.PART3_COMPAT_PROFILE,
+                profile_content.PART3A_PROFILE,
+                profile_content.PART3B_PROFILE,
+            }:
                 triplet = _split_protocol_triplet(joined)
                 if triplet:
                     frozen_text, reject_text, next_text = triplet
@@ -2609,6 +2730,7 @@ def _markdown_to_latex(
             continue
 
         # 箇条書き中の式や継続行は list を維持し、非継続行でのみ list を閉じる。
+
         if (
             list_mode
             and stripped
@@ -2620,28 +2742,38 @@ def _markdown_to_latex(
             close_list()
 
         # 条件分岐: `stripped in {"<!-- LATEX_CLEARPAGE -->", r"\clearpage", r"\newpage"}` を満たす経路を評価する。
+
         if stripped in {"<!-- LATEX_CLEARPAGE -->", r"\clearpage", r"\newpage"}:
             flush_paragraph()
             close_list()
             # Part2/Part3 は「章（section）直前のみ改ページ」を運用固定とするため、
             # 明示マーカーによる追加改ページは無効化する。
-            if profile not in {"part2_astrophysics", "part3_quantum"}:
+            if profile not in {
+                "part2_astrophysics",
+                profile_content.PART3_COMPAT_PROFILE,
+                profile_content.PART3A_PROFILE,
+                profile_content.PART3B_PROFILE,
+            }:
                 out.append(r"\clearpage" if stripped == "<!-- LATEX_CLEARPAGE -->" else stripped)
                 out.append("")
+
             i += 1
             continue
 
         # Generic HTML comments in markdown (e.g., sync markers) should not appear in PDF.
+
         if stripped.startswith("<!--") and stripped.endswith("-->"):
             flush_paragraph()
             close_list()
             marker_body = stripped[4:-3].strip()
             if marker_body:
                 out.append("% " + marker_body)
+
             i += 1
             continue
 
         # 条件分岐: `stripped.startswith(">")` を満たす経路を評価する。
+
         if stripped.startswith(">"):
             flush_paragraph()
             close_list()
@@ -2650,9 +2782,11 @@ def _markdown_to_latex(
                 raw_quote = lines[i].strip()
                 if not raw_quote.startswith(">"):
                     break
+
                 payload = re.sub(r"^>\s?", "", raw_quote).strip()
                 if payload:
                     quote_lines.append(_convert_inline(payload))
+
                 i += 1
 
             if quote_lines:
@@ -2669,6 +2803,7 @@ def _markdown_to_latex(
             flush_paragraph()
             if not list_mode:
                 close_list()
+
             out.append(display_math_open)
             in_math = True
             i += 1
@@ -2680,6 +2815,7 @@ def _markdown_to_latex(
             flush_paragraph()
             if not list_mode:
                 close_list()
+
             math_inline = stripped[2:-2].strip()
             out.append(display_math_open)
             # 条件分岐: `math_inline` を満たす経路を評価する。
@@ -2697,6 +2833,7 @@ def _markdown_to_latex(
             flush_paragraph()
             if not list_mode:
                 close_list()
+
             out.append(display_math_open)
             body_start = line.split("$$", 1)[1].strip()
             # 条件分岐: `body_start` を満たす経路を評価する。
@@ -2799,6 +2936,7 @@ def _markdown_to_latex(
                 pending_table_label = explicit_label
             else:
                 pending_table_label = "tab:" + _compact_label(_safe_label(pending_table_caption), max_len=52)
+
             i += 1
             continue
 
@@ -2808,6 +2946,7 @@ def _markdown_to_latex(
             flush_paragraph()
             if not list_mode:
                 close_list()
+
             i += 1
             continue
 
@@ -2884,6 +3023,7 @@ def _markdown_to_latex(
                     if compact_title in {"この文書の目的", "この文書目的"}:
                         out += [r"\medskip", r"\hrule", r"\medskip", ""]
                 # 条件分岐: `_is_abstract_heading(title)` を満たす経路を評価する。
+
                 if _is_abstract_heading(title):
                     out += [r"\medskip", r"\hrule", r"\medskip", ""]
                     out.append(r"\section*{" + _convert_inline(title) + "}")
@@ -2945,6 +3085,7 @@ def _markdown_to_latex(
             # 条件分岐: `profile == "part3_quantum" and "項目対応（節マップ）" in title` を満たす経路を評価する。
 
             # 条件分岐: `force_subsection_pagebreak or force_heading_pagebreak` を満たす経路を評価する。
+
             if force_subsection_pagebreak or force_heading_pagebreak:
                 # If a markdown horizontal rule was emitted just before this heading,
                 # remove it so the heading itself can start at the very top of the page.
@@ -2971,6 +3112,7 @@ def _markdown_to_latex(
                 out.append(rf"\label{{sec:p4:{section_label}}}")
             else:
                 out.append(rf"\label{{sec:{section_label}}}")
+
             out.append("")
             last_heading_effective_level = effective_level
             last_heading_source_index = i
@@ -3111,7 +3253,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Generate LaTeX paper from markdown manuscript.")
     ap.add_argument(
         "--profile",
-        choices=["paper", "part2_astrophysics", "part3_quantum", "part4_verification", "part5_future_predictions"],
+        choices=list(profile_content.PAPER_PROFILES),
         default="paper",
         help="paper profile",
     )
@@ -3130,20 +3272,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # 条件分岐: `args.manuscript` を満たす経路を評価する。
     if args.manuscript:
         manuscript_md = Path(args.manuscript)
+        md_text = manuscript_md.read_text(encoding="utf-8", errors="replace")
     else:
-        # 条件分岐: `profile == "paper"` を満たす経路を評価する。
-        if profile == "paper":
-            manuscript_md = root / "doc" / "paper" / "10_part1_core_theory.md"
-        # 条件分岐: 前段条件が不成立で、`profile == "part2_astrophysics"` を追加評価する。
-        elif profile == "part2_astrophysics":
-            manuscript_md = root / "doc" / "paper" / "11_part2_astrophysics.md"
-        # 条件分岐: 前段条件が不成立で、`profile == "part3_quantum"` を追加評価する。
-        elif profile == "part3_quantum":
-            manuscript_md = root / "doc" / "paper" / "12_part3_quantum.md"
-        elif profile == "part4_verification":
-            manuscript_md = root / "doc" / "paper" / "13_part4_verification.md"
-        else:
-            manuscript_md = root / "doc" / "paper" / "14_part5_future_predictions.md"
+        manuscript_md = profile_content.resolve_manuscript_path(root, profile)
+        md_text = profile_content.load_profile_markdown(root, profile)
 
     # 条件分岐: `not manuscript_md.exists()` を満たす経路を評価する。
 
@@ -3167,21 +3299,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.out_name:
         out_name = str(args.out_name)
     else:
-        # 条件分岐: `profile == "paper"` を満たす経路を評価する。
-        if profile == "paper":
-            out_name = "pmodel_paper.tex"
-        # 条件分岐: 前段条件が不成立で、`profile == "part2_astrophysics"` を追加評価する。
-        elif profile == "part2_astrophysics":
-            out_name = "pmodel_paper_part2_astrophysics.tex"
-        # 条件分岐: 前段条件が不成立で、`profile == "part3_quantum"` を追加評価する。
-        elif profile == "part3_quantum":
-            out_name = "pmodel_paper_part3_quantum.tex"
-        elif profile == "part4_verification":
-            out_name = "pmodel_paper_part4_verification.tex"
-        else:
-            out_name = "pmodel_paper_part5_future_predictions.tex"
+        out_name = profile_content.resolve_tex_name(profile)
 
-    md_text = manuscript_md.read_text(encoding="utf-8", errors="replace")
     body = _markdown_to_latex(
         md_text,
         root=root,
@@ -3192,19 +3311,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     body = _postprocess_latex_body(body)
     if profile == "part2_astrophysics":
         body = _apply_part2_selective_equation_numbering(body)
-    elif profile == "part3_quantum":
+    elif profile in {
+        profile_content.PART3_COMPAT_PROFILE,
+        profile_content.PART3A_PROFILE,
+        profile_content.PART3B_PROFILE,
+    }:
         body = _apply_part3_selective_equation_numbering(body)
 
     bibliography_section = _render_bibliography_section(profile=profile)
 
-    title_tex_map = {
-        "paper": r"時間波ダイナミクスに基づく統一理論 (The P-model)\\[0.5em]Part I: 理論的基礎と写像原理",
-        "part2_astrophysics": r"時間波ダイナミクスに基づく統一理論 (The P-model)\\[0.5em]Part II: 宇宙物理学および宇宙論的検証\\[1em]\large",
-        "part3_quantum": r"時間波ダイナミクスに基づく統一理論 (The P-model)\\[0.5em]Part III: 微視的および量子的現象の再評価",
-        "part4_verification": r"時間波ダイナミクスに基づく統一理論 (The P-model)\\[0.5em]Part IV: 再現性監査と未来の差分予測\\[1em]\large",
-        "part5_future_predictions": r"時間波ダイナミクスに基づく統一理論 (The P-model)\\[0.5em]Part V: 未来への予測（Predictions for Future Observations）\\[1em]\large",
-    }
-    title_tex = title_tex_map.get(profile, r"P-model Paper")
+    title_tex = profile_content.resolve_tex_title(profile)
     author_tex = (
         r"\author{" "\n"
         r"  Shunji Ogawa \\" "\n"
@@ -3220,7 +3336,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             r"\renewcommand{\figurename}{図}" "\n"
             r"\renewcommand{\tablename}{表}" "\n"
         )
-    elif profile == "part3_quantum":
+    elif profile in {
+        profile_content.PART3_COMPAT_PROFILE,
+        profile_content.PART3A_PROFILE,
+        profile_content.PART3B_PROFILE,
+    }:
         figure_locale_tex = r"\renewcommand{\figurename}{図}" "\n"
     elif profile == "part4_verification":
         figure_locale_tex = r"\renewcommand{\figurename}{図}" "\n"
@@ -3251,6 +3371,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             r"\fi" "\n"
             r"\ifLuaTeX" "\n"
             r"  \usepackage{luatexja}" "\n"
+            r"  \usepackage{luatexja-fontspec}" "\n"
             r"  % avoid lltjp-microtype warning under LuaTeX-ja" "\n"
             r"\else" "\n"
             r"  \usepackage{microtype}" "\n"

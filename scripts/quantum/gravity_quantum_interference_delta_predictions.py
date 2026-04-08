@@ -1,8 +1,16 @@
+"""
+目的: 量子 topic の gravity quantum interference delta predictions に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import csv
 import json
 import math
+import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -13,6 +21,11 @@ import numpy as np
 
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
 
 enable_japanese_figure_localization()
 
@@ -196,7 +209,7 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
 # 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
-    root = Path(__file__).resolve().parents[2]
+    root = ROOT
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -352,27 +365,30 @@ def main() -> None:
 
     x = np.arange(len(labels), dtype=float)
     w = 0.38
-    fig, ax = plt.subplots(figsize=(cfg.fig_w_in, cfg.fig_h_in), dpi=cfg.dpi)
+    fig, ax = plt.subplots(dpi=cfg.dpi)
+    apply_wavep_figure_layout(fig, template="part2_single_panel_sparse")
+    title_font = get_wavep_font_size("title")
+    axis_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    legend_font = get_wavep_font_size("legend")
     ax.bar(x - w / 2, cur, width=w, label="current/assumed precision", color="#2b6cb0", alpha=0.85)
     ax.bar(x + w / 2, req, width=w, label="required (3σ) to see Δ", color="#c53030", alpha=0.75)
     ax.set_yscale("log")
     ax.set_xticks(x)
-    ax.set_xticklabels(labels, rotation=12, ha="right", fontsize=13.4)
-    ax.set_ylabel("precision (fractional or absolute Δf/f)", fontsize=14.4)
-    ax.set_title("Atom-interferometer unified audit (P-model vs GR; Earth field)", fontsize=16.6)
+    ax.set_xticklabels(labels, rotation=12, ha="right", fontsize=tick_font)
+    ax.set_ylabel("precision (fractional or absolute Δf/f)", fontsize=axis_font)
+    ax.set_title("Atom-interferometer unified audit (P-model vs GR; Earth field)", fontsize=title_font, pad=10.0)
     ax.grid(True, axis="y", ls=":", lw=0.7, alpha=0.6)
-    ax.legend(loc="upper right", fontsize=12.4, frameon=True)
-    ax.tick_params(axis="y", labelsize=12.6)
-
-    fig.tight_layout()
+    ax.legend(loc="upper right", fontsize=legend_font, frameon=True)
+    ax.tick_params(axis="y", labelsize=tick_font)
     out_png = out_dir / "gravity_quantum_interference_delta_predictions.png"
     out_pdf = out_dir / "gravity_quantum_interference_delta_predictions.pdf"
     out_png_unified = out_dir / "atom_interferometer_unified_audit.png"
     out_pdf_unified = out_dir / "atom_interferometer_unified_audit.pdf"
-    fig.savefig(out_png, bbox_inches="tight")
-    fig.savefig(out_pdf, bbox_inches="tight")
-    fig.savefig(out_png_unified, bbox_inches="tight")
-    fig.savefig(out_pdf_unified, bbox_inches="tight")
+    fig.savefig(out_png)
+    fig.savefig(out_pdf)
+    fig.savefig(out_png_unified)
+    fig.savefig(out_pdf_unified)
     plt.close(fig)
 
     summary_rows: list[dict[str, Any]] = [

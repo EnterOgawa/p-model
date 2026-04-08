@@ -363,18 +363,19 @@ def _plot(
         f"StageB={desi.get('status')} (promoted={bool(desi.get('promoted'))}, passing={int(desi.get('passing_tracers_n') or 0)})\n"
         f"overall={overall_status}"
     )
-    fig.text(
-        0.18,
-        0.026,
+    ax1.text(
+        0.02,
+        0.98,
         summary,
+        transform=ax1.transAxes,
         ha="left",
-        va="bottom",
+        va="top",
         fontsize=14.0,
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "edgecolor": "#999999", "alpha": 0.92},
     )
 
     fig.suptitle("BAO xi_l cross integration (BOSS Stage A + DESI Stage B)", fontsize=17.8)
-    fig.tight_layout(rect=(0.0, 0.095, 1.0, 0.95), h_pad=2.2)
+    fig.tight_layout(rect=(0.0, 0.040, 1.0, 0.95), h_pad=2.2)
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)
     fig.savefig(out_pdf)

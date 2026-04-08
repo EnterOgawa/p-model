@@ -1,3 +1,10 @@
+"""
+目的: 重力波 topic の gw multi event summary に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -20,6 +27,12 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.utils.plot_style import (  # noqa: E402
+    apply_paper_style,
+    apply_wavep_figure_layout,
+    get_wavep_font_size,
+    resolve_wavep_cjk_font_family,
+)
 
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
@@ -38,23 +51,13 @@ def _iso_utc_now() -> str:
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
-        import matplotlib.font_manager as fm
-
-        preferred = [
-            "Yu Gothic",
-            "Meiryo",
-            "BIZ UDGothic",
-            "MS Gothic",
-            "Yu Mincho",
-            "MS Mincho",
-        ]
-        available = {f.name for f in fm.fontManager.ttflist}
-        chosen = [name for name in preferred if name in available]
+        chosen = resolve_wavep_cjk_font_family()
         # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
-        mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+        mpl.rcParams["font.family"] = [chosen, "DejaVu Sans"]
+        mpl.rcParams["font.sans-serif"] = [chosen, "DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         pass
@@ -311,16 +314,14 @@ def _plot_summary(
     wave_frange_hz: Optional[Tuple[float, float]] = None,
     match_omitted_by_reason: Optional[Dict[str, int]] = None,
 ) -> None:
+    apply_paper_style()
     _set_japanese_font()
 
     dets = _detector_order(sorted({p.detector for p in points if p.detector}))
     ev_index = {ev: i for i, ev in enumerate(events)}
 
-    # Layout: two panels (R^2 and match)
-    # 注: 下部注記を複数行で維持しつつ、プロット領域が小さくならないよう縦横を拡大する。
-    # 図27: Y方向の可読性を優先して縦寸を拡大する。
-    figsize = (17.8, 16.0) if public else (16.8, 15.6)
-    fig, axes = plt.subplots(2, 1, figsize=figsize, sharex=True)
+    fig, axes = plt.subplots(2, 1, sharex=True)
+    apply_wavep_figure_layout(fig, template="part2_two_panel_dense_x")
     ax_r2, ax_m = axes[0], axes[1]
 
     x_base = list(range(len(events)))
@@ -373,7 +374,7 @@ def _plot_summary(
                 linestyle="None",
                 color=col,
                 label=det,
-                markersize=10.8 if public else 9.6,
+                markersize=4.8,
             )
 
         # 条件分岐: `xs_m` を満たす経路を評価する。
@@ -386,23 +387,22 @@ def _plot_summary(
                 linestyle="None",
                 color=col,
                 label=det,
-                markersize=10.8 if public else 9.6,
+                markersize=4.8,
             )
 
     for ax in (ax_r2, ax_m):
         ax.grid(True, alpha=0.35)
         ax.set_axisbelow(True)
 
-    ax_r2.set_ylabel("R^2（1に近いほど良い）", fontsize=19.6 if public else 18.2)
+    ax_r2.set_ylabel("R^2")
     ax_r2.set_ylim(-0.05, 1.05)
     # 条件分岐: `wave_frange_hz is not None` を満たす経路を評価する。
     if wave_frange_hz is not None:
         ax_m.set_ylabel(
-            f"match（{wave_frange_hz[0]:g}..{wave_frange_hz[1]:g} Hz, 1に近いほど良い）",
-            fontsize=19.6 if public else 18.2,
+            f"match ({wave_frange_hz[0]:g}..{wave_frange_hz[1]:g} Hz)",
         )
     else:
-        ax_m.set_ylabel("match（窓内, 1に近いほど良い）", fontsize=19.6 if public else 18.2)
+        ax_m.set_ylabel("match")
 
     ax_m.set_ylim(-0.05, 1.05)
     ax_r2.margins(x=0.03)
@@ -410,26 +410,22 @@ def _plot_summary(
 
     ax_m.set_xticks(x_base)
     xlabels = tick_labels if (isinstance(tick_labels, list) and len(tick_labels) == len(events)) else events
-    if public:
-        ax_m.set_xticklabels(xlabels, rotation=0, ha="center")
-    else:
-        ax_m.set_xticklabels(xlabels, rotation=20, ha="right", rotation_mode="anchor")
+    ax_m.set_xticklabels(xlabels, rotation=0, ha="center")
     for lab in ax_m.get_xticklabels():
-        lab.set_fontsize(15.8 if public else 14.4)
-        lab.set_linespacing(1.05 if public else 1.0)
-    ax_m.tick_params(axis="x", pad=12 if public else 10)
+        lab.set_fontsize(get_wavep_font_size("tick"))
+        lab.set_linespacing(1.0)
 
-    for ax in (ax_r2, ax_m):
-        ax.tick_params(axis="y", labelsize=16.4 if public else 14.8)
+    ax_m.tick_params(axis="x", pad=6)
 
-    fig.suptitle(title, y=0.985, fontsize=22.0 if public else 20.0)
+    fig.suptitle(title, y=0.975, fontsize=get_wavep_font_size("suptitle"))
 
     # Legend: show once (top panel)
     if dets:
-        ax_r2.legend(loc="upper right", frameon=True, fontsize=16.6 if public else 15.0)
+        ax_r2.legend(loc="upper right", frameon=True, fontsize=get_wavep_font_size("legend"))
 
     # 図下注記は論文本文側へ移し、図中の重なりを回避する。
-    bottom = 0.125
+
+    bottom = 0.135
     # 条件分岐: `isinstance(xlabels, list)` を満たす経路を評価する。
     if isinstance(xlabels, list):
         try:
@@ -437,26 +433,27 @@ def _plot_summary(
         except Exception:
             max_lines = 1
 
-        bottom = min(0.265, 0.128 + (0.044 if public else 0.036) * max(0, max_lines - 1))
+        bottom = min(0.225, 0.135 + 0.034 * max(0, max_lines - 1))
 
-    if public:
-        bottom = min(0.285, bottom + 0.03)
-
-    fig.tight_layout(rect=(0.02, bottom, 0.985, 0.964))
+    fig.subplots_adjust(bottom=bottom)
     out_png.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_png, dpi=220)
-    fig.savefig(out_png.with_suffix(".pdf"))
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        fig.savefig(out_png, dpi=220)
+        fig.savefig(out_png.with_suffix(".pdf"))
+
     plt.close(fig)
 
 
 # 関数: `_plot_placeholder` の入出力契約と処理意図を定義する。
 
 def _plot_placeholder(out_png: Path, *, title: str) -> None:
+    apply_paper_style()
     _set_japanese_font()
-    fig = plt.figure(figsize=(10, 4))
+    fig = plt.figure()
+    apply_wavep_figure_layout(fig, template="part2_single_panel")
     ax = fig.add_subplot(111)
     ax.axis("off")
-    ax.text(0.5, 0.6, title, ha="center", va="center", fontsize=16)
+    ax.text(0.5, 0.6, title, ha="center", va="center", fontsize=get_wavep_font_size("title"))
     ax.text(
         0.5,
         0.4,
@@ -464,12 +461,13 @@ def _plot_placeholder(out_png: Path, *, title: str) -> None:
         "先に scripts/gw/gw150914_chirp_phase.py を実行してください。",
         ha="center",
         va="center",
-        fontsize=12,
+        fontsize=get_wavep_font_size("note"),
     )
-    fig.tight_layout()
     out_png.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_png, dpi=180, bbox_inches="tight", pad_inches=0.05)
-    fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight", pad_inches=0.05)
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        fig.savefig(out_png, dpi=220)
+        fig.savefig(out_png.with_suffix(".pdf"))
+
     plt.close(fig)
 
 
@@ -531,31 +529,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         snr = _safe_float(meta.get("network_snr"))
         far = _safe_float(meta.get("far_yr"))
 
-        lines = [name]
-        # 条件分岐: `snr is not None` を満たす経路を評価する。
-        if snr is not None:
-            lines.append(f"SNR={_fmt_g(snr, digits=3)}")
-
-        # 条件分岐: `far is not None` を満たす経路を評価する。
-        if far is not None:
-            lines.append(f"FAR={_fmt_g(far, digits=2)}/yr")
-
-        tick_labels.append("\n".join(lines))
-
-        # public版は2行固定にして、論文縮小時の重なりを避ける。
         if "_" in name:
             head, tail = name.split("_", 1)
-            if snr is not None:
-                lines_pub = [head, f"{tail} ({_fmt_g(snr, digits=3)})"]
-            else:
-                lines_pub = [head, tail]
+            lines_compact = [head, tail]
         else:
-            lines_pub = [name]
-            # 条件分岐: `snr is not None` を満たす経路を評価する。
-            if snr is not None:
-                lines_pub.append(f"SNR {_fmt_g(snr, digits=3)}")
+            lines_compact = [name]
 
-        tick_labels_public.append("\n".join(lines_pub))
+        tick_labels.append("\n".join(lines_compact))
+        tick_labels_public.append("\n".join(lines_compact))
 
         # 条件分岐: `meta` を満たす経路を評価する。
         if meta:
@@ -582,10 +563,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # 条件分岐: `points` を満たす経路を評価する。
 
     if points:
-        title = "重力波（複数イベント）：chirp整合（R^2）と波形match（窓内）"
+        title = "重力波（複数イベント）：R^2 と match の要約"
         # 条件分岐: `wave_frange_hz is not None` を満たす経路を評価する。
         if wave_frange_hz is not None:
-            title = f"重力波（複数イベント）：chirp整合（R^2）と波形match（{wave_frange_hz[0]:g}..{wave_frange_hz[1]:g} Hz）"
+            title = f"重力波（複数イベント）：R^2 と match ({wave_frange_hz[0]:g}..{wave_frange_hz[1]:g} Hz)"
 
         _plot_summary(
             points=points,
@@ -602,7 +583,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             events=events,
             tick_labels=tick_labels_public,
             out_png=out_png_public,
-            title="重力波（複数イベント）：観測と単純モデルの一致度（要約）",
+            title="重力波（複数イベント）：観測と単純モデルの一致度",
             public=True,
             wave_frange_hz=wave_frange_hz,
             match_omitted_by_reason=match_omitted_by_reason,

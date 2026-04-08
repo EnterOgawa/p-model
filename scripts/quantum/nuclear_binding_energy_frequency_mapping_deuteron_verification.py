@@ -1,12 +1,21 @@
+"""
+目的: 量子 topic の nuclear binding energy frequency mapping deuteron verification に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import csv
 import json
 import math
+import os
 from pathlib import Path
 
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
 
 enable_japanese_figure_localization()
 
@@ -253,7 +262,15 @@ def main() -> None:
     ]
 
     fig = plt.figure(figsize=(10.8, 9.8), dpi=170)
-    gs = fig.add_gridspec(2, 1, hspace=0.30)
+    apply_wavep_figure_layout(fig, template="part2_two_panel_spacious")
+    fig.set_size_inches(fig.get_figwidth(), 7.25, forward=True)
+    gs = fig.add_gridspec(2, 1, hspace=0.54)
+    panel_title_font = get_wavep_font_size("title") * 0.82
+    axis_label_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    legend_font = get_wavep_font_size("legend")
+    note_font = get_wavep_font_size("note")
+    suptitle_font = get_wavep_font_size("suptitle") + 2.0
 
     ax0 = fig.add_subplot(gs[0, 0])
     ax0.errorbar(x, b_pred_list, yerr=b_err, fmt="o", color="tab:blue", capsize=4, lw=1.2)
@@ -261,11 +278,11 @@ def main() -> None:
     ax0.fill_between([-0.4, 2.4], [b_min, b_min], [b_max, b_max], color="tab:orange", alpha=0.12, label="eq18–eq19 envelope")
     ax0.set_xticks(x)
     ax0.set_xticklabels(labels)
-    ax0.set_ylabel("B (MeV)", fontsize=13)
-    ax0.set_title("Deuteron binding from triplet ERE pole (a_t, r_t)", fontsize=14)
+    ax0.set_ylabel("B (MeV)", fontsize=axis_label_font)
+    ax0.set_title("Deuteron binding from triplet ERE pole (a_t, r_t)", fontsize=panel_title_font, pad=6.0)
     ax0.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax0.tick_params(axis="both", labelsize=11.5)
-    ax0.legend(loc="lower right", fontsize=11)
+    ax0.tick_params(axis="both", labelsize=tick_font)
+    ax0.legend(loc="lower right", fontsize=legend_font)
 
     ax1 = fig.add_subplot(gs[1, 0])
     ax1.bar([0, 1, 2], delta_keV_list, color=["tab:blue", "tab:blue", "tab:orange"], alpha=0.85)
@@ -273,10 +290,10 @@ def main() -> None:
     ax1.axhspan(-1e3 * sys_half_range, 1e3 * sys_half_range, color="tab:orange", alpha=0.12)
     ax1.set_xticks(x)
     ax1.set_xticklabels(labels)
-    ax1.set_ylabel("ΔB = B_pred − B_obs (keV)", fontsize=13)
-    ax1.set_title("Residuals vs observation", fontsize=14)
+    ax1.set_ylabel("ΔB = B_pred − B_obs (keV)", fontsize=axis_label_font)
+    ax1.set_title("Residuals vs observation", fontsize=panel_title_font, pad=6.0)
     ax1.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax1.tick_params(axis="both", labelsize=11.5)
+    ax1.tick_params(axis="both", labelsize=tick_font)
 
     # Summary annotation (avoid unicode in console; figure text can be unicode).
     verdict = "PASS" if envelope_pass else "FAIL"
@@ -287,15 +304,25 @@ def main() -> None:
         transform=ax1.transAxes,
         ha="left",
         va="top",
-        fontsize=11,
+        fontsize=note_font,
         bbox={"facecolor": "white", "alpha": 0.85, "edgecolor": "0.8"},
     )
 
-    fig.suptitle("deuteron numeric verification (ERE cross-check)", y=0.995, fontsize=15)
-    fig.subplots_adjust(left=0.10, right=0.98, top=0.94, bottom=0.10, hspace=0.35)
+    fig.suptitle("deuteron numeric verification (ERE cross-check)", y=0.992, fontsize=suptitle_font)
+    fig.subplots_adjust(left=0.115, right=0.985, top=0.920, bottom=0.095, hspace=0.64)
 
     out_png = out_dir / "nuclear_binding_energy_frequency_mapping_deuteron_verification.png"
-    fig.savefig(out_png, bbox_inches="tight")
+    prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+    try:
+        with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+            fig.savefig(out_png)
+    finally:
+        if prev_disable_normalize is None:
+            os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = prev_disable_normalize
+
     plt.close(fig)
 
     # Metrics (machine-readable freeze)

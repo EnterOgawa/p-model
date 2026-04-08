@@ -1,3 +1,10 @@
+"""
+目的: 理論 topic の pmodel vector dipole cancellation audit に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -19,6 +26,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog
+from scripts.utils.plot_style import resolve_wavep_cjk_font_family
 
 
 # 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
@@ -26,6 +34,19 @@ def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
         import matplotlib.font_manager as fm
+
+        preferred = resolve_wavep_cjk_font_family(preferred_name="Noto Sans CJK JP")
+        if preferred:
+            mpl.rcParams["font.family"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["axes.unicode_minus"] = False
+            mpl.rcParams["font.size"] = 15.0
+            mpl.rcParams["axes.titlesize"] = 19.0
+            mpl.rcParams["axes.labelsize"] = 16.0
+            mpl.rcParams["xtick.labelsize"] = 14.0
+            mpl.rcParams["ytick.labelsize"] = 14.0
+            mpl.rcParams["legend.fontsize"] = 14.0
+            return
 
         preferred = [
             "Yu Gothic",
@@ -40,6 +61,7 @@ def _set_japanese_font() -> None:
         # 条件分岐: `chosen` を満たす経路を評価する。
         if chosen:
             mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = chosen + ["DejaVu Sans"]
 
         mpl.rcParams["axes.unicode_minus"] = False
         mpl.rcParams["font.size"] = 15.0
@@ -97,6 +119,7 @@ def _fmt_float(x: float, digits: int = 6) -> str:
 
 
 # 関数: `_pretty_pulsar_name` の入出力契約と処理意図を定義する。
+
 def _pretty_pulsar_name(psr_id: str) -> str:
     alias = {
         "psr_b1913p16": "B1913+16\n(Hulse-Taylor)",
@@ -525,6 +548,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         canon_copied.append(dst)
 
     # 条件分岐: `not args.no_public_copy` を満たす経路を評価する。
+
     if not args.no_public_copy:
         for src in (out_json, out_csv, out_png, out_pdf):
             dst = public_outdir / src.name
@@ -568,6 +592,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(f"[ok] canon copies : {len(canon_copied)} files -> {canon_outdir}")
 
     # 条件分岐: `copied` を満たす経路を評価する。
+
     if copied:
         print(f"[ok] public copies: {len(copied)} files -> {public_outdir}")
 

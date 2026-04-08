@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+"""
+目的: EHT topic の eht kappa first principles transfer に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -19,6 +26,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.utils.plot_style import apply_paper_style, apply_wavep_figure_layout, resolve_wavep_cjk_font_family  # noqa: E402
 
 
 # 関数: `_read_json` の入出力契約と処理意図を定義する。
@@ -40,7 +48,18 @@ def _set_japanese_font() -> None:
         import matplotlib as mpl
         import matplotlib.font_manager as fm
 
-        preferred = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
+        resolved = resolve_wavep_cjk_font_family()
+        preferred = [
+            *( [resolved] if resolved else [] ),
+            "Noto Sans CJK JP",
+            "Noto Sans JP",
+            "Yu Gothic",
+            "Meiryo",
+            "BIZ UDGothic",
+            "MS Gothic",
+            "Yu Mincho",
+            "MS Mincho",
+        ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
         # 条件分岐: `not chosen` を満たす経路を評価する。
@@ -48,6 +67,7 @@ def _set_japanese_font() -> None:
             return
 
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+        mpl.rcParams["font.sans-serif"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         pass
@@ -157,13 +177,15 @@ def _plot(rows: Sequence[Dict[str, Any]], out_png: Path) -> None:
     except Exception as exc:
         raise RuntimeError(f"matplotlib not available: {exc}") from exc
 
+    apply_paper_style()
     _set_japanese_font()
     labels = [str(r["name"]) for r in rows]
     x = np.arange(len(labels), dtype=float)
     kappa_fit = np.array([float(r["kappa_fit"]) for r in rows], dtype=float)
     sigma = np.array([float(r["kappa_fp_sigma_1sigma"]) for r in rows], dtype=float)
 
-    fig = plt.figure(figsize=(8.8, 5.0))
+    fig = plt.figure()
+    apply_wavep_figure_layout(fig, template="part2_single_panel")
     ax = fig.add_subplot(1, 1, 1)
     ax.errorbar(
         x,
@@ -179,12 +201,15 @@ def _plot(rows: Sequence[Dict[str, Any]], out_png: Path) -> None:
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
     ax.set_ylabel("κ")
-    ax.set_title("EHT κ: first-principles transfer envelope vs fitted κ")
+    ax.set_title("EHT κ: first-principles transfer envelope vs fitted κ", pad=6.0)
     ax.grid(True, axis="y", alpha=0.25)
-    ax.legend(loc="best", framealpha=0.95)
-    fig.tight_layout()
+    ax.legend(loc="upper left", framealpha=0.95)
     out_png.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_png, dpi=220)
+    out_pdf = out_png.with_suffix(".pdf")
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        fig.savefig(out_png, dpi=220)
+        fig.savefig(out_pdf)
+
     plt.close(fig)
 
 
@@ -240,13 +265,19 @@ def _mirror_to_public(*, src_json: Path, src_csv: Path, src_png: Path, public_di
     dst_json = public_dir / src_json.name
     dst_csv = public_dir / src_csv.name
     dst_png = public_dir / src_png.name
+    src_pdf = src_png.with_suffix(".pdf")
+    dst_pdf = public_dir / src_pdf.name
     shutil.copy2(src_json, dst_json)
     shutil.copy2(src_csv, dst_csv)
     shutil.copy2(src_png, dst_png)
+    if src_pdf.exists():
+        shutil.copy2(src_pdf, dst_pdf)
+
     return {
         "json": str(dst_json),
         "csv": str(dst_csv),
         "plot_png": str(dst_png),
+        "plot_pdf": str(dst_pdf) if src_pdf.exists() else "",
     }
 
 

@@ -1,3 +1,10 @@
+"""
+目的: 重力波 topic の gw imr consistency に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -35,11 +42,46 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.utils.plot_style import (  # noqa: E402
+    apply_paper_style,
+    apply_wavep_figure_layout,
+    get_wavep_font_size,
+    resolve_wavep_cjk_font_family,
+)
 
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
+
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
+
+def _set_japanese_font() -> None:
+    try:
+        import matplotlib as mpl
+        import matplotlib.font_manager as fm
+
+        preferred = resolve_wavep_cjk_font_family(preferred_name="Noto Sans CJK JP")
+        # 条件分岐: `preferred` を満たす経路を評価する。
+        if preferred:
+            mpl.rcParams["font.family"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["axes.unicode_minus"] = False
+            return
+
+        fallback = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
+        available = {f.name for f in fm.fontManager.ttflist}
+        chosen = [name for name in fallback if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
+        if not chosen:
+            return
+
+        mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+        mpl.rcParams["font.sans-serif"] = chosen + ["DejaVu Sans"]
+        mpl.rcParams["axes.unicode_minus"] = False
+    except Exception:
+        pass
 
 
 # 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
@@ -97,6 +139,15 @@ def _read_json(path: Path) -> Dict[str, Any]:
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+# 関数: `_sync_public_outputs` の入出力契約と処理意図を定義する。
+
+def _sync_public_outputs(*, root: Path, out_png: Path, out_json: Path) -> None:
+    public_dir = root / "output" / "public" / "gw"
+    public_dir.mkdir(parents=True, exist_ok=True)
+    for src in (out_png, out_png.with_suffix(".pdf"), out_json):
+        shutil.copy2(src, public_dir / src.name)
 
 
 # 関数: `_download` の入出力契約と処理意図を定義する。
@@ -724,52 +775,57 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     }
     _write_json(out_json, out)
 
-    fig, axes = plt.subplots(2, 2, figsize=(13.6, 9.4))
+    apply_paper_style()
+    _set_japanese_font()
+    fig, axes = plt.subplots(2, 2)
+    apply_wavep_figure_layout(fig, template="part2_quad_panel")
     ax_f, ax_tau, ax_m, ax_a = axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1]
 
     ax_f.hist(f_pred, bins=80, color="#4C78A8", alpha=0.8, density=True)
     ax_f.axvline(f_meas, color="black", lw=1.5, label="measured")
-    ax_f.set_title(f"QNM f220: pred vs meas (z={z_f:.2f})", fontsize=15.8)
-    ax_f.set_xlabel("f (Hz)", fontsize=14.6)
+    ax_f.set_title(f"QNM f220: pred vs meas (z={z_f:.2f})", fontsize=get_wavep_font_size("title"))
+    ax_f.set_xlabel("f (Hz)")
     ax_f.grid(True, alpha=0.3)
-    ax_f.tick_params(labelsize=13.4)
-    ax_f.legend(fontsize=13.4)
+    ax_f.tick_params()
+    ax_f.legend(fontsize=get_wavep_font_size("legend"))
 
     ax_tau.hist(tau_pred * 1000.0, bins=80, color="#F58518", alpha=0.8, density=True)
     ax_tau.axvline(tau_meas * 1000.0, color="black", lw=1.5, label="measured")
-    ax_tau.set_title(f"QNM tau220: pred vs meas (z={z_tau:.2f})", fontsize=15.8)
-    ax_tau.set_xlabel("tau (ms)", fontsize=14.6)
+    ax_tau.set_title(f"QNM tau220: pred vs meas (z={z_tau:.2f})", fontsize=get_wavep_font_size("title"))
+    ax_tau.set_xlabel("tau (ms)")
     ax_tau.grid(True, alpha=0.3)
-    ax_tau.tick_params(labelsize=13.4)
-    ax_tau.legend(fontsize=13.4)
+    ax_tau.tick_params()
+    ax_tau.legend(fontsize=get_wavep_font_size("legend"))
 
     ax_m.hist(m_det, bins=80, color="#54A24B", alpha=0.8, density=True)
     # 条件分岐: `m_cmp is not None and math.isfinite(float(m_cmp))` を満たす経路を評価する。
     if m_cmp is not None and math.isfinite(float(m_cmp)):
         ax_m.axvline(float(m_cmp), color="black", lw=1.5, label="ringdown inferred")
 
-    ax_m.set_title(f"Final mass (det)  z1d={z_m_1d:.2f}", fontsize=15.8)
-    ax_m.set_xlabel("M_f (M_sun)", fontsize=14.6)
+    ax_m.set_title(f"Final mass (det)  z1d={z_m_1d:.2f}", fontsize=get_wavep_font_size("title"))
+    ax_m.set_xlabel("M_f (M_sun)")
     ax_m.grid(True, alpha=0.3)
-    ax_m.tick_params(labelsize=13.4)
-    ax_m.legend(fontsize=13.4)
+    ax_m.tick_params()
+    ax_m.legend(fontsize=get_wavep_font_size("legend"))
 
     ax_a.hist(a_f, bins=80, color="#B279A2", alpha=0.8, density=True)
     # 条件分岐: `a_cmp is not None and math.isfinite(float(a_cmp))` を満たす経路を評価する。
     if a_cmp is not None and math.isfinite(float(a_cmp)):
         ax_a.axvline(float(a_cmp), color="black", lw=1.5, label="ringdown inferred")
 
-    ax_a.set_title(f"Final spin  z1d={z_a_1d:.2f}", fontsize=15.8)
-    ax_a.set_xlabel("a_f", fontsize=14.6)
+    ax_a.set_title(f"Final spin  z1d={z_a_1d:.2f}", fontsize=get_wavep_font_size("title"))
+    ax_a.set_xlabel("a_f")
     ax_a.grid(True, alpha=0.3)
-    ax_a.tick_params(labelsize=13.4)
-    ax_a.legend(fontsize=13.4)
+    ax_a.tick_params()
+    ax_a.legend(fontsize=get_wavep_font_size("legend"))
 
-    fig.suptitle(f"GW250114 IMR consistency proxy: {ev['resolved_event']} ({args.catalog})", fontsize=17.4)
-    fig.tight_layout()
-    fig.savefig(out_png, dpi=160)
-    fig.savefig(out_png.with_suffix(".pdf"))
+    fig.suptitle(f"GW250114 IMR consistency proxy: {ev['resolved_event']} ({args.catalog})", fontsize=get_wavep_font_size("suptitle"))
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        fig.savefig(out_png, dpi=160)
+        fig.savefig(out_png.with_suffix(".pdf"))
+
     plt.close(fig)
+    _sync_public_outputs(root=root, out_png=out_png, out_json=out_json)
 
     try:
         worklog.append_event(

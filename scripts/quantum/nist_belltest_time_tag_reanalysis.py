@@ -1,16 +1,34 @@
+"""
+目的: 量子 topic の nist belltest time tag reanalysis に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
 import contextlib
 import json
 import math
+import os
 import struct
+import sys
 import zipfile
 import zlib
 from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
+
+enable_japanese_figure_localization()
 
 
 _REC_DTYPE = np.dtype([("ch", "u1"), ("t", "<u8"), ("sec", "<u2")], align=False)  # 11 bytes/rec
@@ -897,13 +915,16 @@ def main() -> None:
     # Plot
     import matplotlib.pyplot as plt
 
-    fig = plt.figure(figsize=(15.8, 10.4), dpi=160)
-    panel_title_font = 14.8
-    axis_label_font = 13.8
-    tick_font = 12.6
-    legend_font = 12.4
-    suptitle_font = 16.4
-    gs = fig.add_gridspec(2, 2, height_ratios=[1.0, 1.08], wspace=0.22, hspace=0.34)
+    fig = plt.figure(dpi=170)
+    apply_wavep_figure_layout(fig, template="part2_three_panel_quantum_spacious")
+    fig.set_size_inches(fig.get_figwidth(), 6.35, forward=True)
+    fig.subplots_adjust(left=0.145, right=0.985, top=0.915, bottom=0.105)
+    panel_title_font = get_wavep_font_size("title") * 0.88
+    axis_label_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    legend_font = get_wavep_font_size("legend")
+    suptitle_font = get_wavep_font_size("suptitle") + 2.0
+    gs = fig.add_gridspec(2, 2, height_ratios=[0.96, 1.05], wspace=0.28, hspace=0.42)
 
     # 関数: `_delay_panel` の入出力契約と処理意図を定義する。
     def _delay_panel(ax, title: str, d0: np.ndarray, d1: np.ndarray) -> None:
@@ -911,7 +932,7 @@ def main() -> None:
         allv = np.concatenate([d0, d1]) if d0.size and d1.size else (d0 if d0.size else d1)
         # 条件分岐: `allv.size == 0` を満たす経路を評価する。
         if allv.size == 0:
-            ax.set_title(title + " (no data)", fontsize=panel_title_font)
+            ax.set_title(title + "（データなし）", fontsize=panel_title_font, pad=7.5)
             return
 
         hi = float(np.percentile(allv, 99.5))
@@ -919,18 +940,18 @@ def main() -> None:
         bins = np.linspace(0.0, hi, 120)
         ax.hist(d0, bins=bins, alpha=0.55, label="setting=0", color="#1f77b4")
         ax.hist(d1, bins=bins, alpha=0.55, label="setting=1", color="#ff7f0e")
-        ax.set_title(title, fontsize=panel_title_font)
-        ax.set_xlabel("click delay from sync (ns)", fontsize=axis_label_font)
-        ax.set_ylabel("count", fontsize=axis_label_font)
+        ax.set_title(title, fontsize=panel_title_font, pad=7.5)
+        ax.set_xlabel("sync からの click delay (ns)", fontsize=axis_label_font)
+        ax.set_ylabel("件数", fontsize=axis_label_font)
         ax.grid(True, ls=":", lw=0.6, alpha=0.6)
-        ax.legend(frameon=True, fontsize=legend_font)
+        ax.legend(frameon=True, fontsize=legend_font, loc="upper right")
         ax.tick_params(axis="both", labelsize=tick_font)
 
     ax0 = fig.add_subplot(gs[0, 0])
-    _delay_panel(ax0, "Alice: click delay vs setting", a0, a1)
+    _delay_panel(ax0, "Alice：click delay と setting", a0, a1)
 
     ax1 = fig.add_subplot(gs[0, 1])
-    _delay_panel(ax1, "Bob: click delay vs setting", b0, b1)
+    _delay_panel(ax1, "Bob：click delay と setting", b0, b1)
 
     ax2 = fig.add_subplot(gs[1, :])
     w = np.asarray(cfg.windows_ns, dtype=float)
@@ -940,25 +961,29 @@ def main() -> None:
     ax2.plot(w, counts[:, 1, 0], marker="o", lw=1.2, label="c10")
     ax2.plot(w, counts[:, 1, 1], marker="o", lw=1.2, label="c11")
     ax2.set_xscale("log")
-    ax2.set_xlabel("coincidence window (ns)", fontsize=axis_label_font)
-    ax2.set_ylabel("greedy-paired coincidences", fontsize=axis_label_font)
-    ax2.set_title("Window dependence (aligned by GPS PPS)", fontsize=panel_title_font)
+    ax2.set_xlabel("coincidence 窓幅 (ns)", fontsize=axis_label_font)
+    ax2.set_ylabel("greedy pair 数", fontsize=axis_label_font)
+    ax2.set_title("窓幅依存（GPS PPS 整列）", fontsize=panel_title_font, pad=7.5)
     ax2.grid(True, which="both", ls=":", lw=0.6, alpha=0.6)
     ax2.legend(frameon=True, fontsize=legend_font, ncol=2)
     ax2.tick_params(axis="both", labelsize=tick_font)
 
-    fig.suptitle(
-        "NIST Bell test (time-tag): setting-dependent delays can bias coincidence selection",
-        y=1.02,
-        fontsize=suptitle_font,
-    )
-
-    fig.tight_layout(rect=(0, 0.03, 1, 0.98))
+    fig.suptitle("NIST Bell test（time-tag）：setting 依存遅延と coincidence 窓感度", y=0.992, fontsize=suptitle_font)
 
     out_png = _tag("nist_belltest_time_tag_bias", ext="png")
     out_pdf = _tag("nist_belltest_time_tag_bias", ext="pdf")
-    fig.savefig(out_png, bbox_inches="tight")
-    fig.savefig(out_pdf, bbox_inches="tight")
+    normalize_backup = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+    try:
+        with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+            fig.savefig(out_png)
+            fig.savefig(out_pdf)
+    finally:
+        if normalize_backup is None:
+            del os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"]
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = normalize_backup
+
     plt.close(fig)
 
     # 関数: `_infer_run_base` の入出力契約と処理意図を定義する。

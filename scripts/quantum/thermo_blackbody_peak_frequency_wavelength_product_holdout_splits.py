@@ -1,3 +1,10 @@
+"""
+目的: 黒体 holdout 監査の peak frequency wavelength product 指標図を再生成する。
+入力: スクリプト内の既定 holdout 分割設定と黒体基準量の計算式を用いる。
+出力: output/public/quantum と output/private/quantum の holdout 図と付随指標を更新する。
+前提: Part IV の黒体付録と統合監査台帳が参照する canonical artifact を正とする。
+"""
+
 from __future__ import annotations
 
 import csv
@@ -10,6 +17,20 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
+from scripts.quantum.thermo_blackbody_holdout_style import (
+    add_blackbody_display_floor_note,
+    apply_blackbody_holdout_axes_text,
+    apply_blackbody_holdout_legend,
+    create_blackbody_holdout_figure,
+)
+
+
+from scripts.utils.plot_style import (
+    apply_paper_style,
+    apply_wavep_figure_layout,
+    get_wavep_font_size,
+    resolve_wavep_cjk_font_family,
+)
 
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
@@ -121,6 +142,21 @@ def _fit_fixed_exponent(x_values: np.ndarray, y_values: np.ndarray, idx: np.ndar
     y_vals = np.asarray(y_values, dtype=float).reshape(-1)[indices]
     denom = np.maximum(1e-300, x_vals**float(exponent))
     return float(np.mean(y_vals / denom))
+
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
+
+def _set_japanese_font() -> None:
+    try:
+        import matplotlib as mpl
+
+        preferred = resolve_wavep_cjk_font_family(preferred_name="Noto Sans CJK JP")
+        if preferred:
+            mpl.rcParams["font.family"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["axes.unicode_minus"] = False
+    except Exception:
+        pass
 
 
 # 関数: `_wien_peak_x_wavelength` の入出力契約と処理意図を定義する。
@@ -315,19 +351,28 @@ def main() -> None:
 
     bar_positions = np.arange(len(categories), dtype=float)
     bar_width = 0.3
-    fig, ax = plt.subplots(1, 1, figsize=(10.6, 4.2), dpi=170)
+    fig, ax = create_blackbody_holdout_figure()
     ax.bar(bar_positions - bar_width / 2, y_power, width=bar_width, color="#1f77b4", alpha=0.85, label="power-law fit (2p)")
     ax.bar(bar_positions + bar_width / 2, y_fixed, width=bar_width, color="#ff7f0e", alpha=0.85, label="fixed exponent 0 (1p)")
     ax.axhline(3.0, color="black", linewidth=1.0, linestyle="--", alpha=0.7)
     ax.set_xticks(bar_positions)
-    ax.set_xticklabels(categories)
-    ax.set_ylabel("test max abs(z)")
-    ax.set_title("Blackbody peak product holdout: ν_max λ_max = const")
+    apply_blackbody_holdout_axes_text(
+        ax,
+        categories=categories,
+        ylabel="test max abs(z)",
+        title="黒体ピーク ν_max λ_max の温度帯分割監査",
+    )
     ax.grid(axis="y", linestyle=":", alpha=0.35)
-    ax.legend(loc="upper left", fontsize=9)
-    fig.tight_layout()
+    apply_blackbody_holdout_legend(ax)
+
+    visible_vals = np.asarray(y_power + y_fixed, dtype=float)
+    add_blackbody_display_floor_note(ax, visible_vals)
     out_png = out_dir / "thermo_blackbody_peak_frequency_wavelength_product_holdout_splits.png"
-    fig.savefig(out_png, bbox_inches="tight")
+    out_pdf = out_png.with_suffix(".pdf")
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        fig.savefig(out_png)
+        fig.savefig(out_pdf)
+
     plt.close(fig)
 
     product_reference = float((x_frequency / x_wavelength) * speed_of_light)
@@ -357,7 +402,7 @@ def main() -> None:
                 },
                 "data_range_T_K": [float(np.min(temperature_grid_k)), float(np.max(temperature_grid_k))],
                 "splits": split_results,
-                "outputs": {"csv": str(out_csv), "png": str(out_png)},
+                "outputs": {"csv": str(out_csv), "png": str(out_png), "pdf": str(out_pdf)},
                 "notes": [
                     "Analytic holdout for the mixed Wien observable ν_max(T)·λ_max(T), expected to be temperature-independent.",
                     "The roots are defined by 3(1-exp(-x_nu))=x_nu and 5(1-exp(-x_lambda))=x_lambda.",
@@ -372,6 +417,7 @@ def main() -> None:
 
     print(f"[ok] wrote: {out_csv}")
     print(f"[ok] wrote: {out_png}")
+    print(f"[ok] wrote: {out_pdf}")
     print(f"[ok] wrote: {out_metrics}")
 
 

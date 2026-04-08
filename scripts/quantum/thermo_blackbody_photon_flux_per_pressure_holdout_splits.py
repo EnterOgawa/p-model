@@ -1,3 +1,10 @@
+"""
+目的: 黒体 holdout 監査の photon flux per pressure 指標図を再生成する。
+入力: スクリプト内の既定 holdout 分割設定と黒体基準量の計算式を用いる。
+出力: output/public/quantum と output/private/quantum の holdout 図と付随指標を更新する。
+前提: Part IV の黒体付録と統合監査台帳が参照する canonical artifact を正とする。
+"""
+
 from __future__ import annotations
 
 import csv
@@ -10,6 +17,13 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
+from scripts.quantum.thermo_blackbody_holdout_style import (
+    add_blackbody_display_floor_note,
+    apply_blackbody_holdout_axes_text,
+    apply_blackbody_holdout_legend,
+    create_blackbody_holdout_figure,
+)
+
 
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
@@ -303,7 +317,7 @@ def main() -> None:
 
     bar_positions = np.arange(len(categories), dtype=float)
     bar_width = 0.3
-    fig, ax = plt.subplots(1, 1, figsize=(10.6, 4.2), dpi=170)
+    fig, ax = create_blackbody_holdout_figure()
     ax.bar(bar_positions - bar_width / 2, y_power, width=bar_width, color="#1f77b4", alpha=0.85, label="power-law abs fit (2p)")
     ax.bar(
         bar_positions + bar_width / 2,
@@ -315,14 +329,17 @@ def main() -> None:
     )
     ax.axhline(3.0, color="black", linewidth=1.0, linestyle="--", alpha=0.7)
     ax.set_xticks(bar_positions)
-    ax.set_xticklabels(categories)
-    ax.set_ylabel("test max abs(z)")
-    ax.set_title("Blackbody ratio holdout: Φ_n/P ∝ T^-1")
+    apply_blackbody_holdout_axes_text(ax, categories=categories, ylabel="test max abs(z)", title="Blackbody ratio holdout: Φ_n/P ∝ T^-1")
     ax.grid(axis="y", linestyle=":", alpha=0.35)
-    ax.legend(loc="upper left", fontsize=9)
+    apply_blackbody_holdout_legend(ax)
+
+    visible_vals = np.asarray(y_power + y_fixed, dtype=float)
+    add_blackbody_display_floor_note(ax, visible_vals)
     fig.tight_layout()
     out_png = out_dir / "thermo_blackbody_photon_flux_per_pressure_holdout_splits.png"
+    out_pdf = out_png.with_suffix(".pdf")
     fig.savefig(out_png, bbox_inches="tight")
+    fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
 
     out_metrics = out_dir / "thermo_blackbody_photon_flux_per_pressure_holdout_splits_metrics.json"

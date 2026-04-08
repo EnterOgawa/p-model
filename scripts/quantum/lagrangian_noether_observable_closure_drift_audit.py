@@ -33,6 +33,16 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.utils.plot_style import get_wavep_font_size  # noqa: E402
+
+try:
+    import matplotlib as mpl
+    from scripts.utils.plot_style import install_wavep_cjk_font_override  # noqa: E402
+
+    install_wavep_cjk_font_override(preferred_name="Noto Sans CJK JP")
+    mpl.rcParams["axes.unicode_minus"] = False
+except Exception:
+    pass
 
 DEFAULT_BASELINE_NOETHER_GAUGE_MARGIN = 4.999993032890784e-08
 DEFAULT_BASELINE_NOETHER_REALNESS_MARGIN = 5.0e-10
@@ -481,9 +491,48 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
             writer.writerow(row)
 
 
+# 関数: `_wrap_two_line_label` の入出力契約と処理意図を定義する。
+
+def _wrap_two_line_label(text: str) -> str:
+    words = [
+        token
+        for token in str(text).replace("::", " ").replace(":", " ").replace("_", " ").split()
+        if token
+    ]
+    if len(words) <= 1:
+        return " ".join(words) if words else str(text)
+
+    best_index = 1
+    best_score: Optional[int] = None
+    for idx in range(1, len(words)):
+        left = " ".join(words[:idx])
+        right = " ".join(words[idx:])
+        score = max(len(left), len(right))
+        if best_score is None or score < best_score:
+            best_score = score
+            best_index = idx
+
+    return " ".join(words[:best_index]) + "\n" + " ".join(words[best_index:])
+
+
 # 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, payload: Dict[str, Any]) -> None:
+    display_labels = {
+        "closure_drift::overall_status": "ドリフト: 全体判定",
+        "closure_drift::hard_fail_ids_n": "ドリフト: hard失敗件数",
+        "closure_drift::watch_ids_n": "ドリフト: 監視件数",
+        "closure_drift::missing_equations_n": "ドリフト: 欠落式件数",
+        "closure_drift::missing_nonrel_channels_n": "ドリフト: 欠落channel件数",
+        "closure_drift::route_a_gate": "ドリフト: 経路A判定",
+        "closure_drift::transition": "ドリフト: 遷移判定",
+        "closure_drift::shared_gate_policy": "ドリフト: 共有ゲート方針",
+        "closure_drift::checks_all_pass": "ドリフト: 判定通過数",
+        "closure_drift::noether_gauge_margin_positive": "ドリフト: Noether\nゲージ余裕の正値性",
+        "closure_drift::noether_realness_margin_positive": "ドリフト: Noether\n実数性余裕の正値性",
+        "closure_drift::noether_gauge_margin_ratio": "ドリフト: Noether\nゲージ余裕比",
+        "closure_drift::noether_realness_margin_ratio": "ドリフト: Noether\n実数性余裕比",
+    }
     checks = payload.get("checks") if isinstance(payload.get("checks"), list) else []
     baseline = payload.get("frozen_baseline") if isinstance(payload.get("frozen_baseline"), dict) else {}
 
@@ -495,7 +544,7 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
         if not isinstance(row, dict):
             continue
 
-        ids.append(str(row.get("id") or ""))
+        ids.append(display_labels.get(str(row.get("id") or ""), str(row.get("id") or "")))
         score = row.get("score")
         scores.append(float(score) if isinstance(score, (int, float)) else math.nan)
         status = str(row.get("status") or "")
@@ -528,38 +577,54 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
         elif rid == "closure_drift::noether_realness_margin_ratio":
             ratio_map["realness"] = _as_float(row.get("value"))
 
-    ratio_labels = ["noether gauge", "noether realness"]
+    ratio_labels = ["Noether ゲージ", "Noether 実数性"]
     ratio_values = [
         float(ratio_map["gauge"]) if ratio_map["gauge"] is not None else 0.0,
         float(ratio_map["realness"]) if ratio_map["realness"] is not None else 0.0,
     ]
 
-    fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(12.4, 8.6), dpi=180, gridspec_kw={"height_ratios": [3.1, 1.5]})
+    title_size = max(get_wavep_font_size("title"), 16.0)
+    axis_size = max(get_wavep_font_size("axis"), 14.0)
+    tick_size = max(get_wavep_font_size("tick"), 13.0)
+    upper_y_tick_size = max(tick_size + 1.8, 14.8)
+    legend_size = max(get_wavep_font_size("legend"), 12.8)
+
+    upper_height = max(14.4, 0.78 * len(ids) + 5.0)
+    fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(13.0, upper_height), dpi=180, gridspec_kw={"height_ratios": [5.55, 1.55]})
 
     y = np.arange(len(ids))
-    ax0.barh(y, scores, color=colors)
-    ax0.set_yticks(y, ids)
+    wrapped_ids = [_wrap_two_line_label(label) for label in ids]
+    ax0.barh(y, scores, color=colors, height=0.72)
+    ax0.set_yticks(y)
+    ax0.set_yticklabels(wrapped_ids, fontsize=upper_y_tick_size)
+    for tick in ax0.get_yticklabels():
+        tick.set_linespacing(1.15)
+
     ax0.set_xlim(0.0, 1.05)
     ax0.axvline(1.0, linestyle="--", color="#6b7280", linewidth=1.2)
-    ax0.set_xlabel("drift check score (1=pass, 0.5=watch, 0=reject)")
-    ax0.set_title("Lagrangian-Noether closure drift audit (gate operation)")
+    ax0.set_xlabel("ドリフト監査スコア（1で通過、0.5で監視、0で棄却）", fontsize=axis_size)
+    ax0.set_title("Lagrangian-Noether 閉包ドリフト監査（ゲート運用）", fontsize=title_size, pad=9.0)
+    ax0.tick_params(axis="x", labelsize=tick_size)
+    ax0.tick_params(axis="y", pad=7.0)
     ax0.grid(axis="x", alpha=0.25, linestyle=":")
 
     x = np.arange(len(ratio_labels))
     ax1.bar(x, ratio_values, color="#2563eb")
-    ax1.set_xticks(x, ratio_labels, rotation=0, ha="center")
+    ax1.set_xticks(x)
+    ax1.set_xticklabels(ratio_labels, rotation=0, ha="center", fontsize=tick_size)
     ymax = max(1.05, max(ratio_values) * 1.2 if ratio_values else 1.05)
     ax1.set_ylim(0.0, ymax)
-    ax1.axhline(pass_ratio, linestyle="--", color="#2f9e44", linewidth=1.2, label=f"pass >= {pass_ratio:g}")
-    ax1.axhline(watch_ratio, linestyle="--", color="#eab308", linewidth=1.2, label=f"watch >= {watch_ratio:g}")
-    ax1.set_ylabel("margin ratio vs frozen")
-    ax1.set_title("Noether margin drift monitor")
+    ax1.axhline(pass_ratio, linestyle="--", color="#2f9e44", linewidth=1.2, label=f"通過 >= {pass_ratio:g}")
+    ax1.axhline(watch_ratio, linestyle="--", color="#eab308", linewidth=1.2, label=f"監視 >= {watch_ratio:g}")
+    ax1.set_ylabel("固定基準に対する余裕比", fontsize=axis_size)
+    ax1.set_title("Noether 余裕比ドリフト監視", fontsize=title_size, pad=8.0)
+    ax1.tick_params(axis="y", labelsize=tick_size)
     ax1.grid(axis="y", alpha=0.25, linestyle=":")
-    ax1.legend(loc="upper right", frameon=False, fontsize=9)
+    ax1.legend(loc="upper right", frameon=False, fontsize=legend_size)
 
-    fig.tight_layout()
+    fig.subplots_adjust(left=0.25, right=0.98, top=0.95, bottom=0.11, hspace=0.58)
     path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(path, bbox_inches="tight")
+    fig.savefig(path)
     plt.close(fig)
 
 
@@ -626,6 +691,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     out_json = Path(args.out_json)
     out_csv = Path(args.out_csv)
     out_png = Path(args.out_png)
+    out_pdf = Path(args.out_png).with_suffix(".pdf")
 
     for name, path in [
         ("closure-json", closure_json),
@@ -649,6 +715,11 @@ def main(argv: Optional[List[str]] = None) -> int:
             elif name == "out-png":
                 out_png = resolved
 
+    # 条件分岐: `not out_pdf.is_absolute()` を満たす経路を評価する。
+
+    if not out_pdf.is_absolute():
+        out_pdf = (ROOT / out_pdf).resolve()
+
     # 条件分岐: `not closure_json.exists()` を満たす経路を評価する。
 
     if not closure_json.exists():
@@ -668,11 +739,13 @@ def main(argv: Optional[List[str]] = None) -> int:
     rows = payload.get("checks") if isinstance(payload.get("checks"), list) else []
     _write_csv(out_csv, rows if isinstance(rows, list) else [])
     _plot(out_png, payload)
+    _plot(out_pdf, payload)
 
     decision = payload.get("decision") if isinstance(payload.get("decision"), dict) else {}
     print(f"[ok] wrote: {_rel(out_json)}")
     print(f"[ok] wrote: {_rel(out_csv)}")
     print(f"[ok] wrote: {_rel(out_png)}")
+    print(f"[ok] wrote: {_rel(out_pdf)}")
     print(
         "[summary] overall_status="
         f"{decision.get('overall_status')}, recalc_required={decision.get('recalc_required')}, "

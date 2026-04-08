@@ -154,6 +154,12 @@ def main(argv: List[str] | None = None) -> int:
         help="Shared gate policy id propagated to chain-lock/closure audits.",
     )
     parser.add_argument(
+        "--step-tag",
+        type=str,
+        default="8.7.21.4",
+        help="Roadmap step tag written into JSON/worklog outputs.",
+    )
+    parser.add_argument(
         "--out-json",
         type=str,
         default=str(ROOT / "output" / "public" / "quantum" / "lagrangian_noether_closure_operational_cycle_8722_8721.json"),
@@ -323,7 +329,7 @@ def main(argv: List[str] | None = None) -> int:
     payload = {
         "generated_utc": _iso_utc_now(),
         "phase": 8,
-        "step": "8.7.21.4",
+        "step": str(args.step_tag),
         "title": "Lagrangian-Noether closure operational cycle (8.7.22 -> 8.7.21.3)",
         "inputs": {
             "weak_interaction_beta_decay_route_ab_audit_json": _rel(weak_json),
@@ -361,7 +367,7 @@ def main(argv: List[str] | None = None) -> int:
             {
                 "event_type": "quantum_lagrangian_noether_closure_operational_cycle",
                 "phase": "8",
-                "step": "8.7.21.4",
+                "step": str(args.step_tag),
                 "outputs": {
                     "lagrangian_noether_closure_operational_cycle_json": _rel(out_json),
                     "lagrangian_noether_closure_operational_cycle_csv": _rel(out_csv),

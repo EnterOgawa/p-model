@@ -1,7 +1,15 @@
+"""
+目的: 量子 topic の de broglie precision alpha consistency に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import json
 import math
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -9,6 +17,11 @@ import numpy as np
 
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
 
 enable_japanese_figure_localization()
 
@@ -42,7 +55,7 @@ def epsilon_from_alpha_inv(*, alpha_inv_ref: float, alpha_inv_meas: float) -> fl
 # 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
-    root = Path(__file__).resolve().parents[2]
+    root = ROOT
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -88,16 +101,21 @@ def main() -> None:
     y = np.array([recoil.alpha_inv, g2.alpha_inv], dtype=float)
     yerr = np.array([recoil.sigma_alpha_inv, g2.sigma_alpha_inv], dtype=float)
 
-    fig, ax = plt.subplots(figsize=(10.8, 5.4), dpi=150)
-    axis_label_font = 13.6
-    panel_title_font = 14.8
-    tick_font = 12.4
-    note_font = 11.2
+    fig, ax = plt.subplots(dpi=150)
+    apply_wavep_figure_layout(fig, template="part2_single_panel_sparse")
+    axis_label_font = get_wavep_font_size("axis")
+    panel_title_font = get_wavep_font_size("title")
+    tick_font = get_wavep_font_size("tick")
+    note_font = get_wavep_font_size("note")
     ax.errorbar(x, y, yerr=yerr, fmt="o", capsize=4, elinewidth=1.8, color="#1f77b4", ecolor="#1f77b4")
     ax.set_xticks(x)
     ax.set_xticklabels(labels, fontsize=tick_font)
     ax.set_ylabel("alpha^{-1}", fontsize=axis_label_font)
-    ax.set_title("de Broglie precision cross-check via alpha (recoil vs electron g-2)", fontsize=panel_title_font)
+    ax.set_title(
+        "de Broglie precision cross-check via alpha (recoil vs electron g-2)",
+        fontsize=panel_title_font,
+        pad=10.0,
+    )
     ax.grid(True, ls=":", lw=0.6, alpha=0.7)
     ax.tick_params(axis="y", labelsize=tick_font)
 
@@ -116,11 +134,10 @@ def main() -> None:
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.85, "edgecolor": "0.8"},
     )
 
-    fig.tight_layout()
     out_png = out_dir / "de_broglie_precision_alpha_consistency.png"
     out_pdf = out_dir / "de_broglie_precision_alpha_consistency.pdf"
-    fig.savefig(out_png, bbox_inches="tight")
-    fig.savefig(out_pdf, bbox_inches="tight")
+    fig.savefig(out_png)
+    fig.savefig(out_pdf)
     plt.close(fig)
 
     metrics = {

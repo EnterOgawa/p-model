@@ -112,6 +112,8 @@ def _default_manifest_paths() -> Dict[str, List[Path]]:
             _ROOT / "doc" / "paper" / "06_uncertainty.md",
             _ROOT / "doc" / "paper" / "07_llr_appendix.md",
             _ROOT / "doc" / "paper" / "10_manuscript.md",
+            _ROOT / "doc" / "paper" / "12_part3a_quantum_foundations.md",
+            _ROOT / "doc" / "paper" / "12_part3b_quantum_verification.md",
             _ROOT / "doc" / "paper" / "13_part4_verification.md",
             _ROOT / "doc" / "paper" / "20_data_sources.md",
             _ROOT / "doc" / "paper" / "01_figures_index.md",
@@ -134,7 +136,8 @@ def _default_manifest_paths() -> Dict[str, List[Path]]:
         "publish_outputs": [
             _ROOT / "output" / "private" / "summary" / "pmodel_paper.html",
             _ROOT / "output" / "private" / "summary" / "pmodel_paper_part2_astrophysics.html",
-            _ROOT / "output" / "private" / "summary" / "pmodel_paper_part3_quantum.html",
+            _ROOT / "output" / "private" / "summary" / "pmodel_paper_part3a_quantum_foundations.html",
+            _ROOT / "output" / "private" / "summary" / "pmodel_paper_part3b_quantum_verification.html",
             _ROOT / "output" / "private" / "summary" / "pmodel_paper_part4_verification.html",
             _ROOT / "output" / "private" / "summary" / "pmodel_public_report.html",
             _ROOT / "output" / "private" / "summary" / "paper_qc.json",
@@ -276,6 +279,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         "repro_commands": {
             "build_quick": r"cmd /c scripts\summary\build_materials.bat quick",
             "build_quick_nodocx": r"cmd /c scripts\summary\build_materials.bat quick-nodocx",
+            "build_part3a_quantum_foundations_html": "python -B scripts/summary/paper_build.py --profile part3a_quantum_foundations --figure-lang ja --mode publish --outdir output/private/summary --skip-docx --skip-tables",
+            "build_part3b_quantum_verification_html": "python -B scripts/summary/paper_build.py --profile part3b_quantum_verification --figure-lang ja --mode publish --outdir output/private/summary --skip-docx --skip-tables",
             "build_part4_verification_html": "python -B scripts/summary/paper_build.py --profile part4_verification --mode publish --outdir output/private/summary --skip-docx --skip-tables",
             "paper_qc": "python -B scripts/summary/paper_qc.py",
             "public_outputs_manifest": "python -B scripts/summary/public_outputs_manifest.py",

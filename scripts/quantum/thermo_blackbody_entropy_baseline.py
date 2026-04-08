@@ -1,9 +1,17 @@
+"""
+目的: 黒体 entropy ベースラインの公開図と指標を再生成する。
+入力: スクリプト内の既定温度格子と黒体基準式を用いる。
+出力: output/public/quantum と output/private/quantum の canonical baseline artifact を更新する。
+前提: Part IV 本文と付録が参照する黒体 canonical baseline を正とする。
+"""
+
 from __future__ import annotations
 
 import csv
 import hashlib
 import json
 import math
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
@@ -12,6 +20,7 @@ import matplotlib.pyplot as plt
 
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
 
 enable_japanese_figure_localization()
 
@@ -145,32 +154,48 @@ def main() -> None:
     ratio_curve = [s_over_n_kb for _ in xs]
 
     fig, axes = plt.subplots(2, 1, figsize=(10.8, 9.8))
+    apply_wavep_figure_layout(fig, template="part2_two_panel_spacious")
+    fig.set_size_inches(fig.get_figwidth(), 7.20, forward=True)
+    panel_title_font = get_wavep_font_size("title") * 0.82
+    axis_label_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    suptitle_font = get_wavep_font_size("suptitle") + 2.0
 
     ax = axes[0]
     ax.plot(xs, s_curve, color="#1f77b4")
     ax.scatter([r["T_K"] for r in rows], [r["entropy_density_J_per_m3K"] for r in rows], color="#000000", s=18)
     ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.set_xlabel("Temperature T (K)", fontsize=13)
-    ax.set_ylabel("Entropy density s (J/(m^3·K))", fontsize=13)
-    ax.set_title("Blackbody radiation: s(T) = (4/3) a T^3", fontsize=14)
+    ax.set_xlabel("Temperature T (K)", fontsize=axis_label_font)
+    ax.set_ylabel("Entropy density s (J/(m^3·K))", fontsize=axis_label_font)
+    ax.set_title("Blackbody radiation: s(T) = (4/3) a T^3", fontsize=panel_title_font, pad=6.0)
     ax.grid(True, which="both", alpha=0.25)
-    ax.tick_params(axis="both", labelsize=11.5)
+    ax.tick_params(axis="both", labelsize=tick_font)
 
     ax = axes[1]
     ax.plot(xs, ratio_curve, color="#d62728")
     ax.scatter([r["T_K"] for r in rows], [r["entropy_per_photon_kB"] for r in rows], color="#000000", s=18)
     ax.set_xscale("log")
-    ax.set_xlabel("Temperature T (K)", fontsize=13)
-    ax.set_ylabel("Entropy per photon s/(n k_B)", fontsize=13)
-    ax.set_title("Photon gas: s/(n k_B) = const.", fontsize=14)
+    ax.set_xlabel("Temperature T (K)", fontsize=axis_label_font)
+    ax.set_ylabel("Entropy per photon s/(n k_B)", fontsize=axis_label_font)
+    ax.set_title("Photon gas: s/(n k_B) = const.", fontsize=panel_title_font, pad=6.0)
     ax.grid(True, which="both", alpha=0.25)
-    ax.tick_params(axis="both", labelsize=11.5)
+    ax.tick_params(axis="both", labelsize=tick_font)
 
-    fig.suptitle("Thermo baseline: blackbody entropy and second-law consistency (SI constants)", y=0.995, fontsize=15)
-    fig.tight_layout(rect=(0, 0, 1, 0.985))
+    fig.suptitle("Thermo baseline: blackbody entropy and second-law consistency (SI constants)", y=0.992, fontsize=suptitle_font)
+    fig.subplots_adjust(left=0.115, right=0.985, top=0.920, bottom=0.095, hspace=0.64)
     out_png = out_dir / "thermo_blackbody_entropy_baseline.png"
-    fig.savefig(out_png, dpi=180, bbox_inches="tight")
+    prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+    try:
+        with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+            fig.savefig(out_png, dpi=180)
+    finally:
+        if prev_disable_normalize is None:
+            os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = prev_disable_normalize
+
     plt.close(fig)
 
     out_metrics = out_dir / "thermo_blackbody_entropy_baseline_metrics.json"

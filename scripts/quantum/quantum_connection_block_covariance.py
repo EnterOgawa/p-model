@@ -34,8 +34,23 @@ if str(ROOT) not in sys.path:
 
 from scripts.summary import worklog  # noqa: E402
 
+try:
+    import matplotlib as mpl
+    from scripts.utils.plot_style import install_wavep_cjk_font_override, resolve_wavep_cjk_font_family  # noqa: E402
+
+    install_wavep_cjk_font_override(preferred_name="Noto Sans CJK JP")
+    preferred_cjk = resolve_wavep_cjk_font_family(preferred_name="Noto Sans CJK JP")
+    if preferred_cjk:
+        mpl.rcParams["font.family"] = [preferred_cjk, "DejaVu Sans"]
+        mpl.rcParams["font.sans-serif"] = [preferred_cjk, "DejaVu Sans"]
+
+    mpl.rcParams["axes.unicode_minus"] = False
+except Exception:
+    pass
+
 
 # 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -360,8 +375,15 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     import matplotlib.patches as mpatches
     from matplotlib import colors as mcolors
 
+    channel_display = {
+        "bell": "ベル",
+        "interference": "干渉",
+        "condensed": "物性",
+    }
+
     matrices = payload.get("matrices") if isinstance(payload.get("matrices"), dict) else {}
     labels = matrices.get("channel_order") if isinstance(matrices.get("channel_order"), list) else []
+    display_labels = [channel_display.get(str(label), str(label)) for label in labels]
     cov = np.array(matrices.get("channel_covariance") or [], dtype=float)
     corr = np.array(matrices.get("channel_correlation") or [], dtype=float)
     eig = (
@@ -392,8 +414,8 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     axes[0, 0].set_xlim(-0.5, n_ch - 0.5)
     axes[0, 0].set_ylim(n_ch - 0.5, -0.5)
     axes[0, 0].set_title("Channel covariance")
-    axes[0, 0].set_xticks(range(len(labels)), labels, rotation=25, ha="right")
-    axes[0, 0].set_yticks(range(len(labels)), labels)
+    axes[0, 0].set_xticks(range(len(labels)), display_labels, rotation=25, ha="right")
+    axes[0, 0].set_yticks(range(len(labels)), display_labels)
     cax0 = axes[0, 0].inset_axes([1.02, 0.0, 0.03, 1.0])
     c_norm0 = mcolors.Normalize(vmin=float(np.nanmin(cov)), vmax=float(np.nanmax(cov)))
     c_vals0 = np.linspace(float(np.nanmin(cov)), float(np.nanmax(cov)), 129)
@@ -411,6 +433,7 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
                 edgecolor="none",
             )
         )
+
     cax0.set_xlim(0.0, 1.0)
     cax0.set_ylim(float(c_vals0[0]), float(c_vals0[-1]))
     cax0.set_xticks([])
@@ -429,8 +452,8 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     axes[0, 1].set_xlim(-0.5, n_ch - 0.5)
     axes[0, 1].set_ylim(n_ch - 0.5, -0.5)
     axes[0, 1].set_title("Channel correlation")
-    axes[0, 1].set_xticks(range(len(labels)), labels, rotation=25, ha="right")
-    axes[0, 1].set_yticks(range(len(labels)), labels)
+    axes[0, 1].set_xticks(range(len(labels)), display_labels, rotation=25, ha="right")
+    axes[0, 1].set_yticks(range(len(labels)), display_labels)
     cax1 = axes[0, 1].inset_axes([1.02, 0.0, 0.03, 1.0])
     c_norm1 = mcolors.Normalize(vmin=-1.0, vmax=1.0)
     c_vals1 = np.linspace(-1.0, 1.0, 129)
@@ -448,6 +471,7 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
                 edgecolor="none",
             )
         )
+
     cax1.set_xlim(0.0, 1.0)
     cax1.set_ylim(-1.0, 1.0)
     cax1.set_xticks([])
@@ -458,18 +482,18 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     axes[1, 0].bar(range(len(eig_vals)), eig_vals, color="#4c6ef5")
     axes[1, 0].set_title("Covariance eigenvalues")
     axes[1, 0].set_xlabel("mode index")
-    axes[1, 0].set_ylabel("eigenvalue")
+    axes[1, 0].set_ylabel("固有値")
     axes[1, 0].grid(axis="y", alpha=0.25, linestyle=":")
 
     channel_info = payload.get("channels") if isinstance(payload.get("channels"), list) else []
     x = np.arange(len(channel_info))
     means = [float(item.get("aligned_mean") or 0.0) for item in channel_info if isinstance(item, dict)]
     stds = [float(item.get("aligned_std") or 0.0) for item in channel_info if isinstance(item, dict)]
-    labels2 = [str(item.get("channel") or "") for item in channel_info if isinstance(item, dict)]
+    labels2 = [channel_display.get(str(item.get("channel") or ""), str(item.get("channel") or "")) for item in channel_info if isinstance(item, dict)]
     axes[1, 1].bar(x, means, yerr=stds, capsize=4, color="#51cf66")
     axes[1, 1].set_xticks(x, labels2, rotation=20, ha="right")
     axes[1, 1].set_title("Aligned channel mean ± std")
-    axes[1, 1].set_ylabel("log1p-normalized scale")
+    axes[1, 1].set_ylabel("log1p 正規化スケール")
     axes[1, 1].grid(axis="y", alpha=0.25, linestyle=":")
 
     fig.suptitle("Quantum connection block covariance (Step 7.21.4)", y=0.99)

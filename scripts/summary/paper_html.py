@@ -8,7 +8,9 @@ Phase 8 向けに、Markdown草稿（doc/paper/*.md）をHTMLで読める形に�
 生成物（既定）:
   - profile=paper: output/private/summary/pmodel_paper.html
   - profile=part2_astrophysics: output/private/summary/pmodel_paper_part2_astrophysics.html
-  - profile=part3_quantum: output/private/summary/pmodel_paper_part3_quantum.html
+  - profile=part3_quantum: output/private/summary/pmodel_paper_part3_quantum.html（互換）
+  - profile=part3a_quantum_foundations: output/private/summary/pmodel_paper_part3a_quantum_foundations.html
+  - profile=part3b_quantum_verification: output/private/summary/pmodel_paper_part3b_quantum_verification.html
   - profile=part4_verification: output/private/summary/pmodel_paper_part4_verification.html
   - profile=part5_future_predictions: output/private/summary/pmodel_paper_part5_future_predictions.html
 
@@ -40,7 +42,7 @@ _ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from scripts.summary import paper_latex as _paper_latex, worklog  # noqa: E402
+from scripts.summary import paper_latex as _paper_latex, paper_profile_content as profile_content, worklog  # noqa: E402
 
 FigureAnchorMap = Dict[str, Tuple[str, str]]
 
@@ -84,6 +86,7 @@ def _resolve_repo_asset(rel: str, *, root: Path) -> Path:
             _paper_latex._sync_public_mirror_for_output_reference(rel_norm, root=root)
         except Exception:
             pass
+
         return root / Path(rel_norm)
 
     topic = parts[1]
@@ -96,14 +99,17 @@ def _resolve_repo_asset(rel: str, *, root: Path) -> Path:
         pass
 
     # 条件分岐: `cand_public.exists()` を満たす経路を評価する。
+
     if cand_public.exists():
         return cand_public
 
     # 条件分岐: `cand_private.exists()` を満たす経路を評価する。
+
     if cand_private.exists():
         return cand_private
 
     # Do not fall back to legacy output/<topic>/... to avoid stale-asset mixing.
+
     return cand_public
 
 # 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
@@ -182,6 +188,7 @@ def _normalize_ref_slug(text: str) -> str:
 
 
 # 関数: `_build_section_ref_map` の入出力契約と処理意図を定義する。
+
 def _build_section_ref_map(*, md_text: str, profile: str) -> Dict[str, str]:
     """
     Build a mapping from LaTeX section labels (`sec:...`) to display section numbers.
@@ -217,6 +224,7 @@ def _build_section_ref_map(*, md_text: str, profile: str) -> Dict[str, str]:
 
 
 # 関数: `_build_figure_ref_map` の入出力契約と処理意図を定義する。
+
 def _build_figure_ref_map(*, fig_map: Optional[Dict[str, Dict[str, Any]]]) -> Dict[str, Tuple[str, str]]:
     """
     Build a normalized map from figure label slug -> (anchor, display label).
@@ -252,6 +260,7 @@ def _build_figure_ref_map(*, fig_map: Optional[Dict[str, Dict[str, Any]]]) -> Di
 
 
 # 関数: `_replace_latex_refs_in_html` の入出力契約と処理意図を定義する。
+
 def _replace_latex_refs_in_html(
     rendered_html: str,
     *,
@@ -265,12 +274,17 @@ def _replace_latex_refs_in_html(
     if not text:
         return text
 
+    # 関数: `_resolve_section` の入出力契約と処理意図を定義する。
+
     def _resolve_section(label: str) -> str:
         disp = section_ref_map.get(label, "")
         if not disp:
             return ""
 
         return html.escape(disp)
+
+
+    # 関数: `_resolve_figure` の入出力契約と処理意図を定義する。
 
     def _resolve_figure(label: str) -> Optional[Tuple[str, str]]:
         slug = label.split(":", 1)[1] if ":" in label else label
@@ -280,7 +294,9 @@ def _replace_latex_refs_in_html(
 
         return figure_ref_map.get(norm)
 
+
     # 関数: `repl_fig_with_prefix` の入出力契約と処理意図を定義する。
+
     def repl_fig_with_prefix(m: re.Match[str]) -> str:
         label = m.group(1)
         resolved = _resolve_figure(label)
@@ -301,6 +317,7 @@ def _replace_latex_refs_in_html(
                 return resolved
 
             # Fallback: keep readable slug without LaTeX escape.
+
             return html.escape(label.split(":", 1)[1])
 
         if label.startswith("fig:"):
@@ -317,6 +334,7 @@ def _replace_latex_refs_in_html(
 
 
 # 関数: `_rewrite_repo_relative_asset_urls` の入出力契約と処理意図を定義する。
+
 def _rewrite_repo_relative_asset_urls(rendered_html: str, *, root: Path, out_dir: Path) -> str:
     """
     HTML 内の src/href に含まれる `output/...` 等の “repo-root 相対パス” を、
@@ -708,8 +726,8 @@ def _render_table1_html_from_json(table1_json: Path, *, profile: str) -> str:
         metric_display = _strip_internal_source_tokens(metric_public or metric)
 
         score_norm: Optional[float]
-        # 条件分岐: `profile == "part3_quantum"` を満たす経路を評価する。
-        if profile == "part3_quantum":
+        # 条件分岐: `profile` が量子検証サマリ表を使う profile を満たす経路を評価する。
+        if profile_content.uses_quantum_table1(profile):
             score_norm = _table1_metric_score_norm_quantum(metric_public, metric, pmodel)
         else:
             score_norm = _table1_metric_score_norm_astrophysics(metric_public, metric)
@@ -1905,9 +1923,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--outdir", default=None, help="Output directory (default: output/private/summary).")
     ap.add_argument(
         "--profile",
-        choices=["paper", "part2_astrophysics", "part3_quantum", "part4_verification", "part5_future_predictions"],
+        choices=list(profile_content.PAPER_PROFILES),
         default="paper",
-        help="render profile: paper (Part I) / part2_astrophysics / part3_quantum / part4_verification / part5_future_predictions",
+        help="render profile: paper / part2_astrophysics / part3_quantum / part3a_quantum_foundations / part3b_quantum_verification / part4_verification / part5_future_predictions",
     )
     ap.add_argument(
         "--mode",
@@ -1942,21 +1960,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # 条件分岐: `args.manuscript` を満たす経路を評価する。
     if args.manuscript:
         manuscript_md = (root / Path(str(args.manuscript))).resolve()
+        manuscript_text_source = _read_text(manuscript_md)
     else:
-        # 条件分岐: `profile == "paper"` を満たす経路を評価する。
-        if profile == "paper":
-            manuscript_md = root / "doc" / "paper" / "10_part1_core_theory.md"
-        # 条件分岐: 前段条件が不成立で、`profile == "part2_astrophysics"` を追加評価する。
-        elif profile == "part2_astrophysics":
-            manuscript_md = root / "doc" / "paper" / "11_part2_astrophysics.md"
-        # 条件分岐: 前段条件が不成立で、`profile == "part3_quantum"` を追加評価する。
-        elif profile == "part3_quantum":
-            manuscript_md = root / "doc" / "paper" / "12_part3_quantum.md"
-        # 条件分岐: 前段条件が不成立で、`profile == "part4_verification"` を追加評価する。
-        elif profile == "part4_verification":
-            manuscript_md = root / "doc" / "paper" / "13_part4_verification.md"
-        elif profile == "part5_future_predictions":
-            manuscript_md = root / "doc" / "paper" / "14_part5_future_predictions.md"
+        manuscript_md = profile_content.resolve_manuscript_path(root, profile)
+        manuscript_text_source = profile_content.load_profile_markdown(root, profile)
 
     quantum_appendix_a_md = root / "doc" / "paper" / "12_part3_quantum_appendix_a.md"
     definitions_md = root / "doc" / "paper" / "05_definitions.md"
@@ -1964,7 +1971,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     llr_appendix_md = root / "doc" / "paper" / "07_llr_appendix.md"
     table1_astrophysics_md = root / "output" / "private" / "summary" / "paper_table1_results.md"
     table1_quantum_md = root / "output" / "private" / "summary" / "paper_table1_quantum_results.md"
-    table1_md = table1_quantum_md if profile == "part3_quantum" else table1_astrophysics_md
+    table1_md = table1_quantum_md if profile_content.uses_quantum_table1(profile) else table1_astrophysics_md
     sources_md = root / "doc" / "paper" / "20_data_sources.md"
     refs_md = root / "doc" / "paper" / "30_references.md"
 
@@ -1980,7 +1987,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # Assign "図1, 図2, ..." in the first-reference order (reading order) so numbers are ascending in the manuscript.
     # Captions are taken from doc/paper/01_figures_index.md when available.
 
-    include_table1 = profile in {"part2_astrophysics", "part3_quantum"}
+    include_table1 = (profile == "part2_astrophysics") or profile_content.uses_quantum_table1(profile)
     include_definitions = profile == "paper"
     include_uncertainty = False
     include_llr_appendix = profile == "part2_astrophysics"
@@ -1992,6 +1999,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "paper",
         "part2_astrophysics",
         "part3_quantum",
+        "part3a_quantum_foundations",
+        "part3b_quantum_verification",
         "part4_verification",
         "part5_future_predictions",
     }
@@ -2013,8 +2022,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if include_uncertainty:
         cite_scan_paths.append(uncertainty_md)
 
-    cite_scan_paths.append(manuscript_md)
+    try:
+        manuscript_cite_text = _strip_internal_blocks(manuscript_text_source, mode=mode)
+        used_cite_keys |= set(_CITE_RE.findall(manuscript_cite_text))
+    except Exception:
+        pass
+
     # 条件分岐: `include_quantum_appendix_a` を満たす経路を評価する。
+
     if include_quantum_appendix_a:
         cite_scan_paths.append(quantum_appendix_a_md)
 
@@ -2045,8 +2060,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if include_uncertainty:
         scan_paths.append(uncertainty_md)
 
-    scan_paths.append(manuscript_md)
+    scan_texts: List[str] = []
+    try:
+        scan_texts.append(_strip_internal_blocks(manuscript_text_source, mode=mode))
+    except Exception:
+        pass
+
     # 条件分岐: `include_quantum_appendix_a` を満たす経路を評価する。
+
     if include_quantum_appendix_a:
         scan_paths.append(quantum_appendix_a_md)
 
@@ -2056,7 +2077,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         scan_paths.append(llr_appendix_md)
 
     scan_paths += [sources_md, refs_md]
-    scan_texts: List[str] = []
     for p in scan_paths:
         # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
@@ -2115,7 +2135,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     section_ref_map: Dict[str, str] = {}
     if manuscript_md.exists():
-        manuscript_ref_text = _read_text(manuscript_md)
+        manuscript_ref_text = manuscript_text_source
         manuscript_ref_text = _strip_internal_blocks(manuscript_ref_text, mode=mode)
         section_ref_map = _build_section_ref_map(md_text=manuscript_ref_text, profile=profile)
 
@@ -2168,7 +2188,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # 条件分岐: `manuscript_md.exists()` を満たす経路を評価する。
 
     if manuscript_md.exists():
-        manuscript_text = _read_text(manuscript_md)
+        manuscript_text = manuscript_text_source
         manuscript_text = _strip_internal_blocks(manuscript_text, mode=mode)
         manuscript_text = _normalize_markdown_for_tex_docx_parity(manuscript_text)
         manuscript_text = _replace_math_blocks_with_images(
@@ -2201,9 +2221,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 table1_html = _render_table1_html_from_json(table1_json, profile=profile)
                 body = _inject_table1_after_h3(body, insert_html=table1_html)
 
-        # 条件分岐: `profile == "part3_quantum"` を満たす経路を評価する。
+        # 条件分岐: `profile` が量子検証サマリ表を使う profile を満たす経路を評価する。
 
-        if profile == "part3_quantum":
+        if profile_content.uses_quantum_table1(profile):
             body = _inject_pagebreak_before_heading_ids(
                 body,
                 heading_ids=("section-4-10-2", "section-4-10-3"),
@@ -2460,47 +2480,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.out_name:
         out_name = str(args.out_name)
     else:
-        # 条件分岐: `profile == "paper"` を満たす経路を評価する。
-        if profile == "paper":
-            out_name = "pmodel_paper.html"
-        # 条件分岐: 前段条件が不成立で、`profile == "part2_astrophysics"` を追加評価する。
-        elif profile == "part2_astrophysics":
-            out_name = "pmodel_paper_part2_astrophysics.html"
-        # 条件分岐: 前段条件が不成立で、`profile == "part3_quantum"` を追加評価する。
-        elif profile == "part3_quantum":
-            out_name = "pmodel_paper_part3_quantum.html"
-        # 条件分岐: 前段条件が不成立で、`profile == "part4_verification"` を追加評価する。
-        elif profile == "part4_verification":
-            out_name = "pmodel_paper_part4_verification.html"
-        elif profile == "part5_future_predictions":
-            out_name = "pmodel_paper_part5_future_predictions.html"
-        else:  # pragma: no cover (guarded by argparse choices)
-            raise ValueError(f"unknown profile: {profile}")
+        out_name = profile_content.resolve_html_name(profile)
 
-    # 条件分岐: `profile == "part4_verification"` を満たす経路を評価する。
-
-    if profile == "part4_verification":
-        title = "P-model Part IV（検証資料）"
-        subtitle = "検証方法と公開成果物への参照先（GitHub）"
-        header_badge = "Part IV"
-    # 条件分岐: 前段条件が不成立で、`profile == "part2_astrophysics"` を追加評価する。
-    elif profile == "part2_astrophysics":
-        title = "P-model Part II（宇宙物理編）"
-        subtitle = "応用検証：宇宙物理（公開体裁）"
-        header_badge = "Part II"
-    # 条件分岐: 前段条件が不成立で、`profile == "part3_quantum"` を追加評価する。
-    elif profile == "part3_quantum":
-        title = "P-model Part III（量子物理編）"
-        subtitle = "応用検証：量子物理（公開体裁）"
-        header_badge = "Part III"
-    elif profile == "part5_future_predictions":
-        title = "P-model Part V（未来予測編）"
-        subtitle = "差分予測と将来観測の決着条件（公開体裁）"
-        header_badge = "Part V"
-    else:
-        title = "P-model Part I（コア理論）"
-        subtitle = "記号規約・最小仮定・写像（公開体裁）"
-        header_badge = "Part I"
+    title = profile_content.resolve_html_title(profile)
+    subtitle = profile_content.resolve_html_subtitle(profile)
+    header_badge = profile_content.resolve_html_badge(profile)
 
     manuscript_link = str(manuscript_md.relative_to(root)).replace("\\", "/")
     html_path = _render_html(

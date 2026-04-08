@@ -52,6 +52,13 @@ try:
 except Exception:  # pragma: no cover
     worklog = None
 
+from scripts.utils.plot_style import (  # noqa: E402
+    apply_paper_style,
+    apply_wavep_figure_layout,
+    get_wavep_font_size,
+    resolve_wavep_cjk_font_family,
+)
+
 try:
     import matplotlib.pyplot as plt  # type: ignore
 except Exception:  # pragma: no cover
@@ -106,6 +113,34 @@ def _read_json(path: Path) -> Dict[str, Any]:
         return json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return {}
+
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
+
+def _set_japanese_font() -> None:
+    try:
+        import matplotlib as mpl
+        import matplotlib.font_manager as fm
+
+        preferred = resolve_wavep_cjk_font_family(preferred_name="Noto Sans CJK JP")
+        # 条件分岐: `preferred` を満たす経路を評価する。
+        if preferred:
+            mpl.rcParams["font.family"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["axes.unicode_minus"] = False
+            return
+
+        fallback = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
+        available = {f.name for f in fm.fontManager.ttflist}
+        chosen = [name for name in fallback if name in available]
+        # 条件分岐: `chosen` を満たす経路を評価する。
+        if chosen:
+            mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = chosen + ["DejaVu Sans"]
+
+        mpl.rcParams["axes.unicode_minus"] = False
+    except Exception:
+        pass
 
 
 # 関数: `_parse_rotmod_lines` の入出力契約と処理意図を定義する。
@@ -527,6 +562,9 @@ def _plot_summary(
     if plt is None:
         return
 
+    apply_paper_style()
+    _set_japanese_font()
+
     velocity_obs_km_s = np.asarray([point.velocity_obs_km_s for point in points], dtype=float)
     sigma_obs_km_s = np.asarray([point.velocity_obs_sigma_km_s for point in points], dtype=float)
     sigma_used_km_s = np.maximum(np.maximum(sigma_obs_km_s, 0.0), float(sigma_floor_km_s))
@@ -536,9 +574,9 @@ def _plot_summary(
     residual_pull_baryon = (velocity_obs_km_s - velocity_pred_baryon) / sigma_used_km_s
     residual_pull_pmodel = (velocity_obs_km_s - velocity_pred_pmodel) / sigma_used_km_s
 
-    # 図99: 1列表示へ統一するため、3パネルを縦並びに再構成する。
-    fig = plt.figure(figsize=(13.8, 16.8), dpi=220)
-    grid = fig.add_gridspec(3, 1, height_ratios=[1.0, 1.0, 1.15], hspace=0.34)
+    fig = plt.figure()
+    apply_wavep_figure_layout(fig, template="part2_three_panel_spacious")
+    grid = fig.add_gridspec(3, 1, height_ratios=[1.0, 1.0, 1.15], hspace=0.46)
     axes = [
         fig.add_subplot(grid[0, 0]),
         fig.add_subplot(grid[1, 0]),
@@ -549,23 +587,23 @@ def _plot_summary(
     axes[0].scatter(velocity_obs_km_s, velocity_pred_baryon, s=6, alpha=0.35, color="#d62728", label="baryon-only")
     axes[0].scatter(velocity_obs_km_s, velocity_pred_pmodel, s=6, alpha=0.35, color="#1f77b4", label="P-model corrected")
     axes[0].plot([0.0, vmax], [0.0, vmax], "k--", lw=1.0, alpha=0.7)
-    axes[0].set_xlabel("Vobs [km/s]", fontsize=16.4)
-    axes[0].set_ylabel("Vmodel [km/s]", fontsize=16.4)
-    axes[0].set_title("SPARC rotation curves (all points)", fontsize=18.2, pad=11.0)
+    axes[0].set_xlabel("")
+    axes[0].set_ylabel("")
+    axes[0].set_title("全点比較", fontsize=get_wavep_font_size("title"), pad=5.0)
     axes[0].grid(True, alpha=0.25)
-    axes[0].legend(loc="upper left", fontsize=14.4)
-    axes[0].tick_params(labelsize=14.4)
+    axes[0].legend(loc="upper left", fontsize=get_wavep_font_size("legend"))
+    axes[0].tick_params()
 
     bins = np.linspace(-8.0, 8.0, 61)
     axes[1].hist(residual_pull_baryon, bins=bins, alpha=0.55, color="#d62728", label="baryon-only")
     axes[1].hist(residual_pull_pmodel, bins=bins, alpha=0.55, color="#1f77b4", label="P-model corrected")
     axes[1].axvline(0.0, color="k", ls="--", lw=1.0)
-    axes[1].set_xlabel("(Vobs - Vmodel) / sigma", fontsize=16.4)
-    axes[1].set_ylabel("count", fontsize=16.4)
-    axes[1].set_title("Normalized residual distribution", fontsize=18.2, pad=11.0)
+    axes[1].set_xlabel("(Vobs - Vmodel) / sigma")
+    axes[1].set_ylabel("count")
+    axes[1].set_title("正規化残差分布", fontsize=get_wavep_font_size("title"), pad=5.0)
     axes[1].grid(True, alpha=0.25)
-    axes[1].legend(loc="upper right", fontsize=14.4)
-    axes[1].tick_params(labelsize=14.4)
+    axes[1].legend(loc="upper right", fontsize=get_wavep_font_size("legend"))
+    axes[1].tick_params()
 
     abs_pull_p50 = float(np.median(np.abs(residual_pull_pmodel)))
     abs_pull_b50 = float(np.median(np.abs(residual_pull_baryon)))
@@ -575,10 +613,10 @@ def _plot_summary(
     model_values = [chi2_dof_baryon, chi2_dof_pmodel]
     model_colors = ["#d62728", "#1f77b4"]
     axes[2].bar(model_labels, model_values, color=model_colors, alpha=0.85)
-    axes[2].set_ylabel("global chi2/dof", fontsize=16.4)
-    axes[2].set_title("Fit quality (single M/L parameter)", fontsize=18.2, pad=12.0)
+    axes[2].set_ylabel("global chi2/dof")
+    axes[2].set_title("適合度（single-Υ）", fontsize=get_wavep_font_size("title"), pad=5.0)
     axes[2].grid(axis="y", alpha=0.25)
-    axes[2].tick_params(labelsize=14.4)
+    axes[2].tick_params()
     axes[2].text(
         0.02,
         0.965,
@@ -586,14 +624,20 @@ def _plot_summary(
         transform=axes[2].transAxes,
         ha="left",
         va="top",
-        fontsize=14.0,
+        fontsize=get_wavep_font_size("note"),
     )
 
-    fig.suptitle("SPARC audit: Vobs vs Vbar and P-model-corrected VP (single Υ fit)", fontsize=21.0, y=0.992)
-    fig.subplots_adjust(left=0.070, right=0.985, bottom=0.060, top=0.935)
+    fig.subplots_adjust(top=0.900, bottom=0.095, hspace=0.60)
+    fig.suptitle(
+        "SPARC 監査（single-Υ fit）",
+        fontsize=get_wavep_font_size("suptitle"),
+        y=0.978,
+    )
     out_png.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_png, bbox_inches="tight")
-    fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight")
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        fig.savefig(out_png)
+        fig.savefig(out_png.with_suffix(".pdf"))
+
     plt.close(fig)
 
 
@@ -811,6 +855,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     # 条件分岐: `out_png.exists()` を満たす経路を評価する。
     if out_png.exists():
         print(f"[ok] wrote: {out_png}")
+
     if out_pdf.exists():
         print(f"[ok] wrote: {out_pdf}")
 

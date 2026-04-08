@@ -1,7 +1,15 @@
+"""
+目的: 量子 topic の molecular isotopic scaling に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import json
 import math
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -10,6 +18,7 @@ import matplotlib.pyplot as plt
 
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
 
 enable_japanese_figure_localization()
 
@@ -186,34 +195,50 @@ def main() -> None:
     plt.rcParams["ps.fonttype"] = 42
 
     fig, axes = plt.subplots(2, 1, figsize=(11.2, 11.8), dpi=190)
-    fig.suptitle("Isotopic reduced-mass scaling (WebBook diatomic constants)", fontsize=19.0, y=0.995)
+    apply_wavep_figure_layout(fig, template="part2_two_panel_spacious")
+    fig.set_size_inches(fig.get_figwidth(), 7.20, forward=True)
+    panel_title_font = get_wavep_font_size("title") * 0.82
+    axis_label_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    suptitle_font = get_wavep_font_size("suptitle") + 2.0
+    fig.suptitle("Isotopic reduced-mass scaling (WebBook diatomic constants)", fontsize=suptitle_font, y=0.992)
 
     ax = axes[0]
-    ax.set_title("ωe scaling: ωe ∝ μ^{-1/2} (ratio vs prediction)", fontsize=15.8)
+    ax.set_title("ωe scaling: ωe ∝ μ^{-1/2} (ratio vs prediction)", fontsize=panel_title_font, pad=6.0)
     ax.axhline(1.0, color="#666666", lw=1.2, alpha=0.8)
     ax.plot(x, omega_ratios, "o-", color="#2b6cb0", lw=2)
     ax.set_xticks(x, labels)
-    ax.set_ylabel("measured / predicted", fontsize=14.6)
+    ax.set_ylabel("measured / predicted", fontsize=axis_label_font)
     ax.set_ylim(0.98, 1.02)
     ax.grid(True, axis="y", alpha=0.25)
-    ax.tick_params(axis="both", labelsize=13.2)
+    ax.tick_params(axis="both", labelsize=tick_font)
 
     ax = axes[1]
-    ax.set_title("Be scaling: Be ∝ μ^{-1} (ratio vs prediction)", fontsize=15.8)
+    ax.set_title("Be scaling: Be ∝ μ^{-1} (ratio vs prediction)", fontsize=panel_title_font, pad=6.0)
     ax.axhline(1.0, color="#666666", lw=1.2, alpha=0.8)
     ax.plot(x, be_ratios, "o-", color="#c53030", lw=2)
     ax.set_xticks(x, labels)
-    ax.set_ylabel("measured / predicted", fontsize=14.6)
+    ax.set_ylabel("measured / predicted", fontsize=axis_label_font)
     ax.set_ylim(0.98, 1.02)
     ax.grid(True, axis="y", alpha=0.25)
-    ax.tick_params(axis="both", labelsize=13.2)
+    ax.tick_params(axis="both", labelsize=tick_font)
 
-    fig.tight_layout(rect=(0, 0.0, 1, 0.985))
+    fig.subplots_adjust(left=0.115, right=0.985, top=0.920, bottom=0.095, hspace=0.64)
 
     out_pdf = out_dir / "molecular_isotopic_scaling.pdf"
     out_png = out_dir / "molecular_isotopic_scaling.png"
-    fig.savefig(out_pdf)
-    fig.savefig(out_png)
+    prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+    try:
+        with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+            fig.savefig(out_pdf)
+            fig.savefig(out_png)
+    finally:
+        if prev_disable_normalize is None:
+            os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = prev_disable_normalize
+
     plt.close(fig)
 
     metrics = {

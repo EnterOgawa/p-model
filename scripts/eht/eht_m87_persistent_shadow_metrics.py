@@ -1,8 +1,16 @@
 #!/usr/bin/env python3
+"""
+目的: EHT topic の eht m87 persistent shadow metrics に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import json
 import math
+import shutil
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -15,6 +23,12 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.utils.plot_style import (  # noqa: E402
+    apply_paper_style,
+    apply_wavep_figure_layout,
+    get_wavep_font_size,
+    resolve_wavep_cjk_font_family,
+)
 
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
@@ -29,12 +43,21 @@ def _set_japanese_font() -> None:
         import matplotlib as mpl
         import matplotlib.font_manager as fm
 
-        preferred = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
+        preferred = resolve_wavep_cjk_font_family(preferred_name="Noto Sans CJK JP")
+        # 条件分岐: `preferred` を満たす経路を評価する。
+        if preferred:
+            mpl.rcParams["font.family"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["axes.unicode_minus"] = False
+            return
+
+        fallback = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
         available = {f.name for f in fm.fontManager.ttflist}
-        chosen = [name for name in preferred if name in available]
+        chosen = [name for name in fallback if name in available]
         # 条件分岐: `chosen` を満たす経路を評価する。
         if chosen:
             mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = chosen + ["DejaVu Sans"]
             mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         pass
@@ -51,6 +74,31 @@ def _read_json(path: Path) -> Dict[str, Any]:
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+# 関数: `_save_public_figure` の入出力契約と処理意図を定義する。
+
+def _save_public_figure(
+    fig: Any,
+    *,
+    out_dir: Path,
+    public_dir: Path,
+    stem: str,
+    dpi_png: int = 220,
+) -> Tuple[Path, Path, Path, Path]:
+    import matplotlib.pyplot as plt
+
+    png_path = out_dir / f"{stem}.png"
+    pdf_path = out_dir / f"{stem}.pdf"
+    public_png_path = public_dir / f"{stem}.png"
+    public_pdf_path = public_dir / f"{stem}.pdf"
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        fig.savefig(png_path, dpi=int(dpi_png))
+        fig.savefig(pdf_path)
+
+    shutil.copy2(png_path, public_png_path)
+    shutil.copy2(pdf_path, public_pdf_path)
+    return png_path, pdf_path, public_png_path, public_pdf_path
 
 
 # 関数: `_sigma_sym` の入出力契約と処理意図を定義する。
@@ -174,7 +222,9 @@ def main() -> int:
     root = _repo_root()
     inp = root / "data" / "eht" / "eht_black_holes.json"
     out_dir = root / "output" / "private" / "eht"
+    public_dir = root / "output" / "public" / "eht"
     out_dir.mkdir(parents=True, exist_ok=True)
+    public_dir.mkdir(parents=True, exist_ok=True)
 
     eht = _read_json(inp)
     ms = _extract_m87_ring_measurements(eht)
@@ -231,16 +281,21 @@ def main() -> int:
         import matplotlib.pyplot as plt
         import numpy as np
 
+        apply_paper_style()
         _set_japanese_font()
 
         epochs = [m2017.epoch, m2018.epoch]
-        labels = [m2017.label, m2018.label]
+        labels = [
+            "2017",
+            "2018",
+        ]
         y = np.array([m2017.diameter_uas, m2018.diameter_uas], dtype=float)
         yerr_minus = np.array([m2017.sigma_minus_uas, m2018.sigma_minus_uas], dtype=float)
         yerr_plus = np.array([m2017.sigma_plus_uas, m2018.sigma_plus_uas], dtype=float)
         x = np.arange(len(epochs), dtype=float)
 
-        fig, ax = plt.subplots(figsize=(11.8, 5.8))
+        fig, ax = plt.subplots()
+        apply_wavep_figure_layout(fig, template="part2_single_panel")
         ax.errorbar(
             x,
             y,
@@ -256,37 +311,34 @@ def main() -> int:
         ax.plot(x, y, color="#d62728", alpha=0.35, lw=2.0, zorder=2)
 
         ax.set_xticks(x)
-        ax.set_xticklabels(labels, fontsize=13.6)
-        ax.set_ylabel("角直径 [µas]", fontsize=14.8)
-        ax.set_title("EHT M87*: リング直径の multi-epoch 整合（2017 vs 2018）", fontsize=16.8)
-        ax.tick_params(labelsize=13.2)
+        ax.set_xticklabels(labels)
+        ax.set_ylabel("角直径 [µas]")
+        ax.set_title("EHT M87*: リング直径の multi-epoch 整合（2017 vs 2018）", pad=6.0)
+        ax.tick_params(axis="x", pad=6)
         ax.grid(True, axis="y", alpha=0.25)
+        ax.set_xlim(-0.18, 1.18)
 
         # Annotate delta.
         if math.isfinite(delta):
             ax.text(
                 0.98,
                 0.92,
-                f"Δ(2018−2017) = {delta:+.1f} µas\nz≈{z_delta_avg:.2f} (avg_sym), {z_delta_max:.2f} (max_sym)",
+                f"Δ(2018−2017) = {delta:+.1f} µas\nz(avg/max)={z_delta_avg:.2f} / {z_delta_max:.2f}",
                 transform=ax.transAxes,
                 ha="right",
                 va="top",
-                fontsize=12.8,
+                fontsize=get_wavep_font_size("note"),
                 bbox={"facecolor": "white", "alpha": 0.8, "edgecolor": "#cccccc"},
             )
 
-        # 図18: 凡例はグラフ中央上に重ねる。
-        ax.legend(loc="upper center", bbox_to_anchor=(0.5, 0.98), borderaxespad=0.1, framealpha=0.9, fontsize=12.8)
-        fig.tight_layout()
-
-        png_path = out_dir / "eht_m87_persistent_shadow_ring_diameter.png"
-        pdf_path = out_dir / "eht_m87_persistent_shadow_ring_diameter.pdf"
-        fig.savefig(png_path, dpi=220)
-        fig.savefig(pdf_path)
-        public_png_path = out_dir / "eht_m87_persistent_shadow_ring_diameter_public.png"
-        public_pdf_path = out_dir / "eht_m87_persistent_shadow_ring_diameter_public.pdf"
-        fig.savefig(public_png_path, dpi=220)
-        fig.savefig(public_pdf_path)
+        ax.legend(loc="upper left", framealpha=0.9, fontsize=get_wavep_font_size("legend"))
+        fig.subplots_adjust(bottom=0.14, right=0.95)
+        png_path, pdf_path, public_png_path, public_pdf_path = _save_public_figure(
+            fig,
+            out_dir=out_dir,
+            public_dir=public_dir,
+            stem="eht_m87_persistent_shadow_ring_diameter",
+        )
         plt.close(fig)
     except Exception as e:
         print(f"[warn] plot skipped: {e}")

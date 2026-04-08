@@ -613,6 +613,23 @@ def _replace_equation_images_with_word_equations(
             ],
         ),
         (
+            "part3a_quantum_foundations",
+            [
+                root / "doc" / "paper" / "12_part3a_quantum_foundations.md",
+                sources_md,
+                refs_md,
+            ],
+        ),
+        (
+            "part3b_quantum_verification",
+            [
+                out_dir / "paper_table1_quantum_results.md",
+                root / "doc" / "paper" / "12_part3b_quantum_verification.md",
+                sources_md,
+                refs_md,
+            ],
+        ),
+        (
             "part4_verification",
             [
                 root / "doc" / "paper" / "13_part4_verification.md",

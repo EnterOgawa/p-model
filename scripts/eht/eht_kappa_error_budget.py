@@ -1,9 +1,18 @@
 #!/usr/bin/env python3
+"""
+目的: EHT topic の eht kappa error budget に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
 import json
 import math
+import os
+import shutil
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -17,6 +26,11 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.utils.plot_style import (  # noqa: E402
+    apply_paper_style,
+    get_wavep_font_size,
+    resolve_wavep_cjk_font_family,
+)
 
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
@@ -44,15 +58,22 @@ def _set_japanese_font() -> None:
         import matplotlib as mpl
         import matplotlib.font_manager as fm
 
-        preferred = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
-        available = {f.name for f in fm.fontManager.ttflist}
-        chosen = [name for name in preferred if name in available]
-        # 条件分岐: `not chosen` を満たす経路を評価する。
-        if not chosen:
+        preferred = resolve_wavep_cjk_font_family(preferred_name="Noto Sans CJK JP")
+        # 条件分岐: `preferred` を満たす経路を評価する。
+        if preferred:
+            mpl.rcParams["font.family"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["axes.unicode_minus"] = False
             return
 
-        mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
-        mpl.rcParams["axes.unicode_minus"] = False
+        fallback = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
+        available = {f.name for f in fm.fontManager.ttflist}
+        chosen = [name for name in fallback if name in available]
+        # 条件分岐: `chosen` を満たす経路を評価する。
+        if chosen:
+            mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = chosen + ["DejaVu Sans"]
+            mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         pass
 
@@ -88,9 +109,12 @@ def _std(values: Sequence[float]) -> Optional[float]:
 def _plot_budget(*, title: str, items: Dict[str, float], required: Optional[float], out_png: Path) -> None:
     try:
         import matplotlib.pyplot as plt
+        from matplotlib.lines import Line2D
+        from matplotlib.patches import Patch
     except Exception as e:
         raise RuntimeError(f"matplotlib not available: {e}") from e
 
+    apply_paper_style()
     _set_japanese_font()
 
     # 関数: `_short_label` の入出力契約と処理意図を定義する。
@@ -106,27 +130,49 @@ def _plot_budget(*, title: str, items: Dict[str, float], required: Optional[floa
     vals = [v for _, v in pairs]
     y = np.arange(len(labels), dtype=float)
 
-    # Dynamic height: make long label lists readable in paper figures.
-    fig_h = max(5.8, 0.40 * len(labels) + 1.8)
-    fig = plt.figure(figsize=(12.8, fig_h))
+    # Long y-label bar chart: keep fixed paper width and reserve a large left margin.
+    fig_h = max(7.35, min(7.85, 0.235 * len(labels) + 1.60))
+    fig = plt.figure(figsize=(170.0 / 25.4, fig_h))
     ax = fig.add_subplot(1, 1, 1)
+    fig.subplots_adjust(left=0.43, right=0.985, top=0.948, bottom=0.080)
     ax.barh(y, vals, color="#1f77b4", alpha=0.82)
     ax.set_yticks(y)
-    ax.set_yticklabels(labels, fontsize=12.8)
+    ax.set_yticklabels(labels, fontsize=get_wavep_font_size("axis"))
     ax.invert_yaxis()
-    ax.set_xlabel("σ(κ) [1σ]", fontsize=14.2)
-    ax.set_title(title, fontsize=16.2)
-    ax.tick_params(axis="x", labelsize=12.8)
+    ax.set_xlabel("σ(κ) [1σ]")
+    ax.set_title(title, pad=6.0)
+    ax.tick_params(axis="x", labelsize=get_wavep_font_size("tick"))
+    ax.tick_params(axis="y", labelsize=get_wavep_font_size("axis"))
     ax.grid(True, axis="x", alpha=0.25)
     # 条件分岐: `required is not None and math.isfinite(required) and required > 0` を満たす経路を評価する。
     if required is not None and math.isfinite(required) and required > 0:
         ax.axvline(required, color="#d62728", linewidth=2.0, label=f"target σ(κ) ≈ {required:.4f}")
-        ax.legend(loc="lower right", fontsize=12.2)
+        ax.legend(
+            handles=[
+                Patch(facecolor="#1f77b4", alpha=0.82, label="proxy σ(κ)"),
+                Line2D([0], [0], color="#d62728", linewidth=2.0, label=f"目標 σ(κ) ≈ {required:.4f}"),
+            ],
+            loc="upper right",
+            frameon=True,
+            facecolor="white",
+            edgecolor="#bbbbbb",
+            framealpha=0.96,
+            fontsize=get_wavep_font_size("legend"),
+        )
 
-    fig.tight_layout(pad=0.6)
     out_png.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_png, dpi=200)
-    fig.savefig(out_png.with_suffix(".pdf"))
+    previous_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+    try:
+        with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+            fig.savefig(out_png, dpi=200)
+            fig.savefig(out_png.with_suffix(".pdf"))
+    finally:
+        if previous_disable_normalize is None:
+            os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = previous_disable_normalize
+
     plt.close(fig)
 
 
@@ -171,6 +217,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     default_paper2_gains = root / "output" / "private" / "eht" / "eht_sgra_paper2_gain_uncertainties_metrics.json"
     default_paper2_syserr = root / "output" / "private" / "eht" / "eht_sgra_paper2_syserr_table_metrics.json"
     default_outdir = root / "output" / "private" / "eht"
+    default_public_dir = root / "output" / "public" / "eht"
 
     ap = argparse.ArgumentParser(description="κ error budget helper (uses Paper III ringfit scatter as a systematic scale).")
     ap.add_argument("--shadow-compare-json", type=str, default=str(default_shadow))
@@ -186,6 +233,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--paper2-gain-uncertainties-json", type=str, default=str(default_paper2_gains))
     ap.add_argument("--paper2-syserr-table-json", type=str, default=str(default_paper2_syserr))
     ap.add_argument("--outdir", type=str, default=str(default_outdir))
+    ap.add_argument("--public-dir", type=str, default=str(default_public_dir))
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     shadow_path = Path(args.shadow_compare_json)
@@ -201,12 +249,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     paper2_gains_path = Path(args.paper2_gain_uncertainties_json)
     paper2_syserr_path = Path(args.paper2_syserr_table_json)
     outdir = Path(args.outdir)
+    public_dir = Path(args.public_dir)
     outdir.mkdir(parents=True, exist_ok=True)
+    public_dir.mkdir(parents=True, exist_ok=True)
 
     out_json = outdir / "eht_kappa_error_budget.json"
     out_png = outdir / "eht_kappa_error_budget.png"
-
     out_pdf = outdir / "eht_kappa_error_budget.pdf"
+    public_png = public_dir / out_png.name
+    public_pdf = public_dir / out_pdf.name
 
     payload: Dict[str, Any] = {
         "generated_utc": datetime.now(timezone.utc).isoformat(),
@@ -901,6 +952,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             required=kappa_sigma_req,
             out_png=out_png,
         )
+        if out_png.exists():
+            shutil.copy2(out_png, public_png)
+
+        if out_pdf.exists():
+            shutil.copy2(out_pdf, public_pdf)
     except Exception as e:
         payload["rows"]["sgra"]["plot_error"] = str(e)
 

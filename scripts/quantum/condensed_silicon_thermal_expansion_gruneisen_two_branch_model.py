@@ -1,15 +1,31 @@
+"""
+目的: 量子 topic の condensed silicon thermal expansion gruneisen two branch model に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import csv
 import hashlib
 import json
 import math
+import os
+import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
 import matplotlib.pyplot as plt
+
+os.environ.setdefault("WAVEP_MPL_CJK_FONT", "Meiryo")
+
+ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 
 from figure_japanese_localizer import enable_japanese_figure_localization
@@ -19,6 +35,19 @@ enable_japanese_figure_localization()
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
+
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
+
+def _set_japanese_font() -> None:
+    try:
+        import matplotlib as mpl
+        from scripts.utils.plot_style import install_wavep_cjk_font_override
+
+        install_wavep_cjk_font_override(preferred_name="Meiryo")
+        mpl.rcParams["axes.unicode_minus"] = False
+    except Exception:
+        return
 
 
 # 関数: `_sha256` の入出力契約と処理意図を定義する。
@@ -581,7 +610,10 @@ def main() -> None:
 
     # Figure
 
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10.5, 7.0), sharex=True, gridspec_kw={"height_ratios": [2, 1]})
+    legend_font = 11.8
+    _set_japanese_font()
+
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10.5, 6.8), sharex=True, gridspec_kw={"height_ratios": [2, 1]})
 
     ax1.plot(temps, alpha_obs_1e8, color="#d62728", lw=2.0, label="NIST TRC fit (obs) α(T)")
     ax1.plot(
@@ -589,10 +621,10 @@ def main() -> None:
         alpha_pred_1e8,
         color="#1f77b4",
         lw=2.0,
-        label="Two-branch Debye–Grüneisen: α≈A1·Cv(θ1)+A2·Cv(θ2)",
+        label="2枝モデル: α≈A1·Cv(θ1)+A2·Cv(θ2)",
     )
-    ax1.plot(temps, contrib1_1e8, color="#1f77b4", lw=1.2, ls="--", alpha=0.7, label="branch-1 contrib")
-    ax1.plot(temps, contrib2_1e8, color="#ff7f0e", lw=1.2, ls="--", alpha=0.7, label="branch-2 contrib")
+    ax1.plot(temps, contrib1_1e8, color="#1f77b4", lw=1.2, ls="--", alpha=0.7, label="枝1寄与")
+    ax1.plot(temps, contrib2_1e8, color="#ff7f0e", lw=1.2, ls="--", alpha=0.7, label="枝2寄与")
     ax1.axhline(0.0, color="#666666", lw=1.0, alpha=0.6)
 
     # 条件分岐: `zero_obs is not None` を満たす経路を評価する。
@@ -605,21 +637,23 @@ def main() -> None:
         ax1.axvline(float(zero_pred["x_cross"]), color="#999999", lw=1.0, ls="--", alpha=0.7)
 
     ax1.set_ylabel("α(T) (10^-8 / K)")
-    ax1.set_title("Silicon thermal expansion: two-branch Debye–Grüneisen ansatz check")
+    ax1.set_title("シリコン熱膨張: 2枝 Debye–Grüneisen モデル")
     ax1.grid(True, alpha=0.25)
-    ax1.legend(loc="best", fontsize=11.8)
+    ax1.legend(loc="best", fontsize=legend_font)
 
-    ax2.plot(temps, z_score, color="#000000", lw=1.2, alpha=0.9, label="z = (α_pred−α_obs)/σ_fit")
+    ax2.plot(temps, z_score, color="#000000", lw=1.2, alpha=0.9, label="z=(予測−観測)/σ_fit")
     ax2.axhline(0.0, color="#666666", lw=1.0, alpha=0.6)
     ax2.axhline(3.0, color="#999999", lw=1.0, ls="--", alpha=0.7)
     ax2.axhline(-3.0, color="#999999", lw=1.0, ls="--", alpha=0.7)
     ax2.set_xlabel("Temperature T (K)")
     ax2.set_ylabel("z")
     ax2.grid(True, alpha=0.25)
-    ax2.legend(loc="best", fontsize=11.8)
+    ax2.legend(loc="best", fontsize=legend_font)
 
     fig.tight_layout()
+    out_pdf = out_dir / "condensed_silicon_thermal_expansion_gruneisen_two_branch_model.pdf"
     out_png = out_dir / "condensed_silicon_thermal_expansion_gruneisen_two_branch_model.png"
+    fig.savefig(out_pdf)
     fig.savefig(out_png, dpi=180)
     plt.close(fig)
 
@@ -678,7 +712,7 @@ def main() -> None:
                         "Acceptance is evaluated against the NIST TRC curve-fit standard-error scale σ_fit (proxy for data-level accuracy).",
                     ],
                 },
-                "outputs": {"csv": str(out_csv), "png": str(out_png)},
+                "outputs": {"csv": str(out_csv), "pdf": str(out_pdf), "png": str(out_png)},
             },
             ensure_ascii=False,
             indent=2,
@@ -688,6 +722,7 @@ def main() -> None:
     )
 
     print(f"[ok] wrote: {out_csv}")
+    print(f"[ok] wrote: {out_pdf}")
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_metrics}")
 

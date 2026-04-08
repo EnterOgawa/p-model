@@ -47,6 +47,7 @@ if str(_ROOT) not in sys.path:
 from scripts.llr import llr_pmodel_overlay_horizons_noargs as llr  # noqa: E402
 from scripts.llr import ocean_loading_harpos as ol  # noqa: E402
 from scripts.summary import worklog  # noqa: E402
+from scripts.utils.plot_style import apply_paper_style, apply_wavep_figure_layout, get_wavep_font_size  # noqa: E402
 
 LLR_SHORT_NAME = "月レーザー測距（LLR: Lunar Laser Ranging）"
 
@@ -78,6 +79,7 @@ def _repo_root() -> Path:
 
 
 # 関数: `_sync_public_and_summary_artifact` の入出力契約と処理意図を定義する。
+
 def _sync_public_and_summary_artifact(src: Path, *, public_dir: Path, summary_dir: Path) -> None:
     if not src.exists():
         return
@@ -99,6 +101,7 @@ def _set_japanese_font() -> None:
 
 
 # 関数: `_plot_residual_distribution_from_points_csv` の入出力契約と処理意図を定義する。
+
 def _plot_residual_distribution_from_points_csv(points_csv: Path, out_dir: Path) -> Dict[str, Any]:
     diag_df = pd.read_csv(points_csv)
     inl = diag_df["inlier_best"].astype(str).str.lower().isin(["true", "1"])
@@ -113,11 +116,13 @@ def _plot_residual_distribution_from_points_csv(points_csv: Path, out_dir: Path)
         raise RuntimeError("not enough inlier rows to replot residual distribution")
 
     # 関数: `_rms` の入出力契約と処理意図を定義する。
+
     def _rms(x: np.ndarray) -> float:
         x = x[np.isfinite(x)]
         return float(np.sqrt(np.mean(x * x))) if len(x) else float("nan")
 
     # 関数: `_ecdf_abs` の入出力契約と処理意図を定義する。
+
     def _ecdf_abs(x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         x = np.abs(x[np.isfinite(x)])
         if not len(x):
@@ -134,7 +139,8 @@ def _plot_residual_distribution_from_points_csv(points_csv: Path, out_dir: Path)
     bins = np.linspace(-lim, lim, num=61)
 
     _set_japanese_font()
-    fig, axs = plt.subplots(2, 1, figsize=(11.8, 9.8), gridspec_kw={"height_ratios": [1.10, 1.00]})
+    fig, axs = plt.subplots(2, 1, gridspec_kw={"height_ratios": [1.08, 1.00]})
+    apply_wavep_figure_layout(fig, template="part2_two_panel")
     for ax in axs:
         ax.grid(True, alpha=0.25)
 
@@ -180,13 +186,13 @@ def _plot_residual_distribution_from_points_csv(points_csv: Path, out_dir: Path)
     fig.suptitle(
         f"{LLR_SHORT_NAME}：観測−P-model の差（inlierのみ, n={n_used}）",
         fontsize=16.5,
-        y=0.985,
+        y=0.988,
     )
-    fig.tight_layout(rect=[0.0, 0.01, 1.0, 0.965])
+    fig.tight_layout(rect=[0.0, 0.02, 1.0, 0.965], h_pad=1.05)
     out_png = out_dir / "llr_residual_distribution.png"
     out_pdf = out_dir / "llr_residual_distribution.pdf"
     fig.savefig(out_png, dpi=200)
-    fig.savefig(out_pdf, bbox_inches="tight")
+    fig.savefig(out_pdf)
     plt.close(fig)
     return {
         "plot_png": out_png,
@@ -1637,11 +1643,24 @@ def main() -> int:
         points_csv = Path(str(args.batch_points_csv)) if str(args.batch_points_csv).strip() else (out_dir / "llr_batch_points.csv")
         if not points_csv.is_absolute():
             points_csv = (root / points_csv).resolve()
+
         if not points_csv.exists():
             print(f"[err] missing batch points csv: {points_csv}")
             return 2
 
         replotted = _plot_residual_distribution_from_points_csv(points_csv=points_csv, out_dir=out_dir)
+        public_llr_batch_dir = root / "output" / "public" / "llr" / "batch"
+        summary_figures_dir = root / "output" / "private" / "summary" / "figures"
+        _sync_public_and_summary_artifact(
+            replotted["plot_png"],
+            public_dir=public_llr_batch_dir,
+            summary_dir=summary_figures_dir,
+        )
+        _sync_public_and_summary_artifact(
+            replotted["plot_pdf"],
+            public_dir=public_llr_batch_dir,
+            summary_dir=summary_figures_dir,
+        )
         print(f"[ok] residual distribution png: {replotted['plot_png']}")
         print(f"[ok] residual distribution pdf: {replotted['plot_pdf']}")
         return 0
@@ -3001,28 +3020,31 @@ def main() -> int:
                 try:
                     # 条件分岐: `time_tag_cols and int(len(o)) > 0` を満たす経路を評価する。
                     if time_tag_cols and int(len(o)) > 0:
+                        apply_paper_style()
                         _set_japanese_font()
                         x = np.arange(len(o), dtype=float)
                         width = 0.26
-                        plt.figure(figsize=(14.6, 6.4))
+                        fig, ax = plt.subplots()
+                        apply_wavep_figure_layout(fig, template="part2_single_panel")
                         colors = {"tx": "#1f77b4", "rx": "#ff7f0e", "mid": "#2ca02c"}
                         for j, mm in enumerate(modes_try):
                             y = pd.to_numeric(o[f"abs_delta_centered_{mm}_ns"], errors="coerce").to_numpy(dtype=float)
-                            plt.bar(x + (j - 1) * width, y, width=width, label=f"{mm}", color=colors.get(mm))
+                            ax.bar(x + (j - 1) * width, y, width=width, label=f"{mm}", color=colors.get(mm))
 
-                        plt.yscale("log")
-                        plt.axhline(float(clip_min_ns), color="#333333", lw=1.1, alpha=0.6, linestyle="--", label=f"外れ値閾値 {clip_min_ns:.0f} ns")
-                        plt.xticks(x, [str(i + 1) for i in range(len(o))], fontsize=15.4)
-                        plt.yticks(fontsize=15.4)
-                        plt.xlabel("外れ値ID（降順）", fontsize=17.2)
-                        plt.ylabel("|Δ| [ns]（観測-モデル, 反射器別中央値で中心化）", fontsize=17.2)
-                        plt.title(f"{LLR_SHORT_NAME}：外れ値の time-tag 感度（tx/rx/mid）", fontsize=19.0)
-                        plt.legend(ncols=2, fontsize=14.8)
-                        plt.grid(True, axis="y", alpha=0.25)
-                        plt.tight_layout()
-                        plt.savefig(out_dir / "llr_outliers_time_tag_sensitivity.png", dpi=200)
-                        plt.savefig(out_dir / "llr_outliers_time_tag_sensitivity.pdf")
-                        plt.close()
+                        ax.set_yscale("log")
+                        ax.axhline(float(clip_min_ns), color="#333333", lw=1.1, alpha=0.6, linestyle="--", label=f"外れ値閾値 {clip_min_ns:.0f} ns")
+                        ax.set_xticks(x)
+                        ax.set_xticklabels([str(i + 1) for i in range(len(o))])
+                        ax.set_xlabel("外れ値ID（降順）")
+                        ax.set_ylabel("|Δ| [ns]（観測-モデル, 反射器別中央値で中心化）")
+                        ax.set_title(f"{LLR_SHORT_NAME}：外れ値の time-tag 感度（tx/rx/mid）", pad=6.0)
+                        ax.legend(ncols=2, fontsize=get_wavep_font_size("legend"))
+                        ax.grid(True, axis="y", alpha=0.25)
+                        with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+                            fig.savefig(out_dir / "llr_outliers_time_tag_sensitivity.png", dpi=200)
+                            fig.savefig(out_dir / "llr_outliers_time_tag_sensitivity.pdf")
+
+                        plt.close(fig)
                 except Exception as e:
                     print(f"[warn] outlier time-tag sensitivity plot failed: {e}")
 
@@ -3031,29 +3053,32 @@ def main() -> int:
                 try:
                     # 条件分岐: `"best_target_delta_raw_ns" in o.columns and "delta_best_raw_ns" in o.columns...` を満たす経路を評価する。
                     if "best_target_delta_raw_ns" in o.columns and "delta_best_raw_ns" in o.columns and int(len(o)) > 0:
+                        apply_paper_style()
                         _set_japanese_font()
                         x = np.arange(len(o), dtype=float)
                         width = 0.38
                         cur_abs = np.abs(pd.to_numeric(o["delta_best_raw_ns"], errors="coerce").to_numpy(dtype=float))
                         best_abs = np.abs(pd.to_numeric(o["best_target_delta_raw_ns"], errors="coerce").to_numpy(dtype=float))
 
-                        plt.figure(figsize=(14.6, 6.4))
-                        plt.bar(x - width / 2, cur_abs, width=width, label="現在ターゲット |Δ_raw|", color="#1f77b4", alpha=0.9)
-                        plt.bar(x + width / 2, best_abs, width=width, label="推定ターゲット |Δ_raw|", color="#ff7f0e", alpha=0.9)
-                        plt.yscale("log")
-                        plt.axhline(1e5, color="#333333", lw=1.0, alpha=0.5, linestyle="--", label="混入判定: |Δ_raw|≥1e5 ns")
-                        plt.axhline(1e3, color="#666666", lw=1.0, alpha=0.35, linestyle="--", label="混入判定: best |Δ_raw|≤1e3 ns")
-                        plt.xticks(x, [str(i + 1) for i in range(len(o))], fontsize=15.4)
-                        plt.yticks(fontsize=15.4)
-                        plt.xlabel("外れ値ID（降順）", fontsize=17.2)
-                        plt.ylabel("|Δ_raw| [ns]（観測-モデル, オフセット未除去）", fontsize=17.2)
-                        plt.title(f"{LLR_SHORT_NAME}：外れ値のターゲット混入感度（現ターゲット vs 推定ターゲット）", fontsize=19.0)
-                        plt.legend(ncols=2, fontsize=14.8)
-                        plt.grid(True, axis="y", alpha=0.25)
-                        plt.tight_layout()
-                        plt.savefig(out_dir / "llr_outliers_target_mixing_sensitivity.png", dpi=200)
-                        plt.savefig(out_dir / "llr_outliers_target_mixing_sensitivity.pdf")
-                        plt.close()
+                        fig, ax = plt.subplots()
+                        apply_wavep_figure_layout(fig, template="part2_single_panel")
+                        ax.bar(x - width / 2, cur_abs, width=width, label="現在ターゲット |Δ_raw|", color="#1f77b4", alpha=0.9)
+                        ax.bar(x + width / 2, best_abs, width=width, label="推定ターゲット |Δ_raw|", color="#ff7f0e", alpha=0.9)
+                        ax.set_yscale("log")
+                        ax.axhline(1e5, color="#333333", lw=1.0, alpha=0.5, linestyle="--", label="混入判定: |Δ_raw|≥1e5 ns")
+                        ax.axhline(1e3, color="#666666", lw=1.0, alpha=0.35, linestyle="--", label="混入判定: best |Δ_raw|≤1e3 ns")
+                        ax.set_xticks(x)
+                        ax.set_xticklabels([str(i + 1) for i in range(len(o))])
+                        ax.set_xlabel("外れ値ID（降順）")
+                        ax.set_ylabel("|Δ_raw| [ns]（観測-モデル, オフセット未除去）")
+                        ax.set_title(f"{LLR_SHORT_NAME}：外れ値のターゲット混入感度（現ターゲット vs 推定ターゲット）", pad=6.0)
+                        ax.legend(ncols=2, fontsize=get_wavep_font_size("legend"))
+                        ax.grid(True, axis="y", alpha=0.25)
+                        with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+                            fig.savefig(out_dir / "llr_outliers_target_mixing_sensitivity.png", dpi=200)
+                            fig.savefig(out_dir / "llr_outliers_target_mixing_sensitivity.pdf")
+
+                        plt.close(fig)
                 except Exception as e:
                     print(f"[warn] outlier target-mixing sensitivity plot failed: {e}")
 
@@ -3195,7 +3220,8 @@ def main() -> int:
                 bins = np.linspace(-lim, lim, num=61)
 
                 _set_japanese_font()
-                fig, axs = plt.subplots(1, 2, figsize=(12.6, 4.6))
+                fig, axs = plt.subplots(2, 1, gridspec_kw={"height_ratios": [1.08, 1.00]})
+                apply_wavep_figure_layout(fig, template="part2_two_panel")
                 for ax in axs:
                     ax.grid(True, alpha=0.25)
 
@@ -3212,7 +3238,7 @@ def main() -> int:
                 ax.set_title("残差分布（観測−モデル）")
                 ax.set_xlabel("残差 [ns]（定数オフセット整列後）")
                 ax.set_ylabel("件数")
-                ax.legend(fontsize=9)
+                ax.legend(fontsize=9, loc="upper right")
 
                 # (2) ECDF of |residual|
                 ax = axs[1]
@@ -3242,16 +3268,32 @@ def main() -> int:
                 ax.set_title("|残差| の累積分布（小さいほど良い）")
                 ax.set_xlabel("|残差| [ns]")
                 ax.set_ylabel("累積割合")
-                ax.legend(fontsize=9)
+                ax.legend(fontsize=9, loc="lower right")
 
                 n_used = int(len(res_final))
                 fig.suptitle(
                     f"{LLR_SHORT_NAME}：観測−P-model の差（inlierのみ, n={n_used}）",
                     fontsize=12,
+                    y=0.988,
                 )
-                plt.tight_layout(rect=[0, 0.02, 1, 0.92])
-                plt.savefig(out_dir / "llr_residual_distribution.png", dpi=200)
+                plt.tight_layout(rect=[0.0, 0.02, 1.0, 0.965], h_pad=1.05)
+                residual_distribution_png = out_dir / "llr_residual_distribution.png"
+                residual_distribution_pdf = out_dir / "llr_residual_distribution.pdf"
+                plt.savefig(residual_distribution_png, dpi=200)
+                plt.savefig(residual_distribution_pdf)
                 plt.close()
+                public_llr_batch_dir = root / "output" / "public" / "llr" / "batch"
+                summary_figures_dir = root / "output" / "private" / "summary" / "figures"
+                _sync_public_and_summary_artifact(
+                    residual_distribution_png,
+                    public_dir=public_llr_batch_dir,
+                    summary_dir=summary_figures_dir,
+                )
+                _sync_public_and_summary_artifact(
+                    residual_distribution_pdf,
+                    public_dir=public_llr_batch_dir,
+                    summary_dir=summary_figures_dir,
+                )
         except Exception as e:
             print(f"[warn] residual distribution plot failed: {e}")
 

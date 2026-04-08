@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+"""
+目的: EHT topic の eht shadow compare に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import json
@@ -16,6 +23,12 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.utils.plot_style import (  # noqa: E402
+    apply_paper_style,
+    apply_wavep_figure_layout,
+    get_wavep_font_size,
+    resolve_wavep_cjk_font_family,
+)
 
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
@@ -30,12 +43,21 @@ def _set_japanese_font() -> None:
         import matplotlib as mpl
         import matplotlib.font_manager as fm
 
-        preferred = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
+        preferred = resolve_wavep_cjk_font_family(preferred_name="Noto Sans CJK JP")
+        # 条件分岐: `preferred` を満たす経路を評価する。
+        if preferred:
+            mpl.rcParams["font.family"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["axes.unicode_minus"] = False
+            return
+
+        fallback = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
         available = {f.name for f in fm.fontManager.ttflist}
-        chosen = [name for name in preferred if name in available]
+        chosen = [name for name in fallback if name in available]
         # 条件分岐: `chosen` を満たす経路を評価する。
         if chosen:
             mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = chosen + ["DejaVu Sans"]
             mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         pass
@@ -45,6 +67,31 @@ def _set_japanese_font() -> None:
 
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+# 関数: `_save_public_figure` の入出力契約と処理意図を定義する。
+
+def _save_public_figure(
+    fig: Any,
+    *,
+    out_dir: Path,
+    public_dir: Path,
+    stem: str,
+    dpi_png: int = 220,
+) -> Tuple[Path, Path, Path, Path]:
+    import matplotlib.pyplot as plt
+
+    png_path = out_dir / f"{stem}.png"
+    pdf_path = out_dir / f"{stem}.pdf"
+    public_png_path = public_dir / f"{stem}.png"
+    public_pdf_path = public_dir / f"{stem}.pdf"
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        fig.savefig(png_path, dpi=int(dpi_png))
+        fig.savefig(pdf_path)
+
+    shutil.copy2(png_path, public_png_path)
+    shutil.copy2(pdf_path, public_pdf_path)
+    return png_path, pdf_path, public_png_path, public_pdf_path
 
 
 # 関数: `_resolve_phase4_coeff_ratio` の入出力契約と処理意図を定義する。
@@ -1387,6 +1434,8 @@ def main() -> int:
     try:
         import matplotlib.pyplot as plt
 
+        apply_paper_style()
+        apply_paper_style()
         _set_japanese_font()
 
         names = [r["name"] for r in rows]
@@ -1400,7 +1449,8 @@ def main() -> int:
         gval = [float(r["shadow_diameter_gr_uas"]) for r in rows]
         gsig = [float(r["shadow_diameter_gr_uas_sigma"]) for r in rows]
 
-        fig, ax = plt.subplots(figsize=(12.8, 6.9))
+        fig, ax = plt.subplots()
+        apply_wavep_figure_layout(fig, template="part2_single_panel")
 
         ax.bar(
             [i - width for i in x],
@@ -1461,10 +1511,10 @@ def main() -> int:
             diff_labels.append((i + width * 1.25, f"θ_ring−d_sh={dr:+.1f} µas"))
 
         ax.set_xticks(x)
-        ax.set_xticklabels(names, fontsize=12.2)
-        ax.set_ylabel("角直径 [µas]", fontsize=14.0)
-        ax.set_title("EHT：観測リング θ_ring と、影直径 θ_sh（モデル；κ=1）の比較", fontsize=17.0)
-        ax.tick_params(axis="y", labelsize=12.4)
+        ax.set_xticklabels(names)
+        ax.set_ylabel("角直径 [µas]")
+        ax.set_title("EHT：観測リング θ_ring と、影直径 θ_sh（モデル；κ=1）の比較", pad=6.0)
+        ax.tick_params(axis="y")
         ax.grid(True, alpha=0.25, axis="y")
         y_floor = 0.0
         y_top = max(
@@ -1475,7 +1525,7 @@ def main() -> int:
         ax.set_ylim(y_floor, y_top)
         y_span = y_top - y_floor
         y_diff_text = y_floor + 0.065 * y_span
-        y_kappa_text = y_floor + 0.19 * y_span
+        y_kappa_text = y_floor + 0.21 * y_span
 
         for x_pos, label_text in diff_labels:
             ax.text(
@@ -1484,12 +1534,13 @@ def main() -> int:
                 label_text,
                 ha="center",
                 va="bottom",
-                fontsize=13.2,
+                fontsize=get_wavep_font_size("note"),
                 bbox=dict(facecolor="white", alpha=0.82, edgecolor="none", pad=0.25),
                 color="#111111",
             )
 
         # Legend order: observables first, then model predictions.
+
         handles, labels = ax.get_legend_handles_labels()
         want = [
             "観測（リング直径 θ_ring）",
@@ -1506,8 +1557,10 @@ def main() -> int:
         ax.legend(
             [handles[i] for i in order],
             [labels[i] for i in order],
-            loc="lower right",
-            fontsize=12.0,
+            loc="upper center",
+            bbox_to_anchor=(0.50, 0.995),
+            ncol=2,
+            fontsize=get_wavep_font_size("legend"),
         )
 
         # annotate κ_fit (ring / shadow). β はCassini等で固定する前提のため、EHTでは κ を主に見せる。
@@ -1533,15 +1586,16 @@ def main() -> int:
                 txt,
                 ha="center",
                 va="bottom",
-                fontsize=13.4,
+                fontsize=get_wavep_font_size("note"),
                 bbox=dict(facecolor="white", alpha=0.84, edgecolor="none", pad=0.28),
             )
 
-        fig.tight_layout()
-        png_path = out_dir / "eht_shadow_compare.png"
-        pdf_path = out_dir / "eht_shadow_compare.pdf"
-        fig.savefig(png_path, dpi=220)
-        fig.savefig(pdf_path)
+        png_path, _pdf_path, _public_png_path, _public_pdf_path = _save_public_figure(
+            fig,
+            out_dir=out_dir,
+            public_dir=public_dir,
+            stem="eht_shadow_compare",
+        )
         plt.close(fig)
     except Exception as e:
         print(f"[warn] plot skipped: {e}")
@@ -1561,15 +1615,16 @@ def main() -> int:
         diff_sig = [float(r["shadow_diameter_diff_p_minus_gr_uas_sigma"]) for r in rows]
         sigma_need = [float(r["shadow_diameter_sigma_obs_needed_3sigma_uas"]) for r in rows]
 
-        fig2, (ax0, ax1) = plt.subplots(1, 2, figsize=(13.2, 6.2))
+        fig2, (ax0, ax1) = plt.subplots(1, 2)
+        apply_wavep_figure_layout(fig2, template="part2_side_by_side")
 
         ax0.bar(x, diff, color="#9467bd", alpha=0.9, yerr=diff_sig)
         ax0.axhline(0.0, color="#333333", linewidth=1.0)
         ax0.set_xticks(x)
-        ax0.set_xticklabels(names, fontsize=13.6)
-        ax0.set_ylabel("差（P-model − GR）[μas]", fontsize=15.2)
-        ax0.set_title("差分予測：シャドウ直径の差", fontsize=16.8)
-        ax0.tick_params(labelsize=13.4)
+        ax0.set_xticklabels(names)
+        ax0.set_ylabel("差（P-model − GR）[μas]")
+        ax0.set_title("差分予測：シャドウ直径の差", fontsize=get_wavep_font_size("title"))
+        ax0.tick_params()
         ax0.grid(True, alpha=0.25, axis="y")
 
         sigma_need_plot: List[float] = []
@@ -1585,31 +1640,31 @@ def main() -> int:
         ax1.bar(x, sigma_need_plot, color="#2ca02c", alpha=0.9)
         for i in nan_idx:
             ax1.bar(i, 0.0, color="#2ca02c", alpha=0.25, hatch="///", edgecolor="#2ca02c")
-            ax1.text(i, max(sigma_need_plot) * 0.05 if sigma_need_plot else 0.1, "n/a", ha="center", va="bottom", fontsize=11.2)
+            ax1.text(i, max(sigma_need_plot) * 0.05 if sigma_need_plot else 0.1, "n/a", ha="center", va="bottom", fontsize=get_wavep_font_size("note"))
 
         ax1.set_xticks(x)
-        ax1.set_xticklabels(names, fontsize=13.6)
-        ax1.set_ylabel("必要な観測誤差（1σ）[μas]", fontsize=15.2)
-        ax1.set_title("3σで判別するための必要精度（目安）", fontsize=16.8)
-        ax1.tick_params(labelsize=13.4)
+        ax1.set_xticklabels(names)
+        ax1.set_ylabel("必要な観測誤差（1σ）[μas]")
+        ax1.set_title("3σで判別するための必要精度", fontsize=get_wavep_font_size("title"))
+        ax1.tick_params()
         ax1.grid(True, alpha=0.25, axis="y")
 
         # 条件分岐: `math.isfinite(coeff_ratio_p_over_gr)` を満たす経路を評価する。
         if math.isfinite(coeff_ratio_p_over_gr):
             fig2.suptitle(
                 f"EHT：P-model と GR の差分予測（係数比 {coeff_ratio_p_over_gr:.4f}、差 {((coeff_ratio_p_over_gr-1)*100):.2f}%）",
-                fontsize=18.4,
+                fontsize=get_wavep_font_size("suptitle"),
             )
         else:
-            fig2.suptitle("EHT：P-model と GR の差分予測（シャドウ直径）", fontsize=18.4)
+            fig2.suptitle("EHT：P-model と GR の差分予測", fontsize=get_wavep_font_size("suptitle"))
 
-        fig2.tight_layout()
-        diff_png_path = out_dir / "eht_shadow_differential.png"
-        fig2.savefig(diff_png_path, dpi=220)
-        diff_public_png_path = out_dir / "eht_shadow_differential_public.png"
-        fig2.savefig(diff_public_png_path, dpi=220)
-        fig2.savefig(out_dir / "eht_shadow_differential.pdf")
-        fig2.savefig(out_dir / "eht_shadow_differential_public.pdf")
+        diff_png_path, _diff_pdf_path, _diff_public_png_path, _diff_public_pdf_path = _save_public_figure(
+            fig2,
+            out_dir=out_dir,
+            public_dir=public_dir,
+            stem="eht_shadow_differential",
+        )
+        diff_public_png_path = public_dir / "eht_shadow_differential.png"
         plt.close(fig2)
     except Exception as e:
         print(f"[warn] differential plot skipped: {e}")
@@ -1624,10 +1679,12 @@ def main() -> int:
         import matplotlib.pyplot as plt
         import numpy as np
 
+        apply_paper_style()
+        apply_paper_style()
         _set_japanese_font()
 
-        # 図20: 可読性向上のため縦方向を拡大し、凡例は右下へ重ねる。
-        fig3, (ax0, ax1) = plt.subplots(2, 1, figsize=(14.8, 16.8))
+        fig3, (ax0, ax1) = plt.subplots(2, 1, gridspec_kw={"height_ratios": [1.0, 1.0]})
+        apply_wavep_figure_layout(fig3, template="part2_two_panel")
 
         # Left: coefficient comparison (P-model vs GR, with Kerr range as a reference)
         beta_grid = np.linspace(0.8, 1.2, 200)
@@ -1641,12 +1698,12 @@ def main() -> int:
             ax0.fill_between(beta_grid, float(kmin), float(kmax), color="#9aa0a6", alpha=0.18, label="GR（Kerr 参考レンジ）")
 
         ax0.scatter([beta], [coeff_pmodel], color="#1f77b4", zorder=3)
-        ax0.set_xlabel("β", fontsize=15.4)
-        ax0.set_ylabel("シャドウ直径係数（θ / (GM/(c^2 D)))", fontsize=15.4)
-        ax0.set_title("係数の比較（βとスピン依存）", fontsize=17.4)
-        ax0.tick_params(labelsize=14.2)
+        ax0.set_xlabel("β")
+        ax0.set_ylabel("シャドウ直径係数（θ / (GM/(c^2 D)))")
+        ax0.set_title("係数の比較（βとスピン依存）", pad=4.0)
+        ax0.tick_params()
         ax0.grid(True, alpha=0.25)
-        ax0.legend(loc="lower right", fontsize=14.8)
+        ax0.legend(loc="lower right", fontsize=get_wavep_font_size("legend"))
 
         # 条件分岐: `math.isfinite(coeff_ratio_p_over_gr)` を満たす経路を評価する。
         if math.isfinite(coeff_ratio_p_over_gr):
@@ -1654,7 +1711,7 @@ def main() -> int:
                 0.805,
                 max(coeff_pmodel, coeff_gr) * 0.995,
                 f"β={beta:g} での差: {(coeff_ratio_p_over_gr-1)*100:+.2f}%",
-                fontsize=15.6,
+                fontsize=get_wavep_font_size("note"),
                 ha="left",
                 va="top",
                 bbox={"facecolor": "white", "alpha": 0.75, "edgecolor": "#dddddd"},
@@ -1713,30 +1770,24 @@ def main() -> int:
         ax1.axhline(1.0, color="#333333", linewidth=1.0)
 
         ax1.set_xticks(x)
-        ax1.set_xticklabels(names, fontsize=14.2)
-        ax1.set_ylabel("κ = リング直径 / シャドウ直径", fontsize=15.4)
-        ax1.set_title("リング≒シャドウ近似の系統誤差（κ）\n（縦線=Kerr係数レンジによるκの幅）", fontsize=17.2)
-        ax1.tick_params(labelsize=14.2)
+        ax1.set_xticklabels(names)
+        ax1.set_ylabel("κ = リング直径 / シャドウ直径")
+        ax1.set_title("リング≒シャドウ近似の系統誤差（κ）\n（縦線=Kerr係数レンジによるκの幅）", pad=4.0)
+        ax1.tick_params()
         ax1.grid(True, alpha=0.25, axis="y")
-        # 図20右: 凡例を右下に重ねて固定（軸外には出さない）。
         ax1.legend(
-            loc="lower center",
-            bbox_to_anchor=(0.5, 0.02),
-            bbox_transform=ax1.transAxes,
-            borderaxespad=0.0,
-            fontsize=14.8,
+            loc="lower right",
+            fontsize=get_wavep_font_size("legend"),
             frameon=True,
         )
 
-        fig3.suptitle("EHT：系統誤差（κ）と GR スピン依存（参考）", fontsize=18.8, y=0.992)
-        fig3.tight_layout(rect=[0.0, 0.0, 1.0, 0.965])
-        sys_png_path = out_dir / "eht_shadow_systematics.png"
-        fig3.savefig(sys_png_path, dpi=220, bbox_inches="tight")
-        sys_public_png_path = out_dir / "eht_shadow_systematics_public.png"
-        fig3.savefig(sys_public_png_path, dpi=220, bbox_inches="tight")
-        # Keep PDF in sync so LaTeX (extension-less includegraphics) does not pick stale assets.
-        fig3.savefig(out_dir / "eht_shadow_systematics.pdf", bbox_inches="tight")
-        fig3.savefig(out_dir / "eht_shadow_systematics_public.pdf", bbox_inches="tight")
+        fig3.suptitle("EHT：系統誤差（κ）と GR スピン依存（参考）", y=0.982)
+        sys_png_path, _sys_pdf_path, sys_public_png_path, _sys_public_pdf_path = _save_public_figure(
+            fig3,
+            out_dir=out_dir,
+            public_dir=public_dir,
+            stem="eht_shadow_systematics",
+        )
         plt.close(fig3)
     except Exception as e:
         print(f"[warn] systematics plot skipped: {e}")
@@ -2280,7 +2331,8 @@ def main() -> int:
         z_p = np.array([float(r.get("zscore_pmodel", float("nan"))) for r in rows], dtype=float)
         z_gr = np.array([float(r.get("zscore_gr", float("nan"))) for r in rows], dtype=float)
 
-        fig4, ax = plt.subplots(1, 1, figsize=(12.8, 5.8))
+        fig4, ax = plt.subplots(1, 1)
+        apply_wavep_figure_layout(fig4, template="part2_single_panel_sparse")
         h = 0.36
         ax.barh(y - h / 2, z_p, height=h, color="#1f77b4", alpha=0.9, label="P-model（β固定, κ=1）")
         ax.barh(y + h / 2, z_gr, height=h, color="#9aa0a6", alpha=0.9, label="GR（Schwarzschild, κ=1）")
@@ -2291,20 +2343,20 @@ def main() -> int:
             ax.axvline(-v, color=c0, linestyle="--", linewidth=1.0, alpha=0.55)
 
         ax.set_yticks(y)
-        ax.set_yticklabels(names, fontsize=13.6)
-        ax.set_xlabel("zスコア = (観測 - 予測) / σ_total", fontsize=15.2)
-        ax.set_title("EHT：観測とモデルのずれ（zスコア, κ=1 の仮定）", fontsize=16.8)
-        ax.tick_params(labelsize=13.4)
+        ax.set_yticklabels(names)
+        ax.set_xlabel("zスコア = (観測 - 予測) / σ_total")
+        ax.set_title("EHT：観測とモデルのずれ（zスコア, κ=1）", fontsize=get_wavep_font_size("title"))
+        ax.tick_params()
         ax.grid(True, alpha=0.25, axis="x")
-        ax.legend(loc="lower right", fontsize=13.2)
+        ax.legend(loc="lower right", fontsize=get_wavep_font_size("legend"))
 
-        fig4.tight_layout()
-        z_png_path = out_dir / "eht_shadow_zscores.png"
-        fig4.savefig(z_png_path, dpi=220)
-        z_public_png_path = out_dir / "eht_shadow_zscores_public.png"
-        fig4.savefig(z_public_png_path, dpi=220)
-        fig4.savefig(out_dir / "eht_shadow_zscores.pdf")
-        fig4.savefig(out_dir / "eht_shadow_zscores_public.pdf")
+        z_png_path, _z_pdf_path, _z_public_png_path, _z_public_pdf_path = _save_public_figure(
+            fig4,
+            out_dir=out_dir,
+            public_dir=public_dir,
+            stem="eht_shadow_zscores",
+        )
+        z_public_png_path = public_dir / "eht_shadow_zscores.png"
         plt.close(fig4)
     except Exception as e:
         print(f"[warn] zscore plot skipped: {e}")
@@ -2318,6 +2370,7 @@ def main() -> int:
         import matplotlib.pyplot as plt
         import numpy as np
 
+        apply_paper_style()
         _set_japanese_font()
 
         names = [str(r.get("name") or r.get("key") or "") for r in rows]
@@ -2330,7 +2383,8 @@ def main() -> int:
         kobs = np.array([float(r.get("kappa_ring_over_shadow_obs", float("nan"))) for r in rows], dtype=float)
         kobs_sig = np.array([float(r.get("kappa_ring_over_shadow_obs_sigma", float("nan"))) for r in rows], dtype=float)
 
-        fig6, ax = plt.subplots(1, 1, figsize=(11.8, 5.6))
+        fig6, ax = plt.subplots()
+        apply_wavep_figure_layout(fig6, template="part2_single_panel")
         ax.axhline(1.0, color="#666666", lw=1.2, ls="--", alpha=0.85, label="κ=1（リング≒シャドウの目安）")
 
         ax.errorbar(
@@ -2373,20 +2427,25 @@ def main() -> int:
                 txt,
                 ha="center",
                 va="bottom",
-                fontsize=11.8,
+                fontsize=get_wavep_font_size("note"),
                 color="#111",
                 bbox={"facecolor": "white", "alpha": 0.72, "edgecolor": "#dddddd", "boxstyle": "round,pad=0.18"},
             )
 
         ax.set_xticks(x)
-        ax.set_xticklabels(names, fontsize=13.0)
-        ax.set_xlabel("ターゲット", fontsize=14.4)
-        ax.set_ylabel("κ（リング直径 / シャドウ直径）", fontsize=14.4)
-        ax.set_title("EHT：κ（リング/シャドウ）— κ_fit（モデル）と κ_ref(d_sh)", fontsize=16.2)
-        ax.tick_params(labelsize=13.0)
+        ax.set_xticklabels(names)
+        ax.set_xlabel("ターゲット")
+        ax.set_ylabel("κ（リング直径 / シャドウ直径）")
+        ax.set_title("EHT：κ（リング/シャドウ）— κ_fit（モデル）と κ_ref(d_sh)", pad=6.0)
+        ax.tick_params()
         ax.grid(True, alpha=0.25, axis="y")
-        # 図19: 凡例はグラフ中央下に重ねて配置する。
-        ax.legend(loc="lower center", bbox_to_anchor=(0.5, 0.03), frameon=True, fontsize=12.0)
+        ax.legend(
+            loc="lower center",
+            bbox_to_anchor=(0.50, 0.23),
+            frameon=True,
+            framealpha=0.88,
+            fontsize=get_wavep_font_size("legend"),
+        )
 
         finite = [float(v) for v in kfit.tolist() if math.isfinite(float(v))]
         # 条件分岐: `finite` を満たす経路を評価する。
@@ -2396,14 +2455,12 @@ def main() -> int:
             pad = max(0.06, 0.35 * (hi - lo))
             ax.set_ylim(lo - pad, hi + pad)
 
-        fig6.tight_layout()
-        kappa_png_path = out_dir / "eht_kappa_fit.png"
-        fig6.savefig(kappa_png_path, dpi=220)
-        kappa_public_png_path = out_dir / "eht_kappa_fit_public.png"
-        fig6.savefig(kappa_public_png_path, dpi=220)
-        # Keep PDF in sync so LaTeX (extension-less includegraphics) does not pick stale assets.
-        fig6.savefig(out_dir / "eht_kappa_fit.pdf")
-        fig6.savefig(out_dir / "eht_kappa_fit_public.pdf")
+        kappa_png_path, _kappa_pdf_path, kappa_public_png_path, _kappa_public_pdf_path = _save_public_figure(
+            fig6,
+            out_dir=out_dir,
+            public_dir=public_dir,
+            stem="eht_kappa_fit",
+        )
         plt.close(fig6)
     except Exception as e:
         print(f"[warn] kappa plot skipped: {e}")
@@ -2418,6 +2475,7 @@ def main() -> int:
         import matplotlib.pyplot as plt
         import numpy as np
 
+        apply_paper_style()
         _set_japanese_font()
 
         names = [str(r.get("name") or r.get("key") or "") for r in rows]
@@ -2452,7 +2510,8 @@ def main() -> int:
                 if math.isfinite(kmean) and kmean > 0:
                     ksig_pct[i] = 100.0 * (ksig / kmean)
 
-        fig7, ax = plt.subplots(1, 1, figsize=(14.2, 6.2))
+        fig7, ax = plt.subplots()
+        apply_wavep_figure_layout(fig7, template="part2_single_panel_tall")
 
         ax.bar(x, kreq_pct, color="#1f77b4", alpha=0.25, label="必要 κ精度（1σ, ringσ→0 の最良ケース）")
         ax.plot(x, ring_sig_pct, "o", color="#ff7f0e", alpha=0.95, label="現状 ring σ/diameter（%）")
@@ -2464,20 +2523,19 @@ def main() -> int:
             ax.axhline(v, color=c0, linestyle="--", linewidth=1.0, alpha=0.55)
 
         ax.set_xticks(x)
-        ax.set_xticklabels(names, fontsize=15.0)
-        ax.set_xlabel("ターゲット", fontsize=16.8)
-        ax.set_ylabel("相対不確かさ（%）", fontsize=16.8)
-        ax.set_title("EHT：κ（リング/シャドウ変換）を何%まで詰める必要があるか（3σ判別の入口）", fontsize=18.6)
-        ax.tick_params(labelsize=15.0)
+        ax.set_xticklabels(names)
+        ax.set_xlabel("ターゲット")
+        ax.set_ylabel("相対不確かさ（%）")
+        ax.set_title("EHT：κ（リング/シャドウ変換）を何%まで詰める必要があるか（3σ判別の入口）", pad=6.0)
+        ax.tick_params()
         ax.grid(True, alpha=0.25, axis="y")
-        # 図32: 凡例はグラフ右側・Y軸中央に重ねる。
         ax.legend(
             loc="center right",
-            bbox_to_anchor=(0.98, 0.5),
+            bbox_to_anchor=(0.98, 0.48),
             bbox_transform=ax.transAxes,
             borderaxespad=0.0,
             frameon=True,
-            fontsize=14.8,
+            fontsize=get_wavep_font_size("legend"),
         )
 
         finite = [float(v) for v in np.concatenate([kreq_pct, ring_sig_pct, ksig_pct]) if math.isfinite(float(v))]
@@ -2486,17 +2544,12 @@ def main() -> int:
             hi = max(finite)
             ax.set_ylim(0.0, max(5.0, 1.15 * hi))
 
-        fig7.tight_layout()
-        kappa_req_png_path = out_dir / "eht_kappa_precision_required.png"
-        fig7.savefig(kappa_req_png_path, dpi=220, bbox_inches="tight")
-        kappa_req_public_png_path = out_dir / "eht_kappa_precision_required_public.png"
-        fig7.savefig(kappa_req_public_png_path, dpi=220, bbox_inches="tight")
-        kappa_req_pdf_path = out_dir / "eht_kappa_precision_required.pdf"
-        kappa_req_public_pdf_path = out_dir / "eht_kappa_precision_required_public.pdf"
-        fig7.savefig(kappa_req_pdf_path, bbox_inches="tight")
-        fig7.savefig(kappa_req_public_pdf_path, bbox_inches="tight")
-        shutil.copy2(kappa_req_png_path, public_dir / "eht_kappa_precision_required.png")
-        shutil.copy2(kappa_req_pdf_path, public_dir / "eht_kappa_precision_required.pdf")
+        kappa_req_png_path, _kappa_req_pdf_path, kappa_req_public_png_path, _kappa_req_public_pdf_path = _save_public_figure(
+            fig7,
+            out_dir=out_dir,
+            public_dir=public_dir,
+            stem="eht_kappa_precision_required",
+        )
         plt.close(fig7)
     except Exception as e:
         print(f"[warn] kappa precision plot skipped: {e}")
@@ -2511,6 +2564,7 @@ def main() -> int:
         import matplotlib.pyplot as plt
         import numpy as np
 
+        apply_paper_style()
         _set_japanese_font()
 
         names = [str(r.get("name") or r.get("key") or "") for r in rows]
@@ -2529,7 +2583,8 @@ def main() -> int:
             [100.0 * float(r.get("delta_kerr_sigma_uniform", float("nan"))) for r in rows], dtype=float
         )
 
-        fig9, ax = plt.subplots(1, 1, figsize=(13.8, 5.8))
+        fig9, ax = plt.subplots()
+        apply_wavep_figure_layout(fig9, template="part2_single_panel_tall")
         req_label = "必要 δ精度（1σ, 係数差の3σ判別; 参考）"
         # 条件分岐: `math.isfinite(coeff_diff_pct_phase4)` を満たす経路を評価する。
         if math.isfinite(coeff_diff_pct_phase4):
@@ -2555,28 +2610,31 @@ def main() -> int:
             ax.axhline(v, color=c0, linestyle="--", linewidth=1.0, alpha=0.55)
 
         ax.set_xticks(x)
-        ax.set_xticklabels(names, fontsize=13.4)
-        ax.set_xlabel("ターゲット", fontsize=15.0)
-        ax.set_ylabel("相対不確かさ（%）", fontsize=15.0)
-        ax.set_title("EHT：δ（Schwarzschild shadow deviation）の必要精度（参考; δはモデル依存）", fontsize=16.8)
-        ax.tick_params(labelsize=13.4)
+        ax.set_xticklabels(names)
+        ax.set_xlabel("ターゲット")
+        ax.set_ylabel("相対不確かさ（%）")
+        ax.set_title("EHT：δ（Schwarzschild shadow deviation）の必要精度（参考; δはモデル依存）", pad=6.0)
+        ax.tick_params()
         ax.grid(True, alpha=0.25, axis="y")
-        # 図34: 凡例は左上に重ねる。
-        # 図34: 凡例はグラフ左上に重ねる。
-        ax.legend(loc="upper left", bbox_to_anchor=(0.02, 0.98), borderaxespad=0.0, frameon=True, fontsize=13.2)
+        ax.legend(
+            loc="upper left",
+            bbox_to_anchor=(0.02, 0.98),
+            borderaxespad=0.0,
+            frameon=True,
+            fontsize=get_wavep_font_size("legend"),
+        )
 
         finite = [float(v) for v in np.concatenate([req_pct, vlti_pct, keck_pct, kerr_pct]) if math.isfinite(float(v))]
         # 条件分岐: `finite` を満たす経路を評価する。
         if finite:
             ax.set_ylim(0.0, max(5.0, 1.15 * max(finite)))
 
-        fig9.tight_layout()
-        delta_req_png_path = out_dir / "eht_delta_precision_required.png"
-        fig9.savefig(delta_req_png_path, dpi=220, bbox_inches="tight")
-        delta_req_public_png_path = out_dir / "eht_delta_precision_required_public.png"
-        fig9.savefig(delta_req_public_png_path, dpi=220, bbox_inches="tight")
-        fig9.savefig(out_dir / "eht_delta_precision_required.pdf", bbox_inches="tight")
-        fig9.savefig(out_dir / "eht_delta_precision_required_public.pdf", bbox_inches="tight")
+        delta_req_png_path, _delta_req_pdf_path, delta_req_public_png_path, _delta_req_public_pdf_path = _save_public_figure(
+            fig9,
+            out_dir=out_dir,
+            public_dir=public_dir,
+            stem="eht_delta_precision_required",
+        )
         plt.close(fig9)
     except Exception as e:
         print(f"[warn] delta precision plot skipped: {e}")
@@ -2591,6 +2649,7 @@ def main() -> int:
         import matplotlib.pyplot as plt
         import numpy as np
 
+        apply_paper_style()
         _set_japanese_font()
 
         n = len(rows)
@@ -2598,12 +2657,12 @@ def main() -> int:
         if n <= 0:
             raise RuntimeError("no rows")
 
-        # 注: 上下2段で横幅を確保しつつ、凡例を2段配置して文字欠けを避ける。
-        fig8, axes = plt.subplots(n, 1, figsize=(12.4, 12.9), sharey=True)
+        fig8, axes = plt.subplots(n, 1, sharey=True, gridspec_kw={"height_ratios": [1.0] * n})
         # 条件分岐: `n == 1` を満たす経路を評価する。
         if n == 1:
             axes = [axes]
 
+        apply_wavep_figure_layout(fig8, template="part2_two_panel_tall")
         for ax, r in zip(axes, rows, strict=False):
             name = str(r.get("name") or r.get("key") or "")
             ring = float(r.get("ring_diameter_obs_uas", float("nan")))
@@ -2667,7 +2726,7 @@ def main() -> int:
                     transform=ax.transAxes,
                     ha="left",
                     va="top",
-                    fontsize=14.4,
+                    fontsize=get_wavep_font_size("note"),
                     color="#444",
                     bbox={"facecolor": "white", "alpha": 0.78, "edgecolor": "none", "pad": 0.20},
                 )
@@ -2685,9 +2744,11 @@ def main() -> int:
                 if math.isfinite(kerr_rel_pct_full):
                     ax.plot(ring_rel_now_pct, kerr_rel_pct_full, "s", color="#7f7f7f", alpha=0.9, label="参考: Kerr κ系統（full）")
 
-            ax.set_title(name, fontsize=21.6)
-            ax.set_xlabel("リング直径の相対誤差（1σ, %）", fontsize=17.2)
-            ax.tick_params(labelsize=16.0)
+            panel_title = ax.set_title(name, pad=4.0, fontsize=13.6, fontweight="normal")
+            panel_title.set_fontsize(13.6)
+            panel_title.set_fontweight("normal")
+            ax.set_xlabel("リング直径の相対誤差（1σ, %）")
+            ax.tick_params(axis="both", labelsize=get_wavep_font_size("tick"))
             ax.grid(True, alpha=0.25)
 
             x_max = 0.0
@@ -2703,9 +2764,16 @@ def main() -> int:
             ax.set_xlim(0.0, max(5.0, 1.15 * x_max))
 
         for ax in axes:
-            ax.set_ylabel("許容 κ の相対誤差（1σ, %）", fontsize=17.2)
+            ax.set_ylabel("許容 κ の相対誤差（1σ, %）")
 
-        fig8.suptitle("EHT：3σ判別のための誤差予算（ringσ と κσ のトレードオフ；κ≈1）", fontsize=22.4, y=0.972)
+        fig8_suptitle = fig8.suptitle(
+            "EHT：3σ判別のための誤差予算（ringσ と κσ のトレードオフ；κ≈1）",
+            y=0.978,
+            fontsize=12.8,
+            fontweight="normal",
+        )
+        fig8_suptitle.set_fontsize(12.8)
+        fig8_suptitle.set_fontweight("normal")
 
         # De-duplicate legend entries across subplots.
         handles, labels = [], []
@@ -2725,25 +2793,21 @@ def main() -> int:
                 labels,
                 loc="lower center",
                 ncol=min(2, len(labels)),
-                bbox_to_anchor=(0.5, 0.028),
-                fontsize=15.2,
+                bbox_to_anchor=(0.5, 0.050),
+                fontsize=get_wavep_font_size("legend"),
                 frameon=False,
                 handlelength=1.8,
                 columnspacing=1.5,
                 labelspacing=0.55,
             )
 
-        fig8.subplots_adjust(left=0.10, right=0.98, top=0.91, bottom=0.17, hspace=0.24)
-        kappa_trade_png_path = out_dir / "eht_kappa_tradeoff.png"
-        fig8.savefig(kappa_trade_png_path, dpi=220)
-        kappa_trade_public_png_path = out_dir / "eht_kappa_tradeoff_public.png"
-        fig8.savefig(kappa_trade_public_png_path, dpi=220)
-        kappa_trade_pdf_path = out_dir / "eht_kappa_tradeoff.pdf"
-        kappa_trade_public_pdf_path = out_dir / "eht_kappa_tradeoff_public.pdf"
-        fig8.savefig(kappa_trade_pdf_path)
-        fig8.savefig(kappa_trade_public_pdf_path)
-        shutil.copy2(kappa_trade_png_path, public_dir / "eht_kappa_tradeoff.png")
-        shutil.copy2(kappa_trade_pdf_path, public_dir / "eht_kappa_tradeoff.pdf")
+        fig8.subplots_adjust(left=0.12, right=0.97, top=0.90, bottom=0.19, hspace=0.34)
+        kappa_trade_png_path, _kappa_trade_pdf_path, kappa_trade_public_png_path, _kappa_trade_public_pdf_path = _save_public_figure(
+            fig8,
+            out_dir=out_dir,
+            public_dir=public_dir,
+            stem="eht_kappa_tradeoff",
+        )
         plt.close(fig8)
     except Exception as e:
         print(f"[warn] kappa tradeoff plot skipped: {e}")

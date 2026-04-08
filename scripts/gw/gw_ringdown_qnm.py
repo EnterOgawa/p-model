@@ -1,3 +1,10 @@
+"""
+目的: 重力波 topic の gw ringdown qnm に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -37,6 +44,12 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.utils.plot_style import (  # noqa: E402
+    apply_paper_style,
+    apply_wavep_figure_layout,
+    get_wavep_font_size,
+    resolve_wavep_cjk_font_family,
+)
 
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
@@ -55,23 +68,13 @@ def _iso_utc_now() -> str:
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
-        import matplotlib.font_manager as fm
-
-        preferred = [
-            "Yu Gothic",
-            "Meiryo",
-            "BIZ UDGothic",
-            "MS Gothic",
-            "Yu Mincho",
-            "MS Mincho",
-        ]
-        available = {f.name for f in fm.fontManager.ttflist}
-        chosen = [name for name in preferred if name in available]
+        chosen = resolve_wavep_cjk_font_family()
         # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
-        mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+        mpl.rcParams["font.family"] = [chosen, "DejaVu Sans"]
+        mpl.rcParams["font.sans-serif"] = [chosen, "DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         pass
@@ -99,6 +102,22 @@ def _read_json(path: Path) -> Dict[str, Any]:
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+# 関数: `_save_synced_figure` の入出力契約と処理意図を定義する。
+
+def _save_synced_figure(fig: plt.Figure, *, out_png: Path) -> None:
+    out_png.parent.mkdir(parents=True, exist_ok=True)
+    out_pdf = out_png.with_suffix(".pdf")
+    public_dir = _repo_root() / "output" / "public" / "gw"
+    public_dir.mkdir(parents=True, exist_ok=True)
+
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        fig.savefig(out_png, dpi=220)
+        fig.savefig(out_pdf)
+
+    shutil.copy2(out_png, public_dir / out_png.name)
+    shutil.copy2(out_pdf, public_dir / out_pdf.name)
 
 
 # 関数: `_download` の入出力契約と処理意図を定義する。
@@ -905,19 +924,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             p16 = np.array([float(r[key]["p16_p84"][0]) for r in rows], dtype=np.float64) * scale
             p84 = np.array([float(r[key]["p16_p84"][1]) for r in rows], dtype=np.float64) * scale
             ax.fill_between(xs, p16, p84, color="#4C78A8", alpha=0.25, linewidth=0.0)
-            ax.plot(xs, med, color="#4C78A8", lw=2.0, marker="o", ms=3)
+            ax.plot(xs, med, color="#4C78A8", lw=1.4, marker="o", ms=4.2)
             ax.axvline(t_ref_220, color="black", lw=1.0, ls="--", alpha=0.8)
-            ax.set_xlabel("start time (M)", fontsize=18)
-            ax.set_ylabel(ylabel, fontsize=18)
-            ax.tick_params(labelsize=16)
+            ax.set_xlabel("start time (M)")
+            ax.set_ylabel(ylabel)
             ax.grid(True, alpha=0.3)
 
-        fig, axes = plt.subplots(2, 1, figsize=(12.6, 9.2), sharex=True)
+        apply_paper_style()
+        _set_japanese_font()
+        fig, axes = plt.subplots(2, 1, sharex=True)
+        apply_wavep_figure_layout(fig, template="part2_two_panel")
         plot_series(axes[0], rows_220, key="f_hz", scale=1.0, ylabel="f_220 (Hz)")
         plot_series(axes[1], rows_220, key="tau_s", scale=1000.0, ylabel="tau_220 (ms)")
-        fig.suptitle(f"GW250114 ringdown QNM (data release): {resolved}", fontsize=20)
-        fig.tight_layout(rect=[0.0, 0.0, 1.0, 0.96])
-        fig.savefig(out_png, dpi=160)
+        axes[0].set_title("QNM f220 vs start time", pad=5.0)
+        axes[1].set_title("QNM tau220 vs start time", pad=5.0)
+        _save_synced_figure(fig, out_png=out_png)
         plt.close(fig)
 
         try:
@@ -1056,7 +1077,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _write_json(out_json, out)
 
     # Plot: best fit per detector (time-domain overlay).
-    fig, axes = plt.subplots(2, 1, figsize=(12.6, 9.2), sharex=False)
+    apply_paper_style()
+    _set_japanese_font()
+    fig, axes = plt.subplots(2, 1, sharex=False)
+    apply_wavep_figure_layout(fig, template="part2_two_panel")
     for ax, det in zip(axes, ["H1", "L1"]):
         rec = results.get(det) or {}
         summ = (rec.get("summary") or {}) if isinstance(rec, dict) else {}
@@ -1090,21 +1114,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         env = np.exp(-t_fit / tau_s)
         yhat = env * (a0 * np.cos(2 * math.pi * f_hz * t_fit) + b0 * np.sin(2 * math.pi * f_hz * t_fit))
 
-        ax.plot(t_fit * 1000.0, y, lw=1.2, label="data (bandpass)")
-        ax.plot(t_fit * 1000.0, yhat, lw=2.4, label="fit")
+        ax.plot(t_fit * 1000.0, y, lw=1.2, label="data")
+        ax.plot(t_fit * 1000.0, yhat, lw=1.4, label="fit")
         ax.set_title(
-            f"{det}: f={f_hz:.1f} Hz, tau={tau_s*1000:.2f} ms, band={bp[0]}-{bp[1]} Hz, t0={t0*1000:.1f} ms",
-            fontsize=16,
+            f"{det}: f={f_hz:.1f} Hz, tau={tau_s*1000:.2f} ms",
         )
-        ax.set_xlabel("t - t0 (ms)", fontsize=18)
-        ax.set_ylabel("strain (arb.)", fontsize=18)
-        ax.tick_params(labelsize=16)
+        ax.set_xlabel("t - t0 (ms)")
+        ax.set_ylabel("strain (arb.)")
         ax.grid(True, alpha=0.3)
-        ax.legend(loc="upper right", fontsize=16)
+        ax.legend(loc="upper right", fontsize=get_wavep_font_size("legend"))
 
-    fig.suptitle(f"GWOSC ringdown QNM fit: {fetch.get('resolved_event')} ({args.catalog})", fontsize=20)
-    fig.tight_layout(rect=[0.0, 0.0, 1.0, 0.96])
-    fig.savefig(out_png, dpi=160)
+    _save_synced_figure(fig, out_png=out_png)
     plt.close(fig)
 
     try:

@@ -1,12 +1,21 @@
+"""
+目的: 量子 topic の nuclear binding energy frequency mapping theory diff に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import csv
 import json
 import math
+import os
 from pathlib import Path
 
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
 
 enable_japanese_figure_localization()
 
@@ -386,7 +395,14 @@ def main() -> None:
     r_vals_s = [r for _, r in pairs_semf_ref]
 
     fig = plt.figure(figsize=(14.2, 10.8))
+    apply_wavep_figure_layout(fig, template="part2_quad_panel_spacious")
+    fig.set_size_inches(fig.get_figwidth(), 8.70, forward=True)
     gs = fig.add_gridspec(2, 2)
+    panel_title_font = get_wavep_font_size("title") * 0.82
+    axis_label_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    legend_font = get_wavep_font_size("legend")
+    suptitle_font = get_wavep_font_size("suptitle") + 2.0
 
     ax0 = fig.add_subplot(gs[0, 0])
     ax0.scatter(a_vals_p, r_vals_p, s=8, alpha=0.18, color="tab:green", label="P-model (local+d, nu_sat)")
@@ -394,12 +410,12 @@ def main() -> None:
     ax0.scatter(a_vals_s, r_vals_s, s=8, alpha=0.16, color="tab:orange", label="SEMF fixed-coeff")
     ax0.axhline(1.0, color="0.2", lw=1.2, ls="--")
     ax0.set_yscale("log")
-    ax0.set_xlabel("A", fontsize=14.8)
-    ax0.set_ylabel("B_pred/B_obs", fontsize=14.8)
-    ax0.set_title("All-nuclei residual scale by model class", fontsize=16.0)
+    ax0.set_xlabel("A", fontsize=axis_label_font)
+    ax0.set_ylabel("B_pred/B_obs", fontsize=axis_label_font)
+    ax0.set_title("All-nuclei residual scale by model class", fontsize=panel_title_font, pad=6.0)
     ax0.grid(True, which="both", axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax0.legend(loc="upper right", fontsize=12.6)
-    ax0.tick_params(axis="both", labelsize=13.2)
+    ax0.legend(loc="upper right", fontsize=legend_font)
+    ax0.tick_params(axis="both", labelsize=tick_font)
 
     ax1 = fig.add_subplot(gs[0, 1])
     labels = ["P-model", "Yukawa\nproxy", "SEMF\nfixed"]
@@ -415,23 +431,23 @@ def main() -> None:
     ax1.axhline(0.0, color="0.4", lw=0.9)
     ax1.set_xticks(x)
     ax1.set_xticklabels(labels)
-    ax1.set_ylabel("z (sigma_proxy units)", fontsize=14.8)
-    ax1.set_title("Operational consistency under frozen 3sigma thresholds", fontsize=16.0)
+    ax1.set_ylabel("z (sigma_proxy units)", fontsize=axis_label_font)
+    ax1.set_title("Operational consistency under frozen 3sigma thresholds", fontsize=panel_title_font, pad=6.0)
     ax1.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax1.legend(loc="upper right", fontsize=12.6)
-    ax1.tick_params(axis="both", labelsize=13.2)
+    ax1.legend(loc="upper right", fontsize=legend_font)
+    ax1.tick_params(axis="both", labelsize=tick_font)
 
     ax2 = fig.add_subplot(gs[1, 0])
     ax2.hist([math.log10(v) for v in r_vals_p if v > 0], bins=70, alpha=0.52, color="tab:green", label="P-model")
     ax2.hist([math.log10(v) for v in r_vals_y if v > 0], bins=70, alpha=0.45, color="tab:purple", label="Yukawa proxy")
     ax2.hist([math.log10(v) for v in r_vals_s if v > 0], bins=70, alpha=0.45, color="tab:orange", label="SEMF fixed")
     ax2.axvline(0.0, color="0.2", lw=1.2, ls="--")
-    ax2.set_xlabel("log10(B_pred/B_obs)", fontsize=14.8)
-    ax2.set_ylabel("count", fontsize=14.8)
-    ax2.set_title("Residual distributions in common log10 scale", fontsize=16.0)
+    ax2.set_xlabel("log10(B_pred/B_obs)", fontsize=axis_label_font)
+    ax2.set_ylabel("count", fontsize=axis_label_font)
+    ax2.set_title("Residual distributions in common log10 scale", fontsize=panel_title_font, pad=6.0)
     ax2.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax2.legend(loc="upper left", fontsize=12.6)
-    ax2.tick_params(axis="both", labelsize=13.2)
+    ax2.legend(loc="upper left", fontsize=legend_font)
+    ax2.tick_params(axis="both", labelsize=tick_font)
 
     ax3 = fig.add_subplot(gs[1, 1])
     a_plot: list[int] = []
@@ -455,20 +471,30 @@ def main() -> None:
     ax3.scatter(a_plot, d_semf, s=8, alpha=0.2, color="tab:red", label="P-model - SEMF")
     ax3.scatter(a_plot, d_y, s=8, alpha=0.2, color="tab:cyan", label="P-model - Yukawa proxy")
     ax3.axhline(0.0, color="0.2", lw=1.2)
-    ax3.set_xlabel("A", fontsize=14.8)
-    ax3.set_ylabel("Delta B [MeV]", fontsize=14.8)
-    ax3.set_title("Differential prediction channel (same AME2020 targets)", fontsize=16.0)
+    ax3.set_xlabel("A", fontsize=axis_label_font)
+    ax3.set_ylabel("Delta B [MeV]", fontsize=axis_label_font)
+    ax3.set_title("Differential prediction channel (same AME2020 targets)", fontsize=panel_title_font, pad=6.0)
     ax3.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax3.legend(loc="upper left", fontsize=12.6)
-    ax3.tick_params(axis="both", labelsize=13.2)
+    ax3.legend(loc="upper left", fontsize=legend_font)
+    ax3.tick_params(axis="both", labelsize=tick_font)
 
-    fig.suptitle("theory-difference extraction (P-model vs standard proxies)", y=0.99, fontsize=17.4)
-    fig.subplots_adjust(left=0.06, right=0.98, top=0.93, bottom=0.08, wspace=0.23, hspace=0.32)
+    fig.suptitle("theory-difference extraction (P-model vs standard proxies)", y=0.992, fontsize=suptitle_font)
+    fig.subplots_adjust(left=0.085, right=0.985, top=0.905, bottom=0.095, wspace=0.24, hspace=0.64)
 
     out_png = out_dir / "nuclear_binding_energy_frequency_mapping_theory_diff.png"
     out_pdf = out_dir / "nuclear_binding_energy_frequency_mapping_theory_diff.pdf"
-    fig.savefig(out_png, bbox_inches="tight")
-    fig.savefig(out_pdf, bbox_inches="tight")
+    prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+    try:
+        with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+            fig.savefig(out_png)
+            fig.savefig(out_pdf)
+    finally:
+        if prev_disable_normalize is None:
+            os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = prev_disable_normalize
+
     plt.close(fig)
 
     out_json = out_dir / "nuclear_binding_energy_frequency_mapping_theory_diff_metrics.json"

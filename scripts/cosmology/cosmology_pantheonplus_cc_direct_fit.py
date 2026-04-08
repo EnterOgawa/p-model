@@ -762,7 +762,7 @@ def _build_figure(
     ax_mu.set_xlabel("z", fontsize=15.8)
     ax_mu.set_ylabel("距離モジュラス μ(z) [mag]", fontsize=15.8)
     ax_mu.grid(True, linestyle="--", alpha=0.35)
-    ax_mu.legend(fontsize=14.2, loc="upper left")
+    ax_mu.legend(fontsize=14.2, loc="lower right")
     ax_mu.tick_params(labelsize=13.8)
 
     ax_h.errorbar(

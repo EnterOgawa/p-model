@@ -1,3 +1,10 @@
+"""
+目的: 黒体 holdout 監査の enthalpy per photon flux 指標図を再生成する。
+入力: スクリプト内の既定 holdout 分割設定と黒体基準量の計算式を用いる。
+出力: output/public/quantum と output/private/quantum の holdout 図と付随指標を更新する。
+前提: Part IV の黒体付録と統合監査台帳が参照する canonical artifact を正とする。
+"""
+
 from __future__ import annotations
 
 import csv
@@ -10,6 +17,13 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
+
+from scripts.quantum.thermo_blackbody_holdout_style import (
+    add_blackbody_display_floor_note,
+    apply_blackbody_holdout_axes_text,
+    apply_blackbody_holdout_legend,
+    create_blackbody_holdout_figure,
+)
 
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
@@ -308,7 +322,7 @@ def main() -> None:
 
     bar_positions = np.arange(len(categories), dtype=float)
     bar_width = 0.3
-    fig, ax = plt.subplots(1, 1, figsize=(10.6, 4.2), dpi=170)
+    fig, ax = create_blackbody_holdout_figure()
     ax.bar(bar_positions - bar_width / 2, y_power, width=bar_width, color="#1f77b4", alpha=0.85, label="power-law abs fit (2p)")
     ax.bar(
         bar_positions + bar_width / 2,
@@ -320,61 +334,22 @@ def main() -> None:
     )
     ax.axhline(3.0, color="black", linewidth=1.0, linestyle="--", alpha=0.7)
     ax.set_xticks(bar_positions)
-    ax.set_xticklabels(categories)
-    ax.set_ylabel("test max abs(z)")
-    ax.set_title("Blackbody ratio holdout: h/Φ_n ∝ T")
+    apply_blackbody_holdout_axes_text(ax, categories=categories, ylabel="test max abs(z)", title="Blackbody ratio holdout: h/Φ_n ∝ T")
     ax.grid(axis="y", linestyle=":", alpha=0.35)
-    ax.legend(loc="upper left", fontsize=9)
+    apply_blackbody_holdout_legend(ax)
+
+    visible_vals = np.asarray(y_power + y_fixed, dtype=float)
+    add_blackbody_display_floor_note(ax, visible_vals)
     fig.tight_layout()
     out_png = out_dir / "thermo_blackbody_enthalpy_per_photon_flux_holdout_splits.png"
+    out_pdf = out_png.with_suffix(".pdf")
     fig.savefig(out_png, bbox_inches="tight")
+    fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
-
-    out_metrics = out_dir / "thermo_blackbody_enthalpy_per_photon_flux_holdout_splits_metrics.json"
-    out_metrics.write_text(
-        json.dumps(
-            {
-                "generated_utc": datetime.now(timezone.utc).isoformat(),
-                "phase": 8,
-                "step": "8.7.12",
-                "inputs": {"blackbody_constants_extracted_values": {"path": str(extracted_path), "sha256": _sha256(extracted_path)}},
-                "constants": {
-                    "c_m_per_s": speed_of_light,
-                    "h_J_s": planck_h,
-                    "kB_J_per_K": boltzmann_k,
-                    "stefan_boltzmann_sigma": stefan_boltzmann_sigma,
-                    "radiation_constant_a": radiation_constant_a,
-                    "zeta3": zeta3,
-                },
-                "assumptions": {
-                    "sign_convention": "h/Φ_n is positive for photon gas; model fit is applied to abs(h/Φ_n) and sign=+1 is fixed.",
-                    "sigma_proxy": "1 ppm relative tolerance (operational, analytic baseline)",
-                    "holdout_reduced_chi2_definition": {
-                        "train": "sum(z^2)/max(1,n-params)",
-                        "test": "sum(z^2)/max(1,n)  (no parameters are fit on the test split)",
-                    },
-                },
-                "data_range_T_K": [float(np.min(temperature_grid_k)), float(np.max(temperature_grid_k))],
-                "splits": split_results,
-                "outputs": {"csv": str(out_csv), "png": str(out_png)},
-                "notes": [
-                    "Analytic holdout for h/Φ_n (enthalpy density per photon flux) based on blackbody identities.",
-                    "This is a procedural regression check, not an observational inference.",
-                ],
-            },
-            ensure_ascii=False,
-            indent=2,
-        )
-        + "\n",
-        encoding="utf-8",
-    )
 
     print(f"[ok] wrote: {out_csv}")
     print(f"[ok] wrote: {out_png}")
-    print(f"[ok] wrote: {out_metrics}")
-
-
-# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
+    print(f"[ok] wrote: {out_pdf}")
 
 if __name__ == "__main__":
     main()

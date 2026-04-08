@@ -1,3 +1,10 @@
+"""
+目的: 理論 topic の pmodel core mapping overview に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import json
@@ -7,6 +14,12 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
+
+from scripts.utils.plot_style import (
+    apply_paper_style,
+    apply_wavep_figure_layout,
+    resolve_wavep_cjk_font_family,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR_CANON = ROOT / "output" / "theory"
@@ -20,25 +33,26 @@ def _utc_now() -> str:
 
 
 # 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
+
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
         import matplotlib.font_manager as fm
 
-        preferred = [
-            "Yu Gothic",
-            "Meiryo",
-            "BIZ UDGothic",
-            "MS Gothic",
-            "Yu Mincho",
-            "MS Mincho",
-        ]
-        available = {f.name for f in fm.fontManager.ttflist}
-        chosen = [name for name in preferred if name in available]
-        if not chosen:
+        preferred = resolve_wavep_cjk_font_family(preferred_name="Noto Sans CJK JP")
+        if preferred:
+            mpl.rcParams["font.family"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["axes.unicode_minus"] = False
             return
 
-        mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+        available = {f.name for f in fm.fontManager.ttflist}
+        fallback = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
+        chosen = [name for name in fallback if name in available]
+        if chosen:
+            mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = chosen + ["DejaVu Sans"]
+
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         return
@@ -51,7 +65,32 @@ def _write_json(path: Path, obj: Any) -> None:
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+# 関数: `_save_figure_bundle` の入出力契約と処理意図を定義する。
+
+def _save_figure_bundle(*, fig: Any, stem: str) -> dict[str, str]:
+    outputs = {
+        "png_canon": OUT_DIR_CANON / f"{stem}.png",
+        "png_private": OUT_DIR_PRIVATE / f"{stem}.png",
+        "png_public": OUT_DIR_PUBLIC / f"{stem}.png",
+        "pdf_canon": OUT_DIR_CANON / f"{stem}.pdf",
+        "pdf_private": OUT_DIR_PRIVATE / f"{stem}.pdf",
+        "pdf_public": OUT_DIR_PUBLIC / f"{stem}.pdf",
+    }
+    for path in outputs.values():
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        for path in outputs.values():
+            if path.suffix.lower() == ".png":
+                fig.savefig(path, dpi=220)
+            else:
+                fig.savefig(path)
+
+    return {key: str(value).replace("\\", "/") for key, value in outputs.items()}
+
+
 # 関数: `_box` の入出力契約と処理意図を定義する。
+
 def _box(
     *,
     ax: Any,
@@ -76,54 +115,61 @@ def _box(
         linewidth=1.2,
     )
     ax.add_patch(patch)
-    ax.text(
+    part_text = ax.text(
         x + 0.03 * w,
         y + 0.93 * h,
         part,
         transform=ax.transAxes,
         ha="left",
         va="top",
-        fontsize=9.2,
+        fontsize=7.4,
         color="0.33",
         fontweight="bold",
     )
-    ax.text(
+    part_text.set_fontsize(6.8)
+    part_text.set_fontweight("bold")
+    title_text = ax.text(
         x + 0.5 * w,
         y + 0.72 * h,
         title,
         transform=ax.transAxes,
         ha="center",
         va="center",
-        fontsize=13.2,
+        fontsize=9.8,
         fontweight="bold",
         color="0.10",
         linespacing=1.18,
     )
-    ax.text(
+    title_text.set_fontsize(8.8)
+    title_text.set_fontweight("bold")
+    formula_text = ax.text(
         x + 0.5 * w,
         y + 0.50 * h,
         formula,
         transform=ax.transAxes,
         ha="center",
         va="center",
-        fontsize=12.6,
+        fontsize=9.2,
         color="0.10",
         linespacing=1.14,
     )
-    ax.text(
+    formula_text.set_fontsize(8.2)
+    desc_text = ax.text(
         x + 0.5 * w,
         y + 0.25 * h,
         desc,
         transform=ax.transAxes,
         ha="center",
         va="center",
-        fontsize=10.6,
+        fontsize=8.2,
         color="0.22",
         linespacing=1.15,
     )
+    desc_text.set_fontsize(7.2)
 
 
 # 関数: `_arrow` の入出力契約と処理意図を定義する。
+
 def _arrow(
     *,
     ax: Any,
@@ -153,16 +199,14 @@ def main() -> None:
     OUT_DIR_PRIVATE.mkdir(parents=True, exist_ok=True)
     OUT_DIR_PUBLIC.mkdir(parents=True, exist_ok=True)
 
-    out_png_canon = OUT_DIR_CANON / "pmodel_core_mapping_overview.png"
-    out_png_private = OUT_DIR_PRIVATE / "pmodel_core_mapping_overview.png"
-    out_png_public = OUT_DIR_PUBLIC / "pmodel_core_mapping_overview.png"
-
     out_json_canon = OUT_DIR_CANON / "pmodel_core_mapping_overview_metrics.json"
     out_json_private = OUT_DIR_PRIVATE / "pmodel_core_mapping_overview_metrics.json"
     out_json_public = OUT_DIR_PUBLIC / "pmodel_core_mapping_overview_metrics.json"
 
+    apply_paper_style()
     _set_japanese_font()
-    fig, ax = plt.subplots(figsize=(12.2, 7.2), dpi=220)
+    fig, ax = plt.subplots(dpi=220)
+    apply_wavep_figure_layout(fig, template="paper_diagram")
     ax.set_axis_off()
 
     wh_input = (0.24, 0.20)
@@ -183,18 +227,20 @@ def main() -> None:
         (0.49, 0.165, "Part II 所管", "#276749"),
     ]
     for gx, gy, text, color in group_labels:
-        ax.text(
+        group_text = ax.text(
             gx,
             gy,
             text,
             transform=ax.transAxes,
             ha="center",
             va="center",
-            fontsize=10.0,
+            fontsize=8.0,
             color=color,
             fontweight="bold",
             bbox={"boxstyle": "round,pad=0.18", "facecolor": "white", "edgecolor": "none", "alpha": 0.88},
         )
+        group_text.set_fontsize(7.4)
+        group_text.set_fontweight("bold")
 
     _box(
         ax=ax,
@@ -312,30 +358,26 @@ def main() -> None:
         linestyle="-",
     )
 
-    ax.text(
+    footer_text = ax.text(
         0.5,
         0.058,
         r"Part I は写像と $\beta_{\mathrm{frozen}}$ を固定し、Part II/III は固定値のまま反証監査を行う。",
         transform=ax.transAxes,
         ha="center",
         va="center",
-        fontsize=12.2,
+        fontsize=8.8,
         color="0.25",
     )
+    footer_text.set_fontsize(7.6)
 
-    fig.tight_layout()
-    fig.savefig(out_png_canon, bbox_inches="tight")
-    fig.savefig(out_png_private, bbox_inches="tight")
-    fig.savefig(out_png_public, bbox_inches="tight")
+    outputs = _save_figure_bundle(fig=fig, stem="pmodel_core_mapping_overview")
     plt.close(fig)
 
     payload = {
         "generated_utc": _utc_now(),
         "script": "scripts/theory/pmodel_core_mapping_overview.py",
         "outputs": {
-            "png_canon": str(out_png_canon),
-            "png_private": str(out_png_private),
-            "png_public": str(out_png_public),
+            **outputs,
             "metrics_json_canon": str(out_json_canon),
             "metrics_json_private": str(out_json_private),
             "metrics_json_public": str(out_json_public),
@@ -351,9 +393,10 @@ def main() -> None:
     _write_json(out_json_private, payload)
     _write_json(out_json_public, payload)
 
-    print(f"[ok] png(canon)  : {out_png_canon}")
-    print(f"[ok] png(private): {out_png_private}")
-    print(f"[ok] png(public) : {out_png_public}")
+    print(f"[ok] png(canon)  : {outputs['png_canon']}")
+    print(f"[ok] png(private): {outputs['png_private']}")
+    print(f"[ok] png(public) : {outputs['png_public']}")
+    print(f"[ok] pdf(canon)  : {outputs['pdf_canon']}")
     print(f"[ok] json(canon) : {out_json_canon}")
 
 

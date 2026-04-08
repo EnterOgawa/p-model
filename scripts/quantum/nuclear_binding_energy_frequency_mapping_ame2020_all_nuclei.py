@@ -1,13 +1,22 @@
+"""
+目的: 量子 topic の nuclear binding energy frequency mapping ame2020 all nuclei に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
 import csv
 import json
 import math
+import os
 from pathlib import Path
 
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
 
 enable_japanese_figure_localization()
 
@@ -630,7 +639,14 @@ def main(argv: list[str] | None = None) -> int:
     ]
 
     fig = plt.figure(figsize=(14.6, 10.8), dpi=170)
+    apply_wavep_figure_layout(fig, template="part2_quad_panel_spacious")
+    fig.set_size_inches(fig.get_figwidth(), 8.70, forward=True)
     gs = fig.add_gridspec(2, 2, wspace=0.28, hspace=0.30)
+    panel_title_font = get_wavep_font_size("title") * 0.82
+    axis_label_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    legend_font = get_wavep_font_size("legend")
+    suptitle_font = get_wavep_font_size("suptitle") + 2.0
 
     # (0,0) ratio vs A
     ax0 = fig.add_subplot(gs[0, 0])
@@ -642,12 +658,12 @@ def main(argv: list[str] | None = None) -> int:
 
     ax0.axhline(1.0, color="0.2", lw=1.2, ls="--")
     ax0.set_yscale("log")
-    ax0.set_xlabel("A", fontsize=14.6)
-    ax0.set_ylabel("B_pred/B_obs (baseline; log)", fontsize=14.6)
-    ax0.set_title("Baseline residuals vs A (color=parity; ee/eo/oe/oo)", fontsize=15.8)
+    ax0.set_xlabel("A", fontsize=axis_label_font)
+    ax0.set_ylabel("B_pred/B_obs (baseline; log)", fontsize=axis_label_font)
+    ax0.set_title("Baseline residuals vs A (color=parity; ee/eo/oe/oo)", fontsize=panel_title_font, pad=6.0)
     ax0.grid(True, which="both", axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax0.legend(loc="upper right", fontsize=12.0)
-    ax0.tick_params(axis="both", labelsize=12.8)
+    ax0.legend(loc="upper right", fontsize=legend_font)
+    ax0.tick_params(axis="both", labelsize=tick_font)
 
     # (0,1) C_required / (A-1) vs A
     ax1 = fig.add_subplot(gs[0, 1])
@@ -660,11 +676,11 @@ def main(argv: list[str] | None = None) -> int:
     ax1.scatter(xs, ys, s=8, alpha=0.35, color="tab:purple")
     ax1.axhline(1.0, color="0.2", lw=1.2, ls="--")
     ax1.set_yscale("log")
-    ax1.set_xlabel("A", fontsize=14.6)
-    ax1.set_ylabel("C_required/(A-1) (log)", fontsize=14.6)
-    ax1.set_title("Implied coherence factor vs A (needs >1 for extra binding)", fontsize=15.8)
+    ax1.set_xlabel("A", fontsize=axis_label_font)
+    ax1.set_ylabel("C_required/(A-1) (log)", fontsize=axis_label_font)
+    ax1.set_title("Implied coherence factor vs A (needs >1 for extra binding)", fontsize=panel_title_font, pad=6.0)
     ax1.grid(True, which="both", axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax1.tick_params(axis="both", labelsize=12.8)
+    ax1.tick_params(axis="both", labelsize=tick_font)
 
     # (1,0) histogram of log10 ratios (measured vs model radii)
     ax2 = fig.add_subplot(gs[1, 0])
@@ -672,12 +688,12 @@ def main(argv: list[str] | None = None) -> int:
     ax2.hist(log_ratios_model, bins=bins, alpha=0.55, color="0.6", label="radius law (no measured radii)")
     ax2.hist(log_ratios_meas, bins=bins, alpha=0.70, color="tab:blue", label="measured radii subset")
     ax2.axvline(0.0, color="0.2", lw=1.2, ls="--")
-    ax2.set_xlabel("log10(B_pred/B_obs)  (baseline)", fontsize=14.6)
-    ax2.set_ylabel("count", fontsize=14.6)
-    ax2.set_title("Residual distribution (baseline)", fontsize=15.8)
+    ax2.set_xlabel("log10(B_pred/B_obs)  (baseline)", fontsize=axis_label_font)
+    ax2.set_ylabel("count", fontsize=axis_label_font)
+    ax2.set_title("Residual distribution (baseline)", fontsize=panel_title_font, pad=6.0)
     ax2.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax2.legend(loc="upper left", fontsize=12.0)
-    ax2.tick_params(axis="both", labelsize=12.8)
+    ax2.legend(loc="upper left", fontsize=legend_font)
+    ax2.tick_params(axis="both", labelsize=tick_font)
 
     # (1,1) group medians (parity + magic)
     ax3 = fig.add_subplot(gs[1, 1])
@@ -695,23 +711,33 @@ def main(argv: list[str] | None = None) -> int:
     ax3.set_yscale("log")
     ax3.set_xticks(range(len(groups)))
     ax3.set_xticklabels(groups, rotation=20, ha="right")
-    ax3.set_ylabel("median(B_pred/B_obs) (log)", fontsize=14.6)
-    ax3.set_title("Group medians (baseline): parity & magic flags", fontsize=15.8)
+    ax3.set_ylabel("median(B_pred/B_obs) (log)", fontsize=axis_label_font)
+    ax3.set_title("Group medians (baseline): parity & magic flags", fontsize=panel_title_font, pad=6.0)
     ax3.grid(True, which="both", axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax3.tick_params(axis="both", labelsize=12.8)
+    ax3.tick_params(axis="both", labelsize=tick_font)
 
     suptitle = "AME2020 all-nuclei residuals (Δω→B.E. mapping I/F preview)"
     # 条件分岐: `subset != "all"` を満たす経路を評価する。
     if subset != "all":
         suptitle = f"AME2020 subset residuals ({subset}; Δω→B.E. mapping)"
 
-    fig.suptitle(suptitle, y=0.99, fontsize=17.4)
-    fig.subplots_adjust(left=0.07, right=0.98, top=0.93, bottom=0.12, wspace=0.28, hspace=0.32)
+    fig.suptitle(suptitle, y=0.992, fontsize=suptitle_font)
+    fig.subplots_adjust(left=0.085, right=0.985, top=0.905, bottom=0.110, wspace=0.24, hspace=0.64)
 
     out_pdf = out_dir / f"{out_stem}.pdf"
     out_png = out_dir / f"{out_stem}.png"
-    fig.savefig(out_pdf, bbox_inches="tight")
-    fig.savefig(out_png, bbox_inches="tight")
+    prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+    try:
+        with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+            fig.savefig(out_pdf)
+            fig.savefig(out_png)
+    finally:
+        if prev_disable_normalize is None:
+            os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = prev_disable_normalize
+
     plt.close(fig)
 
     # Z-N residual map with overlays (magic numbers / stability / AME envelope proxy).

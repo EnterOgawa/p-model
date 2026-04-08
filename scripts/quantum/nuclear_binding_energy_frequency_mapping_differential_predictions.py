@@ -1,12 +1,21 @@
+"""
+目的: 量子 topic の nuclear binding energy frequency mapping differential predictions に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import csv
 import json
 import math
+import os
 from pathlib import Path
 
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
 
 enable_japanese_figure_localization()
 
@@ -232,18 +241,29 @@ def main() -> None:
             continue
 
     fig = plt.figure(figsize=(14.2, 10.4))
+    apply_wavep_figure_layout(fig, template="part2_quad_panel_spacious")
+    fig.set_size_inches(fig.get_figwidth(), 8.95, forward=True)
     gs = fig.add_gridspec(2, 2, height_ratios=[1.0, 1.0])
+    panel_title_font = get_wavep_font_size("title") * 0.82
+    axis_label_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    legend_font = get_wavep_font_size("legend")
+    suptitle_font = get_wavep_font_size("suptitle") + 2.0
 
     # (0,0) global ratio vs A (log scale; baseline underpredicts)
     ax0 = fig.add_subplot(gs[0, 0])
     ax0.scatter(a_vals, rg_vals, s=8, alpha=0.18, color="tab:purple")
     ax0.axhline(1.0, color="0.2", lw=1.2, ls="--")
     ax0.set_yscale("log")
-    ax0.set_xlabel("A", fontsize=14.6)
-    ax0.set_ylabel("B_pred/B_obs (global R; baseline)", fontsize=14.6)
-    ax0.set_title("Global distance proxy (R in exp): large A-trend mismatch", fontsize=15.8)
+    ax0.set_xlabel("A", fontsize=axis_label_font)
+    ax0.set_ylabel("B_pred/B_obs (global R; baseline)", fontsize=axis_label_font)
+    ax0.set_title(
+        "Global distance proxy\n(R in exp; large A-trend mismatch)",
+        fontsize=panel_title_font,
+        pad=6.0,
+    )
     ax0.grid(True, which="both", axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax0.tick_params(axis="both", labelsize=12.8)
+    ax0.tick_params(axis="both", labelsize=tick_font)
 
     # (0,1) local spacing ratio vs A (linear-ish around O(1))
     ax1 = fig.add_subplot(gs[0, 1])
@@ -251,11 +271,15 @@ def main() -> None:
     ax1.axhline(1.0, color="0.2", lw=1.2, ls="--")
     ax1.set_xlim(0, 305)
     ax1.set_ylim(0.0, max(3.0, _percentile(sorted(rl_vals), 99.5)))
-    ax1.set_xlabel("A", fontsize=14.6)
-    ax1.set_ylabel("B_pred/B_obs (local spacing d)", fontsize=14.6)
-    ax1.set_title("Local spacing proxy (d=ρ^{-1/3}): A-trend largely removed", fontsize=15.8)
+    ax1.set_xlabel("A", fontsize=axis_label_font)
+    ax1.set_ylabel("B_pred/B_obs (local spacing d)", fontsize=axis_label_font)
+    ax1.set_title(
+        "Local spacing proxy\n(d=ρ^{-1/3}; A-trend largely removed)",
+        fontsize=panel_title_font,
+        pad=6.0,
+    )
     ax1.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax1.tick_params(axis="both", labelsize=12.8)
+    ax1.tick_params(axis="both", labelsize=tick_font)
 
     # (1,0) distributions (log10)
     ax2 = fig.add_subplot(gs[1, 0])
@@ -264,12 +288,16 @@ def main() -> None:
     ax2.hist(lg, bins=60, alpha=0.55, color="tab:purple", label="global R (log10 ratio)")
     ax2.hist(ll, bins=60, alpha=0.55, color="tab:blue", label="local spacing d (log10 ratio)")
     ax2.axvline(0.0, color="0.2", lw=1.2, ls="--")
-    ax2.set_xlabel("log10(B_pred/B_obs)", fontsize=14.6)
-    ax2.set_ylabel("count", fontsize=14.6)
-    ax2.set_title("Residual distributions (same frozen anchor/range; only distance proxy differs)", fontsize=15.8)
+    ax2.set_xlabel("log10(B_pred/B_obs)", fontsize=axis_label_font)
+    ax2.set_ylabel("count", fontsize=axis_label_font)
+    ax2.set_title(
+        "Residual distributions\n(same anchor/range; only distance proxy differs)",
+        fontsize=panel_title_font,
+        pad=6.0,
+    )
     ax2.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax2.legend(loc="upper left", fontsize=12.2)
-    ax2.tick_params(axis="both", labelsize=12.8)
+    ax2.legend(loc="upper left", fontsize=legend_font)
+    ax2.tick_params(axis="both", labelsize=tick_font)
 
     # (1,1) group medians (parity + magic) for local mapping
     ax3 = fig.add_subplot(gs[1, 1])
@@ -286,18 +314,32 @@ def main() -> None:
     ax3.axhline(1.0, color="0.2", lw=1.2, ls="--")
     ax3.set_xticks(range(len(groups)))
     ax3.set_xticklabels(groups, rotation=20, ha="right")
-    ax3.set_ylabel("median(B_pred/B_obs)", fontsize=14.6)
-    ax3.set_title("Local mapping group medians (parity & magic flags)", fontsize=15.8)
+    ax3.set_ylabel("median(B_pred/B_obs)", fontsize=axis_label_font)
+    ax3.set_title(
+        "Local mapping medians\n(parity and magic flags)",
+        fontsize=panel_title_font,
+        pad=6.0,
+    )
     ax3.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax3.tick_params(axis="both", labelsize=12.8)
+    ax3.tick_params(axis="both", labelsize=tick_font)
 
-    fig.suptitle("differential predictions (distance proxy audit)", y=0.99, fontsize=17.4)
-    fig.subplots_adjust(left=0.07, right=0.98, top=0.93, bottom=0.12, wspace=0.25, hspace=0.36)
+    fig.suptitle("differential predictions (distance proxy audit)", y=0.990, fontsize=suptitle_font)
+    fig.subplots_adjust(left=0.085, right=0.985, top=0.890, bottom=0.110, wspace=0.26, hspace=0.74)
 
     out_pdf = out_dir / "nuclear_binding_energy_frequency_mapping_differential_predictions.pdf"
     out_png = out_dir / "nuclear_binding_energy_frequency_mapping_differential_predictions.png"
-    fig.savefig(out_pdf, bbox_inches="tight")
-    fig.savefig(out_png, bbox_inches="tight")
+    prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+    try:
+        with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+            fig.savefig(out_pdf)
+            fig.savefig(out_png)
+    finally:
+        if prev_disable_normalize is None:
+            os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = prev_disable_normalize
+
     plt.close(fig)
 
     out_json = out_dir / "nuclear_binding_energy_frequency_mapping_differential_predictions_metrics.json"

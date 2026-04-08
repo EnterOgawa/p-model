@@ -1,11 +1,20 @@
+"""
+目的: 量子 topic の nuclear binding energy frequency mapping deuteron two body に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import json
 import math
+import os
 from pathlib import Path
 
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
 
 enable_japanese_figure_localization()
 
@@ -225,7 +234,14 @@ def main() -> None:
     plt.rcParams["ps.fonttype"] = 42
 
     fig = plt.figure(figsize=(16.6, 7.4), dpi=170)
+    apply_wavep_figure_layout(fig, template="part2_side_by_side")
+    fig.set_size_inches(fig.get_figwidth(), 5.65, forward=True)
     gs = fig.add_gridspec(1, 2, width_ratios=[1.0, 1.56], wspace=0.24)
+    panel_title_font = get_wavep_font_size("title") * 0.82
+    axis_label_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    note_font = get_wavep_font_size("note")
+    suptitle_font = get_wavep_font_size("suptitle") + 3.0
 
     ax0 = fig.add_subplot(gs[0, 0])
     ax0.axis("off")
@@ -235,7 +251,7 @@ def main() -> None:
         "deuteron (pn) two-body: bound-state scales (frozen)",
         ha="left",
         va="top",
-        fontsize=16.0,
+        fontsize=panel_title_font,
         weight="bold",
         transform=ax0.transAxes,
     )
@@ -250,7 +266,7 @@ def main() -> None:
         ),
         ha="left",
         va="top",
-        fontsize=17.0,
+        fontsize=note_font,
         transform=ax0.transAxes,
         bbox={"boxstyle": "round,pad=0.35", "facecolor": "white", "edgecolor": "0.85"},
     )
@@ -266,7 +282,7 @@ def main() -> None:
         ),
         ha="left",
         va="top",
-        fontsize=16.0,
+        fontsize=note_font,
         transform=ax0.transAxes,
     )
 
@@ -286,25 +302,35 @@ def main() -> None:
             xy=(x, y),
             xytext=(4, y_shift_pts),
             textcoords="offset points",
-            fontsize=14.4,
+            fontsize=note_font,
             ha="left",
             va="top",
             rotation=rot,
         )
 
-    ax1.set_xlabel("well range R (fm)", fontsize=15.0)
-    ax1.set_ylabel("required depth V0 (MeV)", fontsize=15.0)
-    ax1.set_title("Square-well depth required to support B (illustration)", fontsize=16.2)
+    ax1.set_xlabel("well range R (fm)", fontsize=axis_label_font)
+    ax1.set_ylabel("required depth V0 (MeV)", fontsize=axis_label_font)
+    ax1.set_title("Square-well depth required to support B (illustration)", fontsize=panel_title_font, pad=6.0)
     ax1.grid(True, ls=":", lw=0.6, alpha=0.6)
-    ax1.tick_params(axis="both", labelsize=13.4)
+    ax1.tick_params(axis="both", labelsize=tick_font)
 
-    fig.suptitle("deuteron Δω mapping via 2-body boundary condition", y=0.99, fontsize=17.4)
-    fig.subplots_adjust(left=0.05, right=0.985, top=0.90, bottom=0.11, wspace=0.24)
+    fig.suptitle("deuteron Δω mapping via 2-body boundary condition", y=0.986, fontsize=suptitle_font)
+    fig.subplots_adjust(left=0.085, right=0.985, top=0.880, bottom=0.110, wspace=0.24)
 
     out_pdf = out_dir / "nuclear_binding_energy_frequency_mapping_deuteron_two_body.pdf"
     out_png = out_dir / "nuclear_binding_energy_frequency_mapping_deuteron_two_body.png"
-    fig.savefig(out_pdf, bbox_inches="tight")
-    fig.savefig(out_png, bbox_inches="tight")
+    prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+    try:
+        with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+            fig.savefig(out_pdf)
+            fig.savefig(out_png)
+    finally:
+        if prev_disable_normalize is None:
+            os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = prev_disable_normalize
+
     plt.close(fig)
 
     # Sources / traceability

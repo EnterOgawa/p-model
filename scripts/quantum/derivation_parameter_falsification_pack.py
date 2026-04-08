@@ -34,9 +34,20 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.utils.plot_style import get_wavep_font_size  # noqa: E402
+
+try:
+    import matplotlib as mpl
+    from scripts.utils.plot_style import install_wavep_cjk_font_override  # noqa: E402
+
+    install_wavep_cjk_font_override(preferred_name="Noto Sans CJK JP")
+    mpl.rcParams["axes.unicode_minus"] = False
+except Exception:
+    pass
 
 
 # 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -545,6 +556,53 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
             writer.writerow(row)
 
 
+# 関数: `_wrap_two_line_label` の入出力契約と処理意図を定義する。
+
+def _wrap_two_line_label(text: str) -> str:
+    words = [
+        token
+        for token in str(text).replace("::", " ").replace(":", " ").replace("_", " ").split()
+        if token
+    ]
+    if len(words) <= 1:
+        return " ".join(words) if words else str(text)
+
+    best_index = 1
+    best_score: Optional[int] = None
+    for idx in range(1, len(words)):
+        left = " ".join(words[:idx])
+        right = " ".join(words[idx:])
+        score = max(len(left), len(right))
+        if best_score is None or score < best_score:
+            best_score = score
+            best_index = idx
+
+    return " ".join(words[:best_index]) + "\n" + " ".join(words[best_index:])
+
+
+# 関数: `_display_row_label` の入出力契約と処理意図を定義する。
+
+def _display_row_label(text: str) -> str:
+    raw = str(text)
+    display_map = {
+        "derivation::covariant_derivative_gauge_covariance": "導出: 共変微分の\nゲージ共変性",
+        "derivation::kinetic_density_gauge_invariance": "導出: 運動密度の\nゲージ不変性",
+        "derivation::noether_current_gauge_invariance": "導出: Noether電流の\nゲージ不変性",
+        "derivation::noether_current_realness": "導出: Noether電流の\n実数性",
+        "nonrel::cow_neutron": "非相対論: COW中性子",
+        "nonrel::atom_gravimeter": "非相対論: 原子干渉計重力計",
+        "nonrel::optical_clock_leveling_proxy": "非相対論: 光格子時計\nレベリング代理量",
+        "born::selection_delay_signature_fast": "Born: 高速切替\n遅延指標",
+        "born::selection_sweep_sensitivity_fast": "Born: 高速切替\n感度掃引",
+        "born::phase_alpha_consistency": "Born: 原子反跳 α\n整合",
+        "born::phase_molecular_scaling": "Born: 分子同位体\nスケーリング",
+        "born::visibility_atom_precision_gap": "Born: 原子干渉計\n精度差",
+        "condensed::reject_count": "物性・熱: reject件数",
+        "condensed::inconclusive_count": "物性・熱: 判定保留件数",
+    }
+    return display_map.get(raw, raw)
+
+
 # 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, payload: Dict[str, Any]) -> None:
@@ -557,7 +615,7 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
         if not isinstance(row, dict):
             continue
 
-        labels.append(str(row.get("id") or ""))
+        labels.append(_display_row_label(str(row.get("id") or "")))
         score = _as_float(row.get("normalized_score"))
         scores.append(score if score is not None else math.nan)
         status = str(row.get("status") or "unknown")
@@ -573,21 +631,37 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
         else:
             colors.append("#9ca3af")
 
-    figure_height = max(4.8, 0.33 * len(labels) + 1.6)
+    title_size = max(get_wavep_font_size("title"), 16.0)
+    axis_size = max(get_wavep_font_size("axis"), 14.2)
+    tick_size = max(get_wavep_font_size("tick"), 13.2)
+    upper_y_tick_size = max(tick_size + 1.6, 14.8)
+
+    figure_height = max(8.7, 0.74 * len(labels) + 2.8)
+    decision_label = {
+        "A_continue": "A継続",
+        "A_reject": "A棄却",
+        "unknown": "不明",
+    }.get(
+        str((payload.get("decision") or {}).get("route_a_gate") if isinstance(payload.get("decision"), dict) else "unknown"),
+        str((payload.get("decision") or {}).get("route_a_gate") if isinstance(payload.get("decision"), dict) else "unknown"),
+    )
     y_values = np.arange(len(labels))
-    fig, ax = plt.subplots(figsize=(12.4, figure_height), dpi=180)
-    ax.barh(y_values, scores, color=colors)
+    wrapped_labels = [_wrap_two_line_label(label) for label in labels]
+    fig, ax = plt.subplots(figsize=(12.9, figure_height), dpi=180)
+    ax.barh(y_values, scores, color=colors, height=0.72)
     ax.axvline(1.0, linestyle="--", color="#6b7280", linewidth=1.2)
-    ax.set_yticks(y_values, labels)
-    ax.tick_params(axis="y", labelsize=13.6)
-    ax.set_xlabel("normalized score (<=1 means threshold satisfied)", fontsize=14.8)
-    decision = (payload.get("decision") or {}).get("route_a_gate") if isinstance(payload.get("decision"), dict) else "unknown"
-    ax.set_title(f"Derivation-parameter falsification pack ({decision})", fontsize=15.6, pad=8.0)
-    ax.tick_params(axis="x", labelsize=13.4)
+    ax.set_yticks(y_values, wrapped_labels)
+    ax.tick_params(axis="y", labelsize=upper_y_tick_size, pad=7.0)
+    for tick in ax.get_yticklabels():
+        tick.set_linespacing(1.15)
+
+    ax.set_xlabel("正規化スコア（1以下で閾値充足）", fontsize=axis_size)
+    ax.set_title(f"導出パラメータ反証パック（{decision_label}）", fontsize=title_size, pad=9.0)
+    ax.tick_params(axis="x", labelsize=tick_size)
     ax.grid(axis="x", alpha=0.25, linestyle=":")
-    fig.tight_layout()
+    fig.subplots_adjust(left=0.37, right=0.98, top=0.91, bottom=0.11)
     path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(path, bbox_inches="tight")
+    fig.savefig(path)
     plt.close(fig)
 
 
@@ -624,6 +698,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     out_json = _resolve(args.out_json)
     out_csv = _resolve(args.out_csv)
     out_png = _resolve(args.out_png)
+    out_pdf = out_png.with_suffix(".pdf")
 
     payload = build_pack()
     out_json.parent.mkdir(parents=True, exist_ok=True)
@@ -631,10 +706,12 @@ def main(argv: Optional[List[str]] = None) -> int:
     rows = payload.get("criteria") if isinstance(payload.get("criteria"), list) else []
     _write_csv(out_csv, rows)
     _plot(out_png, payload)
+    _plot(out_pdf, payload)
 
     print(f"[ok] wrote: {_rel(out_json)}")
     print(f"[ok] wrote: {_rel(out_csv)}")
     print(f"[ok] wrote: {_rel(out_png)}")
+    print(f"[ok] wrote: {_rel(out_pdf)}")
 
     try:
         worklog.append_event(

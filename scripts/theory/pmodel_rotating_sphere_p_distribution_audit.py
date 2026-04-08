@@ -1,3 +1,10 @@
+"""
+目的: 理論 topic の pmodel rotating sphere p distribution audit に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -19,6 +26,11 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog
+from scripts.utils.plot_style import (
+    apply_paper_style,
+    apply_wavep_figure_layout,
+    resolve_wavep_cjk_font_family,
+)
 
 
 # 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
@@ -27,27 +39,21 @@ def _set_japanese_font() -> None:
         import matplotlib as mpl
         import matplotlib.font_manager as fm
 
-        preferred = [
-            "Yu Gothic",
-            "Meiryo",
-            "BIZ UDGothic",
-            "MS Gothic",
-            "Yu Mincho",
-            "MS Mincho",
-        ]
+        preferred = resolve_wavep_cjk_font_family(preferred_name="Noto Sans CJK JP")
+        if preferred:
+            mpl.rcParams["font.family"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["axes.unicode_minus"] = False
+            return
+
         available = {f.name for f in fm.fontManager.ttflist}
-        chosen = [name for name in preferred if name in available]
-        # 条件分岐: `chosen` を満たす経路を評価する。
+        fallback = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
+        chosen = [name for name in fallback if name in available]
         if chosen:
             mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = chosen + ["DejaVu Sans"]
 
         mpl.rcParams["axes.unicode_minus"] = False
-        mpl.rcParams["font.size"] = 15.0
-        mpl.rcParams["axes.titlesize"] = 20.0
-        mpl.rcParams["axes.labelsize"] = 16.0
-        mpl.rcParams["xtick.labelsize"] = 14.0
-        mpl.rcParams["ytick.labelsize"] = 14.0
-        mpl.rcParams["legend.fontsize"] = 14.0
     except Exception:
         return
 
@@ -429,9 +435,11 @@ def _plot(
     z_reject: float,
     out_png: Path,
 ) -> None:
+    apply_paper_style()
     _set_japanese_font()
 
-    fig = plt.figure(figsize=(14.2, 12.0))
+    fig = plt.figure()
+    apply_wavep_figure_layout(fig, template="paper_grid_tall")
     grid = fig.add_gridspec(2, 2, height_ratios=[1.0, 1.18], hspace=0.34, wspace=0.20)
 
     ax0 = fig.add_subplot(grid[0, 0])
@@ -446,12 +454,13 @@ def _plot(
 
     ax0.plot(theta * 180.0 / math.pi, static_profile, color="#2f2f2f", linestyle="--", linewidth=2.6, label="δP_rot=0（回転項なし）")
     ax0.plot(theta * 180.0 / math.pi, rot_profile, color="#1f77b4", linewidth=3.0, label="δP_rot≠0（回転項あり）")
-    ax0.set_xlabel("極角 θ [deg]", fontsize=17.0)
-    ax0.set_ylabel(r"$P/P_{\mathrm{static}}$（$r=1.5R$）", fontsize=17.0)
-    ax0.set_title("回転 P プロファイル監査（最小 ansatz）", fontsize=21.0, pad=11.0)
+    ax0.set_xlabel("極角 θ [deg]", fontsize=9.5)
+    ax0.set_ylabel(r"$P/P_{\mathrm{static}}$（$r=1.5R$）", fontsize=9.5)
+    title0 = ax0.set_title("回転 P プロファイル監査", fontsize=21.0, pad=11.0)
+    title0.set_fontsize(9.4)
     ax0.grid(True, alpha=0.25)
-    ax0.tick_params(axis="both", labelsize=14.5)
-    ax0.legend(loc="upper right", fontsize=14.0)
+    ax0.tick_params(axis="both", labelsize=7.8)
+    ax0.legend(loc="center right", fontsize=7.6)
 
     frame_static = [r for r in static_rows if str(r.get("kind") or "") == "frame_dragging"]
     frame_rot = [r for r in rot_rows if str(r.get("kind") or "") == "frame_dragging"]
@@ -477,21 +486,23 @@ def _plot(
     ax1.bar(x + width, rot_ratio, width=width, color="#2ca02c", alpha=0.9, label="δP_rot≠0 予測")
     ax1.axhline(1.0, color="#555555", linestyle="--", linewidth=1.0)
     ax1.set_xticks(x)
-    ax1.set_xticklabels(labels, rotation=10, ha="right", fontsize=14.0)
-    ax1.set_ylabel("無次元比", fontsize=17.0)
-    ax1.set_title("フレームドラッグ比率監査", fontsize=21.0, pad=11.0)
+    ax1.set_xticklabels(labels, rotation=10, ha="right", fontsize=7.6)
+    ax1.set_ylabel("無次元比", fontsize=9.5)
+    title1 = ax1.set_title("フレームドラッグ比率監査", fontsize=21.0, pad=11.0)
+    title1.set_fontsize(9.4)
     ax1.grid(True, axis="y", alpha=0.25)
-    ax1.tick_params(axis="both", labelsize=14.5)
-    ax1.legend(loc="upper right", fontsize=14.0)
+    ax1.tick_params(axis="both", labelsize=7.8)
+    ax1.legend(loc="center right", fontsize=7.6)
     yvals = [v for v in obs_ratio + static_ratio + rot_ratio if np.isfinite(v)]
     if yvals:
         y_center = float(np.mean(yvals))
         y_span = max(0.03, 1.2 * max(abs(v - y_center) for v in yvals))
         ax1.set_ylim(y_center - y_span, y_center + y_span)
+
     for xpos, values_plot in zip([x - width, x, x + width], [obs_ratio, static_ratio, rot_ratio]):
         for xi, yi in zip(xpos, values_plot):
             if np.isfinite(yi):
-                ax1.text(xi, yi + 0.007, f"{yi:.3f}", ha="center", va="bottom", fontsize=13.2, color="0.22")
+                ax1.text(xi, yi + 0.007, f"{yi:.3f}", ha="center", va="bottom", fontsize=7.2, color="0.22")
 
     ax2 = fig.add_subplot(grid[1, :])
     z_static = [float(r["z_score"]) if r.get("z_score") is not None else 0.0 for r in frame_static]
@@ -502,12 +513,13 @@ def _plot(
     ax2.axhline(-z_reject, color="#333333", linestyle="--", linewidth=1.0)
     ax2.axhline(0.0, color="#666666", linestyle="-", linewidth=0.9)
     ax2.set_xticks(x)
-    ax2.set_xticklabels(labels, rotation=10, ha="right", fontsize=14.0)
-    ax2.set_ylabel("z = (観測 - 予測) / σ", fontsize=17.0)
-    ax2.set_title("歳差ゲート比較", fontsize=21.0, pad=11.0)
+    ax2.set_xticklabels(labels, rotation=10, ha="right", fontsize=7.6)
+    ax2.set_ylabel("z = (観測 - 予測) / σ", fontsize=9.5)
+    title2 = ax2.set_title("歳差ゲート比較", fontsize=21.0, pad=11.0)
+    title2.set_fontsize(9.8)
     ax2.grid(True, axis="y", alpha=0.25)
-    ax2.tick_params(axis="both", labelsize=14.5)
-    ax2.legend(loc="upper right", fontsize=14.0)
+    ax2.tick_params(axis="both", labelsize=7.8)
+    ax2.legend(loc="upper right", fontsize=7.6)
     max_abs_z_panel = max([abs(v) for v in z_static + z_rot] + [abs(z_reject), 1e-6])
     y_margin = 0.08 * max_abs_z_panel
     ax2.set_ylim(-(max_abs_z_panel + y_margin), max_abs_z_panel + y_margin)
@@ -516,12 +528,13 @@ def _plot(
         x_center = bar.get_x() + bar.get_width() * 0.5
         y_text = h + (0.015 * max_abs_z_panel if h >= 0.0 else -0.03 * max_abs_z_panel)
         va = "bottom" if h >= 0.0 else "top"
-        ax2.text(x_center, y_text, f"{h:.2f}", ha="center", va=va, fontsize=13.4, color="0.20")
+        ax2.text(x_center, y_text, f"{h:.2f}", ha="center", va=va, fontsize=7.3, color="0.20")
 
-    fig.subplots_adjust(left=0.065, right=0.985, top=0.94, bottom=0.075, hspace=0.32, wspace=0.20)
     out_png.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_png, dpi=200)
-    fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight")
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        fig.savefig(out_png, dpi=220)
+        fig.savefig(out_png.with_suffix(".pdf"))
+
     plt.close(fig)
 
 
@@ -768,6 +781,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         canon_copied.append(dst)
 
     # 条件分岐: `not args.no_public_copy` を満たす経路を評価する。
+
     if not args.no_public_copy:
         for src in (out_json, out_csv, out_png, out_pdf):
             dst = public_outdir / src.name
@@ -813,6 +827,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(f"[ok] canon copies : {len(canon_copied)} files -> {canon_outdir}")
 
     # 条件分岐: `copied` を満たす経路を評価する。
+
     if copied:
         print(f"[ok] public copies: {len(copied)} files -> {public_outdir}")
 

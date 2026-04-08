@@ -1,3 +1,10 @@
+"""
+目的: 理論 topic の pmodel rejection protocol flowchart に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import json
@@ -7,10 +14,16 @@ from typing import Any, Dict, List, Tuple
 
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
+from scripts.utils.plot_style import (
+    apply_paper_style,
+    apply_wavep_figure_layout,
+    resolve_wavep_cjk_font_family,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT_DIR_PUBLIC = ROOT / "output" / "theory"
+OUT_DIR_CANON = ROOT / "output" / "theory"
+OUT_DIR_PUBLIC = ROOT / "output" / "public" / "theory"
 OUT_DIR_PRIVATE = ROOT / "output" / "private" / "theory"
 
 
@@ -20,38 +33,64 @@ def _utc_now() -> str:
 
 
 # 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
+
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
         import matplotlib.font_manager as fm
 
-        preferred = [
-            "Yu Gothic",
-            "Meiryo",
-            "BIZ UDGothic",
-            "MS Gothic",
-            "Yu Mincho",
-            "MS Mincho",
-        ]
-        available = {font.name for font in fm.fontManager.ttflist}
-        selected = [name for name in preferred if name in available]
-        # 条件分岐: `not selected` を満たす経路を評価する。
-        if not selected:
+        preferred = resolve_wavep_cjk_font_family(preferred_name="Noto Sans CJK JP")
+        if preferred:
+            mpl.rcParams["font.family"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["axes.unicode_minus"] = False
             return
 
-        mpl.rcParams["font.family"] = selected + ["DejaVu Sans"]
+        available = {font.name for font in fm.fontManager.ttflist}
+        fallback = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
+        selected = [name for name in fallback if name in available]
+        if selected:
+            mpl.rcParams["font.family"] = selected + ["DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = selected + ["DejaVu Sans"]
+
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         return
 
 
 # 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+# 関数: `_save_figure_bundle` の入出力契約と処理意図を定義する。
+
+def _save_figure_bundle(*, fig: Any, stem: str) -> Dict[str, str]:
+    outputs = {
+        "png_canon": OUT_DIR_CANON / f"{stem}.png",
+        "png_public": OUT_DIR_PUBLIC / f"{stem}.png",
+        "png_private": OUT_DIR_PRIVATE / f"{stem}.png",
+        "pdf_canon": OUT_DIR_CANON / f"{stem}.pdf",
+        "pdf_public": OUT_DIR_PUBLIC / f"{stem}.pdf",
+        "pdf_private": OUT_DIR_PRIVATE / f"{stem}.pdf",
+    }
+    for path in outputs.values():
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        for path in outputs.values():
+            if path.suffix.lower() == ".png":
+                fig.savefig(path, dpi=220)
+            else:
+                fig.savefig(path)
+
+    return {key: str(value).replace("\\", "/") for key, value in outputs.items()}
+
+
 # 関数: `_draw_box` の入出力契約と処理意図を定義する。
+
 def _draw_box(
     *,
     ax: Any,
@@ -74,31 +113,35 @@ def _draw_box(
         linewidth=1.2,
     )
     ax.add_patch(patch)
-    ax.text(
+    title_text = ax.text(
         x + w * 0.5,
         y + h * 0.67,
         title,
         transform=ax.transAxes,
         ha="center",
         va="center",
-        fontsize=13.0,
+        fontsize=11.5,
         fontweight="bold",
         color="0.10",
     )
-    ax.text(
+    title_text.set_fontsize(10.2)
+    title_text.set_fontweight("bold")
+    body_text = ax.text(
         x + w * 0.5,
         y + h * 0.33,
         body,
         transform=ax.transAxes,
         ha="center",
         va="center",
-        fontsize=11.3,
+        fontsize=10.0,
         color="0.15",
         linespacing=1.22,
     )
+    body_text.set_fontsize(8.6)
 
 
 # 関数: `_draw_arrow` の入出力契約と処理意図を定義する。
+
 def _draw_arrow(
     *,
     ax: Any,
@@ -122,31 +165,24 @@ def _draw_arrow(
     ax.add_patch(arrow)
 
 
-# 関数: `_save_figure` の入出力契約と処理意図を定義する。
-def _save_figure(fig: Any, public_path: Path, private_path: Path) -> None:
-    public_path.parent.mkdir(parents=True, exist_ok=True)
-    private_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(public_path, dpi=220, bbox_inches="tight")
-    fig.savefig(private_path, dpi=220, bbox_inches="tight")
-
-
 # 関数: `main` の入出力契約と処理意図を定義する。
+
 def main() -> int:
+    apply_paper_style()
     _set_japanese_font()
 
-    out_png_public = OUT_DIR_PUBLIC / "pmodel_rejection_protocol_flowchart.png"
-    out_png_private = OUT_DIR_PRIVATE / "pmodel_rejection_protocol_flowchart.png"
     out_json_private = OUT_DIR_PRIVATE / "pmodel_rejection_protocol_flowchart_metrics.json"
 
-    figure, axis = plt.subplots(figsize=(9.8, 5.2), dpi=220)
+    figure, axis = plt.subplots(dpi=220)
+    apply_wavep_figure_layout(figure, template="paper_flowchart")
     axis.set_axis_off()
 
     steps: List[Dict[str, str]] = [
-        {"title": "Input", "body": "一次データ\n依存前提\n取得元", "color": "#eef3ff"},
-        {"title": "Frozen", "body": "凍結パラメータ\n凍結根拠\n固定時点", "color": "#f2edff"},
-        {"title": "Statistic", "body": "RMS, χ², z\nΔAIC, 傾き\n誤差伝播", "color": "#fff7ec"},
-        {"title": "Reject", "body": "閾値判定\n(3σ, ΔAIC)\n判定分岐へ", "color": "#ffe8e8"},
-        {"title": "Output", "body": "固定ファイル名\n再現コマンド\n監査ログ", "color": "#eaf8ea"},
+        {"title": "入力", "body": "一次データ\n依存前提\n取得元", "color": "#eef3ff"},
+        {"title": "凍結", "body": "凍結パラメータ\n凍結根拠\n固定時点", "color": "#f2edff"},
+        {"title": "統計", "body": "RMS, χ², z\nΔAIC, 傾き\n誤差伝播", "color": "#fff7ec"},
+        {"title": "判定", "body": "閾値判定\n(3σ, ΔAIC)\n判定分岐へ", "color": "#ffe8e8"},
+        {"title": "出力", "body": "固定ファイル名\n再現コマンド\n監査ログ", "color": "#eaf8ea"},
     ]
 
     box_width = 0.148
@@ -172,6 +208,7 @@ def main() -> int:
         )
 
     # 条件分岐: `len(x_positions) >= 2` を満たす経路を評価する。
+
     if len(x_positions) >= 2:
         for left_x, right_x in zip(x_positions[:-1], x_positions[1:]):
             start = (left_x + box_width, y0 + box_height * 0.5)
@@ -195,7 +232,7 @@ def main() -> int:
     )
 
     x_line_start = x_branch + 0.005
-    x_line_end = 0.95
+    x_line_end = 0.975
     _draw_arrow(
         ax=axis,
         start=(x_line_start, y_branch),
@@ -206,57 +243,59 @@ def main() -> int:
         zorder=7.8,
     )
     branch_labels = [
-        ("Pass", "#2ca02c", x_output + 0.04 - branch_shift_left),
-        ("Watch", "#f59e0b", x_output + 0.105 - branch_shift_left),
-        ("Reject", "#d62728", x_output + 0.165 - branch_shift_left),
+        ("採用", "#2ca02c", x_output + 0.026 - branch_shift_left),
+        ("監視", "#f59e0b", x_output + 0.118 - branch_shift_left),
+        ("棄却", "#d62728", x_output + 0.212 - branch_shift_left),
     ]
     for label, color, xb in branch_labels:
         axis.scatter([xb], [y_branch], transform=axis.transAxes, s=56, color=color, zorder=9.0)
-        axis.text(
-            xb + 0.008,
-            y_branch + 0.0025,
+        branch_text = axis.text(
+            xb,
+            y_branch - 0.020,
             label,
             transform=axis.transAxes,
-            ha="left",
-            va="bottom",
-            fontsize=9.6,
+            ha="center",
+            va="top",
+            fontsize=8.8,
             color=color,
             fontweight="bold",
             zorder=9.0,
         )
+        branch_text.set_fontsize(8.2)
+        branch_text.set_fontweight("bold")
 
-    axis.text(
+    branch_label = axis.text(
         x_branch - branch_shift_left,
         y_branch + 0.033,
         "判定分岐",
         transform=axis.transAxes,
         ha="center",
         va="bottom",
-        fontsize=9.3,
+        fontsize=8.5,
         color="0.30",
     )
+    branch_label.set_fontsize(8.0)
 
-    axis.text(
+    footer_text = axis.text(
         0.5,
         0.07,
-        "Part I 基準：Input→Frozen→Statistic→Reject→Output を同一I/Fで固定し、再現可能な棄却手順として運用する。",
+        "Part I 基準：入力→凍結→統計→判定→出力 を同一I/Fで固定し、再現可能な棄却手順として運用する。",
         transform=axis.transAxes,
         ha="center",
         va="center",
-        fontsize=11.0,
+        fontsize=9.8,
         color="0.25",
     )
+    footer_text.set_fontsize(8.8)
 
-    figure.tight_layout()
-    _save_figure(figure, public_path=out_png_public, private_path=out_png_private)
+    outputs = _save_figure_bundle(fig=figure, stem="pmodel_rejection_protocol_flowchart")
     plt.close(figure)
 
     payload = {
         "generated_utc": _utc_now(),
         "script": "scripts/theory/pmodel_rejection_protocol_flowchart.py",
         "outputs": {
-            "png_public": str(out_png_public).replace("\\", "/"),
-            "png_private": str(out_png_private).replace("\\", "/"),
+            **outputs,
             "metrics_json": str(out_json_private).replace("\\", "/"),
         },
         "flow_steps": [step["title"] for step in steps],
@@ -267,12 +306,14 @@ def main() -> int:
     }
     _write_json(out_json_private, payload)
 
-    print(f"[ok] png(public) : {out_png_public}")
-    print(f"[ok] png(private): {out_png_private}")
+    print(f"[ok] png(public) : {outputs['png_public']}")
+    print(f"[ok] png(private): {outputs['png_private']}")
+    print(f"[ok] pdf(public) : {outputs['pdf_public']}")
     print(f"[ok] json        : {out_json_private}")
     return 0
 
 
 # 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
+
 if __name__ == "__main__":
     raise SystemExit(main())

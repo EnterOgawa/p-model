@@ -1,3 +1,10 @@
+"""
+目的: Part III-B / Part IV で使う量子 score board を再計算して公開 JSON と図を更新する。
+入力: 量子系 canonical artifact と判定ルールを読む。
+出力: output/public/summary の量子 score board と要約図を更新する。
+前提: 論文本文はここで固定した status 集計を正とする。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -218,8 +225,26 @@ def build_quantum_scoreboard(root: Path) -> Dict[str, Any]:
         pmodel = str(r.get("pmodel") or "")
 
         label = topic
+        topic_lc = topic.lower()
+        if "bell" in topic_lc and (
+            "公開一次" in topic
+            or "selection" in topic_lc
+            or "公開一次" in observable
+            or "selection" in observable.lower()
+            or "window/offset" in observable.lower()
+        ):
+            label = "ベル（公開一次）"
+        elif topic.lower() == "bell" and (
+            "公開一次" in observable
+            or "selection" in observable.lower()
+            or "window/offset" in observable.lower()
+        ):
+            label = "ベル（公開一次）"
+        elif topic == "ベル" and ("公開一次" in observable or "selection" in observable.lower()):
+            label = "ベル（公開一次）"
         # 条件分岐: `topic_counts.get(topic, 0) > 1` を満たす経路を評価する。
-        if topic_counts.get(topic, 0) > 1:
+
+        if not label.endswith("）") and topic_counts.get(topic, 0) > 1:
             label = f"{topic}：{_short_observable_label(observable)}"
 
         score = _score_norm_quantum(metric_public, metric, pmodel)
@@ -271,7 +296,18 @@ def main() -> int:
         out_pdf=out_pdf,
         title="総合スコアボード（量子：緑=OK / 黄=要改善 / 赤=不一致）",
         xlabel="正規化スコア（0=理想, 1=OK境界, 2=要改善境界）",
-        target_fig_h_in=12.8,
+        target_fig_h_in=6.92,
+        row_h_nominal=0.26,
+        base_h=1.70,
+        bar_pitch=0.78,
+        bar_height=0.60,
+        title_scale=0.94,
+        axis_scale=1.00,
+        label_scale=1.00,
+        tick_scale=1.00,
+        min_label_font_size=6.0,
+        left_margin=0.43,
+        right_margin=0.99,
     )
 
     payload["outputs"] = {

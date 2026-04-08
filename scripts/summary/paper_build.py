@@ -15,7 +15,9 @@ Phase 8（論文化・公開）向けの「ビルド入口」。
   - output/private/summary/paper_table1_results.md（ほか .json/.csv）
   - profile=paper: output/private/summary/pmodel_paper.html（Part I）
   - profile=part2_astrophysics: output/private/summary/pmodel_paper_part2_astrophysics.html
-  - profile=part3_quantum: output/private/summary/pmodel_paper_part3_quantum.html
+  - profile=part3_quantum: output/private/summary/pmodel_paper_part3_quantum.html（互換）
+  - profile=part3a_quantum_foundations: output/private/summary/pmodel_paper_part3a_quantum_foundations.html
+  - profile=part3b_quantum_verification: output/private/summary/pmodel_paper_part3b_quantum_verification.html
   - profile=part4_verification: output/private/summary/pmodel_paper_part4_verification.html
   - profile=part5_future_predictions: output/private/summary/pmodel_paper_part5_future_predictions.html
   - profileごとの PDF（.tex から生成）
@@ -38,6 +40,7 @@ if str(_ROOT) not in sys.path:
 from scripts.cosmology import jwst_spectra_integration, jwst_spectra_release_waitlist
 from scripts.gw import gw_multi_event_summary
 from scripts.xrism import fek_relativistic_broadening_isco_constraints, xrism_integration
+from scripts.summary import paper_profile_content as profile_content
 from scripts.summary import html_to_docx, paper_html, paper_latex, paper_lint, paper_pdf, paper_tables, paper_tex_audit, worklog
 
 
@@ -67,9 +70,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Build paper artifacts (検証サマリ表 + HTML + lint).")
     ap.add_argument(
         "--profile",
-        choices=["paper", "part2_astrophysics", "part3_quantum", "part4_verification", "part5_future_predictions"],
+        choices=list(profile_content.PAPER_PROFILES),
         default="paper",
-        help="build profile: paper (Part I) / part2_astrophysics / part3_quantum / part4_verification / part5_future_predictions",
+        help="build profile: paper / part2_astrophysics / part3_quantum / part3a_quantum_foundations / part3b_quantum_verification / part4_verification / part5_future_predictions",
     )
     ap.add_argument(
         "--mode",
@@ -211,30 +214,33 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     env_figure_lang = os.environ.get("WAVEP_FIGURE_LANG", "").strip().lower()
     auto_figure_lang = env_figure_lang if env_figure_lang in {"ja", "en"} else "ja"
-    auto_lang_profiles = {"part3_quantum", "part4_verification", "part5_future_predictions"}
+    auto_lang_profiles = {
+        profile_content.PART3_COMPAT_PROFILE,
+        profile_content.PART3A_PROFILE,
+        profile_content.PART3B_PROFILE,
+        "part4_verification",
+        "part5_future_predictions",
+    }
     figure_lang = auto_figure_lang if (requested_figure_lang == "auto" and profile in auto_lang_profiles) else requested_figure_lang
-    font_profile_by_build_profile = {
-        "paper": "paper",
-        "part2_astrophysics": "part2_astrophysics",
-        "part3_quantum": "part3_quantum",
-        "part4_verification": "part4_verification",
-        "part5_future_predictions": "part5_future_predictions",
-    }
-    font_floor_by_build_profile = {
-        "paper": ("12.2", "12.2"),
-        "part2_astrophysics": ("13.2", "13.2"),
-        "part3_quantum": ("12.2", "12.2"),
-        "part4_verification": ("14.0", "14.0"),
-        "part5_future_predictions": ("12.8", "12.8"),
-    }
 
     os.environ.setdefault("WAVEP_MPL_AUTOSAVE_VECTOR_PDF", "1")
-    os.environ.setdefault("WAVEP_MPL_FONT_PROFILE", font_profile_by_build_profile.get(profile, "paper"))
+    os.environ.setdefault("WAVEP_MPL_FONT_PROFILE", profile_content.resolve_font_profile(profile))
     os.environ["WAVEP_MPL_FONT_SCALE"] = str(figure_font_scale)
-    text_floor, legend_note_floor = font_floor_by_build_profile.get(profile, ("12.2", "12.2"))
+    os.environ.setdefault("WAVEP_MPL_CJK_FONT", "Noto Sans CJK JP")
+    os.environ.setdefault("WAVEP_MPL_CJK_FONT_PATH", str(root / "output" / "private" / "summary" / "fonts" / "NotoSansJP-Regular-static.ttf"))
+    text_floor, legend_note_floor = profile_content.resolve_font_floors(profile)
     os.environ.setdefault("WAVEP_MPL_TEXT_MIN_FONT", text_floor)
     os.environ.setdefault("WAVEP_MPL_LEGEND_NOTE_MIN_FONT", legend_note_floor)
-    if profile == "part3_quantum":
+    existing_pythonpath = str(os.environ.get("PYTHONPATH", "")).strip()
+    root_str = str(root)
+    if existing_pythonpath:
+        pythonpath_items = existing_pythonpath.split(os.pathsep)
+        if root_str not in pythonpath_items:
+            os.environ["PYTHONPATH"] = root_str + os.pathsep + existing_pythonpath
+    else:
+        os.environ["PYTHONPATH"] = root_str
+
+    if profile_content.is_quantum_profile(profile):
         if requested_figure_lang == "auto":
             os.environ.setdefault("WAVEP_FIGURE_LANG", figure_lang)
             if figure_lang == "ja":
@@ -284,7 +290,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     # Best-effort refresh of Part III (quantum) figures/metrics so a single
     # `paper_build --profile part3_quantum` yields a consistent publish artifact.
-    if profile == "part3_quantum":
+    if profile_content.should_run_quantum_presteps(profile):
         _run_best_effort(
             [py, "-B", str(root / "scripts" / "quantum" / "molecular_h2_baseline.py"), "--slug", "h2"],
             cwd=root,
@@ -306,11 +312,227 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             cwd=root,
         )
         _run_best_effort([py, "-B", str(root / "scripts" / "quantum" / "electron_double_slit_interference.py")], cwd=root)
+        bell_selection_env = {
+            "WAVEP_MPL_FONT_PROFILE": "part3b_quantum_verification" if profile == profile_content.PART3B_PROFILE else "part3_quantum",
+        }
+        _run_best_effort(
+            [py, "-B", str(root / "scripts" / "quantum" / "bell_primary_products.py")],
+            cwd=root,
+            env_overrides=bell_selection_env,
+        )
+        _run_best_effort(
+            [
+                py,
+                "-B",
+                str(root / "scripts" / "quantum" / "nist_belltest_time_tag_reanalysis.py"),
+                "--out-tag",
+                "03_43_afterfixingModeLocking_s3600",
+            ],
+            cwd=root,
+            env_overrides=bell_selection_env,
+        )
+        _run_best_effort(
+            [
+                py,
+                "-B",
+                str(root / "scripts" / "quantum" / "nist_belltest_trial_based_reanalysis.py"),
+                "--out-tag",
+                "03_43_afterfixingModeLocking_s3600",
+            ],
+            cwd=root,
+            env_overrides=bell_selection_env,
+        )
+        _run_best_effort(
+            [py, "-B", str(root / "scripts" / "quantum" / "bell_selection_sensitivity_summary.py")],
+            cwd=root,
+            env_overrides=bell_selection_env,
+        )
+        _run_best_effort([py, "-B", str(root / "scripts" / "quantum" / "gravity_induced_decoherence.py")], cwd=root)
+        _run_best_effort([py, "-B", str(root / "scripts" / "quantum" / "photon_quantum_interference.py")], cwd=root)
+        _run_best_effort([py, "-B", str(root / "scripts" / "quantum" / "qed_vacuum_precision.py")], cwd=root)
+        _run_best_effort([py, "-B", str(root / "scripts" / "quantum" / "nuclear_binding_deuteron.py")], cwd=root)
+        _run_best_effort([py, "-B", str(root / "scripts" / "quantum" / "nuclear_np_scattering_baseline.py")], cwd=root)
+        _run_best_effort(
+            [py, "-B", str(root / "scripts" / "quantum" / "nuclear_binding_energy_frequency_mapping_theory_diff.py")],
+            cwd=root,
+        )
+        _run_best_effort(
+            [
+                py,
+                "-B",
+                str(root / "scripts" / "quantum" / "nuclear_binding_energy_frequency_mapping_differential_quantification.py"),
+            ],
+            cwd=root,
+        )
+        _run_best_effort(
+            [py, "-B", str(root / "scripts" / "quantum" / "nuclear_binding_energy_frequency_mapping_deuteron_verification.py")],
+            cwd=root,
+        )
+        _run_best_effort(
+            [py, "-B", str(root / "scripts" / "quantum" / "nuclear_binding_energy_frequency_mapping_deuteron_two_body.py")],
+            cwd=root,
+        )
+        _run_best_effort(
+            [py, "-B", str(root / "scripts" / "quantum" / "nuclear_binding_energy_frequency_mapping_alpha_verification.py")],
+            cwd=root,
+        )
+        _run_best_effort([py, "-B", str(root / "scripts" / "quantum" / "nuclear_binding_light_nuclei.py")], cwd=root)
+        _run_best_effort(
+            [py, "-B", str(root / "scripts" / "quantum" / "nuclear_binding_energy_frequency_mapping_representative_nuclei.py")],
+            cwd=root,
+        )
+        _run_best_effort(
+            [py, "-B", str(root / "scripts" / "quantum" / "nuclear_near_field_interference_two_mode_model.py")],
+            cwd=root,
+        )
+        _run_best_effort(
+            [py, "-B", str(root / "scripts" / "quantum" / "nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei.py")],
+            cwd=root,
+        )
+        _run_best_effort(
+            [py, "-B", str(root / "scripts" / "quantum" / "nuclear_binding_energy_frequency_mapping_differential_predictions.py")],
+            cwd=root,
+        )
+        _run_best_effort(
+            [
+                py,
+                "-B",
+                str(root / "scripts" / "quantum" / "nuclear_effective_potential_two_range.py"),
+                "--step",
+                "7.9.7",
+                "--eq-only",
+                "18",
+                "--export-pdf",
+            ],
+            cwd=root,
+        )
+        _run_best_effort(
+            [
+                py,
+                "-B",
+                str(root / "scripts" / "quantum" / "nuclear_effective_potential_two_range.py"),
+                "--step",
+                "7.9.7",
+                "--eq-only",
+                "19",
+                "--export-pdf",
+            ],
+            cwd=root,
+        )
+        _run_best_effort([py, "-B", str(root / "scripts" / "quantum" / "thermo_blackbody_radiation_baseline.py")], cwd=root)
+        _run_best_effort([py, "-B", str(root / "scripts" / "quantum" / "thermo_blackbody_entropy_baseline.py")], cwd=root)
+        _run_best_effort(
+            [py, "-B", str(root / "scripts" / "quantum" / "nuclear_binding_energy_frequency_mapping_falsification_pack.py")],
+            cwd=root,
+        )
+        _run_best_effort(
+            [
+                py,
+                "-B",
+                str(root / "scripts" / "quantum" / "nuclear_effective_potential_two_range.py"),
+                "--step",
+                "7.13.8",
+                "--eq-only",
+                "18",
+                "--export-pdf",
+            ],
+            cwd=root,
+        )
+        _run_best_effort(
+            [
+                py,
+                "-B",
+                str(root / "scripts" / "quantum" / "nuclear_effective_potential_two_range.py"),
+                "--step",
+                "7.13.8",
+                "--eq-only",
+                "19",
+                "--export-pdf",
+            ],
+            cwd=root,
+        )
+        _run_best_effort(
+            [
+                py,
+                "-B",
+                str(root / "scripts" / "quantum" / "nuclear_effective_potential_two_range.py"),
+                "--step",
+                "7.13.8.5",
+                "--eq-only",
+                "18",
+                "--export-pdf",
+            ],
+            cwd=root,
+        )
+        _run_best_effort(
+            [
+                py,
+                "-B",
+                str(root / "scripts" / "quantum" / "nuclear_effective_potential_two_range.py"),
+                "--step",
+                "7.13.8.5",
+                "--eq-only",
+                "19",
+                "--export-pdf",
+            ],
+            cwd=root,
+        )
+        _run_best_effort(
+            [
+                py,
+                "-B",
+                str(root / "scripts" / "quantum" / "nuclear_binding_energy_frequency_mapping_minimal_additional_physics.py"),
+            ],
+            cwd=root,
+        )
+        _run_best_effort(
+            [
+                py,
+                "-B",
+                str(root / "scripts" / "quantum" / "condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_model.py"),
+                "--groups",
+                "3",
+            ],
+            cwd=root,
+        )
+        _run_best_effort(
+            [
+                py,
+                "-B",
+                str(root / "scripts" / "quantum" / "condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_model.py"),
+                "--groups",
+                "3",
+                "--optical-softening",
+                "linear_fit",
+            ],
+            cwd=root,
+        )
+        _run_best_effort(
+            [
+                py,
+                "-B",
+                str(root / "scripts" / "quantum" / "condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_model.py"),
+                "--groups",
+                "3",
+                "--optical-softening",
+                "raman_shape_fit",
+            ],
+            cwd=root,
+        )
+        _run_best_effort(
+            [
+                py,
+                "-B",
+                str(root / "scripts" / "quantum" / "condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_model.py"),
+                "--groups",
+                "3",
+                "--dos-softening",
+                "kim2015_linear_proxy",
+            ],
+            cwd=root,
+        )
     elif profile == "part4_verification":
-        # Part4 の図1/図2（scoreboard）は同一の控えめフォントで統一する。
         scoreboard_env = {
-            "WAVEP_MPL_TEXT_MIN_FONT": "11",
-            "WAVEP_MPL_LEGEND_NOTE_MIN_FONT": "11",
             "WAVEP_MPL_AUTOSAVE_VECTOR_PDF": "1",
         }
         public_summary_dir = root / "output" / "public" / "summary"
@@ -321,7 +543,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "-B",
                 str(root / "scripts" / "summary" / "validation_scoreboard.py"),
                 "--target-fig-h-in",
-                "15.6",
+                "9.2",
             ],
             cwd=root,
             env_overrides=scoreboard_env,
@@ -334,7 +556,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "-B",
                 str(root / "scripts" / "summary" / "validation_scoreboard.py"),
                 "--target-fig-h-in",
-                "15.6",
+                "9.2",
                 "--out-json",
                 str(public_summary_dir / "validation_scoreboard.json"),
                 "--out-png",
@@ -364,11 +586,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         # 図4/7/8（同系列監査パック）を毎回再生成してフォント調整を確実に反映する。
         _run_best_effort([py, "-B", str(root / "scripts" / "quantum" / "born_route_a_proxy_constraints.py")], cwd=root)
         action_env = {
-            "WAVEP_MPL_TEXT_MIN_FONT": "11",
-            "WAVEP_MPL_LEGEND_NOTE_MIN_FONT": "11",
             "WAVEP_MPL_AUTOSAVE_VECTOR_PDF": "1",
         }
-        # 図5のみは過大化を避けるため、低めフォント下限で再生成する。
         _run_best_effort(
             [py, "-B", str(root / "scripts" / "quantum" / "action_principle_el_derivation_audit.py")],
             cwd=root,
@@ -380,10 +599,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         _run_best_effort([py, "-B", str(root / "scripts" / "quantum" / "lagrangian_noether_observable_closure_audit.py")], cwd=root)
         _run_best_effort([py, "-B", str(root / "scripts" / "quantum" / "lagrangian_noether_observable_closure_drift_audit.py")], cwd=root)
         _run_best_effort([py, "-B", str(root / "scripts" / "quantum" / "lagrangian_noether_rotational_closure_audit.py")], cwd=root)
-        # 図13, 93-100 は凡例/注記を優先してフォント下限を上げて再生成する。
         part4_legend_env = {
-            "WAVEP_MPL_TEXT_MIN_FONT": "14",
-            "WAVEP_MPL_LEGEND_NOTE_MIN_FONT": "14",
             "WAVEP_MPL_AUTOSAVE_VECTOR_PDF": "1",
         }
         _run_best_effort(
@@ -419,6 +635,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             env_overrides=part4_legend_env,
         )
     elif profile == "part5_future_predictions":
+        _run_best_effort([py, "-B", str(root / "scripts" / "summary" / "part5_conceptual_figures.py")], cwd=root)
         _run_best_effort([py, "-B", str(root / "scripts" / "summary" / "part5_future_predictions_timeline.py")], cwd=root)
 
     # 条件分岐: `not args.skip_tables` を満たす経路を評価する。
@@ -458,7 +675,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         # 条件分岐: `profile == "part3_quantum"` を満たす経路を評価する。
 
-        if profile == "part3_quantum":
+        if profile_content.uses_quantum_table1(profile):
             _run_best_effort([py, "-B", str(root / "scripts" / "summary" / "quantum_scoreboard.py")], cwd=root)
 
     # Ensure summary figures referenced by the manuscript exist (best effort).
@@ -522,20 +739,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     if not args.skip_lint:
         lint_argv: list[str] = []
-        # 条件分岐: `profile == "paper"` を満たす経路を評価する。
-        if profile == "paper":
-            lint_argv += ["--manuscript", "doc/paper/10_part1_core_theory.md"]
-        # 条件分岐: 前段条件が不成立で、`profile == "part2_astrophysics"` を追加評価する。
-        elif profile == "part2_astrophysics":
-            lint_argv += ["--manuscript", "doc/paper/11_part2_astrophysics.md"]
-        # 条件分岐: 前段条件が不成立で、`profile == "part3_quantum"` を追加評価する。
-        elif profile == "part3_quantum":
-            lint_argv += ["--manuscript", "doc/paper/12_part3_quantum.md"]
-        # 条件分岐: 前段条件が不成立で、`profile == "part4_verification"` を追加評価する。
-        elif profile == "part4_verification":
-            lint_argv += ["--manuscript", "doc/paper/13_part4_verification.md"]
-        elif profile == "part5_future_predictions":
-            lint_argv += ["--manuscript", "doc/paper/14_part5_future_predictions.md"]
+        for manuscript in profile_content.resolve_lint_manuscripts(profile):
+            lint_argv += ["--manuscript", manuscript]
 
         rc = paper_lint.main(lint_argv)
         # 条件分岐: `rc != 0` を満たす経路を評価する。
@@ -544,31 +749,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     # 条件分岐: `profile == "paper"` を満たす経路を評価する。
 
-    if profile == "paper":
-        html_name = "pmodel_paper.html"
-        docx_name = "pmodel_paper.docx"
-        pdf_name = "pmodel_paper.pdf"
-    # 条件分岐: 前段条件が不成立で、`profile == "part2_astrophysics"` を追加評価する。
-    elif profile == "part2_astrophysics":
-        html_name = "pmodel_paper_part2_astrophysics.html"
-        docx_name = "pmodel_paper_part2_astrophysics.docx"
-        pdf_name = "pmodel_paper_part2_astrophysics.pdf"
-    # 条件分岐: 前段条件が不成立で、`profile == "part3_quantum"` を追加評価する。
-    elif profile == "part3_quantum":
-        html_name = "pmodel_paper_part3_quantum.html"
-        docx_name = "pmodel_paper_part3_quantum.docx"
-        pdf_name = "pmodel_paper_part3_quantum.pdf"
-    # 条件分岐: 前段条件が不成立で、`profile == "part4_verification"` を追加評価する。
-    elif profile == "part4_verification":
-        html_name = "pmodel_paper_part4_verification.html"
-        docx_name = "pmodel_paper_part4_verification.docx"
-        pdf_name = "pmodel_paper_part4_verification.pdf"
-    elif profile == "part5_future_predictions":
-        html_name = "pmodel_paper_part5_future_predictions.html"
-        docx_name = "pmodel_paper_part5_future_predictions.docx"
-        pdf_name = "pmodel_paper_part5_future_predictions.pdf"
-    else:  # pragma: no cover (guarded by argparse choices)
-        raise ValueError(f"unknown profile: {profile}")
+    html_name = profile_content.resolve_html_name(profile)
+    docx_name = profile_content.resolve_docx_name(profile)
+    pdf_name = profile_content.resolve_pdf_name(profile)
 
     paper_html_path = out_dir / html_name
     paper_docx_path = out_dir / docx_name
@@ -604,6 +787,41 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # 条件分岐: `rc != 0` を満たす経路を評価する。
     if rc != 0:
         return rc
+
+    # Part IV は generated TeX が参照する全 figure stem を strict に rerun し、
+    # その後に TeX を再生成して summary/figures を最新 source へ張り直す。
+
+    if profile == "part4_verification":
+        strict_refresh_argv = [
+            py,
+            "-B",
+            str(root / "scripts" / "summary" / "part4_strict_figure_refresh.py"),
+            "--tex",
+            str(out_dir / profile_content.resolve_tex_name(profile)),
+        ]
+        strict_rc = subprocess.run(strict_refresh_argv, cwd=str(root)).returncode
+        if strict_rc != 0:
+            return strict_rc
+
+        rc = paper_latex.main(tex_argv)
+        if rc != 0:
+            return rc
+
+    # Part III-B は generated TeX を基準に canonical figure PDF を fixed-width 正規化してから PDF 化する。
+
+    if profile == profile_content.PART3B_PROFILE:
+        normalize_argv = [
+            py,
+            "-B",
+            str(root / "scripts" / "summary" / "part3b_figure_canvas_normalize.py"),
+            "--tex",
+            str(out_dir / profile_content.resolve_tex_name(profile)),
+        ]
+        try:
+            subprocess.run(normalize_argv, cwd=str(root), check=True)
+        except Exception as exc:
+            print(f"[err] part3b figure canvas normalization failed: {exc}")
+            return 2
 
     paper_pdf_path = out_dir / pdf_name
     papers_pdf_path = Path(str(args.papers_dir)) / pdf_name

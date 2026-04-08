@@ -1,12 +1,21 @@
+"""
+目的: 量子 topic の nuclear binding light nuclei に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import csv
 import json
 import math
+import os
 from pathlib import Path
 
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
 
 enable_japanese_figure_localization()
 
@@ -206,7 +215,14 @@ def main() -> None:
     mpl.rcParams["ps.fonttype"] = 42
 
     fig = plt.figure(figsize=(18.8, 8.8), dpi=190)
-    gs = fig.add_gridspec(2, 3, height_ratios=[1.0, 0.34], wspace=0.28, hspace=0.22)
+    apply_wavep_figure_layout(fig, template="part2_full_tall_spacious")
+    fig.set_size_inches(fig.get_figwidth(), 8.10, forward=True)
+    gs = fig.add_gridspec(2, 3, height_ratios=[1.0, 0.30], wspace=0.26, hspace=0.30)
+    panel_title_font = get_wavep_font_size("title") * 0.82
+    axis_label_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    note_font = get_wavep_font_size("note")
+    suptitle_font = get_wavep_font_size("suptitle") + 2.0
 
     labels = [r["key"] for r in rows]
     x = list(range(len(labels)))
@@ -219,19 +235,19 @@ def main() -> None:
     ax0.errorbar(x, b_vals, yerr=b_sig, fmt="o", capsize=4, lw=1.6)
     ax0.set_xticks(x)
     ax0.set_xticklabels(labels)
-    ax0.set_ylabel("binding energy B (MeV)", fontsize=20.4)
-    ax0.set_title("Mass defect baseline (CODATA via NIST)", fontsize=21.4)
+    ax0.set_ylabel("binding energy B (MeV)", fontsize=axis_label_font)
+    ax0.set_title("Mass defect baseline (CODATA via NIST)", fontsize=panel_title_font, pad=6.0)
     ax0.grid(True, ls=":", lw=0.6, alpha=0.6)
-    ax0.tick_params(axis="both", labelsize=17.2)
+    ax0.tick_params(axis="both", labelsize=tick_font)
 
     ax1 = fig.add_subplot(gs[0, 1])
     ax1.errorbar(x, ba_vals, yerr=ba_sig, fmt="o", capsize=4, lw=1.6, color="tab:green")
     ax1.set_xticks(x)
     ax1.set_xticklabels(labels)
-    ax1.set_ylabel("B/A (MeV per nucleon)", fontsize=20.4)
-    ax1.set_title("Binding energy per nucleon", fontsize=21.4)
+    ax1.set_ylabel("B/A (MeV per nucleon)", fontsize=axis_label_font)
+    ax1.set_title("Binding energy per nucleon", fontsize=panel_title_font, pad=6.0)
     ax1.grid(True, ls=":", lw=0.6, alpha=0.6)
-    ax1.tick_params(axis="both", labelsize=17.2)
+    ax1.tick_params(axis="both", labelsize=tick_font)
 
     ax2 = fig.add_subplot(gs[0, 2])
     r_labels = ["p", "d", "t", "h", "alpha"]
@@ -241,10 +257,10 @@ def main() -> None:
     ax2.errorbar(rx, r_vals, yerr=r_sig, fmt="o", capsize=4, lw=1.6, color="tab:purple")
     ax2.set_xticks(rx)
     ax2.set_xticklabels(r_labels)
-    ax2.set_ylabel("charge rms radius (fm)", fontsize=20.4)
-    ax2.set_title("Charge radii (CODATA + IAEA compilation)", fontsize=21.4)
+    ax2.set_ylabel("charge rms radius (fm)", fontsize=axis_label_font)
+    ax2.set_title("Charge radii (CODATA + IAEA compilation)", fontsize=panel_title_font, pad=6.0)
     ax2.grid(True, ls=":", lw=0.6, alpha=0.6)
-    ax2.tick_params(axis="both", labelsize=17.2)
+    ax2.tick_params(axis="both", labelsize=tick_font)
 
     ax3 = fig.add_subplot(gs[1, :])
     ax3.axis("off")
@@ -261,18 +277,28 @@ def main() -> None:
         ),
         va="top",
         ha="left",
-        fontsize=18.2,
+        fontsize=note_font,
         linespacing=1.32,
         wrap=True,
     )
 
-    fig.suptitle("light nuclei baselines (A=2,3,4) incl. A=3 charge radii", y=0.975, fontsize=22.8)
-    fig.subplots_adjust(left=0.055, right=0.995, top=0.88, bottom=0.08, wspace=0.28, hspace=0.22)
+    fig.suptitle("light nuclei baselines (A=2,3,4) incl. A=3 charge radii", y=0.992, fontsize=suptitle_font)
+    fig.subplots_adjust(left=0.070, right=0.990, top=0.885, bottom=0.090, wspace=0.26, hspace=0.40)
 
     out_pdf = out_dir / "nuclear_binding_light_nuclei.pdf"
     out_png = out_dir / "nuclear_binding_light_nuclei.png"
-    fig.savefig(out_pdf, format="pdf", bbox_inches="tight")
-    fig.savefig(out_png, bbox_inches="tight")
+    prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+    try:
+        with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+            fig.savefig(out_pdf, format="pdf")
+            fig.savefig(out_png)
+    finally:
+        if prev_disable_normalize is None:
+            os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = prev_disable_normalize
+
     plt.close(fig)
 
     out_csv = out_dir / "nuclear_binding_light_nuclei.csv"

@@ -1,11 +1,24 @@
+"""
+目的: 量子 topic の nuclear np scattering baseline に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import json
 import math
+import os
+import sys
 from pathlib import Path
 
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 enable_japanese_figure_localization()
 
@@ -172,9 +185,19 @@ def main() -> None:
     # Plot
 
     import matplotlib.pyplot as plt
+    from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
+    title_font = get_wavep_font_size("title") * 0.88
+    axis_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    legend_font = get_wavep_font_size("legend")
+    note_font = get_wavep_font_size("note")
+    suptitle_font = get_wavep_font_size("suptitle") + 2.0
 
-    fig = plt.figure(figsize=(10.8, 10.2), dpi=170)
-    gs = fig.add_gridspec(2, 1, hspace=0.30)
+    fig = plt.figure(dpi=170)
+    apply_wavep_figure_layout(fig, template="part2_two_panel_spacious")
+    fig.set_size_inches(fig.get_figwidth(), 5.95, forward=True)
+    fig.subplots_adjust(left=0.145, right=0.985, top=0.915, bottom=0.105, hspace=0.44)
+    gs = fig.add_gridspec(2, 1)
 
     # Panel A: triplet channel (a_t vs r_t) with mixed-radius curve from B
     ax0 = fig.add_subplot(gs[0, 0])
@@ -195,12 +218,12 @@ def main() -> None:
         else:
             ax0.plot([x], [y], marker="o", lw=0, label=label)
 
-    ax0.set_xlabel("triplet scattering length a_t (fm)", fontsize=13)
-    ax0.set_ylabel("triplet effective range r_t (fm)", fontsize=13)
-    ax0.set_title("np triplet low-energy parameters", fontsize=14)
+    ax0.set_xlabel("triplet scattering length a_t (fm)", fontsize=axis_font)
+    ax0.set_ylabel("triplet effective range r_t (fm)", fontsize=axis_font)
+    ax0.set_title("np triplet low-energy parameters", fontsize=title_font, pad=5.0)
     ax0.grid(True, ls=":", lw=0.6, alpha=0.6)
-    ax0.tick_params(axis="both", labelsize=11.5)
-    ax0.legend(frameon=True, fontsize=10.5, loc="lower right")
+    ax0.tick_params(axis="both", labelsize=tick_font)
+    ax0.legend(frameon=True, fontsize=legend_font, loc="lower right")
     ax0.text(
         0.02,
         0.02,
@@ -208,7 +231,7 @@ def main() -> None:
         transform=ax0.transAxes,
         va="bottom",
         ha="left",
-        fontsize=11,
+        fontsize=note_font,
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.85, "edgecolor": "0.85"},
     )
 
@@ -226,18 +249,29 @@ def main() -> None:
         else:
             ax1.plot([x], [y], marker="o", lw=0, label=label)
 
-    ax1.set_xlabel("singlet scattering length a_s (fm)", fontsize=13)
-    ax1.set_ylabel("singlet effective range r_s (fm)", fontsize=13)
-    ax1.set_title("np singlet low-energy parameters", fontsize=14)
+    ax1.set_xlabel("singlet scattering length a_s (fm)", fontsize=axis_font)
+    ax1.set_ylabel("singlet effective range r_s (fm)", fontsize=axis_font)
+    ax1.set_title("np singlet low-energy parameters", fontsize=title_font, pad=5.0)
     ax1.grid(True, ls=":", lw=0.6, alpha=0.6)
-    ax1.tick_params(axis="both", labelsize=11.5)
-    ax1.legend(frameon=True, fontsize=10.5, loc="upper right")
+    ax1.tick_params(axis="both", labelsize=tick_font)
+    ax1.legend(frameon=True, fontsize=legend_font, loc="upper right")
 
-    fig.suptitle("np scattering baseline (observables fixed)", y=0.995, fontsize=15)
-    fig.subplots_adjust(left=0.10, right=0.98, top=0.94, bottom=0.08, hspace=0.35)
+    fig.suptitle("np scattering baseline（観測量固定）", y=0.992, fontsize=suptitle_font)
 
     out_png = out_dir / "nuclear_np_scattering_baseline.png"
-    fig.savefig(out_png, bbox_inches="tight")
+    out_pdf = out_png.with_suffix(".pdf")
+    prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+    try:
+        with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+            fig.savefig(out_pdf)
+            fig.savefig(out_png)
+    finally:
+        if prev_disable_normalize is None:
+            os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = prev_disable_normalize
+
     plt.close(fig)
 
     manifest = src_dir / "np_scattering_low_energy_arxiv_0704_1024v1_manifest.json"

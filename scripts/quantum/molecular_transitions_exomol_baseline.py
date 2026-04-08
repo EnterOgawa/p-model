@@ -1,3 +1,10 @@
+"""
+目的: 量子 topic の molecular transitions exomol baseline に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -5,20 +12,55 @@ import bz2
 import csv
 import json
 import math
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
 import matplotlib.pyplot as plt
 
-
-from figure_japanese_localizer import enable_japanese_figure_localization
-
-enable_japanese_figure_localization()
+ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
+
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
+
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
+
+def _set_japanese_font() -> str | None:
+    try:
+        import matplotlib as mpl
+        from scripts.utils.plot_style import install_wavep_cjk_font_override
+
+        font_name = install_wavep_cjk_font_override(preferred_name="Meiryo")
+        mpl.rcParams["axes.unicode_minus"] = False
+        return font_name
+    except Exception:
+        return None
+
+
+# 関数: `_load_japanese_font_properties` の入出力契約と処理意図を定義する。
+
+def _load_japanese_font_properties():
+    try:
+        from matplotlib.font_manager import FontProperties
+
+        static_font = _repo_root() / "output" / "private" / "summary" / "fonts" / "NotoSansJP-Regular-static.ttf"
+        if static_font.exists():
+            return FontProperties(fname=str(static_font))
+
+        font_name = _set_japanese_font()
+        if font_name:
+            return FontProperties(family=font_name)
+    except Exception:
+        return None
+
+    return None
 
 
 # 関数: `_read_json` の入出力契約と処理意図を定義する。
@@ -212,6 +254,15 @@ def _transition_label(*, upper: dict[str, Any], lower: dict[str, Any]) -> str:
 
 def _molat_transition_label(*, upper_state: str, vu: int, ju: int, vl: int, jl: int) -> str:
     return f"{upper_state}(v={vu},J={ju}) → X(v={vl},J={jl})"
+
+
+# 関数: `_compact_transition_entry` の入出力契約と処理意図を定義する。
+
+def _compact_transition_entry(row: dict[str, Any]) -> str:
+    label = str(row.get("transition_label") or "").strip()
+    nu_cm = float(row["wavenumber_cm^-1"])
+    a_value = float(row["A_s^-1"])
+    return f"{label}\n$\\tilde{{\\nu}}$={nu_cm:.3f} cm^-1 / A={a_value:.3e} s^-1"
 
 
 # 関数: `_load_molat_d2_transitions` の入出力契約と処理意図を定義する。
@@ -459,91 +510,68 @@ def main() -> None:
             }
         )
 
-    # ---- Figure (text table, stable & readable in paper) ----
+    # ---- Figure (compact three-row table for the manuscript surface) ----
 
-    n_panels = max(1, len(per_dataset))
-    # 可読性優先で1列固定にし、紙面幅に合わせて拡大する。
-    ncols = 1
-    nrows = int(math.ceil(n_panels / ncols))
-    # 紙面での可読性を優先し、幅をやや絞って同一掲載幅での文字見かけサイズを上げる。
-    fig_w = 12.2
-    # 注記を右側へ寄せる前提で、縦方向の過大化を抑えて紙面はみ出しを回避する。
-    fig_h = max(7.8, 4.6 * float(nrows) + 1.2)
-
-    fig, axes = plt.subplots(nrows, ncols, figsize=(fig_w, fig_h), dpi=180)
-    axes_flat = list(axes.flat) if hasattr(axes, "flat") else [axes]  # type: ignore[truthy-bool]
-    for ax in axes_flat:
-        ax.set_axis_off()
-
-    fig.suptitle(
-        "Molecular transition baseline (primary line lists; representative transitions)",
-        fontsize=21,
-        y=0.98,
-    )
-
-    for ax, ds in zip(axes_flat, per_dataset, strict=False):
+    display_n = min(2, top_n)
+    _set_japanese_font()
+    figure_rows: list[list[str]] = []
+    for ds in per_dataset:
         mol = str(ds["molecule"])
-        dataset_tag = str(ds["dataset_tag"])
-        src = str(ds.get("source") or "").strip()
-        src_prefix = f"{src} " if src else ""
-        title = f"{mol} ({src_prefix}{dataset_tag}; top {top_n} by A)"
-        ax.text(0.02, 0.95, title, transform=ax.transAxes, fontsize=18.8, va="top")
-
-        # Rows for this molecule.
         sub = [r for r in rows_all if str(r["molecule"]) == mol]
         sub = sorted(sub, key=lambda r: int(r["rank_by_A_desc"]))
+        first = _compact_transition_entry(sub[0]) if len(sub) >= 1 else "—"
+        second = _compact_transition_entry(sub[1]) if len(sub) >= 2 and display_n >= 2 else "—"
+        figure_rows.append([mol, first, second])
 
-        y = 0.84
-        # 行間を広げて、2行構成の遷移表記が重ならないようにする。
-        dy = 0.104
-        for r in sub:
-            rank = int(r["rank_by_A_desc"])
-            nu = float(r["wavenumber_cm^-1"])
-            lam = float(r["wavelength_um"])
-            A = float(r["A_s^-1"])
-            label = str(r["transition_label"])
-            ax.text(
-                0.03,
-                y,
-                f"{rank:>2d}) {label}",
-                transform=ax.transAxes,
-                fontsize=15.2,
-                ha="left",
-                va="center",
-            )
-            ax.text(
-                0.03,
-                y - 0.040,
-                f"    ν̃={nu:.6f} cm⁻¹  λ={lam:.3f} μm  A={A:.3e} s⁻¹",
-                transform=ax.transAxes,
-                fontsize=14.4,
-                ha="left",
-                va="center",
-                color="#222222",
-            )
-            y -= dy
-            # 条件分岐: `y < 0.18` を満たす経路を評価する。
-            if y < 0.20:
-                break
+    fig, ax = plt.subplots(figsize=(11.8, 5.35), dpi=180)
+    ax.set_axis_off()
+    font_props = _load_japanese_font_properties()
+    title_font_props = font_props.copy() if font_props is not None else None
+    if title_font_props is not None:
+        title_font_props.set_size(17.2)
 
-        ax.text(
-            0.62,
-            0.14,
-            "Selection: top-N by Einstein A.\n"
-            "Target fix only (not P-model derivation).",
-            transform=ax.transAxes,
-            fontsize=13.8,
-            ha="left",
-            va="bottom",
-            bbox=dict(boxstyle="round,pad=0.34", facecolor="white", edgecolor="#cccccc"),
-        )
+    fig.suptitle(
+        "分子遷移の代表基準（一次線リストから各分子 2 本を抽出）",
+        fontsize=17.2,
+        y=0.96,
+        fontproperties=title_font_props,
+    )
+    table = ax.table(
+        cellText=figure_rows,
+        colLabels=["分子", "代表遷移 1", "代表遷移 2"],
+        cellLoc="left",
+        colLoc="center",
+        loc="center",
+        colWidths=[0.12, 0.44, 0.44],
+    )
+    table.auto_set_font_size(False)
+    table.set_fontsize(16.6)
+    table.scale(1.0, 5.2)
+    for (row, col), cell in table.get_celld().items():
+        cell.set_edgecolor("#cbd5e1")
+        cell.set_linewidth(0.8)
+        cell.PAD = 0.042
+        if font_props is not None:
+            try:
+                cell.get_text().set_fontproperties(font_props)
+            except Exception:
+                pass
 
-    for ax in axes_flat[len(per_dataset) :]:
-        ax.set_axis_off()
+        if row == 0:
+            cell.set_facecolor("#e2e8f0")
+            cell.set_text_props(weight="bold", ha="center", va="center", fontsize=15.2)
+        elif col == 0:
+            cell.set_facecolor("#f8fafc")
+            cell.set_text_props(weight="bold", ha="center", va="center", fontsize=15.8)
+        else:
+            cell.set_facecolor("white")
+            cell.set_text_props(ha="left", va="center", fontsize=16.6)
 
-    fig.tight_layout(rect=(0, 0, 1, 0.97))
+    fig.tight_layout(rect=(0.01, 0.03, 0.99, 0.92))
+    out_pdf = out_dir / "molecular_transitions_exomol_baseline.pdf"
     out_png = out_dir / "molecular_transitions_exomol_baseline.png"
-    fig.savefig(out_png)
+    fig.savefig(out_pdf, bbox_inches="tight", pad_inches=0.03)
+    fig.savefig(out_png, bbox_inches="tight", pad_inches=0.03)
     plt.close(fig)
 
     # ---- CSV ----
@@ -577,20 +605,20 @@ def main() -> None:
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "phase": 7,
         "step": "7.12",
-        "title": "Molecular transition baseline (primary line lists; representative transitions)",
+        "title": "分子遷移の代表基準（一次線リストから各分子 2 本を抽出）",
         "selection": {"method": "top_n_by_Einstein_A_desc", "top_n_per_molecule": top_n},
         "note": (
-            "Representative transitions are selected objectively by descending Einstein A from primary line lists "
-            "(ExoMol for H2/HD; MOLAT for D2). This output fixes a small baseline target set for future "
-            "molecular-binding derivations."
+            "一次線リストから Einstein A の大きい順に top-N を選び、そのうち本文図では各分子 2 遷移だけを表示する。"
+            "残りの上位遷移は selected CSV と metrics JSON に保持し、将来の分子束縛再導出で参照できるようにする。"
         ),
         "datasets": per_dataset,
         "rows": rows_all,
-        "outputs": {"png": str(out_png), "csv": str(out_csv)},
+        "outputs": {"pdf": str(out_pdf), "png": str(out_png), "csv": str(out_csv)},
     }
     out_json = out_dir / "molecular_transitions_exomol_baseline_metrics.json"
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    print(f"[ok] wrote: {out_pdf}")
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_csv}")
     print(f"[ok] wrote: {out_json}")

@@ -1,8 +1,17 @@
+"""
+目的: 量子 topic の photon quantum interference に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import csv
 import json
 import math
+import os
+import sys
 import zipfile
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -12,6 +21,11 @@ import numpy as np
 
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
 
 enable_japanese_figure_localization()
 
@@ -227,9 +241,12 @@ def _build_hom_squeezed_light_audit(
 
     import matplotlib.pyplot as plt
 
-    fig, axes = plt.subplots(2, 2, figsize=(12.4, 8.2), dpi=140)
+    fig, axes = plt.subplots(4, 1, dpi=140)
+    apply_wavep_figure_layout(fig, template="part2_four_panel_spacious")
+    fig.set_size_inches(fig.get_figwidth(), 9.30, forward=True)
+    fig.subplots_adjust(left=0.120, right=0.985, top=0.905, bottom=0.085, hspace=0.80)
 
-    ax0 = axes[0, 0]
+    ax0 = axes[0]
     ax0.errorbar(
         d_ns,
         v_hom * 100.0,
@@ -239,66 +256,75 @@ def _build_hom_squeezed_light_audit(
         lw=1.4,
         capsize=4,
     )
-    panel_title_font = 14.8
-    axis_label_font = 13.6
-    tick_font = 12.4
-    legend_font = 11.8
-    note_font = 11.4
-    suptitle_font = 16.0
+    panel_title_font = get_wavep_font_size("title") * 0.82
+    axis_label_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    legend_font = get_wavep_font_size("legend")
+    note_font = get_wavep_font_size("note")
+    suptitle_font = get_wavep_font_size("suptitle") + 2.0
 
     ax0.axhline(50.0, color="0.25", ls="--", lw=1.2)
     ax0.set_xscale("log")
     ax0.set_xlabel("D (ns)", fontsize=axis_label_font)
-    ax0.set_ylabel("visibility (%)", fontsize=axis_label_font)
-    ax0.set_title("HOM visibility (with 50% reference)", fontsize=panel_title_font)
+    ax0.set_ylabel("可視度 (%)", fontsize=axis_label_font)
+    ax0.set_title("HOM 可視度（50% 基準付き）", fontsize=panel_title_font, pad=5.0)
     ax0.grid(True, which="both", ls=":", lw=0.6, alpha=0.7)
     ax0.tick_params(axis="both", labelsize=tick_font)
 
-    ax1 = axes[0, 1]
+    ax1 = axes[1]
     hom_rows = [r for r in rows if str(r["channel"]).startswith("hom_visibility_d")]
     labels = [str(r["channel"]).replace("hom_visibility_", "") for r in hom_rows]
     z_vals = [float(r["metric_value"]) for r in hom_rows]
     ax1.bar(labels, z_vals, color="#ff7f0e")
     ax1.axhline(3.0, color="0.25", ls="--", lw=1.2)
-    ax1.set_ylabel("z vs 0.5 visibility", fontsize=axis_label_font)
-    ax1.set_title("HOM significance", fontsize=panel_title_font)
+    ax1.set_ylabel("z（0.5 基準）", fontsize=axis_label_font)
+    ax1.set_title("HOM の有意性", fontsize=panel_title_font, pad=5.0)
     ax1.grid(True, axis="y", ls=":", lw=0.6, alpha=0.7)
     ax1.tick_params(axis="both", labelsize=tick_font)
 
-    ax2 = axes[1, 0]
+    ax2 = axes[2]
     ax2.bar(["variance ratio"], [var_ratio], color="#2ca02c")
-    ax2.axhline(0.5, color="0.25", ls="--", lw=1.2, label="3 dB threshold")
-    ax2.set_ylabel("ratio", fontsize=axis_label_font)
-    ax2.set_title("Squeezing scale", fontsize=panel_title_font)
+    ax2.axhline(0.5, color="0.25", ls="--", lw=1.2, label="3 dB 基準")
+    ax2.set_ylabel("分散比", fontsize=axis_label_font)
+    ax2.set_title("スクイージング規模", fontsize=panel_title_font, pad=5.0)
     ax2.grid(True, axis="y", ls=":", lw=0.6, alpha=0.7)
     ax2.legend(frameon=True, fontsize=legend_font, loc="upper right")
     ax2.text(
         0.02,
         0.05,
-        f"loss-only: eta >= {eta_lower_if_perfect_intrinsic:.3f}",
+        f"loss-only: η >= {eta_lower_if_perfect_intrinsic:.3f}",
         transform=ax2.transAxes,
         fontsize=note_font,
     )
     ax2.tick_params(axis="both", labelsize=tick_font)
 
-    ax3 = axes[1, 1]
+    ax3 = axes[3]
     # 条件分岐: `np.isfinite(psd_10k) and np.isfinite(psd_100k)` を満たす経路を評価する。
     if np.isfinite(psd_10k) and np.isfinite(psd_100k):
         ax3.bar(["PSD@10kHz", "PSD@100kHz"], [psd_10k, psd_100k], color=["#1f77b4", "#7f7f7f"])
 
     ax3.set_yscale("log")
     ax3.set_ylabel("PSD (arb.)", fontsize=axis_label_font)
-    ax3.set_title("Noise PSD scale indicator", fontsize=panel_title_font)
+    ax3.set_title("ノイズ PSD の規模指標", fontsize=panel_title_font, pad=5.0)
     ax3.grid(True, axis="y", ls=":", lw=0.6, alpha=0.7)
     ax3.tick_params(axis="both", labelsize=tick_font)
 
-    fig.suptitle("HOM + squeezed-light unified audit", y=0.98, fontsize=suptitle_font)
-    fig.tight_layout()
+    fig.suptitle("HOM + スクイーズド光の統合監査", y=0.994, fontsize=suptitle_font)
 
     out_png = out_dir / "hom_squeezed_light_unified_audit.png"
     out_pdf = out_dir / "hom_squeezed_light_unified_audit.pdf"
-    fig.savefig(out_png, bbox_inches="tight")
-    fig.savefig(out_pdf, bbox_inches="tight")
+    prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+    try:
+        with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+            fig.savefig(out_png)
+            fig.savefig(out_pdf)
+    finally:
+        if prev_disable_normalize is None:
+            os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = prev_disable_normalize
+
     plt.close(fig)
 
     out_json = out_dir / "hom_squeezed_light_unified_audit_metrics.json"
@@ -341,7 +367,7 @@ def _build_hom_squeezed_light_audit(
 
 def main() -> None:
     cfg = Config()
-    root = Path(__file__).resolve().parents[2]
+    root = ROOT
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -367,24 +393,32 @@ def main() -> None:
 
     import matplotlib.pyplot as plt
 
-    fig = plt.figure(figsize=(15.8, 10.2), dpi=170)
-    gs = fig.add_gridspec(2, 2, wspace=0.24, hspace=0.34)
+    fig, axes = plt.subplots(3, 1, dpi=170)
+    apply_wavep_figure_layout(fig, template="part2_three_panel_tall")
+    fig.set_size_inches(fig.get_figwidth(), 7.20, forward=True)
+    fig.subplots_adjust(left=0.155, right=0.985, top=0.920, bottom=0.095, hspace=0.66)
+    panel_title_font = get_wavep_font_size("title") * 0.82
+    axis_label_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    legend_font = get_wavep_font_size("legend")
+    note_font = get_wavep_font_size("note")
+    suptitle_font = get_wavep_font_size("suptitle") + 2.0
 
     # A
-    ax0 = fig.add_subplot(gs[0, 0])
+    ax0 = axes[0]
     v_grid = np.linspace(0.55, 0.999, 240)
     sig_grid = np.asarray([_sigma_path_nm_from_visibility(v, wavelength_nm=lam_nm) for v in v_grid], dtype=float)
     ax0.plot(v_grid, sig_grid, lw=2.0, label=f"λ={lam_nm:.0f} nm")
     ax0.scatter([v0], [sigma_nm], s=40, zorder=5, label=f"Kimura+2004: V≥{v0:.2f}")
-    ax0.set_xlabel("visibility V", fontsize=14.0)
-    ax0.set_ylabel("equiv. path-length noise σL (nm)", fontsize=14.0)
-    ax0.set_title("Single-photon interference: V → σL", fontsize=15.2)
+    ax0.set_xlabel("可視度 V", fontsize=axis_label_font)
+    ax0.set_ylabel("等価な経路長ノイズ σL (nm)", fontsize=axis_label_font)
+    ax0.set_title("単一光子干渉：V → σL", fontsize=panel_title_font, pad=5.0)
     ax0.grid(True, ls=":", lw=0.6, alpha=0.6)
-    ax0.legend(frameon=True, fontsize=12.0, loc="upper right")
-    ax0.tick_params(axis="both", labelsize=12.4)
+    ax0.legend(frameon=True, fontsize=legend_font, loc="upper right")
+    ax0.tick_params(axis="both", labelsize=tick_font)
 
     # B
-    ax1 = fig.add_subplot(gs[0, 1])
+    ax1 = axes[1]
     ax1.errorbar(
         d_ns,
         v_hom * 100.0,
@@ -393,75 +427,65 @@ def main() -> None:
         ms=6,
         lw=1.5,
         capsize=4,
-        label="reported (QD2; corrected)",
+        label="reported（QD2; corrected）",
     )
     ax1.set_xscale("log")
-    ax1.set_xlabel("temporal separation D (ns)", fontsize=14.0)
-    ax1.set_ylabel("HOM visibility (%)", fontsize=14.0)
-    ax1.set_title("HOM: visibility vs separation (reported)", fontsize=15.2)
+    ax1.set_xlabel("分離時間 D (ns)", fontsize=axis_label_font)
+    ax1.set_ylabel("HOM 可視度 (%)", fontsize=axis_label_font)
+    ax1.set_title("HOM：分離時間に対する可視度", fontsize=panel_title_font, pad=5.0)
     ax1.grid(True, which="both", ls=":", lw=0.6, alpha=0.6)
     ax1.set_ylim(90.0, 100.0)
-    ax1.legend(frameon=True, fontsize=12.0, loc="lower left")
+    ax1.legend(frameon=True, fontsize=legend_font, loc="lower left")
     ax1.text(
         0.02,
         0.98,
-        "Definition: V=1−(C∥/C⊥) at zero delay\n(see Methods in arXiv:2106.03871v2)",
+        "定義: V=1−(C∥/C⊥) at zero delay\n（Methods, arXiv:2106.03871v2）",
         transform=ax1.transAxes,
         va="top",
         ha="left",
-        fontsize=11.8,
+        fontsize=note_font,
     )
-    ax1.tick_params(axis="both", labelsize=12.4)
+    ax1.tick_params(axis="both", labelsize=tick_font)
 
     # C
-    ax2 = fig.add_subplot(gs[1, 0])
-    ax2.plot(f_hz, psd, lw=1.2, label="Zenodo 6371310 (ExData Fig.3b)")
+    ax2 = axes[2]
+    ax2.plot(f_hz, psd, lw=1.2, label="Zenodo 6371310（ExData Fig.3b）")
     ax2.axvline(1e4, color="k", lw=1.0, ls="--", alpha=0.7, label="10^4 Hz")
     ax2.set_xscale("log")
     ax2.set_yscale("log")
-    ax2.set_xlabel("frequency (Hz)", fontsize=14.0)
-    ax2.set_ylabel("PSD (arb. units)", fontsize=14.0)
-    ax2.set_title("Low-frequency noise PSD (for indistinguishability)", fontsize=15.2)
+    ax2.set_xlabel("周波数 (Hz)", fontsize=axis_label_font)
+    ax2.set_ylabel("PSD (arb. units)", fontsize=axis_label_font)
+    ax2.set_title("低周波ノイズ PSD（識別不能性の proxy）", fontsize=panel_title_font, pad=5.0)
     ax2.grid(True, which="both", ls=":", lw=0.6, alpha=0.6)
-    ax2.legend(frameon=True, fontsize=12.0, loc="lower left")
+    ax2.legend(frameon=True, fontsize=legend_font, loc="lower left")
     ax2.text(
         0.02,
         0.98,
-        f"squeezing: {sq_db:.1f} dB → variance ratio={var_ratio:.3f}\n"
+        f"スクイージング: {sq_db:.1f} dB → 分散比={var_ratio:.3f}\n"
         f"loss-only bound: η ≥ {eta_lower_if_perfect_intrinsic:.3f}",
         transform=ax2.transAxes,
         va="top",
         ha="left",
-        fontsize=11.8,
+        fontsize=note_font,
     )
-    ax2.tick_params(axis="both", labelsize=12.4)
+    ax2.tick_params(axis="both", labelsize=tick_font)
 
-    ax3 = fig.add_subplot(gs[1, 1])
-    ax3.axis("off")
-    ax3.text(
-        0.02,
-        0.98,
-        (
-            "Unified summary\n"
-            "A: single-photon interference (V→σL)\n"
-            "B: HOM visibility vs delay\n"
-            "C: low-frequency PSD and squeezed-light\n"
-            "   scale indicators"
-        ),
-        transform=ax3.transAxes,
-        va="top",
-        ha="left",
-        fontsize=13.2,
-        bbox={"boxstyle": "round,pad=0.35", "facecolor": "white", "alpha": 0.9, "edgecolor": "0.8"},
-    )
-
-    fig.suptitle("Photon interference observables (visibility, HOM, squeezing/noise)", y=0.99, fontsize=16.6)
-    fig.tight_layout(rect=(0, 0, 1, 0.97))
+    fig.suptitle("光子干渉の観測量（可視度・HOM・スクイージング/ノイズ）", y=0.994, fontsize=suptitle_font)
 
     out_png = out_dir / "photon_quantum_interference.png"
     out_pdf = out_dir / "photon_quantum_interference.pdf"
-    fig.savefig(out_png, bbox_inches="tight")
-    fig.savefig(out_pdf, bbox_inches="tight")
+    prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+    try:
+        with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+            fig.savefig(out_png)
+            fig.savefig(out_pdf)
+    finally:
+        if prev_disable_normalize is None:
+            os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = prev_disable_normalize
+
     plt.close(fig)
 
     metrics = {

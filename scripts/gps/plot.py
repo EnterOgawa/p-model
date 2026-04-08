@@ -1,7 +1,15 @@
+"""
+目的: GPS topic の plot に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import csv
 import json
+import shutil
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -22,7 +30,11 @@ def _set_japanese_font() -> None:
         import matplotlib as mpl
         import matplotlib.font_manager as fm
 
+        resolved = resolve_wavep_cjk_font_family()
         preferred = [
+            *( [resolved] if resolved else [] ),
+            "Noto Sans CJK JP",
+            "Noto Sans JP",
             "Yu Gothic",
             "Meiryo",
             "BIZ UDGothic",
@@ -37,6 +49,7 @@ def _set_japanese_font() -> None:
             return
 
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+        mpl.rcParams["font.sans-serif"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         pass
@@ -48,13 +61,32 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.utils.plot_style import apply_paper_style, apply_wavep_figure_layout, resolve_wavep_cjk_font_family  # noqa: E402
 
 OUT_DIR = ROOT / "output" / "private" / "gps"
+OUT_PUBLIC_DIR = ROOT / "output" / "public" / "gps"
 
 
 # 関数: `_to_ns_from_m` の入出力契約と処理意図を定義する。
 def _to_ns_from_m(rms_m: float) -> float:
     return (rms_m / C) * 1e9
+
+
+# 関数: `_save_dual_figure` の入出力契約と処理意図を定義する。
+
+def _save_dual_figure(fig: plt.Figure, *, stem: str, dpi_png: int) -> tuple[Path, Path]:
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    OUT_PUBLIC_DIR.mkdir(parents=True, exist_ok=True)
+    out_png = OUT_DIR / f"{stem}.png"
+    out_pdf = OUT_DIR / f"{stem}.pdf"
+
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        fig.savefig(out_png, dpi=int(dpi_png))
+        fig.savefig(out_pdf)
+
+    shutil.copy2(out_png, OUT_PUBLIC_DIR / out_png.name)
+    shutil.copy2(out_pdf, OUT_PUBLIC_DIR / out_pdf.name)
+    return (out_png, out_pdf)
 
 
 # 関数: `load_summary` の入出力契約と処理意図を定義する。
@@ -109,6 +141,7 @@ def plot_all_residuals_brdc(sats: List[str]) -> Path:
     for tick_label in ax.get_xticklabels():
         tick_label.set_rotation(28)
         tick_label.set_ha("right")
+
     plt.tight_layout()
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -133,41 +166,36 @@ def plot_residual_compare_g01() -> Optional[Path]:
     df = pd.read_csv(path)
     df["time_utc"] = pd.to_datetime(df["time_utc"])
 
+    apply_paper_style()
     _set_japanese_font()
-    plt.figure(figsize=(12.2, 6.4))
-    plt.plot(df["time_utc"], df["res_brdc_s"] * 1e9, label="放送暦（BRDC）- IGS", linewidth=2.1)
+    fig, ax = plt.subplots()
+    apply_wavep_figure_layout(fig, template="part2_single_panel")
+    ax.plot(df["time_utc"], df["res_brdc_s"] * 1e9, label="放送暦（BRDC）- IGS", linewidth=2.1)
     # 条件分岐: `"res_pmodel_s" in df.columns` を満たす経路を評価する。
     if "res_pmodel_s" in df.columns:
-        plt.plot(
+        ax.plot(
             df["time_utc"],
             df["res_pmodel_s"] * 1e9,
             label="P-model（dt_rel除去）- IGS",
             linewidth=2.1,
         )
 
-    plt.title("GPS 時計残差：G01（観測IGSに対する比較）", fontsize=17.8)
-    plt.xlabel("UTC時刻", fontsize=16.2)
-    plt.ylabel("残差 [ns]（バイアス＋ドリフト除去後）", fontsize=16.2)
-    plt.axhline(0.0, color="black", linewidth=1.0, alpha=0.6)
-    plt.grid(True, alpha=0.3)
-    plt.tick_params(axis="both", labelsize=14.8)
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-    plt.gcf().autofmt_xdate()
-    plt.legend(
-        fontsize=16.2,
+    ax.set_title("GPS 時計残差: G01（観測 IGS に対する比較）", pad=6.0)
+    ax.set_xlabel("UTC時刻")
+    ax.set_ylabel("残差 [ns]（バイアス＋ドリフト除去後）")
+    ax.axhline(0.0, color="black", linewidth=1.0, alpha=0.6)
+    ax.grid(True, alpha=0.3)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+    fig.autofmt_xdate()
+    ax.legend(
         loc="upper right",
         frameon=True,
-        borderpad=0.7,
-        labelspacing=0.45,
-        handlelength=2.4,
+        borderpad=0.6,
+        labelspacing=0.35,
+        handlelength=2.1,
     )
-    plt.tight_layout()
-
-    out_png = OUT_DIR / "gps_residual_compare_G01.png"
-    out_pdf = OUT_DIR / "gps_residual_compare_G01.pdf"
-    plt.savefig(out_png, dpi=220)
-    plt.savefig(out_pdf)
-    plt.close()
+    out_png, out_pdf = _save_dual_figure(fig, stem="gps_residual_compare_G01", dpi_png=220)
+    plt.close(fig)
     print(f"[ok] {out_png}")
     print(f"[ok] {out_pdf}")
     return out_png
@@ -253,26 +281,22 @@ def plot_rms_compare(summary_rows: List[Dict[str, str]]) -> Tuple[Optional[Path]
     p_map = {k: v for k, v in rms_p_ns}
     p_vals = [p_map.get(k, float("nan")) for k in labels]
 
+    apply_paper_style()
     _set_japanese_font()
-    fig, ax = plt.subplots(figsize=(14.8, 6.9))
+    fig, ax = plt.subplots()
+    apply_wavep_figure_layout(fig, template="part2_single_panel")
     x = range(len(labels))
     w = 0.42
     ax.bar([i - w / 2 for i in x], b_vals, width=w, label="放送暦（BRDC）- IGS（RMS）")
     ax.bar([i + w / 2 for i in x], p_vals, width=w, label="P-model（dt_rel除去）- IGS（RMS）")
-    ax.set_title("GPS：観測IGSに対する残差RMS（全衛星）", fontsize=20.0)
-    ax.set_ylabel("RMS [ns]（バイアス＋ドリフト除去後）", fontsize=16.2)
-    ax.set_xlabel("衛星PRN", fontsize=16.2)
+    ax.set_title("GPS: 観測 IGS に対する残差 RMS（全衛星）", pad=6.0)
+    ax.set_ylabel("RMS [ns]（バイアス＋ドリフト除去後）")
+    ax.set_xlabel("衛星PRN")
     ax.set_xticks(list(x))
-    ax.set_xticklabels(labels, rotation=60, ha="right", fontsize=13.0)
-    ax.tick_params(axis="y", labelsize=14.2)
+    ax.set_xticklabels(labels, rotation=60, ha="right")
     ax.grid(True, axis="y", alpha=0.3)
-    ax.legend(fontsize=14.6)
-    fig.tight_layout()
-
-    out_png = OUT_DIR / "gps_rms_compare.png"
-    out_pdf = OUT_DIR / "gps_rms_compare.pdf"
-    fig.savefig(out_png, dpi=220)
-    fig.savefig(out_pdf)
+    ax.legend(loc="upper right", framealpha=0.95)
+    out_png, out_pdf = _save_dual_figure(fig, stem="gps_rms_compare", dpi_png=220)
     plt.close(fig)
     print(f"[ok] {out_png}")
     print(f"[ok] {out_pdf}")
@@ -366,21 +390,20 @@ def plot_relativistic_correction_example(prn: str = "G02") -> Tuple[Optional[Pat
         "dt_rel_peak_to_peak_ns": float((np.max(rel_det) - np.min(rel_det)) * 1e9),
     }
 
+    apply_paper_style()
     _set_japanese_font()
-    fig, ax = plt.subplots(figsize=(10.8, 5.2))
+    fig, ax = plt.subplots()
+    apply_wavep_figure_layout(fig, template="part2_single_panel")
     ax.plot(df["time_utc"], rel_det * 1e9, label="標準式 δt_rel（-2 r·v / c^2）", linewidth=2.0)
     ax.plot(df["time_utc"], p_det * 1e9, label="P-model（dτ/dt を積分, バイアス＋ドリフト除去）", linewidth=2.0)
-    ax.set_title(f"GPS：相対補正（近日点効果） {prn}\n標準式 vs P-model（同じ周期成分）", fontsize=14)
+    ax.set_title(f"GPS: 相対補正（近日点効果） {prn}", pad=6.0)
     ax.set_xlabel("UTC時刻")
     ax.set_ylabel("時間補正 [ns]（バイアス＋ドリフト除去後）")
     ax.grid(True, alpha=0.3)
-    ax.legend()
+    ax.legend(loc="upper right", framealpha=0.95)
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
     fig.autofmt_xdate()
-    fig.tight_layout()
-
-    out_png = OUT_DIR / f"gps_relativistic_correction_{prn}.png"
-    fig.savefig(out_png, dpi=220)
+    out_png, _ = _save_dual_figure(fig, stem=f"gps_relativistic_correction_{prn}", dpi_png=220)
     plt.close(fig)
     print(f"[ok] {out_png}")
     return out_png, metrics

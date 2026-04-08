@@ -16,6 +16,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Sequence, Tuple
@@ -25,12 +26,14 @@ _ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from scripts.summary import worklog
+from scripts.summary import paper_profile_content as profile_content, worklog
 
 _PROFILE_TO_TEX: Dict[str, str] = {
     "paper": "pmodel_paper.tex",
     "part2_astrophysics": "pmodel_paper_part2_astrophysics.tex",
     "part3_quantum": "pmodel_paper_part3_quantum.tex",
+    "part3a_quantum_foundations": "pmodel_paper_part3a_quantum_foundations.tex",
+    "part3b_quantum_verification": "pmodel_paper_part3b_quantum_verification.tex",
     "part4_verification": "pmodel_paper_part4_verification.tex",
     "part5_future_predictions": "pmodel_paper_part5_future_predictions.tex",
 }
@@ -39,6 +42,8 @@ _PROFILE_TO_PDF: Dict[str, str] = {
     "paper": "pmodel_paper.pdf",
     "part2_astrophysics": "pmodel_paper_part2_astrophysics.pdf",
     "part3_quantum": "pmodel_paper_part3_quantum.pdf",
+    "part3a_quantum_foundations": "pmodel_paper_part3a_quantum_foundations.pdf",
+    "part3b_quantum_verification": "pmodel_paper_part3b_quantum_verification.pdf",
     "part4_verification": "pmodel_paper_part4_verification.pdf",
     "part5_future_predictions": "pmodel_paper_part5_future_predictions.pdf",
 }
@@ -132,6 +137,28 @@ def _pick_engine(choice: str) -> Tuple[str | None, str]:
     return None, "missing"
 
 
+# Function: prepare a writable TeX cache environment for LuaTeX/XeTeX runs.
+
+def _prepare_tex_cache_env(base_dir: Path) -> Dict[str, str]:
+    env = os.environ.copy()
+    temp_root = Path(tempfile.gettempdir()).resolve()
+    cache_root = temp_root / "wavep_tex_cache"
+    luaotfload_cache = cache_root / "luaotfload"
+
+    for path in (cache_root, luaotfload_cache):
+        path.mkdir(parents=True, exist_ok=True)
+
+    env["TEXMFVAR"] = str(cache_root)
+    env["TEXMFCONFIG"] = str(cache_root)
+    env["TEXMFCACHE"] = str(cache_root)
+    env["LUAOTFLOAD_CACHE"] = str(luaotfload_cache)
+    env["TEMP"] = str(cache_root)
+    env["TMP"] = str(cache_root)
+    env.setdefault("HOME", str(temp_root))
+    env.setdefault("USERPROFILE", str(temp_root))
+    return env
+
+
 # Function: extract compile errors/warnings from a latex log text.
 
 def _collect_issues(log_text: str, returncode: int, *, include_overfull_warning: bool) -> Tuple[List[str], List[str]]:
@@ -201,9 +228,11 @@ def _run_latex_once(
         f"-output-directory={str(build_dir)}",
         str(tex_path.resolve()),
     ]
+    env = _prepare_tex_cache_env(tex_path.parent)
     proc = subprocess.run(
         cmd,
         cwd=str(tex_path.parent.resolve()),
+        env=env,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
@@ -492,7 +521,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Build paper PDFs from TeX with safe auto-fixes.")
     ap.add_argument(
         "--profile",
-        choices=list(_PROFILE_TO_TEX.keys()),
+        choices=list(profile_content.PAPER_PROFILES),
         action="append",
         help="target profile (repeatable). default: all profiles",
     )

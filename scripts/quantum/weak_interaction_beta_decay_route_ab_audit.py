@@ -1,3 +1,10 @@
+"""
+目的: 量子 topic の weak interaction beta decay route ab audit に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -1365,6 +1372,12 @@ def main() -> None:
         default=1.0e-9,
         help="Sigma floor [MeV] for weighted linear calibration stability.",
     )
+    parser.add_argument(
+        "--step-tag",
+        type=str,
+        default="8.7.22.8",
+        help="Roadmap step tag written into JSON/worklog outputs.",
+    )
     args = parser.parse_args()
 
     in_csv = args.in_csv
@@ -1465,7 +1478,7 @@ def main() -> None:
             {
                 "generated_utc": _iso_now(),
                 "phase": 8,
-                "step": "8.7.22.8",
+                "step": str(args.step_tag),
                 "title": "Weak-interaction beta-decay Route-A watch outlier audit",
                 "gate_z_threshold": float(args.z_gate),
                 "summary": route_a_watch_summary,
@@ -1491,7 +1504,7 @@ def main() -> None:
     payload = {
         "generated_utc": _iso_now(),
         "phase": 8,
-        "step": "8.7.22.8",
+        "step": str(args.step_tag),
         "title": "Weak-interaction beta-decay Route A/B quantitative audit (DoF-equalized + holdout + CKM update watchpack)",
         "inputs": {
             "beta_qvalue_full_csv": {"path": _rel(in_csv), "sha256": _sha256(in_csv)},
@@ -1550,7 +1563,7 @@ def main() -> None:
         },
         "notes": [
             "Legacy rows keep pre-existing all-channel/per-channel gate metrics for continuity.",
-            "Step 8.7.22.8 keeps DoF-equalized calibration (same 2-parameter affine map) for Route A/B.",
+            f"Step {args.step_tag} keeps DoF-equalized calibration (same 2-parameter affine map) for Route A/B.",
             "Holdout is nuclide-level deterministic split and is used as the primary hard/watch gate.",
             "Overfit guard uses p95 gap (holdout-train) for Qβ and logft-proxy.",
             "CKM gate and PMNS gate are loaded when their audit JSONs are available.",
@@ -1566,7 +1579,7 @@ def main() -> None:
     worklog.append_event(
         {
             "type": "step_update",
-            "step": "8.7.22.8",
+            "step": str(args.step_tag),
             "script": "scripts/quantum/weak_interaction_beta_decay_route_ab_audit.py",
             "inputs": [_rel(in_csv), _rel(in_json)],
             "outputs": [

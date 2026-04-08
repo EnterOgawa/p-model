@@ -35,8 +35,18 @@ if str(ROOT) not in sys.path:
 
 from scripts.summary import worklog  # noqa: E402
 
+try:
+    import matplotlib as mpl
+    from scripts.utils.plot_style import install_wavep_cjk_font_override  # noqa: E402
+
+    install_wavep_cjk_font_override(preferred_name="Noto Sans CJK JP")
+    mpl.rcParams["axes.unicode_minus"] = False
+except Exception:
+    pass
+
 
 # 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -271,7 +281,12 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]], criteria: List[Dict[str, 
 # 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, rows: List[Dict[str, Any]], threshold: float) -> None:
-    labels = [str(r.get("channel") or "") for r in rows]
+    display_labels = {
+        "cow_neutron": "COW中性子",
+        "atom_gravimeter": "原子干渉計重力計",
+        "optical_clock_leveling_proxy": "光格子時計\nレベリング代理量",
+    }
+    labels = [display_labels.get(str(r.get("channel") or ""), str(r.get("channel") or "")) for r in rows]
     eps_v2 = np.asarray([float(r.get("epsilon_v2", math.nan)) for r in rows], dtype=float)
     eps_phi = np.asarray([float(r.get("epsilon_phi", math.nan)) for r in rows], dtype=float)
     eps_env = np.asarray([float(r.get("epsilon_env", math.nan)) for r in rows], dtype=float)
@@ -283,6 +298,7 @@ def _plot(path: Path, rows: List[Dict[str, Any]], threshold: float) -> None:
     eps_floor = max(eps_floor, 1.0e-30)
     x_max = float(max(np.max(positive_eps) if positive_eps.size else threshold, threshold) * 5.0)
 
+    # 関数: `_safe_width` の入出力契約と処理意図を定義する。
     def _safe_width(values: np.ndarray) -> np.ndarray:
         clamped = np.where(np.isfinite(values) & (values > eps_floor), values, eps_floor)
         return clamped - eps_floor
@@ -291,22 +307,22 @@ def _plot(path: Path, rows: List[Dict[str, Any]], threshold: float) -> None:
     h = 0.22
 
     fig, ax = plt.subplots(figsize=(12.0, 5.1), dpi=180)
-    ax.barh(y - h, _safe_width(eps_v2), left=eps_floor, height=h, color="#1d4ed8", label="epsilon_v2")
-    ax.barh(y, _safe_width(eps_phi), left=eps_floor, height=h, color="#f59e0b", label="epsilon_phi")
-    ax.barh(y + h, _safe_width(eps_env), left=eps_floor, height=h, color="#2f9e44", label="epsilon_env")
-    ax.scatter(np.clip(eps_max, eps_floor, None), y, marker="D", color="#111827", s=24, label="epsilon_max")
-    ax.axvline(threshold, linestyle="--", color="#6b7280", linewidth=1.2, label="gate threshold")
+    ax.barh(y - h, _safe_width(eps_v2), left=eps_floor, height=h, color="#1d4ed8", label="ε_v2")
+    ax.barh(y, _safe_width(eps_phi), left=eps_floor, height=h, color="#f59e0b", label="ε_phi")
+    ax.barh(y + h, _safe_width(eps_env), left=eps_floor, height=h, color="#2f9e44", label="ε_env")
+    ax.scatter(np.clip(eps_max, eps_floor, None), y, marker="D", color="#111827", s=24, label="ε_max")
+    ax.axvline(threshold, linestyle="--", color="#6b7280", linewidth=1.2, label="ゲート閾値")
     ax.set_xscale("log")
     ax.set_xlim(eps_floor, x_max)
-    ax.set_yticks(y, labels, fontsize=12.0)
-    ax.set_xlabel("dimensionless scale (log)", fontsize=14.0)
-    ax.set_title("Nonrelativistic reduction audit (2.6 -> 2.5 Schr mapping)", fontsize=15.0, pad=10.0)
-    ax.tick_params(axis="x", labelsize=12.0)
+    ax.set_yticks(y, labels, fontsize=10.8)
+    ax.set_xlabel("無次元スケール（対数）", fontsize=14.0)
+    ax.set_title("非相対論極限監査（2.6 から 2.5 Schr 対応）", fontsize=15.0, pad=10.0)
+    ax.tick_params(axis="x", labelsize=12.4)
     ax.grid(axis="x", alpha=0.25, linestyle=":")
-    ax.legend(loc="lower right", fontsize=11.5)
-    fig.tight_layout()
+    ax.legend(loc="center right", bbox_to_anchor=(0.98, 0.50), fontsize=11.5)
+    fig.subplots_adjust(left=0.16, right=0.98, top=0.88, bottom=0.16)
     path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(path, bbox_inches="tight")
+    fig.savefig(path)
     plt.close(fig)
 
 
@@ -337,6 +353,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     out_json = Path(args.out_json)
     out_csv = Path(args.out_csv)
     out_png = Path(args.out_png)
+    out_pdf = Path(args.out_png).with_suffix(".pdf")
     # 条件分岐: `not out_json.is_absolute()` を満たす経路を評価する。
     if not out_json.is_absolute():
         out_json = (ROOT / out_json).resolve()
@@ -351,6 +368,11 @@ def main(argv: Optional[List[str]] = None) -> int:
     if not out_png.is_absolute():
         out_png = (ROOT / out_png).resolve()
 
+    # 条件分岐: `not out_pdf.is_absolute()` を満たす経路を評価する。
+
+    if not out_pdf.is_absolute():
+        out_pdf = (ROOT / out_pdf).resolve()
+
     payload = build_pack()
     out_json.parent.mkdir(parents=True, exist_ok=True)
     out_json.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -359,10 +381,12 @@ def main(argv: Optional[List[str]] = None) -> int:
     criteria = payload.get("criteria") if isinstance(payload.get("criteria"), list) else []
     _write_csv(out_csv, rows if isinstance(rows, list) else [], criteria if isinstance(criteria, list) else [])
     _plot(out_png, rows if isinstance(rows, list) else [], threshold=1.0e-6)
+    _plot(out_pdf, rows if isinstance(rows, list) else [], threshold=1.0e-6)
 
     print(f"[ok] wrote: {_rel(out_json)}")
     print(f"[ok] wrote: {_rel(out_csv)}")
     print(f"[ok] wrote: {_rel(out_png)}")
+    print(f"[ok] wrote: {_rel(out_pdf)}")
 
     try:
         worklog.append_event(

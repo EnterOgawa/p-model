@@ -1,35 +1,36 @@
+"""
+目的: 量子 topic の nuclear binding deuteron に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import json
 import math
+import os
+import sys
 from pathlib import Path
 
 
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+
 # 関数: `_configure_japanese_font` の入出力契約と処理意図を定義する。
+
 def _configure_japanese_font() -> None:
     import matplotlib as mpl
-    from matplotlib import font_manager as fm
+    from scripts.utils.plot_style import install_wavep_cjk_font_override
 
-    candidates = [
-        "Yu Gothic",
-        "Meiryo",
-        "MS Gothic",
-        "MS PGothic",
-        "Noto Sans CJK JP",
-        "Noto Sans JP",
-        "IPAexGothic",
-    ]
-    available = {f.name for f in fm.fontManager.ttflist}
-    for name in candidates:
-        if name in available:
-            mpl.rcParams["font.family"] = name
-            mpl.rcParams["font.sans-serif"] = [name] + list(mpl.rcParams.get("font.sans-serif", []))
-            break
-
+    install_wavep_cjk_font_override(preferred_name="Noto Sans CJK JP")
     mpl.rcParams["axes.unicode_minus"] = False
 
 
 # 関数: `_sha256` の入出力契約と処理意図を定義する。
+
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
 
@@ -123,18 +124,28 @@ def main() -> None:
 
     # Plot
     import matplotlib.pyplot as plt
+    from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
+    title_font = get_wavep_font_size("title") * 0.88
+    axis_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    legend_font = get_wavep_font_size("legend")
+    note_font = get_wavep_font_size("note")
+    suptitle_font = get_wavep_font_size("suptitle") + 2.0
 
-    fig = plt.figure(figsize=(10.8, 9.8), dpi=170)
-    gs = fig.add_gridspec(2, 1, hspace=0.30)
+    fig = plt.figure(dpi=170)
+    apply_wavep_figure_layout(fig, template="part2_two_panel_spacious")
+    fig.set_size_inches(fig.get_figwidth(), 5.95, forward=True)
+    fig.subplots_adjust(left=0.145, right=0.985, top=0.915, bottom=0.105, hspace=0.44)
+    gs = fig.add_gridspec(2, 1)
 
     ax0 = fig.add_subplot(gs[0, 0])
     ax0.errorbar([0.0], [b_mev], yerr=[sigma_b_mev], fmt="o", capsize=5, lw=1.8)
     ax0.set_xticks([0.0])
     ax0.set_xticklabels(["重水素"])
-    ax0.set_ylabel("束縛エネルギー B (MeV)", fontsize=13)
-    ax0.set_title("質量欠損ベースライン（CODATA/NIST）", fontsize=14)
+    ax0.set_ylabel("束縛エネルギー B (MeV)", fontsize=axis_font)
+    ax0.set_title("質量欠損ベースライン（CODATA/NIST）", fontsize=title_font, pad=5.0)
     ax0.grid(True, ls=":", lw=0.6, alpha=0.6)
-    ax0.tick_params(axis="both", labelsize=11.5)
+    ax0.tick_params(axis="both", labelsize=tick_font)
     ax0.text(
         0.02,
         0.98,
@@ -146,7 +157,7 @@ def main() -> None:
         transform=ax0.transAxes,
         va="top",
         ha="left",
-        fontsize=11,
+        fontsize=note_font,
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.85, "edgecolor": "0.85"},
     )
 
@@ -158,11 +169,11 @@ def main() -> None:
     ax1.plot([x[1]], [y[1]], marker="s", lw=0.0, label="Bから得る 1/κ（テール尺度）")
     ax1.set_xticks(x)
     ax1.set_xticklabels(["r_d", "1/κ"])
-    ax1.set_ylabel("長さスケール (fm)", fontsize=13)
-    ax1.set_title("サイズ制約（半径と束縛テール）", fontsize=14)
+    ax1.set_ylabel("長さスケール (fm)", fontsize=axis_font)
+    ax1.set_title("サイズ制約（半径と束縛テール）", fontsize=title_font, pad=5.0)
     ax1.grid(True, ls=":", lw=0.6, alpha=0.6)
-    ax1.tick_params(axis="both", labelsize=11.5)
-    ax1.legend(frameon=True, fontsize=11, loc="upper right")
+    ax1.tick_params(axis="both", labelsize=tick_font)
+    ax1.legend(frameon=True, fontsize=legend_font, loc="upper right")
     ax1.text(
         0.02,
         0.02,
@@ -170,14 +181,25 @@ def main() -> None:
         transform=ax1.transAxes,
         va="bottom",
         ha="left",
-        fontsize=11,
+        fontsize=note_font,
     )
 
-    fig.suptitle("重水素の核ベースライン（観測量固定）", y=0.995, fontsize=15)
-    fig.subplots_adjust(left=0.10, right=0.98, top=0.94, bottom=0.08, hspace=0.35)
+    fig.suptitle("重水素の核ベースライン（観測量固定）", y=0.992, fontsize=suptitle_font)
 
     out_png = out_dir / "nuclear_binding_deuteron.png"
-    fig.savefig(out_png, bbox_inches="tight")
+    out_pdf = out_png.with_suffix(".pdf")
+    prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+    try:
+        with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+            fig.savefig(out_pdf)
+            fig.savefig(out_png, dpi=180)
+    finally:
+        if prev_disable_normalize is None:
+            os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = prev_disable_normalize
+
     plt.close(fig)
 
     # Sources and traceability
@@ -228,7 +250,7 @@ def main() -> None:
                 "Any proposed P-model prediction for the deuteron size scale must be compatible with r_d and the tail scale 1/κ (within stated model assumptions).",
             ]
         },
-        "outputs": {"png": str(out_png)},
+        "outputs": {"pdf": str(out_pdf), "png": str(out_png)},
         "notes": [
             "This step fixes nuclear baseline observables and traceable primary sources; it does not claim a first-principles derivation of nuclear forces yet.",
             "Next: extend primary data to np scattering (a_t, r_t, phase shifts) and derive the effective nuclear-scale constraint from the P-field model (to avoid 'just insert φ' criticism).",
@@ -238,6 +260,7 @@ def main() -> None:
     out_json = out_dir / "nuclear_binding_deuteron_metrics.json"
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    print(f"[ok] pdf : {out_pdf}")
     print(f"[ok] png : {out_png}")
     print(f"[ok] json: {out_json}")
 

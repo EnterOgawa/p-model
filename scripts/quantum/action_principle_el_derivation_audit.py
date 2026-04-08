@@ -38,8 +38,18 @@ if str(ROOT) not in sys.path:
 
 from scripts.summary import worklog  # noqa: E402
 
+try:
+    import matplotlib as mpl
+    from scripts.utils.plot_style import install_wavep_cjk_font_override  # noqa: E402
+
+    install_wavep_cjk_font_override(preferred_name="Noto Sans CJK JP")
+    mpl.rcParams["axes.unicode_minus"] = False
+except Exception:
+    pass
+
 
 # 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -202,6 +212,12 @@ def _write_csv(path: Path, criteria: List[Dict[str, Any]]) -> None:
 # 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, payload: Dict[str, Any]) -> None:
+    display_labels = {
+        "covariant_derivative_gauge_covariance": "共変微分のゲージ共変性",
+        "kinetic_density_gauge_invariance": "運動密度のゲージ不変性",
+        "noether_current_gauge_invariance": "Noether電流のゲージ不変性",
+        "noether_current_realness": "Noether電流の実数性",
+    }
     audit = payload.get("numerical_audit") if isinstance(payload.get("numerical_audit"), dict) else {}
     criteria = audit.get("criteria") if isinstance(audit.get("criteria"), list) else []
 
@@ -216,7 +232,7 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
         value = float(row.get("value", math.nan))
         threshold = float(row.get("threshold", math.nan))
         score = value / threshold if math.isfinite(value) and math.isfinite(threshold) and threshold != 0.0 else math.nan
-        labels.append(str(row.get("id") or ""))
+        labels.append(display_labels.get(str(row.get("id") or ""), str(row.get("id") or "")))
         scores.append(float(score))
         colors.append("#2f9e44" if bool(row.get("pass")) else "#dc2626")
 
@@ -226,6 +242,7 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     score_floor = max(score_floor, 1.0e-12)
     x_max = float(max(np.max(positive_scores) if positive_scores.size else 1.0, 1.0) * 1.25)
 
+    # 関数: `_safe_width` の入出力契約と処理意図を定義する。
     def _safe_width(values: np.ndarray) -> np.ndarray:
         clamped = np.where(np.isfinite(values) & (values > score_floor), values, score_floor)
         return clamped - score_floor
@@ -236,16 +253,16 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     ax.axvline(1.0, linestyle="--", color="#6b7280", linewidth=1.2)
     ax.set_xscale("log")
     ax.set_xlim(score_floor, x_max)
-    ax.set_yticks(y, labels, fontsize=12.0)
-    ax.set_xlabel("normalized error (<=1 is pass)", fontsize=13.8)
-    ax.set_title("Action-principle EL derivation audit (gauge covariance / invariance)", fontsize=14.8, pad=8.0)
-    ax.tick_params(axis="x", labelsize=12.0)
+    ax.set_yticks(y, labels, fontsize=12.4)
+    ax.set_xlabel("正規化誤差（1以下で通過）", fontsize=14.0)
+    ax.set_title("作用原理 EL 導出監査（ゲージ共変性・不変性）", fontsize=15.0, pad=8.0)
+    ax.tick_params(axis="x", labelsize=12.4)
     ax.grid(axis="x", alpha=0.25, linestyle=":")
     ax.legend(
         handles=[
-            Patch(facecolor="#2f9e44", label="pass"),
-            Patch(facecolor="#dc2626", label="watch/reject"),
-            Line2D([0], [0], color="#6b7280", linewidth=1.2, linestyle="--", label="threshold (=1)"),
+            Patch(facecolor="#2f9e44", label="通過"),
+            Patch(facecolor="#dc2626", label="監視/棄却"),
+            Line2D([0], [0], color="#6b7280", linewidth=1.2, linestyle="--", label="閾値 (=1)"),
         ],
         loc="lower right",
         fontsize=11.6,

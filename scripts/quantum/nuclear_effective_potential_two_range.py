@@ -1,3 +1,10 @@
+"""
+目的: 量子 topic の nuclear effective potential two range に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -5,38 +12,30 @@ import copy
 import csv
 import json
 import math
+import os
+import sys
 from pathlib import Path
 
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 enable_japanese_figure_localization()
 
 # 関数: `_configure_japanese_font` の入出力契約と処理意図を定義する。
 def _configure_japanese_font() -> None:
     import matplotlib as mpl
-    from matplotlib import font_manager as fm
+    from scripts.utils.plot_style import install_wavep_cjk_font_override
 
-    candidates = [
-        "Yu Gothic",
-        "Meiryo",
-        "MS Gothic",
-        "MS PGothic",
-        "Noto Sans CJK JP",
-        "Noto Sans JP",
-        "IPAexGothic",
-    ]
-    available = {f.name for f in fm.fontManager.ttflist}
-    for name in candidates:
-        if name in available:
-            mpl.rcParams["font.family"] = name
-            mpl.rcParams["font.sans-serif"] = [name] + list(mpl.rcParams.get("font.sans-serif", []))
-            break
-
+    install_wavep_cjk_font_override(preferred_name="Noto Sans CJK JP")
     mpl.rcParams["axes.unicode_minus"] = False
 
 
 # 関数: `_sha256` の入出力契約と処理意図を定義する。
+
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
 
@@ -54,6 +53,7 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
 
 # 関数: `_normalize_cache_key_value` の入出力契約と処理意図を定義する。
+
 def _normalize_cache_key_value(obj: object) -> object:
     """
     Convert nested Python objects into a stable, JSON-serializable key payload.
@@ -85,6 +85,7 @@ def _normalize_cache_key_value(obj: object) -> object:
 
 
 # 関数: `_build_call_cache_key` の入出力契約と処理意図を定義する。
+
 def _build_call_cache_key(*, fn_name: str, args: tuple[object, ...], kwargs: dict[str, object]) -> str:
     payload = {
         "fn": fn_name,
@@ -5544,6 +5545,7 @@ def main(argv: list[str] | None = None) -> None:
                 fit_cache_store = {}
 
     # 関数: `_cached_callable` の入出力契約と処理意図を定義する。
+
     def _cached_callable(tag: str, fn):
         # 関数: `_wrapped` の入出力契約と処理意図を定義する。
         def _wrapped(*f_args, **f_kwargs):
@@ -5565,6 +5567,7 @@ def main(argv: list[str] | None = None) -> None:
                 fit_cache_misses += 1
             except Exception:
                 pass
+
             return value
 
         return _wrapped
@@ -7590,6 +7593,7 @@ def main(argv: list[str] | None = None) -> None:
                     barrier_tail_channel_split_kq_triplet_barrier_fraction_scan = legacy_step85_scan
 
         # Precompute the frozen singlet fit once (does not depend on the triplet scan params).
+
         r1_s_fm_fixed = float(singlet_r1_over_lambda_pi_best) * float(lambda_pi_pm_fm)
         r2_s_fm_fixed = float(singlet_r2_over_lambda_pi_best) * float(lambda_pi_pm_fm)
         cfg_s_any = _barrier_tail_config_free_depth(
@@ -8714,44 +8718,35 @@ def main(argv: list[str] | None = None) -> None:
 
     _configure_japanese_font()
     import matplotlib.pyplot as plt
+    from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
+
+    title_font = get_wavep_font_size("title") * 0.88
+    axis_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    legend_font = get_wavep_font_size("legend")
+    note_font = get_wavep_font_size("note")
+    suptitle_font = get_wavep_font_size("suptitle") + 2.0
 
     enlarged_readability_steps = {"7.9.7", "7.13.8", "7.13.8.5"}
     # 条件分岐: `step in enlarged_readability_steps` を満たす経路を評価する。
     if step in enlarged_readability_steps:
-        plt.rcParams.update(
-            {
-                "font.size": 20.5,
-                "axes.titlesize": 22.5,
-                "axes.labelsize": 20.8,
-                "xtick.labelsize": 18.8,
-                "ytick.labelsize": 18.8,
-                "legend.fontsize": 18.5,
-            }
-        )
-        # Part3 図23-25は1列表示で、各パネルの視認性を優先する。
+        # Part III-B 図23-28は図2基準で 1 列固定にし、font は Part II baseline をそのまま使う。
         max_dataset_cols = 1
-        # 図25-28（7.13.8 / 7.13.8.5）はより縦長+横幅拡張で、注記とX軸可読性を両立する。
-        if step in {"7.13.8", "7.13.8.5"}:
-            fig_w = 16.8
-            block_h = 20.4
-        else:
-            fig_w = 15.6
-            # 図23-24（7.9.7）は従来の拡大バランスを維持する。
-            block_h = 17.2
+        fig_w = 12.2
+        block_h = 8.2
         use_constrained_layout = False
-        legend_fontsize = 18.5
-        panel_note_fontsize = 17.0
-        # 3セット図の最上段注記は、軸内に完全に収まる右側中段へ固定する。
+        legend_fontsize = legend_font
+        panel_note_fontsize = note_font
         if step in {"7.13.8", "7.13.8.5"}:
-            top_note_x = 0.965
-            top_note_y = 0.52
+            top_note_x = 0.98
+            top_note_y = 0.50
             top_note_ha = "right"
             top_note_va = "center"
         else:
-            top_note_x = 0.76
-            top_note_y = 0.50
+            top_note_x = 0.02
+            top_note_y = 0.98
             top_note_ha = "left"
-            top_note_va = "center"
+            top_note_va = "top"
     else:
         plt.rcParams.update(
             {
@@ -8777,13 +8772,28 @@ def main(argv: list[str] | None = None) -> None:
     n_results = max(1, len(results))
     dataset_cols = max_dataset_cols
     dataset_blocks = (n_results + max_dataset_cols - 1) // max_dataset_cols
-    fig_h = block_h * dataset_blocks
-    fig = plt.figure(figsize=(fig_w, fig_h), dpi=160, constrained_layout=use_constrained_layout)
-    if step in {"7.13.8", "7.13.8.5"}:
-        gs_hspace = 0.56
+    is_single_dataset_rollout = dataset_blocks == 1 and dataset_cols == 1
+    if is_single_dataset_rollout:
+        fig = plt.figure(dpi=160, constrained_layout=False)
+        apply_wavep_figure_layout(fig, template="part2_three_panel_spacious")
+        fig.set_size_inches(fig.get_figwidth(), 8.20, forward=True)
+        fig.subplots_adjust(left=0.110, right=0.985, top=0.905, bottom=0.095, hspace=0.52)
+        gs = fig.add_gridspec(3, 1)
+        legend_fontsize = legend_font
+        panel_note_fontsize = note_font
+        top_note_x = 0.02 if step not in {"7.13.8", "7.13.8.5"} else 0.98
+        top_note_y = 0.98 if step not in {"7.13.8", "7.13.8.5"} else 0.50
+        top_note_ha = "left" if step not in {"7.13.8", "7.13.8.5"} else "right"
+        top_note_va = "top" if step not in {"7.13.8", "7.13.8.5"} else "center"
     else:
-        gs_hspace = 0.62 if step in enlarged_readability_steps else 0.34
-    gs = fig.add_gridspec(3 * dataset_blocks, dataset_cols, wspace=0.24, hspace=gs_hspace)
+        fig_h = block_h * dataset_blocks
+        fig = plt.figure(figsize=(fig_w, fig_h), dpi=160, constrained_layout=use_constrained_layout)
+        if step in {"7.13.8", "7.13.8.5"}:
+            gs_hspace = 0.46
+        else:
+            gs_hspace = 0.52 if step in enlarged_readability_steps else 0.34
+
+        gs = fig.add_gridspec(3 * dataset_blocks, dataset_cols, wspace=0.24, hspace=gs_hspace)
 
     for dataset_idx, r in enumerate(results):
         block_row = dataset_idx // max_dataset_cols
@@ -9098,8 +9108,8 @@ def main(argv: list[str] | None = None) -> None:
         ):
             ax0.axvline(float(lambda_pi_pm_fm), color="tab:green", lw=1.1, ls="--")
 
-        ax0.set_xlabel("距離 r（fm）")
-        ax0.set_ylabel("ポテンシャル V(r)（MeV）")
+        ax0.set_xlabel("距離 r（fm）", fontsize=axis_font)
+        ax0.set_ylabel("ポテンシャル V(r)（MeV）", fontsize=axis_font)
         # 条件分岐: `step == "7.13.3"` を満たす経路を評価する。
         if step == "7.13.3":
             title = f"{label}\n2レンジ（λπ拘束、符号付きV2_s）"
@@ -9130,9 +9140,10 @@ def main(argv: list[str] | None = None) -> None:
         else:
             title = f"{label}\n2レンジ井戸（幾何共有）"
 
-        ax0.set_title(title)
+        ax0.set_title(title, fontsize=title_font, pad=5.0)
         ax0.grid(True, ls=":", lw=0.6, alpha=0.6)
         ax0.legend(frameon=True, fontsize=legend_fontsize, loc="lower right")
+        ax0.tick_params(axis="both", labelsize=tick_font)
         ax0.text(
             top_note_x,
             top_note_y,
@@ -9190,11 +9201,12 @@ def main(argv: list[str] | None = None) -> None:
         x_line = [0.0, max(xs) if xs else 0.002**2]
         y_line = [c0 + c2 * x + c4 * (x * x) for x in x_line]
         ax1.plot(x_line, y_line, "-", lw=2.0, color="0.35", label="EREフィット")
-        ax1.set_xlabel("波数二乗 $k^2$（fm$^{-2}$）")
-        ax1.set_ylabel("有効レンジ関数 $k\\cot\\delta$（fm$^{-1}$）")
-        ax1.set_title("三重項: EREフィット（v2を目標）")
+        ax1.set_xlabel("波数二乗 $k^2$（fm$^{-2}$）", fontsize=axis_font)
+        ax1.set_ylabel("有効レンジ関数 $k\\cot\\delta$（fm$^{-1}$）", fontsize=axis_font)
+        ax1.set_title("三重項: EREフィット（v2を目標）", fontsize=title_font, pad=5.0)
         ax1.grid(True, ls=":", lw=0.6, alpha=0.6)
         ax1.legend(frameon=True, fontsize=legend_fontsize, loc="best")
+        ax1.tick_params(axis="both", labelsize=tick_font)
         ax1.text(
             0.02,
             0.02,
@@ -9229,9 +9241,10 @@ def main(argv: list[str] | None = None) -> None:
         ax2.bar(range(len(names)), deltas, color=["tab:blue", "tab:orange", "tab:orange"], alpha=0.85)
         ax2.set_xticks(range(len(names)))
         ax2.set_xticklabels(names, rotation=10, ha="right")
-        ax2.set_ylabel("フィット/予測 − 観測（単位: fm³, fm, fm³）")
-        ax2.set_title("観測値とのクロスチェック（eq出典）")
+        ax2.set_ylabel("フィット/予測 − 観測（単位: fm³, fm, fm³）", fontsize=axis_font)
+        ax2.set_title("観測値とのクロスチェック（eq出典）", fontsize=title_font, pad=5.0)
         ax2.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
+        ax2.tick_params(axis="both", labelsize=tick_font)
         crosscheck_note_y = 0.02 if step == "7.13.8" else 0.98
         crosscheck_note_va = "bottom" if step == "7.13.8" else "top"
         ax2.text(
@@ -9261,13 +9274,14 @@ def main(argv: list[str] | None = None) -> None:
         "7.13.8.4": "λπ拘束3レンジ + チャネル分離(k,q) + 一重項R2_s/λπ走査",
         "7.13.8.5": "λπ拘束3レンジ + チャネル分離(k,q) + 三重項障壁比率走査",
     }
-    fig.suptitle(suptitle_by_step[step], y=0.995)
+    fig.suptitle(suptitle_by_step[step], y=0.992, fontsize=suptitle_font)
     # 条件分岐: `not use_constrained_layout` を満たす経路を評価する。
-    if not use_constrained_layout:
+    if not is_single_dataset_rollout and not use_constrained_layout:
         if step in {"7.13.8", "7.13.8.5"}:
-            manual_hspace = 0.56
+            manual_hspace = 0.46
         else:
-            manual_hspace = 0.62 if step in enlarged_readability_steps else 0.42
+            manual_hspace = 0.52 if step in enlarged_readability_steps else 0.42
+
         fig.subplots_adjust(left=0.07, right=0.98, top=0.93, bottom=0.05, wspace=0.24, hspace=manual_hspace)
 
     out_png_by_step = {
@@ -9289,11 +9303,22 @@ def main(argv: list[str] | None = None) -> None:
     out_png = out_png_by_step[step]
     if eq_only is not None:
         out_png = out_png.with_name(f"{out_png.stem}_eq{eq_only}{out_png.suffix}")
-    fig.savefig(out_png, bbox_inches="tight")
+
+    prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
     out_pdf: Path | None = None
-    if args.export_pdf:
-        out_pdf = out_png.with_suffix(".pdf")
-        fig.savefig(out_pdf, bbox_inches="tight")
+    try:
+        with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+            fig.savefig(out_png)
+            if args.export_pdf:
+                out_pdf = out_png.with_suffix(".pdf")
+                fig.savefig(out_pdf)
+    finally:
+        if prev_disable_normalize is None:
+            os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = prev_disable_normalize
+
     plt.close(fig)
 
     split_png_by_eq: dict[str, str] = {}
@@ -9315,8 +9340,10 @@ def main(argv: list[str] | None = None) -> None:
                     candidate = base_bounds[b] + split_pad_px
                     if candidate < lower:
                         candidate = lower
+
                     if candidate > upper:
                         candidate = upper
+
                     adjusted_bounds[b] = candidate
 
                 for idx, row in enumerate(results):
@@ -9332,6 +9359,7 @@ def main(argv: list[str] | None = None) -> None:
                         eq_label = int(eq_label_obj)
                     except Exception:
                         eq_label = idx + 1
+
                     split_key = f"eq{eq_label}"
                     split_path = out_dir / f"{out_png.stem}_{split_key}{out_png.suffix}"
                     plt.imsave(split_path, arr[y0:y1, ...])
@@ -10204,6 +10232,7 @@ def main(argv: list[str] | None = None) -> None:
         metrics["outputs"]["png_split_by_eq"] = split_png_by_eq
 
     # 条件分岐: `out_csv is not None` を満たす経路を評価する。
+
     if out_csv is not None:
         metrics["outputs"]["csv"] = str(out_csv)
 
@@ -10268,6 +10297,7 @@ def main(argv: list[str] | None = None) -> None:
     out_json = out_json_by_step[step]
     if eq_only is not None:
         out_json = out_json.with_name(f"{out_json.stem}_eq{eq_only}{out_json.suffix}")
+
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
     if fit_cache_enabled and fit_cache_dirty:
@@ -10280,6 +10310,7 @@ def main(argv: list[str] | None = None) -> None:
 
     # Canonical alias (stable path) for downstream A-dependence / paper tables.
     # This avoids hard-coding long, step-specific filenames in other scripts.
+
     canonical_json: Path | None = None
     # 条件分岐: `step == "7.13.8.5"` を満たす経路を評価する。
     if step == "7.13.8.5":
@@ -10297,10 +10328,12 @@ def main(argv: list[str] | None = None) -> None:
     print(f"  {out_png}")
     if out_pdf is not None:
         print(f"  {out_pdf}")
+
     if split_png_by_eq:
         for eq_key in sorted(split_png_by_eq.keys()):
             print(f"  {split_png_by_eq[eq_key]}")
     # 条件分岐: `out_csv is not None` を満たす経路を評価する。
+
     if out_csv is not None:
         print(f"  {out_csv}")
 

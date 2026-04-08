@@ -36,6 +36,7 @@ import csv
 import json
 import math
 import shutil
+import textwrap
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
@@ -1697,7 +1698,10 @@ def _write_plot(payload: Dict[str, Any], out_pdf: Path, out_png: Path) -> None:
     scores = [_status_to_score(s) for s in statuses]
     colors = [_status_color(s) for s in statuses]
 
-    fig, ax = plt.subplots(figsize=(11.5, 4.8))
+    fig = plt.figure(figsize=(11.5, 5.3))
+    grid = fig.add_gridspec(1, 2, width_ratios=[1.02, 1.28], wspace=0.18)
+    ax = fig.add_subplot(grid[0, 0])
+    ax_note = fig.add_subplot(grid[0, 1])
     y = np.arange(len(labels), dtype=float)
     ax.barh(y, scores, color=colors, alpha=0.9)
     ax.set_yticks(y)
@@ -1762,10 +1766,31 @@ def _write_plot(payload: Dict[str, Any], out_pdf: Path, out_png: Path) -> None:
     if vlbi_bias or llr_bias:
         note_parts.append(f"bias(vlbi/llr)={vlbi_bias}/{llr_bias}")
 
-    note = " / ".join(note_parts) if note_parts else "|z|=NA"
-    ax.text(0.02, 0.05, note, transform=ax.transAxes, ha="left", va="bottom", fontsize=10.0)
+    note_lines: List[str] = []
+    if note_parts:
+        for part in note_parts:
+            wrapped = textwrap.wrap(part, width=36, break_long_words=False, break_on_hyphens=False)
+            if wrapped:
+                note_lines.extend(wrapped)
+            else:
+                note_lines.append(part)
+    else:
+        note_lines.append("|z|=NA")
 
-    fig.tight_layout()
+    ax_note.axis("off")
+    ax_note.text(
+        0.02,
+        0.98,
+        "\n".join(note_lines),
+        transform=ax_note.transAxes,
+        ha="left",
+        va="top",
+        fontsize=10.0,
+        linespacing=1.28,
+        bbox={"boxstyle": "round,pad=0.28", "facecolor": "white", "edgecolor": "#999999", "alpha": 0.92},
+    )
+
+    fig.subplots_adjust(left=0.12, right=0.97, top=0.90, bottom=0.12)
     out_pdf.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_pdf)
     fig.savefig(out_png, dpi=180)

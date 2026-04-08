@@ -1,12 +1,21 @@
+"""
+目的: 量子 topic の nuclear binding energy frequency mapping representative nuclei に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import csv
 import json
 import math
+import os
 from pathlib import Path
 
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
 
 enable_japanese_figure_localization()
 
@@ -400,7 +409,15 @@ def main() -> None:
         b_over_a_pred.append(float(r_obs["B_pred_MeV"]) / float(a))
 
     fig = plt.figure(figsize=(13.6, 5.8), dpi=170)
-    gs = fig.add_gridspec(1, 2, wspace=0.30)
+    apply_wavep_figure_layout(fig, template="part2_side_by_side")
+    fig.set_size_inches(fig.get_figwidth(), 5.55, forward=True)
+    gs = fig.add_gridspec(1, 2, wspace=0.28)
+    panel_title_font = get_wavep_font_size("title") * 0.82
+    axis_label_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    legend_font = get_wavep_font_size("legend")
+    note_font = get_wavep_font_size("note")
+    suptitle_font = get_wavep_font_size("suptitle") + 3.0
 
     ax0 = fig.add_subplot(gs[0, 0])
     x = list(range(len(labels)))
@@ -408,12 +425,12 @@ def main() -> None:
     ax0.bar([v - w / 2 for v in x], b_over_a_obs, width=w, color="0.7", label="obs (AME2020)")
     ax0.bar([v + w / 2 for v in x], b_over_a_pred, width=w, color="tab:blue", alpha=0.85, label=f"pred ({baseline_method})")
     ax0.set_xticks(x)
-    ax0.set_xticklabels(labels, fontsize=13.8)
-    ax0.set_ylabel("B/A (MeV per nucleon)", fontsize=15.8)
-    ax0.set_title("Observed vs predicted (baseline) B/A", fontsize=16.8, pad=8)
+    ax0.set_xticklabels(labels, fontsize=tick_font)
+    ax0.set_ylabel("B/A (MeV per nucleon)", fontsize=axis_label_font)
+    ax0.set_title("Observed vs predicted (baseline) B/A", fontsize=panel_title_font, pad=6.0)
     ax0.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax0.tick_params(axis="y", labelsize=13.8)
-    ax0.legend(loc="upper right", fontsize=13.0)
+    ax0.tick_params(axis="y", labelsize=tick_font)
+    ax0.legend(loc="upper right", fontsize=legend_font)
 
     # Ratio plot (all methods)
     ax1 = fig.add_subplot(gs[0, 1])
@@ -427,32 +444,47 @@ def main() -> None:
 
     ax1.axhline(1.0, color="0.2", lw=1.2, ls="--")
     ax1.set_xticks(x)
-    ax1.set_xticklabels(labels, fontsize=13.8)
-    ax1.set_ylabel("B_pred / B_obs", fontsize=15.8)
-    ax1.set_title("Multi-body reduction sensitivity (C choices)", fontsize=16.8, pad=8)
+    ax1.set_xticklabels(labels, fontsize=tick_font)
+    ax1.set_ylabel("B_pred / B_obs", fontsize=axis_label_font)
+    ax1.set_title("Multi-body reduction sensitivity (C choices)", fontsize=panel_title_font, pad=6.0)
     ax1.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax1.tick_params(axis="y", labelsize=13.8)
-    ax1.legend(loc="upper left", fontsize=13.0)
+    ax1.tick_params(axis="y", labelsize=tick_font)
+    ax1.legend(loc="upper left", fontsize=legend_font)
 
     ax1.text(
-        0.02,
-        0.02,
-        f"anchor: R_ref=1/κ_d={r_ref:.2f} fm,  J_ref=B_d/2={j_ref_mev:.3f} MeV\n"
-        f"range: L=λπ={l_range:.2f} fm,  R(model): d uses tail; others use √(5/3) r_rms",
+        0.32,
+        0.52,
+        (
+            f"anchor: R_ref=1/κ_d={r_ref:.2f} fm\n"
+            f"J_ref=B_d/2={j_ref_mev:.3f} MeV\n"
+            f"range: L=λπ={l_range:.2f} fm\n"
+            "R(model): d uses tail\n"
+            "others use √(5/3) r_rms"
+        ),
         transform=ax1.transAxes,
         ha="left",
-        va="bottom",
-        fontsize=12.0,
+        va="center",
+        fontsize=note_font,
         bbox={"facecolor": "white", "alpha": 0.85, "edgecolor": "0.85"},
     )
 
-    fig.suptitle("representative nuclei (A=2,4,12,16) — A-dependence preview", y=1.02, fontsize=18.0)
-    fig.subplots_adjust(left=0.07, right=0.985, top=0.86, bottom=0.20, wspace=0.30)
+    fig.suptitle("representative nuclei (A=2,4,12,16) — A-dependence preview", y=0.986, fontsize=suptitle_font)
+    fig.subplots_adjust(left=0.095, right=0.985, top=0.880, bottom=0.200, wspace=0.28)
 
     out_pdf = out_dir / "nuclear_binding_energy_frequency_mapping_representative_nuclei.pdf"
     out_png = out_dir / "nuclear_binding_energy_frequency_mapping_representative_nuclei.png"
-    fig.savefig(out_pdf, bbox_inches="tight")
-    fig.savefig(out_png, bbox_inches="tight")
+    prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+    try:
+        with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+            fig.savefig(out_pdf)
+            fig.savefig(out_png)
+    finally:
+        if prev_disable_normalize is None:
+            os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = prev_disable_normalize
+
     plt.close(fig)
 
     # Metrics JSON

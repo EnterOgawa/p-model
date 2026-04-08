@@ -1,40 +1,35 @@
+"""
+目的: 量子 topic の nuclear binding energy frequency mapping falsification pack に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import csv
 import json
 import math
+import os
 from pathlib import Path
 
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
 
 enable_japanese_figure_localization()
 
 # 関数: `_configure_japanese_font` の入出力契約と処理意図を定義する。
 def _configure_japanese_font() -> None:
     import matplotlib as mpl
-    from matplotlib import font_manager as fm
+    from scripts.utils.plot_style import install_wavep_cjk_font_override
 
-    candidates = [
-        "Yu Gothic",
-        "Meiryo",
-        "MS Gothic",
-        "MS PGothic",
-        "Noto Sans CJK JP",
-        "Noto Sans JP",
-        "IPAexGothic",
-    ]
-    available = {f.name for f in fm.fontManager.ttflist}
-    for name in candidates:
-        if name in available:
-            mpl.rcParams["font.family"] = name
-            mpl.rcParams["font.sans-serif"] = [name] + list(mpl.rcParams.get("font.sans-serif", []))
-            break
-
+    install_wavep_cjk_font_override(preferred_name="Noto Sans CJK JP")
     mpl.rcParams["axes.unicode_minus"] = False
 
 
 # 関数: `_sha256` の入出力契約と処理意図を定義する。
+
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
 
@@ -490,7 +485,14 @@ def main() -> None:
     z_delta_vals = [float(m["z_delta_median"]) for m in models]
 
     fig, axs = plt.subplots(2, 2, figsize=(17.2, 14.6))
+    apply_wavep_figure_layout(fig, template="part2_quad_panel_spacious")
+    fig.set_size_inches(fig.get_figwidth(), 8.90, forward=True)
     ax0, ax1, ax2, ax3 = axs.flatten()
+    panel_title_font = get_wavep_font_size("title") * 0.82
+    axis_label_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    note_font = get_wavep_font_size("note")
+    suptitle_font = get_wavep_font_size("suptitle") + 2.0
 
     ax0.bar(range(len(labels)), z_vals, color=["tab:purple", "tab:blue"], alpha=0.85)
     ax0.axhline(thresholds["z_median_abs_max"], color="0.2", lw=1.2, ls="--")
@@ -498,10 +500,10 @@ def main() -> None:
     ax0.axhline(0.0, color="0.4", lw=0.9)
     ax0.set_xticks(range(len(labels)))
     ax0.set_xticklabels(labels, rotation=15, ha="right")
-    ax0.set_ylabel("z_median（log10比）", fontsize=22.0)
-    ax0.set_title("中央値残差の整合性（|z|<=3）", fontsize=24.0)
+    ax0.set_ylabel("z_median（log10比）", fontsize=axis_label_font)
+    ax0.set_title("中央値残差の整合性（|z|<=3）", fontsize=panel_title_font, pad=6.0)
     ax0.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax0.tick_params(labelsize=19.5)
+    ax0.tick_params(labelsize=tick_font)
 
     ax1.bar(range(len(labels)), z_delta_vals, color=["tab:purple", "tab:blue"], alpha=0.85)
     ax1.axhline(thresholds["z_delta_median_abs_max"], color="0.2", lw=1.2, ls="--")
@@ -509,10 +511,10 @@ def main() -> None:
     ax1.axhline(0.0, color="0.4", lw=0.9)
     ax1.set_xticks(range(len(labels)))
     ax1.set_xticklabels(labels, rotation=15, ha="right")
-    ax1.set_ylabel("z_Δmedian（log10比）", fontsize=22.0)
-    ax1.set_title("Aトレンド整合性（|z_Δmedian|<=3）", fontsize=24.0)
+    ax1.set_ylabel("z_Δmedian（log10比）", fontsize=axis_label_font)
+    ax1.set_title("Aトレンド整合性（|z_Δmedian|<=3）", fontsize=panel_title_font, pad=6.0)
     ax1.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax1.tick_params(labelsize=19.5)
+    ax1.tick_params(labelsize=tick_font)
 
     ch_labels = [str(c.get("channel_id", "")) for c in channels]
     ch_vals = []
@@ -524,10 +526,10 @@ def main() -> None:
     ax2.bar(range(len(ch_labels)), ch_vals, color=["tab:red", "tab:blue"], alpha=0.85)
     ax2.set_xticks(range(len(ch_labels)))
     ax2.set_xticklabels(ch_labels, rotation=15, ha="right")
-    ax2.set_ylabel("中央値 σ_req,rel [%]", fontsize=22.0)
-    ax2.set_title("チャネル精度要求（3σ）", fontsize=24.0)
+    ax2.set_ylabel("中央値 σ_req,rel [%]", fontsize=axis_label_font)
+    ax2.set_title("チャネル精度要求（3σ）", fontsize=panel_title_font, pad=6.0)
     ax2.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax2.tick_params(labelsize=19.5)
+    ax2.tick_params(labelsize=tick_font)
 
     radius_threshold = _safe_float(radii_crosscheck.get("strict_threshold_sigma"))
     base = radii_crosscheck.get("baseline_def0") if isinstance(radii_crosscheck.get("baseline_def0"), dict) else {}
@@ -547,10 +549,10 @@ def main() -> None:
 
     ax3.set_xticks(range(len(radius_labels)))
     ax3.set_xticklabels(radius_labels, rotation=15, ha="right")
-    ax3.set_ylabel("最大絶対残差 [σ]", fontsize=22.0)
-    ax3.set_title("独立クロスチェック（電荷半径キンク, A_min=100）", fontsize=24.0)
+    ax3.set_ylabel("最大絶対残差 [σ]", fontsize=axis_label_font)
+    ax3.set_title("独立クロスチェック（電荷半径キンク, A_min=100）", fontsize=panel_title_font, pad=6.0)
     ax3.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
-    ax3.tick_params(labelsize=19.5)
+    ax3.tick_params(labelsize=tick_font)
 
     sn_rms = _safe_float(sep_crosscheck.get("sn_rms_total_mev"))
     s2n_rms = _safe_float(sep_crosscheck.get("s2n_rms_total_mev"))
@@ -569,15 +571,25 @@ def main() -> None:
         transform=ax3.transAxes,
         va="top",
         ha="right",
-        fontsize=23.5,
+        fontsize=note_font,
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.8, "edgecolor": "0.8"},
     )
 
-    fig.suptitle("反証条件パックと独立クロスチェック", y=0.985, fontsize=26.0)
-    fig.subplots_adjust(left=0.065, right=0.985, top=0.91, bottom=0.10, wspace=0.20, hspace=0.38)
+    fig.suptitle("反証条件パックと独立クロスチェック", y=0.992, fontsize=suptitle_font)
+    fig.subplots_adjust(left=0.085, right=0.985, top=0.905, bottom=0.095, wspace=0.22, hspace=0.64)
 
     out_png = out_dir / "nuclear_binding_energy_frequency_mapping_falsification_pack.png"
-    fig.savefig(out_png, bbox_inches="tight")
+    prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+    try:
+        with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+            fig.savefig(out_png)
+    finally:
+        if prev_disable_normalize is None:
+            os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = prev_disable_normalize
+
     plt.close(fig)
 
     # Representative nuclei table (operational, for reviewer-facing clarity).

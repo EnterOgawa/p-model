@@ -1,8 +1,16 @@
+"""
+目的: 理論 topic の gravitational redshift experiments に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
 import csv
 import json
+import shutil
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -11,28 +19,25 @@ from typing import Any, Dict, List, Optional, Sequence
 import matplotlib.pyplot as plt
 import numpy as np
 
+from scripts.utils.plot_style import (
+    apply_paper_style,
+    apply_wavep_figure_layout,
+    get_wavep_font_size,
+    resolve_wavep_cjk_font_family,
+)
+
 
 # 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
-        import matplotlib.font_manager as fm
-
-        preferred = [
-            "Yu Gothic",
-            "Meiryo",
-            "BIZ UDGothic",
-            "MS Gothic",
-            "Yu Mincho",
-            "MS Mincho",
-        ]
-        available = {f.name for f in fm.fontManager.ttflist}
-        chosen = [name for name in preferred if name in available]
+        chosen = resolve_wavep_cjk_font_family()
         # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
-        mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+        mpl.rcParams["font.family"] = [chosen, "DejaVu Sans"]
+        mpl.rcParams["font.sans-serif"] = [chosen, "DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         pass
@@ -81,6 +86,23 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 def _fmt_sci(x: float, *, digits: int = 3) -> str:
     return f"{x:.{digits}e}"
+
+
+# 関数: `gravitational_redshift_experiments` の canonical 図を private/public に同期保存する。
+
+def _save_public_figure(fig: plt.Figure, *, out_png: Path) -> None:
+    out_png.parent.mkdir(parents=True, exist_ok=True)
+    out_pdf = out_png.with_suffix(".pdf")
+    root = Path(__file__).resolve().parents[2]
+    public_dir = root / "output" / "public" / "theory"
+    public_dir.mkdir(parents=True, exist_ok=True)
+
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        fig.savefig(out_png, dpi=220)
+        fig.savefig(out_pdf)
+
+    shutil.copy2(out_png, public_dir / out_png.name)
+    shutil.copy2(out_pdf, public_dir / out_pdf.name)
 
 
 # 関数: `compute` の入出力契約と処理意図を定義する。
@@ -134,6 +156,7 @@ def _write_csv(path: Path, rows: Sequence[Dict[str, Any]]) -> None:
 # 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path, scale: float) -> None:
+    apply_paper_style()
     _set_japanese_font()
 
     labels = [str(r.get("short_label") or "") for r in rows]
@@ -141,8 +164,8 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path, scale: float) -> Non
     yerr = np.array([float(r["sigma"]) / scale for r in rows], dtype=float)
     x = np.arange(len(rows), dtype=float)
 
-    fig = plt.figure(figsize=(11.8, 6.6))
-    ax = fig.add_subplot(1, 1, 1)
+    fig, ax = plt.subplots()
+    apply_wavep_figure_layout(fig, template="part2_single_panel_sparse")
     ax.axhline(0.0, color="black", linewidth=1.0, alpha=0.8, label="P-model / GR 予測（ε=0）")
     ax.errorbar(
         x,
@@ -157,19 +180,16 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path, scale: float) -> Non
     )
 
     ax.set_xticks(x)
-    ax.set_xticklabels(labels, rotation=12, ha="right", fontsize=13.6)
+    ax.set_xticklabels(labels, rotation=0, ha="center")
 
     power = int(round(np.log10(scale)))
-    ax.set_ylabel(f"偏差 ε（観測のずれ） [×10^{power}]", fontsize=15.4)
-    ax.set_title("重力赤方偏移：観測 vs P-model（一次ソース）", fontsize=17.2)
-    ax.tick_params(axis="y", labelsize=13.6)
+    ax.set_ylabel(f"偏差 ε（観測のずれ） [×10^{power}]")
+    ax.set_title("重力赤方偏移：観測 vs P-model（一次ソース）")
+    ax.tick_params(axis="y")
     ax.grid(True, alpha=0.25)
-    ax.legend(loc="upper right", fontsize=13.8)
+    ax.legend(loc="upper right", fontsize=get_wavep_font_size("legend"))
 
-    fig.tight_layout()
-    out_png.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_png, dpi=200)
-    fig.savefig(out_png.with_suffix(".pdf"))
+    _save_public_figure(fig, out_png=out_png)
     plt.close(fig)
 
 

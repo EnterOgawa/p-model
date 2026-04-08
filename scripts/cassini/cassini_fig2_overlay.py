@@ -1,3 +1,10 @@
+"""
+目的: Cassini topic の cassini fig2 overlay に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 import argparse
 import csv
 import json
@@ -18,6 +25,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog
+from scripts.utils.plot_style import apply_wavep_compact_legend, apply_wavep_figure_layout
 
 C = 299792458.0
 MU_SUN = 1.3271244e20  # m^3/s^2
@@ -63,6 +71,19 @@ def _set_japanese_font() -> None:
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         pass
+
+
+# 関数: Cassini 図を fixed canvas のまま保存し、tight bbox による legend/caption 崩れを防ぐ。
+
+def _save_figure_fixed_canvas(fig, path: Path, *, dpi: int | None = None) -> None:
+    import matplotlib.pyplot as plt
+
+    save_kwargs: dict[str, object] = {}
+    if dpi is not None:
+        save_kwargs["dpi"] = int(dpi)
+
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.1}):
+        fig.savefig(path, **save_kwargs)
 
 
 # クラス: `ModelRow` の責務と境界条件を定義する。
@@ -1349,6 +1370,7 @@ def try_plot_delta_beta_fit(
     ax0.set_title(
         f"{title_prefix}（β_ref={beta_ref:.9f}, β_est={beta_est:.9f}, Δβ={delta_beta:+.3e}）",
         fontsize=13.6,
+        pad=8.0,
     )
     ax0.grid(True, alpha=0.3)
     ax0.legend(loc="best", fontsize=10.8)
@@ -1361,7 +1383,7 @@ def try_plot_delta_beta_fit(
     ax1.grid(True, alpha=0.3)
     ax1.tick_params(labelsize=11.2)
 
-    fig.tight_layout()
+    apply_wavep_figure_layout(fig, template="part2_two_panel")
     fig.savefig(out_dir / f"{plot_basename}.png", dpi=180)
     fig.savefig(out_dir / f"{plot_basename}.pdf")
     plt.close(fig)
@@ -1473,59 +1495,80 @@ def try_plot(
     ym_pts = [p.y_model for p in points]
     res_pts = [p.residual for p in points]
 
+    # 関数: 観測ソース説明を図内向けの短い凡例ラベルへ正規化する。
+    def _compact_obs_label(label: str) -> str:
+        normalized = str(label).strip()
+        if "PDS TDF" in normalized:
+            return "観測（PDS TDF 処理後）"
+
+        if "PDS ODF" in normalized:
+            return "観測（PDS ODF）"
+
+        if "デジタイズ" in normalized:
+            return "観測（論文図）"
+
+        return "観測"
+
+    compact_obs_label = _compact_obs_label(obs_label)
+
     # Full overlay
     fig, ax = plt.subplots(figsize=(10, 5))
-    ax.plot(model_t_days, model_y, label=f"P-model（β={beta:g}）", linewidth=2, color="tab:blue")
-    ax.scatter(xs_pts, yd_pts, s=12, label=obs_label, alpha=0.85, color="tab:orange")
-    ax.set_title("Cassini：ドップラー y（観測 vs P-model）", fontsize=13)
+    ax.plot(model_t_days, model_y, label="P-model", linewidth=2, color="tab:blue")
+    ax.scatter(xs_pts, yd_pts, s=12, label=compact_obs_label, alpha=0.85, color="tab:orange")
+    ax.set_title("Cassini：ドップラー y（観測 vs P-model）", fontsize=13, pad=8.0)
     ax.set_xlabel("t（日, b_min からの相対）")
     ax.set_ylabel("y（周波数比）")
     ax.grid(True, alpha=0.3)
-    ax.legend()
-    fig.tight_layout()
-    fig.savefig(out_dir / "cassini_fig2_overlay_full.png", dpi=180)
+    apply_wavep_figure_layout(fig, template="part2_single_panel")
+    ax.legend(loc="lower right", framealpha=0.95)
+    _save_figure_fixed_canvas(fig, out_dir / "cassini_fig2_overlay_full.png", dpi=180)
+    _save_figure_fixed_canvas(fig, out_dir / "cassini_fig2_overlay_full.pdf")
     plt.close(fig)
 
     # Zoom +/- 10 days
     fig, ax = plt.subplots(figsize=(10, 5))
-    ax.plot(model_t_days, model_y, label=f"P-model（β={beta:g}）", linewidth=2, color="tab:blue")
-    ax.scatter(xs_pts, yd_pts, s=12, label=obs_label, alpha=0.85, color="tab:orange")
+    ax.plot(model_t_days, model_y, label="P-model", linewidth=2, color="tab:blue")
+    ax.scatter(xs_pts, yd_pts, s=12, label=compact_obs_label, alpha=0.85, color="tab:orange")
     ax.set_xlim(-10, 10)
-    ax.set_title("Cassini：ドップラー y（±10日, 観測 vs P-model）", fontsize=13)
+    ax.set_title("Cassini：ドップラー y（±10日, 観測 vs P-model）", fontsize=13, pad=8.0)
     ax.set_xlabel("t（日, b_min からの相対）")
     ax.set_ylabel("y（周波数比）")
     ax.grid(True, alpha=0.3)
-    ax.legend()
-    fig.tight_layout()
-    fig.savefig(out_dir / "cassini_fig2_overlay_zoom10d.png", dpi=180)
+    # 図5は plot 内 legend を使い、canvas 高を増やさずに系列識別を残す。
+    apply_wavep_figure_layout(fig, template="part2_single_panel")
+    ax.legend(loc="lower right", framealpha=0.95)
+    _save_figure_fixed_canvas(fig, out_dir / "cassini_fig2_overlay_zoom10d.png", dpi=180)
+    _save_figure_fixed_canvas(fig, out_dir / "cassini_fig2_overlay_zoom10d.pdf")
     plt.close(fig)
 
     # Residuals
     fig, ax = plt.subplots(figsize=(10, 4.5))
     ax.axhline(0.0, color="k", linewidth=1, alpha=0.5)
     ax.scatter(xs_pts, res_pts, s=12, alpha=0.85, color="tab:red")
-    ax.set_title("Cassini：残差（観測 - P-model）", fontsize=13)
+    ax.set_title("Cassini：残差（観測 - P-model）", fontsize=13, pad=8.0)
     ax.set_xlabel("t（日, b_min からの相対）")
     ax.set_ylabel("残差（観測 - モデル）")
     ax.grid(True, alpha=0.3)
-    fig.tight_layout()
-    fig.savefig(out_dir / "cassini_fig2_residuals.png", dpi=180)
+    apply_wavep_figure_layout(fig, template="part2_single_panel")
+    _save_figure_fixed_canvas(fig, out_dir / "cassini_fig2_residuals.png", dpi=180)
+    _save_figure_fixed_canvas(fig, out_dir / "cassini_fig2_residuals.pdf")
     plt.close(fig)
 
     # Best beta overlay (zoom) if provided
     if best_beta_zoom is not None:
         best_beta, best_model_y = best_beta_zoom
         fig, ax = plt.subplots(figsize=(10, 5))
-        ax.plot(model_t_days, best_model_y, label=f"P-model（最適β={best_beta:g}）", linewidth=2, color="tab:blue")
-        ax.scatter(xs_pts, yd_pts, s=12, label=obs_label, alpha=0.85, color="tab:orange")
+        ax.plot(model_t_days, best_model_y, label="P-model（最適β）", linewidth=2, color="tab:blue")
+        ax.scatter(xs_pts, yd_pts, s=12, label=compact_obs_label, alpha=0.85, color="tab:orange")
         ax.set_xlim(-10, 10)
-        ax.set_title("Cassini：ドップラー y（±10日, 最適β）", fontsize=13)
+        ax.set_title("Cassini：ドップラー y（±10日, 最適β）", fontsize=13, pad=8.0)
         ax.set_xlabel("t（日, b_min からの相対）")
         ax.set_ylabel("y（周波数比）")
         ax.grid(True, alpha=0.3)
-        ax.legend()
-        fig.tight_layout()
-        fig.savefig(out_dir / "cassini_fig2_overlay_bestbeta_zoom10d.png", dpi=180)
+        apply_wavep_figure_layout(fig, template="part2_single_panel")
+        ax.legend(loc="lower right", framealpha=0.95)
+        _save_figure_fixed_canvas(fig, out_dir / "cassini_fig2_overlay_bestbeta_zoom10d.png", dpi=180)
+        _save_figure_fixed_canvas(fig, out_dir / "cassini_fig2_overlay_bestbeta_zoom10d.pdf")
         plt.close(fig)
 
 
@@ -1586,17 +1629,18 @@ def run_beta_sweep(
 
     _set_japanese_font()
     fig, ax = plt.subplots(figsize=(10, 5))
-    ax.plot(betas, rmse_all, label="RMSE（全区間）")
-    ax.plot(betas, rmse_10, label="RMSE（±10日）")
-    ax.plot(betas, rmse_3, label="RMSE（±3日）")
-    ax.axvline(best_beta, color="k", linewidth=1, alpha=0.5, label=f"最適β={best_beta:g}")
-    ax.set_title("Cassini：βスイープ（RMSE）", fontsize=13)
+    ax.plot(betas, rmse_all, label="全区間")
+    ax.plot(betas, rmse_10, label="±10日")
+    ax.plot(betas, rmse_3, label="±3日")
+    ax.axvline(best_beta, color="k", linewidth=1, alpha=0.5, label="最適β")
+    ax.set_title("Cassini：βスイープ（RMSE）", fontsize=13, pad=8.0)
     ax.set_xlabel("β")
     ax.set_ylabel("RMSE")
     ax.grid(True, alpha=0.3)
-    ax.legend()
-    fig.tight_layout()
-    fig.savefig(out_png, dpi=180)
+    apply_wavep_figure_layout(fig, template="part2_single_panel")
+    ax.legend(loc="upper right", framealpha=0.95)
+    _save_figure_fixed_canvas(fig, out_png, dpi=180)
+    _save_figure_fixed_canvas(fig, out_png.with_suffix(".pdf"))
     plt.close(fig)
 
     return best_beta, rmse_10
@@ -2857,15 +2901,16 @@ def main() -> None:
                         s=10,
                         alpha=0.8,
                         color="tab:orange",
-                        label=f"論文図デジタイズ（時間シフト {best_shift_days:+.2f} 日）",
+                        label=f"論文図（shift {best_shift_days:+.2f}日）",
                     )
-                    ax.set_title("Cassini：PDS一次データ（処理後） vs 論文図デジタイズ", fontsize=13)
+                    ax.set_title("Cassini：PDS一次データ（処理後） vs 論文図デジタイズ", fontsize=13, pad=8.0)
                     ax.set_xlabel("t（日, b_min からの相対）")
                     ax.set_ylabel("y（周波数比）")
                     ax.grid(True, alpha=0.3)
-                    ax.legend()
-                    fig.tight_layout()
-                    fig.savefig(out_dir / "cassini_pds_vs_digitized.png", dpi=180)
+                    apply_wavep_figure_layout(fig, template="part2_single_panel")
+                    ax.legend(loc="lower right", framealpha=0.95)
+                    _save_figure_fixed_canvas(fig, out_dir / "cassini_pds_vs_digitized.png", dpi=180)
+                    _save_figure_fixed_canvas(fig, out_dir / "cassini_pds_vs_digitized.pdf")
                     plt.close(fig)
                 except Exception as e:
                     print(f"[warn] failed to plot PDS vs digitized: {e}")
@@ -3131,6 +3176,27 @@ def main() -> None:
         )
     except Exception:
         pass
+
+    public_dir = _ROOT / "output" / "public" / "cassini"
+    public_dir.mkdir(parents=True, exist_ok=True)
+    for artifact_name in (
+        "cassini_fig2_overlay_full.png",
+        "cassini_fig2_overlay_full.pdf",
+        "cassini_fig2_overlay_zoom10d.png",
+        "cassini_fig2_overlay_zoom10d.pdf",
+        "cassini_fig2_residuals.png",
+        "cassini_fig2_residuals.pdf",
+        "cassini_beta_sweep_rmse.png",
+        "cassini_beta_sweep_rmse.pdf",
+        "cassini_pds_vs_digitized.png",
+        "cassini_pds_vs_digitized.pdf",
+        "cassini_fig2_metrics.csv",
+        "cassini_fig2_run_metadata.json",
+        "cassini_pds_vs_digitized_metrics.csv",
+    ):
+        artifact_path = out_dir / artifact_name
+        if artifact_path.exists():
+            shutil.copy2(artifact_path, public_dir / artifact_name)
 
 
 # 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。

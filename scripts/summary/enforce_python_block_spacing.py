@@ -11,16 +11,25 @@ Rules implemented (Python interpretation):
 Usage:
     python -B scripts/summary/enforce_python_block_spacing.py --paths scripts
     python -B scripts/summary/enforce_python_block_spacing.py --paths scripts --fix
+    python -B scripts/summary/enforce_python_block_spacing.py --paths-file output/private/summary/python_paths.txt --fix
 """
 
 from __future__ import annotations
 
 import argparse
 import io
+import sys
 import tokenize
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List, Sequence, Set
+
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.utils.windows_length_policy import expand_cli_paths
 
 
 CONTINUATION_PREFIXES: tuple[str, ...] = ("elif ", "elif:", "else:", "except", "finally:")
@@ -241,8 +250,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--paths",
         nargs="+",
-        default=["scripts"],
-        help="Target files/directories (default: scripts).",
+        default=None,
+        help="Target files/directories (default: scripts when no path input is given).",
+    )
+    parser.add_argument(
+        "--paths-file",
+        action="append",
+        default=[],
+        help=(
+            "UTF-8 text file with one target path per line. Blank lines and lines starting with "
+            "`#` are ignored; relative entries resolve against the manifest directory first and "
+            "fall back to the repo root."
+        ),
     )
     parser.add_argument(
         "--fix",
@@ -257,7 +276,10 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     """CLI entry point."""
     args = parse_args()
-    target_paths = [Path(path_text) for path_text in args.paths]
+    target_paths = expand_cli_paths(args.paths, args.paths_file)
+    if not target_paths:
+        target_paths = [Path("scripts")]
+
     python_files = sorted(set(_iter_python_files(target_paths)))
 
     # 条件分岐: `not python_files` を満たす経路を評価する。

@@ -39,6 +39,12 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.utils.plot_style import (  # noqa: E402
+    apply_paper_style,
+    apply_wavep_figure_layout,
+    get_wavep_font_size,
+    resolve_wavep_cjk_font_family,
+)
 
 
 # 関数: `_utc_now` の入出力契約と処理意図を定義する。
@@ -80,6 +86,34 @@ def _read_json(path: Path) -> Dict[str, Any]:
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
+
+def _set_japanese_font() -> None:
+    try:
+        import matplotlib as mpl
+        import matplotlib.font_manager as fm
+
+        preferred = resolve_wavep_cjk_font_family(preferred_name="Noto Sans CJK JP")
+        # 条件分岐: `preferred` を満たす経路を評価する。
+        if preferred:
+            mpl.rcParams["font.family"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["axes.unicode_minus"] = False
+            return
+
+        fallback = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
+        available = {f.name for f in fm.fontManager.ttflist}
+        chosen = [name for name in fallback if name in available]
+        # 条件分岐: `chosen` を満たす経路を評価する。
+        if chosen:
+            mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = chosen + ["DejaVu Sans"]
+
+        mpl.rcParams["axes.unicode_minus"] = False
+    except Exception:
+        pass
 
 
 # 関数: `_maybe_float` の入出力契約と処理意図を定義する。
@@ -143,6 +177,7 @@ def _rel(path: Path) -> str:
 
 
 # 関数: `_sync_public_figure_assets` の入出力契約と処理意図を定義する。
+
 def _sync_public_figure_assets(root: Path, out_png: Path) -> None:
     out_pdf = out_png.with_suffix(".pdf")
     public_dir = root / "output" / "public" / "xrism"
@@ -658,42 +693,48 @@ def _plot_resolve_summary(out_png: Path, bh: Dict[str, Any], cluster: Dict[str, 
     if plt is None:
         return False
 
+    apply_paper_style()
+    _set_japanese_font()
     bh_rows = [r for r in (bh.get("per_obsid_best") or []) if r.get("detected") is True]
     cl_rows = [r for r in (cluster.get("per_obsid_best") or []) if r.get("detected") is True]
     # 条件分岐: `not bh_rows and not cl_rows` を満たす経路を評価する。
     if not bh_rows and not cl_rows:
-        fig, ax = plt.subplots(1, 1, figsize=(11, 6.5), constrained_layout=True)
+        fig, ax = plt.subplots(1, 1)
+        apply_wavep_figure_layout(fig, template="part2_single_panel_sparse")
         ax.axis("off")
         ax.text(
             0.5,
             0.62,
-            "XRISM Resolve: no detected obsid rows yet",
+            "XRISM Resolve：検出済み obsid 行はまだありません",
             ha="center",
             va="center",
-            fontsize=12,
+            fontsize=get_wavep_font_size("title"),
             weight="bold",
             transform=ax.transAxes,
         )
         ax.text(
             0.5,
             0.45,
-            "This is a placeholder figure so the paper stays readable.\n"
-            "To populate this panel, generate XRISM fixed outputs (BH/AGN, clusters, event-level QC) and rerun xrism_integration.py.",
+            "これは論文本体の可読性を保つための仮図である。\n"
+            "このパネルを埋めるには、XRISM 固定出力（BH/AGN、銀河団、イベントレベルQC）を生成して再実行する。",
             ha="center",
             va="center",
-            fontsize=9,
+            fontsize=get_wavep_font_size("note"),
             transform=ax.transAxes,
         )
         out_png.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(out_png, dpi=200)
-        fig.savefig(out_png.with_suffix(".pdf"))
+        with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+            fig.savefig(out_png, dpi=200)
+            fig.savefig(out_png.with_suffix(".pdf"))
+
         plt.close(fig)
         return True
 
     bh_rows = sorted(bh_rows, key=lambda r: (str(r.get("target_name", "")), str(r.get("obsid", ""))))
     cl_rows = sorted(cl_rows, key=lambda r: (str(r.get("target_name", "")), str(r.get("obsid", ""))))
 
-    fig, (ax_bh, ax_cl) = plt.subplots(2, 1, figsize=(12.4, 9.8), constrained_layout=False)
+    fig, (ax_bh, ax_cl) = plt.subplots(2, 1)
+    apply_wavep_figure_layout(fig, template="part2_two_panel")
 
     # Panel A: BH/AGN beta
     if bh_rows:
@@ -714,17 +755,17 @@ def _plot_resolve_summary(out_png: Path, bh: Dict[str, Any], cluster: Dict[str, 
             line_id = str(r.get("line_id", "")).strip()
             labels.append(f"{target}\n{line_id}")
 
-        ax_bh.errorbar(xs, ys, yerr=yerrs, fmt="o", capsize=4, lw=1.4, markersize=8.8)
+        ax_bh.errorbar(xs, ys, yerr=yerrs, fmt="o", capsize=4, lw=1.2, markersize=4.8)
         ax_bh.axhline(0.0, color="k", lw=1, alpha=0.4)
-        ax_bh.set_ylabel("β_obs (v/c)", fontsize=16.8)
-        ax_bh.set_title("XRISM Resolve: BH/AGN line centroid → β", fontsize=19.4)
+        ax_bh.set_ylabel("観測 β (v/c)")
+        ax_bh.set_title("XRISM Resolve：BH/AGN 線重心からの β", fontsize=get_wavep_font_size("title"))
         ax_bh.set_xticks(xs)
-        ax_bh.set_xticklabels(labels, rotation=0, fontsize=12.8)
+        ax_bh.set_xticklabels(labels, rotation=0)
         ax_bh.tick_params(axis="x", pad=13)
-        ax_bh.tick_params(axis="y", labelsize=14.4)
+        ax_bh.tick_params(axis="y")
     else:
         ax_bh.set_axis_off()
-        ax_bh.text(0.5, 0.5, "BH/AGN: no detected obsid", ha="center", va="center", transform=ax_bh.transAxes)
+        ax_bh.text(0.5, 0.5, "BH/AGN：検出済み obsid なし", ha="center", va="center", transform=ax_bh.transAxes)
 
     # Panel B: cluster delta_v (converted from delta_z)
 
@@ -749,22 +790,23 @@ def _plot_resolve_summary(out_png: Path, bh: Dict[str, Any], cluster: Dict[str, 
             line_id = str(r.get("line_id", "")).strip()
             labels.append(f"{target}\n{line_id}")
 
-        ax_cl.errorbar(xs, ys, yerr=yerrs, fmt="o", capsize=4, lw=1.4, color="#d55e00", markersize=8.8)
+        ax_cl.errorbar(xs, ys, yerr=yerrs, fmt="o", capsize=4, lw=1.2, color="#d55e00", markersize=4.8)
         ax_cl.axhline(0.0, color="k", lw=1, alpha=0.4)
-        ax_cl.set_ylabel("Δv (km/s)\n(X-ray − optical)", fontsize=16.8)
-        ax_cl.set_title("XRISM Resolve: clusters z_xray − z_opt (Δv)", fontsize=19.4)
+        ax_cl.set_ylabel("Δv (km/s)\n(X線 − 光学)")
+        ax_cl.set_title("XRISM Resolve：銀河団 z_xray − z_opt (Δv)", fontsize=get_wavep_font_size("title"))
         ax_cl.set_xticks(xs)
-        ax_cl.set_xticklabels(labels, rotation=0, fontsize=12.8)
+        ax_cl.set_xticklabels(labels, rotation=0)
         ax_cl.tick_params(axis="x", pad=13)
-        ax_cl.tick_params(axis="y", labelsize=14.4)
+        ax_cl.tick_params(axis="y")
     else:
         ax_cl.set_axis_off()
-        ax_cl.text(0.5, 0.5, "Clusters: no detected obsid", ha="center", va="center", transform=ax_cl.transAxes)
+        ax_cl.text(0.5, 0.5, "銀河団：検出済み obsid なし", ha="center", va="center", transform=ax_cl.transAxes)
 
     out_png.parent.mkdir(parents=True, exist_ok=True)
-    fig.subplots_adjust(left=0.132, right=0.985, top=0.930, bottom=0.128, hspace=0.56)
-    fig.savefig(out_png, dpi=200)
-    fig.savefig(out_png.with_suffix(".pdf"))
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        fig.savefig(out_png, dpi=200)
+        fig.savefig(out_png.with_suffix(".pdf"))
+
     plt.close(fig)
     return True
 

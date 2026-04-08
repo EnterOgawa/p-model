@@ -1,8 +1,16 @@
+"""
+目的: 水星近日点移動 topic の mercury precession v3 に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 import json
 import sys
+import shutil
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -12,6 +20,12 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog
+from scripts.utils.plot_style import (
+    apply_paper_style,
+    apply_wavep_figure_layout,
+    get_wavep_font_size,
+    resolve_wavep_cjk_font_family,
+)
 
 # Constants
 G = 6.67430e-11
@@ -30,7 +44,11 @@ def _set_japanese_font() -> None:
         import matplotlib as mpl
         import matplotlib.font_manager as fm
 
+        resolved = resolve_wavep_cjk_font_family()
         preferred = [
+            *( [resolved] if resolved else [] ),
+            "Noto Sans CJK JP",
+            "Noto Sans JP",
             "Yu Gothic",
             "Meiryo",
             "BIZ UDGothic",
@@ -45,6 +63,7 @@ def _set_japanese_font() -> None:
             return
 
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+        mpl.rcParams["font.sans-serif"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         pass
@@ -156,7 +175,9 @@ def main():
     print("--- Mercury Simulation (Perihelion Precession) ---")
 
     out_dir = _ROOT / "output" / "private" / "mercury"
+    public_dir = _ROOT / "output" / "public" / "mercury"
     out_dir.mkdir(parents=True, exist_ok=True)
+    public_dir.mkdir(parents=True, exist_ok=True)
     
     # Reference (GR residual after planetary perturbations), representative value.
     reference_arcsec_century = 42.98
@@ -219,30 +240,26 @@ def main():
     reference_line = reference_arcsec_per_orbit * p_ph["orbit_nums"]
     
     # Plot
+    apply_paper_style()
     _set_japanese_font()
     fig, (ax1, ax2) = plt.subplots(
         2,
         1,
-        figsize=(14.2, 13.6),
-        gridspec_kw={"height_ratios": [1.18, 1.14]},
+        gridspec_kw={"height_ratios": [1.06, 1.0]},
     )
+    apply_wavep_figure_layout(fig, template="part2_two_panel")
+    fig.align_ylabels((ax1, ax2))
 
     # Left: Orbit
     ax1.plot(0, 0, 'yo', markersize=14, label='太陽', zorder=10)
     ax1.plot(x_nw, y_nw, 'k--', linewidth=1.2, alpha=0.55, label='ニュートン')
     ax1.plot(x_gr, y_gr, 'b-', linewidth=1.9, label='P-model 軌道')
-    
-    ax1.set_title(
-        "水星の近日点移動（誇張表示）\n"
-        f"参考: 観測残差≈{reference_arcsec_century:.2f} 角秒/世紀, "
-        f"P-model(実C)≈{p_arcsec_century:.2f} 角秒/世紀",
-        fontsize=18.8,
-    )
-    
+
+    ax1.set_title("水星の近日点移動（俯瞰; 誇張表示）", pad=6.0)
+
     ax1.axis('equal')
     ax1.grid(True, linestyle='--')
-    ax1.tick_params(axis='both', labelsize=14.4)
-    ax1.legend(loc='lower left', fontsize=14.2)
+    ax1.legend(loc='lower left', framealpha=0.95)
 
     # Right: Physical shift vs orbit count
     ax2.plot(
@@ -279,13 +296,12 @@ def main():
         zorder=3,
     )
 
-    ax2.set_title("近日点移動の累積（周回ごと）\n（実Cでの定量評価）", fontsize=18.8)
-    ax2.set_xlabel("周回数", fontsize=15.6)
-    ax2.set_ylabel("移動角 [角秒]", fontsize=15.6)
+    ax2.set_title("近日点移動の累積（実C）", pad=6.0)
+    ax2.set_xlabel("周回数")
+    ax2.set_ylabel("移動角 [角秒]")
     ax2.grid(True, linestyle='--')
-    ax2.tick_params(axis='both', labelsize=14.4)
-    ax2.legend(loc='lower right', fontsize=14.2)
-    
+    ax2.legend(loc='lower right', framealpha=0.95)
+
     ax2.text(
         0.05,
         0.94,
@@ -293,16 +309,19 @@ def main():
         f"Einstein近似: {einstein_arcsec_century:.2f} 角秒/世紀\n"
         f"観測代表: {reference_arcsec_century:.2f} 角秒/世紀",
         transform=ax2.transAxes,
-        fontsize=15.0,
+        fontsize=get_wavep_font_size("note"),
         va="top",
         bbox=dict(facecolor="white", alpha=0.85, edgecolor="gray"),
     )
 
-    plt.tight_layout(h_pad=1.2)
     out_file = out_dir / "mercury_orbit.png"
     out_pdf = out_dir / "mercury_orbit.pdf"
-    plt.savefig(out_file, dpi=300)
-    plt.savefig(out_pdf)
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        plt.savefig(out_file, dpi=300)
+        plt.savefig(out_pdf)
+
+    shutil.copy2(out_file, public_dir / out_file.name)
+    shutil.copy2(out_pdf, public_dir / out_pdf.name)
     print(f"Graph saved to {out_file}")
     print(f"Graph saved to {out_pdf}")
 

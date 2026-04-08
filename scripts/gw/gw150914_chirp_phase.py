@@ -1,3 +1,10 @@
+"""
+目的: 重力波 topic の gw150914 chirp phase に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -32,6 +39,12 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.utils.plot_style import (  # noqa: E402
+    apply_paper_style,
+    apply_wavep_figure_layout,
+    get_wavep_font_size,
+    resolve_wavep_cjk_font_family,
+)
 
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
@@ -50,26 +63,32 @@ def _iso_utc_now() -> str:
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
-        import matplotlib.font_manager as fm
-
-        preferred = [
-            "Yu Gothic",
-            "Meiryo",
-            "BIZ UDGothic",
-            "MS Gothic",
-            "Yu Mincho",
-            "MS Mincho",
-        ]
-        available = {f.name for f in fm.fontManager.ttflist}
-        chosen = [name for name in preferred if name in available]
+        chosen = resolve_wavep_cjk_font_family()
         # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
-        mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+        mpl.rcParams["font.family"] = [chosen, "DejaVu Sans"]
+        mpl.rcParams["font.sans-serif"] = [chosen, "DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         pass
+
+
+# 関数: `_save_synced_figure` の入出力契約と処理意図を定義する。
+
+def _save_synced_figure(fig: plt.Figure, *, out_png: Path, sync_public: bool = False) -> None:
+    out_png.parent.mkdir(parents=True, exist_ok=True)
+    out_pdf = out_png.with_suffix(".pdf")
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        fig.savefig(out_png, dpi=220)
+        fig.savefig(out_pdf)
+
+    if sync_public:
+        public_dir = _repo_root() / "output" / "public" / "gw"
+        public_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(out_png, public_dir / out_png.name)
+        shutil.copy2(out_pdf, public_dir / out_pdf.name)
 
 
 # 関数: `_sha256` の入出力契約と処理意図を定義する。
@@ -1086,16 +1105,14 @@ def _render(
     note_lines: List[str],
     event_name: str,
 ) -> None:
+    apply_paper_style()
     _set_japanese_font()
 
-    # 図24: 1列2行（上: f(t), 下: 直線化）へ統一し、検出器は同一軸に重ねて比較する。
     fig, (ax_f, ax_lin) = plt.subplots(
         nrows=2,
         ncols=1,
-        figsize=(16.0, 15.2),
-        dpi=150,
-        gridspec_kw={"hspace": 0.24},
     )
+    apply_wavep_figure_layout(fig, template="part2_two_panel_dense_x")
     det_colors = {
         "H1": "#1f77b4",
         "L1": "#d62728",
@@ -1125,7 +1142,7 @@ def _render(
             ax_f.scatter(
                 t_sel[outlier_mask],
                 f_sel[outlier_mask],
-                s=16,
+                s=12,
                 alpha=0.25,
                 color=color if color is not None else "#888",
                 label=f"{det}: 除外点",
@@ -1134,7 +1151,7 @@ def _render(
         ax_f.scatter(
             t_sel[inlier_mask],
             f_sel[inlier_mask],
-            s=21,
+            s=14,
             alpha=0.82,
             color=color,
             label=f"{det}: 抽出 f(t)",
@@ -1144,12 +1161,12 @@ def _render(
         if t_sel.size:
             t_line = np.linspace(float(np.min(t_sel)), float(np.max(t_sel)), 600)
             f_line = _predict_f_from_fit(t_line, tc=tc, A=A)
-            ax_f.plot(t_line, f_line, color=color, lw=2.0, alpha=0.92, label=f"{det}: 四重極チャープ則（fit）")
+            ax_f.plot(t_line, f_line, color=color, lw=1.4, alpha=0.92, label=f"{det}: fit")
 
         ax_f.axvline(0.0, color="#666", lw=1.1, ls="--", alpha=0.8)
-        ax_f.set_title("周波数トラック f(t)（検出器重ね描き）", fontsize=24.0)
-        ax_f.set_ylabel("周波数 f [Hz]", fontsize=21.2)
-        ax_f.set_xlabel(f"時刻 t - t_event [s]（t_event={event_name}のGPS時刻）", fontsize=20.0)
+        ax_f.set_title("周波数トラック f(t)", pad=5.0)
+        ax_f.set_ylabel("f [Hz]")
+        ax_f.set_xlabel("t - t_event [s]")
         ax_f.grid(True, alpha=0.25, linestyle="--")
 
         # Right: linearized relation t = tc - A f^{-8/3}
@@ -1169,7 +1186,7 @@ def _render(
                 ax_lin.scatter(
                     x_out[finite_out],
                     y_out[finite_out],
-                    s=16,
+                    s=12,
                     alpha=0.25,
                     color=color if color is not None else "#888",
                     label=f"{det}: 除外点",
@@ -1180,38 +1197,31 @@ def _render(
             ax_lin.scatter(
                 x_in[finite_in],
                 y_in[finite_in],
-                s=21,
+                s=14,
                 alpha=0.82,
                 color=color,
                 label=f"{det}: 採用点",
             )
 
         # 条件分岐: `math.isfinite(A)` を満たす経路を評価する。
+
         if math.isfinite(A) and np.any(finite_in):
             x0 = float(np.min(x_in))
             x1 = float(np.max(x_in))
             x_line = np.linspace(x0, x1, 200)
             y_line = tc - A * x_line
-            ax_lin.plot(x_line, y_line, color=color, lw=2.0, alpha=0.92, label=f"{det}: t = t_c − A f^(-8/3)（fit）")
+            ax_lin.plot(x_line, y_line, color=color, lw=1.4, alpha=0.92, label=f"{det}: fit")
 
-    ax_lin.set_title("直線化（t vs f^(-8/3)）", fontsize=24.0)
-    ax_lin.set_xlabel("f^(-8/3) [Hz^(-8/3)]", fontsize=20.0, labelpad=10)
-    ax_lin.set_ylabel("時刻 t - t_event [s]", fontsize=21.2)
+    ax_lin.set_title("直線化: t vs f^(-8/3)", pad=5.0)
+    ax_lin.set_xlabel("f^(-8/3) [Hz^(-8/3)]", labelpad=6)
+    ax_lin.set_ylabel("t - t_event [s]")
     ax_lin.grid(True, alpha=0.25, linestyle="--")
 
-    ax_f.tick_params(labelsize=19.0)
-    ax_lin.tick_params(labelsize=19.0)
-    ax_f.legend(loc="upper left", fontsize=19.2, ncol=2)
-    ax_lin.legend(loc="lower right", fontsize=19.2, ncol=2)
-    ax_lin.xaxis.get_offset_text().set_size(19.0)
+    ax_f.legend(loc="upper left", fontsize=get_wavep_font_size("legend"), ncol=2)
+    ax_lin.legend(loc="lower left", fontsize=get_wavep_font_size("legend"), ncol=2)
+    ax_lin.xaxis.get_offset_text().set_size(get_wavep_font_size("tick"))
 
-    fig.suptitle(title, y=0.99, fontsize=21.2)
-
-    # 図24: 下部注記は図外（本文）へ移し、図中の重なりを回避する。
-    fig.subplots_adjust(left=0.08, right=0.985, top=0.92, bottom=0.09, hspace=0.38)
-    out_png.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_png, bbox_inches="tight")
-    fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight")
+    _save_synced_figure(fig, out_png=out_png, sync_public=True)
     plt.close(fig)
 
 
@@ -1225,9 +1235,11 @@ def _render_public(
     note_lines: List[str],
     event_name: str,
 ) -> None:
+    apply_paper_style()
     _set_japanese_font()
 
-    fig, ax = plt.subplots(figsize=(10.8, 5.4), dpi=150)
+    fig, ax = plt.subplots()
+    apply_wavep_figure_layout(fig, template="part2_single_panel")
 
     colors = {
         "H1": "#1f77b4",
@@ -1270,19 +1282,16 @@ def _render_public(
                 t1 = float(np.max(t_in))
                 t_line = np.linspace(t0, t1, 300)
                 f_line = _predict_f_from_fit(t_line, tc=tc, A=A)
-                ax.plot(t_line, f_line, color=color, lw=2.0, alpha=0.9, label=f"{det}: 単純モデル曲線（fit）")
+                ax.plot(t_line, f_line, color=color, lw=1.4, alpha=0.9, label=f"{det}: fit")
 
     ax.axvline(0.0, color="#666", lw=1.1, ls="--", alpha=0.8)
-    ax.set_title(title, fontsize=12)
-    ax.set_ylabel("周波数 f [Hz]")
-    ax.set_xlabel(f"時刻 t - t_event [s]（t_event={event_name}のGPS時刻）")
+    ax.set_title(title, pad=5.0)
+    ax.set_ylabel("f [Hz]")
+    ax.set_xlabel("t - t_event [s]")
     ax.grid(True, alpha=0.25)
-    ax.legend(loc="lower right", fontsize=9.5)
+    ax.legend(loc="lower right", fontsize=get_wavep_font_size("legend"))
 
-    # 図下注記は論文本文側へ移し、図中の重なりを回避する。
-    fig.tight_layout(rect=[0, 0.0, 1, 1])
-    out_png.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_png, bbox_inches="tight")
+    _save_synced_figure(fig, out_png=out_png, sync_public=True)
     plt.close(fig)
 
 

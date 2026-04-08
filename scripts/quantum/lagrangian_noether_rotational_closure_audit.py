@@ -35,6 +35,15 @@ if str(ROOT) not in sys.path:
 
 from scripts.summary import worklog  # noqa: E402
 
+try:
+    import matplotlib as mpl
+    from scripts.utils.plot_style import install_wavep_cjk_font_override  # noqa: E402
+
+    install_wavep_cjk_font_override(preferred_name="Noto Sans CJK JP")
+    mpl.rcParams["axes.unicode_minus"] = False
+except Exception:
+    pass
+
 
 DEFAULT_PRIOR_SOURCE_IDS = ["lageos_frame_dragging"]
 
@@ -690,9 +699,9 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     lambda_rot_legacy = _to_float(legacy_fit.get("lambda_rot_fit"))
     lambda_sigma_legacy = _to_float(legacy_fit.get("lambda_sigma_fit"))
 
-    # 図11: 下段（Operational checks）のY軸可読性を優先して縦比率を拡大する。
-    fig = plt.figure(figsize=(13.8, 16.9), dpi=180)
-    grid = fig.add_gridspec(3, 1, height_ratios=[0.80, 0.80, 2.80], hspace=0.36)
+    # 図43: source 自体をやや縦長へ寄せ、論文紙面での縮小率を下げる。
+    fig = plt.figure(figsize=(11.4, 16.8), dpi=180)
+    grid = fig.add_gridspec(3, 1, height_ratios=[1.36, 1.42, 2.72], hspace=0.66)
     ax0 = fig.add_subplot(grid[0, 0])
     ax1 = fig.add_subplot(grid[1, 0])
     ax2 = fig.add_subplot(grid[2, 0])
@@ -700,44 +709,63 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     # 条件分岐: `lambda_rot is not None` を満たす経路を評価する。
     if lambda_rot is not None:
         err = 0.0 if lambda_sigma is None else float(lambda_sigma)
-        ax0.errorbar([0.0], [lambda_rot], yerr=[err], fmt="o", color="#1f77b4", capsize=5, label="prior")
+        ax0.errorbar([0.0], [lambda_rot], yerr=[err], fmt="o", color="#1f77b4", capsize=5, label="事前値")
 
     # 条件分岐: `lambda_rot_legacy is not None` を満たす経路を評価する。
 
     if lambda_rot_legacy is not None:
         err_legacy = 0.0 if lambda_sigma_legacy is None else float(lambda_sigma_legacy)
-        ax0.errorbar([0.25], [lambda_rot_legacy], yerr=[err_legacy], fmt="s", color="#ff7f0e", capsize=5, label="legacy fit")
+        ax0.errorbar([0.25], [lambda_rot_legacy], yerr=[err_legacy], fmt="s", color="#ff7f0e", capsize=5, label="旧フィット")
 
     ax0.axhline(0.0, linestyle="--", color="#6b7280", linewidth=1.0)
     ax0.set_xlim(-0.4, 0.65)
-    ax0.set_xticks([0.0, 0.25], ["prior", "legacy"])
-    ax0.set_ylabel("coupling value", fontsize=13.2)
-    ax0.set_title("L_rot coupling freeze", fontsize=14.2)
+    ax0.set_xticks([0.0, 0.25], ["事前値", "旧値"])
+    ax0.set_ylabel("結合係数", fontsize=12.2)
+    ax0.set_title("L_rot 結合の固定", fontsize=13.4)
     # 条件分岐: `kappa_rot is not None` を満たす経路を評価する。
     if kappa_rot is not None:
-        ax0.text(0.02, 0.92, f"kappa_rot={kappa_rot:.6f}", transform=ax0.transAxes, fontsize=11.6)
+        ax0.text(0.03, 0.96, f"κ_rot = {kappa_rot:.6f}", transform=ax0.transAxes, fontsize=10.6, va="top")
 
     # 条件分岐: `lambda_rot is not None` を満たす経路を評価する。
 
     if lambda_rot is not None:
-        ax0.text(0.02, 0.84, f"lambda_rot={lambda_rot:.6f}", transform=ax0.transAxes, fontsize=11.6)
+        ax0.text(0.03, 0.86, f"λ_rot = {lambda_rot:.6f}", transform=ax0.transAxes, fontsize=10.6, va="top")
 
     ax0.grid(axis="y", alpha=0.25, linestyle=":")
 
     x = np.arange(len(labels), dtype=float)
     width = 0.48
-    ax1.bar(x - width / 2.0, z_static, width=width, color="#d62728", alpha=0.88, label="static (deltaP_rot=0)")
-    ax1.bar(x + width / 2.0, z_lrot, width=width, color="#2ca02c", alpha=0.88, label="L_rot prior-pred")
+    display_labels = {
+        "GP-B frame-dragging": "GP-B フレームドラッギング",
+        "LAGEOS frame-dragging": "LAGEOS フレームドラッギング",
+    }
+    check_label_map = {
+        "l_rot::input_channels": "入力\nチャネル数",
+        "l_rot::static_reject": "静的仮定の\n棄却",
+        "l_rot::lambda_defined": "λ_rot の\n定義済み",
+        "l_rot::lambda_sigma": "λ_rot 誤差の\n定義済み",
+        "l_rot::prior_source_channels": "事前ソース\nチャネル数",
+        "l_rot::prediction_holdout_channels": "予測ホールドアウト\nチャネル数",
+        "l_rot::prediction_holdout_reject": "予測ホールドアウト\n棄却数",
+        "l_rot::prediction_holdout_max_abs_z": "予測ホールドアウト\n最大 |z|",
+        "l_rot::closure_upstream": "上流閉包\n監査",
+        "l_rot::drift_guard": "ドリフト\n監視",
+        "l_rot::small_coupling_watch": "微小結合の\n監視",
+        "l_rot::prior_vs_legacy_watch": "事前値と旧値の\n監視",
+        "l_rot::prior_source_role_watch": "事前ソース役割の\n監視",
+    }
+    ax1.bar(x - width / 2.0, z_static, width=width, color="#d62728", alpha=0.88, label="静的仮定（δP_rot = 0）")
+    ax1.bar(x + width / 2.0, z_lrot, width=width, color="#2ca02c", alpha=0.88, label="L_rot の事前予測")
     ax1.axhline(3.0, linestyle="--", color="#6b7280", linewidth=1.0)
     ax1.axhline(-3.0, linestyle="--", color="#6b7280", linewidth=1.0)
     ax1.axhline(0.0, linestyle="-", color="#9ca3af", linewidth=0.9)
-    ax1.set_xticks(x, labels, rotation=10, ha="right")
-    ax1.set_ylabel("z = (obs - pred) / sigma", fontsize=13.2)
-    ax1.set_title("Frame-dragging gate: static vs holdout prediction", fontsize=14.2)
-    ax1.legend(loc="best", fontsize=11.6)
+    ax1.set_xticks(x, [display_labels.get(label, label) for label in labels], rotation=10, ha="right")
+    ax1.set_ylabel("標準化残差 z", fontsize=12.2)
+    ax1.set_title("フレームドラッギング監査\n静的仮定とホールドアウト予測の比較", fontsize=13.4)
+    ax1.legend(loc="best", fontsize=10.6)
     ax1.grid(axis="y", alpha=0.25, linestyle=":")
 
-    check_labels = [str(c.get("id") or "") for c in checks if isinstance(c, dict)]
+    check_labels = [check_label_map.get(str(c.get("id") or ""), str(c.get("id") or "")) for c in checks if isinstance(c, dict)]
     check_scores = [float(c.get("score") or 0.0) for c in checks if isinstance(c, dict)]
     check_colors: List[str] = []
     for c in checks:
@@ -763,18 +791,48 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     ax2.axvline(1.0, linestyle="--", color="#6b7280", linewidth=1.0)
     ax2.set_yticks(y, check_labels)
     ax2.set_xlim(0.0, 1.05)
-    ax2.set_xlabel("gate score", fontsize=13.2)
-    ax2.set_title("Operational checks", fontsize=14.2)
+    ax2.set_xlabel("ゲートスコア", fontsize=12.2)
+    ax2.set_title("運用監査", fontsize=13.4)
     ax2.grid(axis="x", alpha=0.25, linestyle=":")
 
-    for axis in (ax0, ax1, ax2):
-        axis.tick_params(labelsize=11.4)
+    tick_font = 10.6
+    axis_font = 12.2
+    title_font = 13.4
+    note_font = 10.6
 
-    fig.tight_layout(rect=[0.0, 0.0, 1.0, 0.98])
+    for axis in (ax0, ax1, ax2):
+        axis.tick_params(labelsize=tick_font)
+
+    fig.subplots_adjust(left=0.15, right=0.98, top=0.975, bottom=0.04)
+    ax0.set_position([0.15, 0.78, 0.79, 0.15])
+    ax1.set_position([0.15, 0.54, 0.79, 0.18])
+    ax2.set_position([0.24, 0.16, 0.70, 0.32])
+    fig.canvas.draw()
+
+    # 図43: role-font patch 後に最終的な Text object へ直接サイズを入れ直す。
+    ax0.title.set_fontsize(title_font)
+    ax0.yaxis.label.set_fontsize(axis_font)
+    ax1.title.set_fontsize(title_font)
+    ax1.yaxis.label.set_fontsize(axis_font)
+    ax2.title.set_fontsize(title_font)
+    ax2.xaxis.label.set_fontsize(axis_font)
+
+    for axis in (ax0, ax1, ax2):
+        for tick in list(axis.get_xticklabels()) + list(axis.get_yticklabels()):
+            tick.set_fontsize(tick_font)
+
+        for text in axis.texts:
+            text.set_fontsize(note_font)
+
+        legend = axis.get_legend()
+        if legend is not None:
+            for text in legend.get_texts():
+                text.set_fontsize(note_font)
+
     path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(path, bbox_inches="tight")
+    fig.savefig(path, bbox_inches="tight", pad_inches=0.02)
     # PDF版も同時に保存し、論文側でのベクター優先読込を保証する。
-    fig.savefig(path.with_suffix(".pdf"), bbox_inches="tight")
+    fig.savefig(path.with_suffix(".pdf"), bbox_inches="tight", pad_inches=0.02)
     plt.close(fig)
 
 

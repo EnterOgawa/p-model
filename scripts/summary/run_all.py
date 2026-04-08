@@ -1,3 +1,10 @@
+"""
+目的: リポジトリ全体の公開成果物再生成を topic 単位で束ねて実行する。
+入力: CLI オプションで指定した offline/online モードと jobs 数を用いる。
+出力: summary build と各 topic の canonical artifact を順次更新する。
+前提: 日常運用では重い full rebuild ではなく必要な profile を明示実行する。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -1764,7 +1771,13 @@ def main() -> int:
         ),
         Task(
             key="validation_scoreboard",
-            argv=[py, "-B", str(root / "scripts" / "summary" / "validation_scoreboard.py")],
+            argv=[
+                py,
+                "-B",
+                str(root / "scripts" / "summary" / "validation_scoreboard.py"),
+                "--target-fig-h-in",
+                "9.2",
+            ],
             cwd=cwd,
         ),
         Task(

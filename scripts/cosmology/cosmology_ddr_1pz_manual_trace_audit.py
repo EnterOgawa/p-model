@@ -10,6 +10,7 @@ SNe Ia（SALT2）と BAO の距離推定プロセスを行単位で追跡し、
 出力（固定名）:
   - output/public/cosmology/cosmology_ddr_1pz_manual_trace_audit.json
   - output/public/cosmology/cosmology_ddr_1pz_manual_trace_audit.csv
+  - output/public/cosmology/cosmology_ddr_1pz_manual_trace_audit.pdf
   - output/public/cosmology/cosmology_ddr_1pz_manual_trace_audit.png
 """
 
@@ -18,7 +19,9 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 import sys
+import textwrap
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
@@ -31,6 +34,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.utils.plot_style import apply_paper_style, get_wavep_font_size  # noqa: E402
 
 
 # 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
@@ -324,14 +328,39 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+# 関数: `_format_equation_note` の入出力契約と処理意図を定義する。
+
+def _format_equation_note(equation: str) -> str:
+    parts = str(equation).split(" = ", 1)
+    # 条件分岐: `len(parts) == 2` を満たす経路を評価する。
+    if len(parts) == 2:
+        return f"{parts[0]} =\n{parts[1]}"
+
+    return textwrap.fill(
+        str(equation),
+        width=28,
+        break_long_words=False,
+        break_on_hyphens=False,
+    )
+
+
 # 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, rows: List[Dict[str, Any]], summary: Dict[str, Any]) -> None:
-    _set_japanese_font()
+    os.environ["WAVEP_MPL_FONT_PROFILE"] = "part2_astrophysics"
+    os.environ["WAVEP_MPL_CJK_FONT"] = "Noto Sans CJK JP"
+    os.environ["WAVEP_FIGURE_LANG"] = "ja"
+    apply_paper_style()
     import matplotlib.pyplot as plt
 
     pipeline_ids = list(summary["by_pipeline"].keys())
     pipeline_labels = [str(summary["by_pipeline"][pipeline_id]["pipeline_label"]) for pipeline_id in pipeline_ids]
+    title_font = get_wavep_font_size("title", name="part2_astrophysics")
+    suptitle_font = get_wavep_font_size("suptitle", name="part2_astrophysics")
+    axis_font = get_wavep_font_size("axis", name="part2_astrophysics")
+    tick_font = get_wavep_font_size("tick", name="part2_astrophysics")
+    legend_font = get_wavep_font_size("legend", name="part2_astrophysics")
+    note_font = get_wavep_font_size("note", name="part2_astrophysics")
 
     role_order = [
         "geometry_DA_from_DM",
@@ -352,8 +381,8 @@ def _plot(path: Path, rows: List[Dict[str, Any]], summary: Dict[str, Any]) -> No
         for role_index, role_name in enumerate(role_order):
             role_matrix[role_index, pipeline_index] = float(role_counts.get(role_name, 0))
 
-    figure = plt.figure(figsize=(15.2, 9.4))
-    grid = figure.add_gridspec(2, 1, height_ratios=(0.58, 0.42))
+    figure = plt.figure(figsize=(6.6929, 6.25))
+    grid = figure.add_gridspec(2, 1, height_ratios=(0.55, 0.45))
     axis_top = figure.add_subplot(grid[0, 0])
     axis_bottom = figure.add_subplot(grid[1, 0])
 
@@ -373,50 +402,55 @@ def _plot(path: Path, rows: List[Dict[str, Any]], summary: Dict[str, Any]) -> No
         cumulative += counts
 
     axis_top.set_xticks(x_positions)
-    axis_top.set_xticklabels(pipeline_labels, rotation=8, ha="right")
-    axis_top.set_ylabel("rows with (1+z)", fontsize=13.0)
-    axis_top.set_title("DDR audit: where (1+z) enters in SNe Ia/BAO pipelines", fontsize=14.5)
-    axis_top.tick_params(labelsize=11.2)
+    axis_top.set_xticklabels(pipeline_labels, rotation=10, ha="right", rotation_mode="anchor")
+    axis_top.set_ylabel("rows with (1+z)", fontsize=axis_font)
+    axis_top.set_title("DDR audit: where (1+z) enters in SNe Ia/BAO pipelines", fontsize=title_font)
+    axis_top.tick_params(labelsize=tick_font)
     axis_top.grid(axis="y", linestyle="--", alpha=0.35)
-    axis_top.legend(loc="upper right", frameon=True, fontsize=11.0)
+    axis_top.legend(loc="upper left", frameon=True, fontsize=legend_font)
 
     geometry_points = summary["geometry_injection_points"]
     # 条件分岐: `geometry_points` を満たす経路を評価する。
     if geometry_points:
         y_positions = np.arange(len(geometry_points))
         labels = [
-            f"{item['pipeline_label']} / line {item['line_no']}"
+            f"{item['pipeline_label']}\nline {item['line_no']}"
             for item in geometry_points
         ]
         axis_bottom.barh(y_positions, np.ones(len(geometry_points)), color="#dc2626", edgecolor="#222222", linewidth=0.8)
         axis_bottom.set_yticks(y_positions)
         axis_bottom.set_yticklabels(labels)
         axis_bottom.set_xlim(0.0, 1.4)
-        axis_bottom.set_xlabel("geometry-side injection marker (1 = detected)", fontsize=13.0)
-        axis_bottom.set_title("Detected insertion points for D_A = D_M/(1+z)", fontsize=14.5)
-        axis_bottom.tick_params(labelsize=11.0)
+        axis_bottom.set_xlabel("geometry-side injection marker (1 = detected)", fontsize=axis_font)
+        axis_bottom.set_title("Detected insertion points for D_A = D_M/(1+z)", fontsize=title_font)
+        axis_bottom.tick_params(labelsize=tick_font)
         axis_bottom.grid(axis="x", linestyle="--", alpha=0.35)
         for point_index, item in enumerate(geometry_points):
             axis_bottom.text(
                 1.02,
                 point_index,
-                str(item["equation"]),
+                _format_equation_note(str(item["equation"])),
                 va="center",
                 ha="left",
-                fontsize=10.6,
+                fontsize=note_font,
+                linespacing=1.12,
             )
     else:
         axis_bottom.axis("off")
-        axis_bottom.text(0.5, 0.5, "No geometry-side (1+z) insertion detected.", ha="center", va="center", fontsize=12.0)
+        axis_bottom.text(0.5, 0.5, "No geometry-side (1+z) insertion detected.", ha="center", va="center", fontsize=axis_font)
 
     figure.suptitle(
         "Step 5.3.18: manual line-by-line trace for implicit expansion assumption in DDR pipelines",
-        fontsize=15.8,
-        y=0.98,
+        fontsize=suptitle_font,
+        y=0.95,
     )
-    figure.subplots_adjust(left=0.08, right=0.98, top=0.92, bottom=0.08, hspace=0.42)
+    figure.subplots_adjust(left=0.23, right=0.97, top=0.87, bottom=0.12, hspace=0.58)
     path.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(path, dpi=160)
+    pdf_path = path.with_suffix(".pdf")
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        figure.savefig(pdf_path)
+        figure.savefig(path, dpi=160)
+
     plt.close(figure)
 
 

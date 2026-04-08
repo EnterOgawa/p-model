@@ -219,6 +219,17 @@ def _decision_from_delta_aic(delta_aic: float) -> str:
     return "reject"
 
 
+# 関数: `_format_summary_multiline` の入出力契約と処理意図を定義する。
+
+def _format_summary_multiline(summary_lines: List[str]) -> str:
+    line_groups = [
+        summary_lines[0:3],
+        summary_lines[3:6],
+        summary_lines[6:8],
+    ]
+    return "\n".join(" / ".join(group) for group in line_groups if group)
+
+
 # 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(
@@ -233,8 +244,8 @@ def _plot(
     _set_japanese_font()
     import matplotlib.pyplot as plt
 
-    fig = plt.figure(figsize=(14.2, 13.6))
-    gs = fig.add_gridspec(4, 1, height_ratios=[2.2, 2.2, 2.2, 2.0], hspace=0.42)
+    fig = plt.figure(figsize=(11.2, 10.8))
+    gs = fig.add_gridspec(4, 1, height_ratios=[1.85, 1.85, 1.85, 1.55], hspace=0.44)
 
     order = [("TT", "CMB TT"), ("TE", "CMB TE"), ("EE", "CMB EE")]
     for idx, (name, title) in enumerate(order):
@@ -270,20 +281,20 @@ def _plot(
     ax_bar.set_ylabel("χ² contribution", fontsize=15.8)
     ax_bar.grid(True, axis="y", linestyle="--", alpha=0.35)
     ax_bar.legend(fontsize=14.2, loc="upper right")
-    ax_bar.text(
-        0.01,
-        0.98,
-        "\n".join(summary_lines),
-        transform=ax_bar.transAxes,
-        ha="left",
-        va="top",
-        fontsize=14.0,
-        bbox={"boxstyle": "round,pad=0.28", "facecolor": "white", "edgecolor": "#888888", "alpha": 0.92},
-    )
     ax_bar.tick_params(labelsize=13.8)
 
     fig.suptitle("CMB TT/TE/EE simultaneous full-range fit audit", fontsize=18.0)
-    fig.tight_layout(rect=(0.0, 0.018, 1.0, 0.97))
+    summary_text = _format_summary_multiline(summary_lines)
+    fig.text(
+        0.5,
+        0.014,
+        summary_text,
+        ha="center",
+        va="bottom",
+        fontsize=12.8,
+        linespacing=1.08,
+    )
+    fig.tight_layout(rect=(0.0, 0.108, 1.0, 0.965))
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)
     fig.savefig(out_pdf)

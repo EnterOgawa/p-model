@@ -1,3 +1,10 @@
+"""
+目的: Part II-IV の検証項目を統合した validation score board を再計算する。
+入力: 各 topic の canonical artifact と判定ルールを読む。
+出力: output/public/summary の統合 score board と関連 JSON を更新する。
+前提: README と Part IV はこの集計値を正とする。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -18,6 +25,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.quantum.figure_japanese_localizer import enable_japanese_figure_localization  # noqa: E402
+from scripts.utils.plot_style import get_wavep_font_size  # noqa: E402
 from scripts.summary import worklog  # noqa: E402
 
 enable_japanese_figure_localization()
@@ -466,6 +474,7 @@ def _load_beta_cross_channel_row(root: Path) -> Optional[ScoreRow]:
             "if policy_D_promotion_ready=false or blockers remain, "
             "keep policy_B_exclude_comparator_when_ineligible."
         )
+
     policy_terminal_watch_statement_id = str(policy_terminal_watch_statement.get("statement_id") or "").strip()
     policy_terminal_watch_statement_text = str(policy_terminal_watch_statement.get("statement_text") or "").strip()
     score = _score_lower_better(beta_abs_z_minus_1, ok_max=1.0, mixed_max=2.0)
@@ -474,6 +483,7 @@ def _load_beta_cross_channel_row(root: Path) -> Optional[ScoreRow]:
         score = _score_lower_better(beta_abs_z, ok_max=1.0, mixed_max=2.0)
 
     # 条件分岐: `score is None` を満たす経路を評価する。
+
     if score is None:
         score = _canonical_score_for_status(None, _status_from_gate(terminal_status))
 
@@ -495,6 +505,7 @@ def _load_beta_cross_channel_row(root: Path) -> Optional[ScoreRow]:
         metric_parts.append(f"beta_comb={_fmt_float(beta_est, digits=6)}+/-{_fmt_float(beta_sig, digits=6)}")
 
     # 条件分岐: `beta_abs_z_minus_1 is not None` を満たす経路を評価する。
+
     if beta_abs_z_minus_1 is not None:
         metric_parts.append(f"|z(beta_comb-1)|={_fmt_float(beta_abs_z_minus_1, digits=3)}")
 
@@ -515,14 +526,17 @@ def _load_beta_cross_channel_row(root: Path) -> Optional[ScoreRow]:
         metric_parts.append(f"bias(messenger)={messenger_bias}")
 
     # 条件分岐: `active_policy_id` を満たす経路を評価する。
+
     if active_policy_id:
         metric_parts.append(f"active_policy={active_policy_id}")
 
     # 条件分岐: `policy_b_hold_status` を満たす経路を評価する。
+
     if policy_b_hold_status:
         metric_parts.append(f"policy_B_hold={policy_b_hold_status}")
 
     # 条件分岐: `policy_d_promotion_status` を満たす経路を評価する。
+
     if policy_d_promotion_status:
         promotion_ready_text = ""
         # 条件分岐: `isinstance(policy_d_promotion_ready, bool)` を満たす経路を評価する。
@@ -532,13 +546,16 @@ def _load_beta_cross_channel_row(root: Path) -> Optional[ScoreRow]:
         metric_parts.append(f"policy_D_promotion={policy_d_promotion_status}{promotion_ready_text}")
 
     # 条件分岐: `policy_d_blockers` を満たす経路を評価する。
+
     if policy_d_blockers:
         metric_parts.append(f"policy_D_blockers={','.join(policy_d_blockers)}")
 
     # 条件分岐: `recommended_policy_id` を満たす経路を評価する。
+
     if recommended_policy_id:
         metric_parts.append(f"recommended_policy={recommended_policy_id}")
     # 条件分岐: `policy_switch_decision_id` を満たす経路を評価する。
+
     if policy_switch_decision_id:
         switch_required_text = (
             str(bool(policy_switch_required_now)).lower()
@@ -554,9 +571,11 @@ def _load_beta_cross_channel_row(root: Path) -> Optional[ScoreRow]:
             f"switch_decision={policy_switch_decision_id}(required={switch_required_text},allowed={switch_allowed_text})"
         )
     # 条件分岐: `policy_switch_branch_id` を満たす経路を評価する。
+
     if policy_switch_branch_id:
         metric_parts.append(f"switch_branch={policy_switch_branch_id}")
     # 条件分岐: `policy_terminal_watch_statement_id` を満たす経路を評価する。
+
     if policy_terminal_watch_statement_id:
         metric_parts.append(f"watch_statement_id={policy_terminal_watch_statement_id}")
 
@@ -3651,7 +3670,19 @@ def plot_validation_scoreboard(
     out_pdf: Optional[Path] = None,
     title: str = "総合スコアボード（全検証：緑=OK / 黄=要改善 / 赤=不一致）",
     xlabel: str = "正規化スコア（0=理想, 1=OK境界, 2=要改善境界）",
-    target_fig_h_in: float = 12.4,
+    target_fig_h_in: float = 9.2,
+    row_h_nominal: float = 0.72,
+    base_h: float = 2.6,
+    bar_pitch: float = 1.12,
+    bar_height: float = 0.88,
+    title_scale: float = 1.0,
+    suptitle_scale: float = 1.0,
+    axis_scale: float = 1.0,
+    label_scale: float = 1.0,
+    tick_scale: float = 1.0,
+    min_label_font_size: float = 6.0,
+    left_margin: float = 0.43,
+    right_margin: float = 0.985,
 ) -> None:
     _set_japanese_font()
     out_png.parent.mkdir(parents=True, exist_ok=True)
@@ -3712,11 +3743,9 @@ def plot_validation_scoreboard(
 
         return "\n".join(textwrap.wrap(t, width=width, break_long_words=False, break_on_hyphens=False))
 
-    row_h_nominal = 0.62
-    base_h = 2.2
     fig_h_ideal = row_h_nominal * float(len(ordered)) + base_h
     fig_h = max(4.2, min(fig_h_ideal, float(target_fig_h_in)))
-    fig_w = 12.0
+    fig_w = 170.0 / 25.4
 
     # 図1/2は上下パネル間の余白を避けるため、単一パネルで固定する。
     n_panels = 1
@@ -3737,27 +3766,32 @@ def plot_validation_scoreboard(
 
     # 条件分岐: `n_panels == 1` を満たす経路を評価する。
 
-    bar_pitch = 1.12
+    title_font = get_wavep_font_size("title") * title_scale
+    axis_font = get_wavep_font_size("axis") * axis_scale
+    tick_font = get_wavep_font_size("tick")
+    label_font = max(float(min_label_font_size), tick_font * label_scale)
 
     if n_panels == 1:
         fig, ax = plt.subplots(1, 1, figsize=(fig_w, fig_h))
         y = [i * bar_pitch for i in range(len(ordered))]
-        ax.barh(y, scores_clipped, height=0.88, color=colors, alpha=0.9)
+        ax.barh(y, scores_clipped, height=bar_height, color=colors, alpha=0.9)
         ax.set_yticks(y)
-        ax.set_yticklabels([_wrap_label(s, width=label_width) for s in labels], fontsize=font_size)
+        ax.set_yticklabels([_wrap_label(s, width=label_width) for s in labels], fontsize=label_font)
         ax.invert_yaxis()
         ax.set_xlim(0.0, x_max)
         ax.axvline(0.0, color="#333333", linewidth=1.0)
         for x in (1.0, 2.0):
             ax.axvline(x, color="#999999", linewidth=1.0, linestyle="--")
 
-        ax.set_xlabel(xlabel, fontsize=13.4)
-        ax.set_title(title, fontsize=15.2)
-        ax.tick_params(axis="x", labelsize=12.0)
-        fig.subplots_adjust(left=0.38, right=0.98, top=0.91, bottom=0.13)
-        fig.savefig(out_png, dpi=180)
-        if out_pdf is not None:
-            fig.savefig(out_pdf, format="pdf")
+        ax.set_xlabel(xlabel, fontsize=axis_font)
+        ax.set_title(title, fontsize=title_font, pad=8.0)
+        ax.tick_params(axis="x", labelsize=tick_font * tick_scale)
+        fig.subplots_adjust(left=left_margin, right=right_margin, top=0.84, bottom=0.11)
+        with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+            fig.savefig(out_png, dpi=180)
+            if out_pdf is not None:
+                fig.savefig(out_pdf, format="pdf")
+
         plt.close(fig)
         return
 
@@ -3791,9 +3825,9 @@ def plot_validation_scoreboard(
 
     for ax, sub_labels, sub_scores, sub_colors in zip(axes, panels, panels_scores, panels_colors, strict=False):
         y = [i * bar_pitch for i in range(len(sub_labels))]
-        ax.barh(y, sub_scores, height=0.88, color=sub_colors, alpha=0.9)
+        ax.barh(y, sub_scores, height=bar_height, color=sub_colors, alpha=0.9)
         ax.set_yticks(y)
-        ax.set_yticklabels([_wrap_label(s, width=label_width) for s in sub_labels], fontsize=font_size)
+        ax.set_yticklabels([_wrap_label(s, width=label_width) for s in sub_labels], fontsize=label_font)
         ax.invert_yaxis()
 
         ax.set_xlim(0.0, x_max)
@@ -3801,23 +3835,25 @@ def plot_validation_scoreboard(
         for x in (1.0, 2.0):
             ax.axvline(x, color="#999999", linewidth=1.0, linestyle="--")
 
-        ax.tick_params(axis="x", labelsize=11.5)
+        ax.tick_params(axis="x", labelsize=tick_font * tick_scale)
 
     # 上段パネルのx軸ラベルは非表示にして、パネル間の余白を圧縮する。
 
     for ax in axes[:-1]:
         ax.tick_params(axis="x", labelbottom=False)
 
-    fig.suptitle(title, y=0.98, fontsize=15.2)
-    fig.supxlabel(xlabel, fontsize=13.4)
+    fig.suptitle(title, y=0.992, fontsize=get_wavep_font_size("suptitle") * suptitle_scale)
+    fig.supxlabel(xlabel, fontsize=axis_font)
 
     # Note: metric details are intentionally not embedded in the PNG
     # (they live in validation_scoreboard.json / 検証サマリ表 captions).
 
-    fig.subplots_adjust(left=0.38, right=0.98, top=0.91, bottom=0.14, hspace=0.0)
-    fig.savefig(out_png, dpi=180)
-    if out_pdf is not None:
-        fig.savefig(out_pdf, format="pdf")
+    fig.subplots_adjust(left=left_margin, right=right_margin, top=0.835, bottom=0.12, hspace=0.18)
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        fig.savefig(out_png, dpi=180)
+        if out_pdf is not None:
+            fig.savefig(out_pdf, format="pdf")
+
     plt.close(fig)
 
 
@@ -3837,8 +3873,8 @@ def main() -> int:
     ap.add_argument(
         "--target-fig-h-in",
         type=float,
-        default=12.4,
-        help="Target figure height in inches used by panel layout (default: 12.4).",
+        default=9.2,
+        help="Target figure height in inches used by panel layout (default: 9.2).",
     )
     args = ap.parse_args()
 
@@ -3852,6 +3888,7 @@ def main() -> int:
         out_png=out_png,
         out_pdf=out_pdf,
         target_fig_h_in=float(args.target_fig_h_in),
+        title_scale=0.94,
     )
 
     payload["outputs"] = {

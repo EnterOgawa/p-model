@@ -939,7 +939,7 @@ def _plot(path: Path, *, observations: Sequence[CollisionObs], rows_baryon: Sequ
     z_lens_b = np.asarray([abs(float(by_cluster_b[obs.cluster_id]["z_delta_x_p_lens"])) for obs in observations], dtype=float)
     z_lens_p = np.asarray([abs(float(by_cluster_p[obs.cluster_id]["z_delta_x_p_lens"])) for obs in observations], dtype=float)
 
-    fig, axes = plt.subplots(2, 1, figsize=(12.6, 8.8), constrained_layout=True)
+    fig, axes = plt.subplots(2, 1, figsize=(12.6, 8.8), constrained_layout=False)
     ax0, ax1 = axes
 
     ax0.errorbar(obs_vals, y, xerr=obs_err, fmt="o", color="black", capsize=4, label="observed lens-gas offset")
@@ -965,6 +965,7 @@ def _plot(path: Path, *, observations: Sequence[CollisionObs], rows_baryon: Sequ
     ax1.legend(loc="best", fontsize=11.2)
     ax1.tick_params(labelsize=11.2)
 
+    fig.subplots_adjust(left=0.18, right=0.98, top=0.90, bottom=0.10, hspace=0.48)
     fig.savefig(path, dpi=150)
     plt.close(fig)
 

@@ -39,6 +39,12 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.utils.plot_style import (  # noqa: E402
+    apply_paper_style,
+    apply_wavep_figure_layout,
+    get_wavep_font_size,
+    resolve_wavep_cjk_font_family,
+)
 
 import numpy as np
 
@@ -96,6 +102,7 @@ def _write_json(path: Path, obj: Dict[str, Any]) -> None:
 
 
 # 関数: `_sync_public_figure_assets` の入出力契約と処理意図を定義する。
+
 def _sync_public_figure_assets(root: Path, out_png: Path) -> None:
     out_pdf = out_png.with_suffix(".pdf")
     public_dir = root / "output" / "public" / "xrism"
@@ -109,6 +116,34 @@ def _sync_public_figure_assets(root: Path, out_png: Path) -> None:
 
         shutil.copy2(src, public_dir / src.name)
         shutil.copy2(src, summary_dir / src.name)
+
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
+
+def _set_japanese_font() -> None:
+    try:
+        import matplotlib as mpl
+        import matplotlib.font_manager as fm
+
+        preferred = resolve_wavep_cjk_font_family(preferred_name="Noto Sans CJK JP")
+        # 条件分岐: `preferred` を満たす経路を評価する。
+        if preferred:
+            mpl.rcParams["font.family"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["axes.unicode_minus"] = False
+            return
+
+        fallback = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
+        available = {f.name for f in fm.fontManager.ttflist}
+        chosen = [name for name in fallback if name in available]
+        # 条件分岐: `chosen` を満たす経路を評価する。
+        if chosen:
+            mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = chosen + ["DejaVu Sans"]
+
+        mpl.rcParams["axes.unicode_minus"] = False
+    except Exception:
+        pass
 
 
 # 関数: `_as_bool01` の入出力契約と処理意図を定義する。
@@ -362,11 +397,14 @@ def _plot_isco_constraints(rows: List[Dict[str, str]], *, out_png: Path) -> None
     if plt is None:
         return
 
+    apply_paper_style()
+    _set_japanese_font()
     out_png.parent.mkdir(parents=True, exist_ok=True)
 
     # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
-        fig, ax = plt.subplots(1, 1, figsize=(10.0, 2.6))
+        fig, ax = plt.subplots(1, 1)
+        apply_wavep_figure_layout(fig, template="part2_single_panel_sparse")
         ax.axis("off")
         ax.text(
             0.5,
@@ -374,11 +412,13 @@ def _plot_isco_constraints(rows: List[Dict[str, str]], *, out_png: Path) -> None
             "Fe-Kα broad line / ISCO: no data\n(run the proxy pipeline to generate the CSV)",
             ha="center",
             va="center",
-            fontsize=12,
+            fontsize=get_wavep_font_size("title"),
             color="#333333",
         )
-        fig.savefig(out_png, dpi=160)
-        fig.savefig(out_png.with_suffix(".pdf"))
+        with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+            fig.savefig(out_png, dpi=160)
+            fig.savefig(out_png.with_suffix(".pdf"))
+
         plt.close(fig)
         return
 
@@ -442,18 +482,21 @@ def _plot_isco_constraints(rows: List[Dict[str, str]], *, out_png: Path) -> None
     # 条件分岐: `not xs` を満たす経路を評価する。
 
     if not xs:
-        fig, ax = plt.subplots(1, 1, figsize=(10.0, 2.6))
+        fig, ax = plt.subplots(1, 1)
+        apply_wavep_figure_layout(fig, template="part2_single_panel_sparse")
         ax.axis("off")
-        ax.text(0.5, 0.5, "Fe-Kα broad line / ISCO: no valid rows", ha="center", va="center", fontsize=12)
-        fig.savefig(out_png, dpi=160)
-        fig.savefig(out_png.with_suffix(".pdf"))
+        ax.text(0.5, 0.5, "Fe-Kα broad line / ISCO: no valid rows", ha="center", va="center", fontsize=get_wavep_font_size("title"))
+        with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+            fig.savefig(out_png, dpi=160)
+            fig.savefig(out_png.with_suffix(".pdf"))
+
         plt.close(fig)
         return
 
     n = len(xs)
-    # 注: Figure 30 の可読性改善のため、キャンバスと文字を拡大する。
-    fig_h = max(15.2, 1.06 * n + 6.6)
-    fig, ax = plt.subplots(1, 1, figsize=(22.4, fig_h))
+    fig_h = min(9.6, max(4.8, 0.34 * n + 2.9))
+    fig, ax = plt.subplots(1, 1)
+    fig.set_size_inches(170.0 / 25.4, fig_h, forward=True)
     y = np.arange(n)
 
     for i in range(n):
@@ -465,25 +508,26 @@ def _plot_isco_constraints(rows: List[Dict[str, str]], *, out_png: Path) -> None
 
         # 条件分岐: `total > 0` を満たす経路を評価する。
         if total > 0:
-            ax.hlines(float(y[i]), rin - total, rin + total, color=c, alpha=0.22, linewidth=8.6, zorder=1)
+            ax.hlines(float(y[i]), rin - total, rin + total, color=c, alpha=0.22, linewidth=4.2, zorder=1)
 
         # 条件分岐: `s > 0` を満たす経路を評価する。
 
         if s > 0:
-            ax.hlines(float(y[i]), rin - s, rin + s, color=c, alpha=0.9, linewidth=2.9, zorder=2)
+            ax.hlines(float(y[i]), rin - s, rin + s, color=c, alpha=0.9, linewidth=1.6, zorder=2)
 
-        ax.plot(rin, float(y[i]), marker=markers[i], color=c, markersize=19.4, zorder=3)
+        ax.plot(rin, float(y[i]), marker=markers[i], color=c, markersize=5.2, zorder=3)
 
     ax.set_yticks(y)
-    ax.set_yticklabels(labels, fontsize=22.4)
+    ax.set_yticklabels(labels)
     ax.invert_yaxis()
-    ax.set_xlabel("inner radius r_in (r_g)", fontsize=24.6)
+    ax.set_xlabel("inner radius r_in (r_g)")
     ax.set_title(
-        "Fe-Kα broad line (GX 339-4): inner radius proxy constraints (method-dependent)",
-        fontsize=27.8,
-        x=0.47,
+        "GX 339-4: Fe-Kα 内縁半径拘束",
+        fontsize=get_wavep_font_size("title") - 0.9,
+        x=0.50,
+        wrap=True,
     )
-    ax.tick_params(labelsize=21.8)
+    ax.tick_params()
 
     # Reference ISCO lines (to connect with Step 4.13.7 falsifiability).
     try:
@@ -507,7 +551,7 @@ def _plot_isco_constraints(rows: List[Dict[str, str]], *, out_png: Path) -> None
             ],
             loc="center right",
             bbox_to_anchor=(0.985, 0.60),
-            fontsize=20.4,
+            fontsize=get_wavep_font_size("legend"),
             frameon=False,
         )
     except Exception:
@@ -517,9 +561,12 @@ def _plot_isco_constraints(rows: List[Dict[str, str]], *, out_png: Path) -> None
     ax.set_xlim(left=0.0, right=float(min(60.0, max(10.0, x_max))))
     ax.grid(axis="x", color="#dddddd", linewidth=1.0, linestyle="--", alpha=0.8)
 
-    fig.subplots_adjust(left=0.365, right=0.992, top=0.934, bottom=0.084)
-    fig.savefig(out_png, dpi=220)
-    fig.savefig(out_png.with_suffix(".pdf"))
+    left_margin = 0.24 if n <= 5 else min(0.40, 0.18 + 0.018 * n)
+    fig.subplots_adjust(left=left_margin, right=0.992, top=0.915, bottom=0.095)
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        fig.savefig(out_png, dpi=220)
+        fig.savefig(out_png.with_suffix(".pdf"))
+
     plt.close(fig)
 
 

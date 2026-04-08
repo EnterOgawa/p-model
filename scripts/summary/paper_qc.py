@@ -115,7 +115,8 @@ def _check_part3_lint_strict() -> _Check:
     result = _paper_lint._lint(  # noqa: SLF001
         root=root,
         manuscript_paths=[
-            root / "doc" / "paper" / "12_part3_quantum.md",
+            root / "doc" / "paper" / "12_part3a_quantum_foundations.md",
+            root / "doc" / "paper" / "12_part3b_quantum_verification.md",
         ],
         references_path=root / "doc" / "paper" / "30_references.md",
         figures_index_path=root / "doc" / "paper" / "01_figures_index.md",
@@ -211,7 +212,8 @@ def _check_publish_html_no_repo_paths(*, html_text: str) -> _Check:
 
     (Those details are moved to Verification Materials.)
     """
-    banned_prefixes = ("output/", "scripts/", "data/", "doc/")
+    banned_prefixes = ("scripts/", "data/", "doc/")
+    allowed_output_prefixes = ("output/public/",)
     banned_command_prefixes = ("python -B ", "cmd /c ", "wsl ", "bash -lc ")
 
     hits: List[Dict[str, Any]] = []
@@ -223,7 +225,9 @@ def _check_publish_html_no_repo_paths(*, html_text: str) -> _Check:
 
         reason = None
         # 条件分岐: `any(code.startswith(p) for p in banned_prefixes)` を満たす経路を評価する。
-        if any(code.startswith(p) for p in banned_prefixes):
+        if code.startswith("output/") and not any(code.startswith(p) for p in allowed_output_prefixes):
+            reason = "repo_path"
+        elif any(code.startswith(p) for p in banned_prefixes):
             reason = "repo_path"
         # 条件分岐: 前段条件が不成立で、`any(code.startswith(p) for p in banned_command_prefixes)` を追加評価する。
         elif any(code.startswith(p) for p in banned_command_prefixes):
@@ -386,6 +390,9 @@ def _check_markdown_figure_number_references(*, manuscript_md: Path, html_text: 
             try:
                 n = int(m.group(1))
             except Exception:
+                continue
+
+            if re.search(r"Part\s+[A-Za-z0-9\-]+", stripped):
                 continue
 
             # 条件分岐: `(not fig_nums) or (n not in fig_nums)` を満たす経路を評価する。
@@ -667,10 +674,22 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="publish Part II html path (optional; default: output/private/summary/pmodel_paper_part2_astrophysics.html)",
     )
     ap.add_argument(
+        "--part3a-html",
+        type=str,
+        default=str(_ROOT / "output" / "private" / "summary" / "pmodel_paper_part3a_quantum_foundations.html"),
+        help="publish Part III-A html path (optional; default: output/private/summary/pmodel_paper_part3a_quantum_foundations.html)",
+    )
+    ap.add_argument(
+        "--part3b-html",
+        type=str,
+        default=str(_ROOT / "output" / "private" / "summary" / "pmodel_paper_part3b_quantum_verification.html"),
+        help="publish Part III-B html path (optional; default: output/private/summary/pmodel_paper_part3b_quantum_verification.html)",
+    )
+    ap.add_argument(
         "--part3-html",
         type=str,
         default=str(_ROOT / "output" / "private" / "summary" / "pmodel_paper_part3_quantum.html"),
-        help="publish Part III html path (optional; default: output/private/summary/pmodel_paper_part3_quantum.html)",
+        help="compat Part III html path (optional; default: output/private/summary/pmodel_paper_part3_quantum.html)",
     )
     ap.add_argument(
         "--part4-html",
@@ -708,8 +727,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not part2_html.is_absolute():
         part2_html = (_ROOT / part2_html).resolve()
 
+    part3a_html = Path(str(args.part3a_html))
+    if not part3a_html.is_absolute():
+        part3a_html = (_ROOT / part3a_html).resolve()
+
+    part3b_html = Path(str(args.part3b_html))
+    if not part3b_html.is_absolute():
+        part3b_html = (_ROOT / part3b_html).resolve()
+
     part3_html = Path(str(args.part3_html))
-    # 条件分岐: `not part3_html.is_absolute()` を満たす経路を評価する。
     if not part3_html.is_absolute():
         part3_html = (_ROOT / part3_html).resolve()
 
@@ -743,6 +769,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     paper_text = _read_text(paper_html)
     part2_text = _read_text(part2_html) if part2_html.exists() else None
+    part3a_text = _read_text(part3a_html) if part3a_html.exists() else None
+    part3b_text = _read_text(part3b_html) if part3b_html.exists() else None
     part3_text = _read_text(part3_html) if part3_html.exists() else None
     part4_text = _read_text(part4_html)
     public_text = _read_text(public_html) if public_html.exists() else None
@@ -795,6 +823,38 @@ def main(argv: Sequence[str] | None = None) -> int:
             }
         )
 
+    if isinstance(part3a_text, str):
+        checks.update(
+            {
+                "part3a_html_no_double_backslash": _check_no_double_backslash(part3a_text),
+                "part3a_html_no_draft_labels": _check_no_substrings(part3a_text, ["草稿", "ドラフト"]),
+                "part3a_html_no_repo_paths": _check_publish_html_no_repo_paths(html_text=part3a_text),
+                "part3a_html_internal_anchor_links": _check_internal_anchor_links(part3a_text),
+                "part3a_equation_alt": _check_equation_alt(part3a_text),
+                "part3a_figure_numbering": _check_figure_numbering(part3a_text, allow_sparse=True),
+                "part3a_md_figure_number_references": _check_markdown_figure_number_references(
+                    manuscript_md=_ROOT / "doc" / "paper" / "12_part3a_quantum_foundations.md",
+                    html_text=part3a_text,
+                ),
+            }
+        )
+
+    if isinstance(part3b_text, str):
+        checks.update(
+            {
+                "part3b_html_no_double_backslash": _check_no_double_backslash(part3b_text),
+                "part3b_html_no_draft_labels": _check_no_substrings(part3b_text, ["草稿", "ドラフト"]),
+                "part3b_html_no_repo_paths": _check_publish_html_no_repo_paths(html_text=part3b_text),
+                "part3b_html_internal_anchor_links": _check_internal_anchor_links(part3b_text),
+                "part3b_equation_alt": _check_equation_alt(part3b_text),
+                "part3b_figure_numbering": _check_figure_numbering(part3b_text, allow_sparse=True),
+                "part3b_md_figure_number_references": _check_markdown_figure_number_references(
+                    manuscript_md=_ROOT / "doc" / "paper" / "12_part3b_quantum_verification.md",
+                    html_text=part3b_text,
+                ),
+            }
+        )
+
     # 条件分岐: `isinstance(part3_text, str)` を満たす経路を評価する。
 
     if isinstance(part3_text, str):
@@ -833,6 +893,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         "inputs": {
             "paper_html": str(paper_html.relative_to(_ROOT)).replace("\\", "/"),
             "part2_html": (str(part2_html.relative_to(_ROOT)).replace("\\", "/") if part2_html.exists() else None),
+            "part3a_html": (str(part3a_html.relative_to(_ROOT)).replace("\\", "/") if part3a_html.exists() else None),
+            "part3b_html": (str(part3b_html.relative_to(_ROOT)).replace("\\", "/") if part3b_html.exists() else None),
             "part3_html": (str(part3_html.relative_to(_ROOT)).replace("\\", "/") if part3_html.exists() else None),
             "part4_html": str(part4_html.relative_to(_ROOT)).replace("\\", "/"),
             "public_html": (str(public_html.relative_to(_ROOT)).replace("\\", "/") if public_html.exists() else None),
@@ -856,7 +918,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         worklog.append_event(
             {
                 "tool": "paper_qc",
-                "inputs": [p for p in [paper_html, part2_html, part3_html, part4_html, public_html] if p.exists()],
+                "inputs": [p for p in [paper_html, part2_html, part3a_html, part3b_html, part3_html, part4_html, public_html] if p.exists()],
                 "outputs": [out_json],
                 "result": {"ok": bool(ok)},
             }

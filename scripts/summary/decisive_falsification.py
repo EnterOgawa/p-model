@@ -1,3 +1,10 @@
+"""
+目的: Part II/IV で使う decisive falsification pack の公開図と要約を再生成する。
+入力: 各 topic の canonical residual と判定閾値を読む。
+出力: output/public/summary の falsification pack artifact を更新する。
+前提: 論文本文はここで固定した差分 pack を参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -19,6 +26,12 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.utils.plot_style import (  # noqa: E402
+    apply_paper_style,
+    apply_wavep_figure_layout,
+    get_wavep_font_size,
+    resolve_wavep_cjk_font_family,
+)
 
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
@@ -39,21 +52,23 @@ def _set_japanese_font() -> None:
         import matplotlib as mpl
         import matplotlib.font_manager as fm
 
-        preferred = [
-            "Yu Gothic",
-            "Meiryo",
-            "BIZ UDGothic",
-            "MS Gothic",
-            "Yu Mincho",
-            "MS Mincho",
-        ]
+        preferred = resolve_wavep_cjk_font_family(preferred_name="Noto Sans CJK JP")
+        # 条件分岐: `preferred` を満たす経路を評価する。
+        if preferred:
+            mpl.rcParams["font.family"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = [preferred, "DejaVu Sans"]
+            mpl.rcParams["axes.unicode_minus"] = False
+            return
+
+        fallback = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
         available = {f.name for f in fm.fontManager.ttflist}
-        chosen = [name for name in preferred if name in available]
+        chosen = [name for name in fallback if name in available]
         # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+        mpl.rcParams["font.sans-serif"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         pass
@@ -412,6 +427,7 @@ def _extract_delta_constraints(delta_j: Dict[str, Any]) -> Dict[str, Any]:
 # 関数: `_render_figure` の入出力契約と処理意図を定義する。
 
 def _render_figure(payload: Dict[str, Any], *, out_png: Path) -> None:
+    apply_paper_style()
     _set_japanese_font()
 
     eht = payload.get("eht") if isinstance(payload.get("eht"), dict) else {}
@@ -419,7 +435,8 @@ def _render_figure(payload: Dict[str, Any], *, out_png: Path) -> None:
     delta = payload.get("delta") if isinstance(payload.get("delta"), dict) else {}
     delta_rows = delta.get("rows") if isinstance(delta.get("rows"), list) else []
 
-    fig = plt.figure(figsize=(13.8, 11.2), dpi=180)
+    fig = plt.figure()
+    apply_wavep_figure_layout(fig, template="part2_two_panel_dense_x")
     gs = fig.add_gridspec(2, 1, height_ratios=[1.12, 1.22], hspace=0.42)
 
     # Panel A: EHT required precision
@@ -472,11 +489,11 @@ def _render_figure(payload: Dict[str, Any], *, out_png: Path) -> None:
                 sigma_annotation_specs.append((i, top, f"|Δ|={_format_num(d, digits=3)} μas"))
 
     ax1.set_xticks(x, names)
-    ax1.tick_params(labelsize=12.8)
-    ax1.set_ylabel("観測誤差（1σ）[μas]", fontsize=15.0)
-    ax1.set_title("EHT（ブラックホール影）：差分予測を3σで判別するための必要精度（κ/散乱は参考）", fontsize=16.4)
+    ax1.tick_params()
+    ax1.set_ylabel("観測誤差（1σ）[μas]")
+    ax1.set_title("EHT：3σ判別に必要な観測精度", fontsize=get_wavep_font_size("title"))
     ax1.grid(True, axis="y", alpha=0.25)
-    ax1.legend(loc="upper left", fontsize=12.4)
+    ax1.legend(loc="upper left", fontsize=get_wavep_font_size("legend"))
     finite_sigma = [v for v in sigma_now + sigma_now_kappa + sigma_now_kappa_scatt + sigma_need if math.isfinite(v)]
     if finite_sigma:
         y_max = max(finite_sigma) * 1.28 + 0.45
@@ -491,7 +508,7 @@ def _render_figure(payload: Dict[str, Any], *, out_png: Path) -> None:
                 txt,
                 ha="center",
                 va="bottom",
-                fontsize=15.6,
+                fontsize=get_wavep_font_size("note"),
                 bbox={"facecolor": "white", "alpha": 0.74, "edgecolor": "none", "pad": 0.22},
             )
 
@@ -504,7 +521,7 @@ def _render_figure(payload: Dict[str, Any], *, out_png: Path) -> None:
             0.02,
             f"係数差（β固定）: 係数比 P/GR={float(ratio):.4f}（差 {float(diff_pct):.2f}%）",
             transform=ax1.transAxes,
-            fontsize=13.0,
+            fontsize=get_wavep_font_size("note"),
             color="#444",
         )
 
@@ -527,7 +544,7 @@ def _render_figure(payload: Dict[str, Any], *, out_png: Path) -> None:
     for i, g in enumerate(gamma_obs):
         # 条件分岐: `math.isfinite(g) and g > 0` を満たす経路を評価する。
         if math.isfinite(g) and g > 0:
-            ax2.text(i, log10_upper[i] + 0.6, f"γ≈1e{math.log10(g):.1f}", ha="center", va="bottom", fontsize=13.2)
+            ax2.text(i, log10_upper[i] + 0.6, f"γ≈1e{math.log10(g):.1f}", ha="center", va="bottom", fontsize=get_wavep_font_size("note"))
 
     delta_adopted = float(delta.get("delta_adopted", float("nan")))
     # 条件分岐: `math.isfinite(delta_adopted) and delta_adopted > 0` を満たす経路を評価する。
@@ -536,19 +553,30 @@ def _render_figure(payload: Dict[str, Any], *, out_png: Path) -> None:
         ax2.axhline(y, color="#d62728", linestyle="--", linewidth=1.8, label=f"採用 δ = 1e{y:.0f}")
 
     ax2.set_xticks(range(len(labels)), labels, rotation=0)
-    ax2.tick_params(labelsize=12.8)
-    ax2.set_ylabel("log10(δの上限)   ※観測が許す最大δ（小さいほど厳しい）", fontsize=14.8)
-    ax2.set_title("速度飽和 δ：既知の高γ観測が与える上限（δ < 1/γ^2）", fontsize=16.2)
+    ax2.tick_params()
+    ax2.set_ylabel("log10(δの上限)")
+    ax2.set_title("速度飽和 δ：既知の高γ観測が与える上限", fontsize=get_wavep_font_size("title"))
     ax2.grid(True, axis="y", alpha=0.25)
     # 条件分岐: `math.isfinite(delta_adopted) and delta_adopted > 0` を満たす経路を評価する。
     if math.isfinite(delta_adopted) and delta_adopted > 0:
-        ax2.legend(loc="upper right", fontsize=12.4)
+        ax2.text(
+            0.58,
+            0.96,
+            f"採用 δ = 1e{y:.0f}",
+            transform=ax2.transAxes,
+            ha="left",
+            va="top",
+            fontsize=get_wavep_font_size("legend"),
+            bbox={"facecolor": "white", "alpha": 0.84, "edgecolor": "none", "pad": 0.26},
+            color="#d62728",
+        )
 
-    fig.suptitle("反証条件（差分予測）パック：必要精度と棄却条件の要点", fontsize=17.2, y=0.98)
+    fig.suptitle("反証条件パック：必要精度と棄却条件の要点", fontsize=get_wavep_font_size("suptitle"), y=0.98)
     out_png.parent.mkdir(parents=True, exist_ok=True)
-    fig.subplots_adjust(top=0.90, bottom=0.08, left=0.08, right=0.98, hspace=0.42)
-    fig.savefig(out_png, bbox_inches="tight")
-    fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight")
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        fig.savefig(out_png)
+        fig.savefig(out_png.with_suffix(".pdf"))
+
     plt.close(fig)
 
 

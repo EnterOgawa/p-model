@@ -35,9 +35,20 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.utils.plot_style import get_wavep_font_size  # noqa: E402
+
+try:
+    import matplotlib as mpl
+    from scripts.utils.plot_style import install_wavep_cjk_font_override  # noqa: E402
+
+    install_wavep_cjk_font_override(preferred_name="Noto Sans CJK JP")
+    mpl.rcParams["axes.unicode_minus"] = False
+except Exception:
+    pass
 
 
 # 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -516,9 +527,50 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
             writer.writerow(row)
 
 
+# 関数: `_wrap_two_line_label` の入出力契約と処理意図を定義する。
+
+def _wrap_two_line_label(text: str) -> str:
+    words = [
+        token
+        for token in str(text).replace("::", " ").replace(":", " ").replace("_", " ").split()
+        if token
+    ]
+    if len(words) <= 1:
+        return " ".join(words) if words else str(text)
+
+    best_index = 1
+    best_score: Optional[int] = None
+    for idx in range(1, len(words)):
+        left = " ".join(words[:idx])
+        right = " ".join(words[idx:])
+        score = max(len(left), len(right))
+        if best_score is None or score < best_score:
+            best_score = score
+            best_index = idx
+
+    return " ".join(words[:best_index]) + "\n" + " ".join(words[best_index:])
+
+
 # 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, payload: Dict[str, Any]) -> None:
+    display_labels = {
+        "action::route_a_gate": "作用原理: 経路A判定",
+        "action::criteria_all_pass": "作用原理: 全判定通過",
+        "action::required_equations": "作用原理: 必須式充足",
+        "action::noether_gauge": "作用原理: Noether\nゲージ余裕",
+        "action::noether_realness": "作用原理: Noether\n実数性余裕",
+        "nonrel::route_gate": "非相対論: 経路判定",
+        "nonrel::criteria_all_pass": "非相対論: 全判定通過",
+        "nonrel::required_channels": "非相対論: 必須チャネル充足",
+        "deriv_pack::hard_fail_unknown": "導出pack: hard失敗/不明",
+        "deriv_pack::derivation_channel_pass": "導出pack: 導出チャネル通過",
+        "closure::observables_present": "閉包: 観測量経路の存在",
+        "closure::observables_unique": "閉包: 観測量経路の一意性",
+        "chain::hard_fail": "連鎖監査: hard失敗件数",
+        "chain::shared_gate_policy": "連鎖監査: 共有ゲート方針",
+        "chain::watch_convergence": "連鎖監査: 監視収束",
+    }
     checks = payload.get("checks") if isinstance(payload.get("checks"), list) else []
     matrix = payload.get("closure_matrix") if isinstance(payload.get("closure_matrix"), list) else []
 
@@ -530,7 +582,7 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
         if not isinstance(row, dict):
             continue
 
-        labels.append(str(row.get("id") or ""))
+        labels.append(display_labels.get(str(row.get("id") or ""), str(row.get("id") or "")))
         score = row.get("score")
         scores.append(float(score) if isinstance(score, (int, float)) else math.nan)
         status = str(row.get("status") or "")
@@ -560,29 +612,44 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
 
     # 上段（閉包監査）の可読性を図8相当に合わせるため、上段比率を拡大する。
 
-    fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(12.4, 9.4), dpi=180, gridspec_kw={"height_ratios": [4.6, 1.4]})
+    title_size = max(get_wavep_font_size("title"), 16.0)
+    axis_size = max(get_wavep_font_size("axis"), 14.0)
+    tick_size = max(get_wavep_font_size("tick"), 13.0)
+    upper_y_tick_size = max(tick_size + 1.8, 14.8)
+
+    upper_height = max(15.4, 0.75 * len(labels) + 5.6)
+    fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(12.9, upper_height), dpi=180, gridspec_kw={"height_ratios": [6.6, 1.5]})
 
     y = np.arange(len(labels))
-    ax0.barh(y, scores, color=colors)
-    ax0.set_yticks(y, labels)
+    wrapped_labels = [_wrap_two_line_label(label) for label in labels]
+    ax0.barh(y, scores, color=colors, height=0.72)
+    ax0.set_yticks(y)
+    ax0.set_yticklabels(wrapped_labels, fontsize=upper_y_tick_size)
+    for tick in ax0.get_yticklabels():
+        tick.set_linespacing(1.15)
+
     ax0.set_xlim(0.0, 1.05)
     ax0.axvline(1.0, linestyle="--", color="#6b7280", linewidth=1.2)
-    ax0.set_xlabel("check score (1=pass, 0.5=watch, 0=reject)")
-    ax0.set_title("L_total -> EL -> observables closure audit (Noether + nonrel mapping)")
+    ax0.set_xlabel("監査スコア（1で通過、0.5で監視、0で棄却）", fontsize=axis_size)
+    ax0.set_title("L_total -> EL -> 観測量閉包監査（Noether + 非相対論写像）", fontsize=title_size, pad=9.0)
+    ax0.tick_params(axis="x", labelsize=tick_size)
+    ax0.tick_params(axis="y", pad=7.0)
     ax0.grid(axis="x", alpha=0.25, linestyle=":")
 
     x = np.arange(len(obs_labels))
     ax1.bar(x, obs_values, color="#2563eb")
-    ax1.set_xticks(x, obs_labels, rotation=10, ha="right")
+    ax1.set_xticks(x)
+    ax1.set_xticklabels(obs_labels, rotation=10, ha="right", fontsize=tick_size)
     ax1.set_ylim(0.0, 1.05)
     ax1.axhline(1.0, linestyle="--", color="#6b7280", linewidth=1.2)
-    ax1.set_ylabel("route lock score")
-    ax1.set_title("Observable route uniqueness lock")
+    ax1.set_ylabel("経路固定スコア", fontsize=axis_size)
+    ax1.set_title("観測量経路の一意固定", fontsize=title_size, pad=8.0)
+    ax1.tick_params(axis="y", labelsize=tick_size)
     ax1.grid(axis="y", alpha=0.25, linestyle=":")
 
-    fig.tight_layout()
+    fig.subplots_adjust(left=0.25, right=0.98, top=0.96, bottom=0.10, hspace=0.66)
     path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(path, bbox_inches="tight")
+    fig.savefig(path)
     plt.close(fig)
 
 
@@ -647,6 +714,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     out_json = Path(args.out_json)
     out_csv = Path(args.out_csv)
     out_png = Path(args.out_png)
+    out_pdf = Path(args.out_png).with_suffix(".pdf")
 
     for name, path in [
         ("action-json", action_json),
@@ -682,6 +750,11 @@ def main(argv: Optional[List[str]] = None) -> int:
             elif name == "out-png":
                 out_png = resolved
 
+    # 条件分岐: `not out_pdf.is_absolute()` を満たす経路を評価する。
+
+    if not out_pdf.is_absolute():
+        out_pdf = (ROOT / out_pdf).resolve()
+
     for p in [action_json, nonrel_json, deriv_pack_json, chain_lock_json]:
         # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
@@ -701,11 +774,13 @@ def main(argv: Optional[List[str]] = None) -> int:
     rows = payload.get("checks") if isinstance(payload.get("checks"), list) else []
     _write_csv(out_csv, rows if isinstance(rows, list) else [])
     _plot(out_png, payload)
+    _plot(out_pdf, payload)
 
     decision = payload.get("decision") if isinstance(payload.get("decision"), dict) else {}
     print(f"[ok] wrote: {_rel(out_json)}")
     print(f"[ok] wrote: {_rel(out_csv)}")
     print(f"[ok] wrote: {_rel(out_png)}")
+    print(f"[ok] wrote: {_rel(out_pdf)}")
     print(f"[summary] overall_status={decision.get('overall_status')}, hard_fail_ids={len(decision.get('hard_fail_ids') or [])}")
 
     try:

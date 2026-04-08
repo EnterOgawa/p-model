@@ -5,6 +5,8 @@ sitecustomize.py
 
 - `WAVEP_MPL_FONT_PROFILE`: 役割別 font profile（title / axis / tick / legend / note / suptitle）
 - `WAVEP_MPL_FONT_SCALE`: profile 全体の倍率
+- `WAVEP_MPL_CJK_FONT`: 図用の日本語 sans-serif font target
+- `WAVEP_MPL_CJK_FONT_PATH`: 図用 font file path の明示 override
 - `WAVEP_MPL_LEGEND_NOTE_MIN_FONT`: 凡例・注記の後方互換 floor
 - `WAVEP_MPL_TEXT_MIN_FONT`: 文字全体の後方互換 floor
 """
@@ -16,6 +18,11 @@ import sys
 import re
 from pathlib import Path
 from typing import Any
+
+_PMODEL_TEXTWIDTH_MM = 170.0
+_PMODEL_MM_PER_INCH = 25.4
+_PMODEL_TEXTWIDTH_IN = _PMODEL_TEXTWIDTH_MM / _PMODEL_MM_PER_INCH
+_WAVEP_PART2_CANVAS_HEIGHT_SENTINEL_IN = 10_000.0
 
 
 # 関数: `_apply_wavep_font_profile_if_enabled` の入出力契約と処理意図を定義する。
@@ -40,6 +47,99 @@ def _apply_wavep_font_profile_if_enabled() -> None:
 
 
 _apply_wavep_font_profile_if_enabled()
+
+
+# 関数: `_apply_wavep_cjk_font_override_if_enabled` の入出力契約と処理意図を定義する。
+def _apply_wavep_cjk_font_override_if_enabled() -> None:
+    raw = os.getenv("WAVEP_MPL_CJK_FONT", "").strip()
+    if not raw:
+        return
+
+    try:
+        import matplotlib as mpl
+        from scripts.utils.plot_style import install_wavep_cjk_font_override
+    except Exception:
+        return
+
+    target_family = install_wavep_cjk_font_override(preferred_name=raw)
+    if not target_family:
+        return
+
+    mpl.rcParams["font.family"] = [target_family, "DejaVu Sans"]
+    mpl.rcParams["font.sans-serif"] = [target_family, "DejaVu Sans"]
+
+
+_apply_wavep_cjk_font_override_if_enabled()
+
+
+# 関数: rcParams への古い日本語フォント代入を Noto 系へ正規化する。
+def _apply_wavep_rcparams_font_rewrite_if_enabled() -> None:
+    raw = os.getenv("WAVEP_MPL_CJK_FONT", "").strip()
+    if not raw:
+        return
+
+    try:
+        import matplotlib as mpl
+        from scripts.utils.plot_style import resolve_wavep_cjk_font_family
+    except Exception:
+        return
+
+    target_family = resolve_wavep_cjk_font_family(preferred_name=raw)
+    if not target_family:
+        return
+
+    alias_names = {
+        "sans-serif",
+        "noto sans cjk jp",
+        "noto sans jp",
+        "source han sans",
+        "source han sans jp",
+        "yu gothic",
+        "yu gothic ui",
+        "yu mincho",
+        "meiryo",
+        "biz udgothic",
+        "ms gothic",
+        "ms mincho",
+        "ipaexgothic",
+    }
+
+    # 関数: `_normalize_family_value` の入出力契約と処理意図を定義する。
+    def _normalize_family_value(value: Any) -> list[str]:
+        if isinstance(value, str):
+            items = [value]
+        else:
+            try:
+                items = [str(item) for item in value]
+            except Exception:
+                items = [str(value)]
+
+        lowered = {str(item).strip().lower() for item in items if str(item).strip()}
+        if lowered & alias_names:
+            return [target_family, "DejaVu Sans"]
+
+        return [str(item) for item in items if str(item).strip()] or [target_family, "DejaVu Sans"]
+
+    rcparams_type = type(mpl.rcParams)
+    if getattr(rcparams_type, "_wavep_font_rewrite_patched", False):
+        return
+
+    original_setitem = rcparams_type.__setitem__
+
+    # 関数: font.family / font.sans-serif への legacy 代入を Noto 優先へ寄せる。
+    def patched_setitem(self, key, value):
+        if key in {"font.family", "font.sans-serif"}:
+            value = _normalize_family_value(value)
+
+        return original_setitem(self, key, value)
+
+    rcparams_type.__setitem__ = patched_setitem
+    rcparams_type._wavep_font_rewrite_patched = True
+    mpl.rcParams["font.family"] = [target_family, "DejaVu Sans"]
+    mpl.rcParams["font.sans-serif"] = [target_family, "DejaVu Sans"]
+
+
+_apply_wavep_rcparams_font_rewrite_if_enabled()
 
 
 # 関数: `_apply_wavep_font_floor_if_enabled` の入出力契約と処理意図を定義する。
@@ -80,6 +180,7 @@ def _coerce_fontsize_number(value: Any) -> float | None:
 
 
 # 関数: `_apply_wavep_global_text_floor_if_enabled` の入出力契約と処理意図を定義する。
+
 def _apply_wavep_global_text_floor_if_enabled() -> None:
     """
     WAVEP_MPL_TEXT_MIN_FONT が設定されている場合、
@@ -101,6 +202,7 @@ def _apply_wavep_global_text_floor_if_enabled() -> None:
         return
 
     # rcParams 側の既定値を先に引き上げる（明示未指定の文字へ効かせる）。
+
     for key in (
         "font.size",
         "axes.titlesize",
@@ -125,6 +227,7 @@ def _apply_wavep_global_text_floor_if_enabled() -> None:
         numeric = _coerce_fontsize_number(fontsize)
         if numeric is not None and numeric < floor:
             fontsize = floor
+
         return original_set_fontsize(self, fontsize)
 
     Text.set_fontsize = patched_set_fontsize
@@ -138,7 +241,63 @@ _VECTOR_PDF_AUTOSAVE_PATCHED = False
 _VECTOR_PDF_AUTOSAVE_IN_PROGRESS = False
 
 
+# 関数: `_resolve_wavep_canonical_canvas_box` の入出力契約と処理意図を定義する。
+def _resolve_wavep_canonical_canvas_box(width_in: float, height_in: float) -> tuple[float, float] | None:
+    """
+    build profile ごとの figure canvas 正規化 box を返す。
+
+    Part II は TeX 側を width 基準で組むため、source 側も 170 mm 幅へ
+    そろえてから保存する。高さは aspect ratio を維持するため sentinel を使う。
+    """
+    disable_normalize = str(os.getenv("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", "")).strip().lower()
+    if disable_normalize in {"1", "true", "yes", "on"}:
+        return None
+
+    profile = str(os.getenv("WAVEP_MPL_FONT_PROFILE", "")).strip().lower()
+    if profile == "part2_astrophysics":
+        return (_PMODEL_TEXTWIDTH_IN, _WAVEP_PART2_CANVAS_HEIGHT_SENTINEL_IN)
+
+    return None
+
+
+# 関数: `_normalize_wavep_figure_canvas_for_profile` の入出力契約と処理意図を定義する。
+
+def _normalize_wavep_figure_canvas_for_profile(figure: Any) -> tuple[float, float] | None:
+    """
+    現在 profile に応じて figure canvas を等倍縮尺で正規化する。
+
+    戻り値は復元用の元サイズ（inch）。正規化不要なら None を返す。
+    """
+    try:
+        width_in, height_in = figure.get_size_inches()
+    except Exception:
+        return None
+
+    target_box = _resolve_wavep_canonical_canvas_box(float(width_in), float(height_in))
+    if target_box is None:
+        return None
+
+    target_width, target_height = target_box
+    scale = min(target_width / float(width_in), target_height / float(height_in))
+    if scale <= 0.0 or abs(scale - 1.0) < 0.03:
+        return None
+
+    original_size = (float(width_in), float(height_in))
+    try:
+        figure.set_size_inches(width_in * scale, height_in * scale, forward=True)
+    except Exception:
+        return None
+
+    try:
+        figure.tight_layout()
+    except Exception:
+        pass
+
+    return original_size
+
+
 # 関数: `_enable_vector_pdf_sidecar_if_enabled` の入出力契約と処理意図を定義する。
+
 def _enable_vector_pdf_sidecar_if_enabled() -> None:
     """
     WAVEP_MPL_AUTOSAVE_VECTOR_PDF=1 のとき、`*.png/*.jpg` 保存時に
@@ -176,9 +335,18 @@ def _enable_vector_pdf_sidecar_if_enabled() -> None:
             return None
 
     # 関数: `patched_savefig` の入出力契約と処理意図を定義する。
+
     def patched_savefig(self, *args, **kwargs):
         global _VECTOR_PDF_AUTOSAVE_IN_PROGRESS
-        result = original_savefig(self, *args, **kwargs)
+        original_size = _normalize_wavep_figure_canvas_for_profile(self)
+        try:
+            result = original_savefig(self, *args, **kwargs)
+        finally:
+            if original_size is not None:
+                try:
+                    self.set_size_inches(*original_size, forward=True)
+                except Exception:
+                    pass
 
         if _VECTOR_PDF_AUTOSAVE_IN_PROGRESS:
             return result
@@ -199,6 +367,7 @@ def _enable_vector_pdf_sidecar_if_enabled() -> None:
 
         _VECTOR_PDF_AUTOSAVE_IN_PROGRESS = True
         try:
+            normalized_pdf_size = _normalize_wavep_figure_canvas_for_profile(self)
             original_savefig(self, pdf_path, **pdf_kwargs)
         except Exception:
             if debug_enabled:
@@ -206,6 +375,12 @@ def _enable_vector_pdf_sidecar_if_enabled() -> None:
                 print(f"[autosave-pdf] kwargs={pdf_kwargs}", file=sys.stderr)
                 print(f"[autosave-pdf] error={repr(sys.exc_info()[1])}", file=sys.stderr)
         finally:
+            if "normalized_pdf_size" in locals() and normalized_pdf_size is not None:
+                try:
+                    self.set_size_inches(*normalized_pdf_size, forward=True)
+                except Exception:
+                    pass
+
             _VECTOR_PDF_AUTOSAVE_IN_PROGRESS = False
 
         return result
@@ -230,6 +405,7 @@ def _translate_wavep_text_to_japanese(text: str) -> str:
         return text
 
     # 数式だけの文字列は変換しない。
+
     stripped = text.strip()
     if stripped.startswith("$") and stripped.endswith("$"):
         return text
@@ -373,6 +549,7 @@ def _translate_wavep_text_to_japanese(text: str) -> str:
         out = re.sub(re.escape(src), dst, out, flags=re.IGNORECASE)
 
     # 英語語彙を単語単位で置換する。
+
     word_map = {
         "audit": "監査",
         "summary": "要約",
@@ -687,6 +864,7 @@ def _translate_wavep_text_to_japanese(text: str) -> str:
 
 
 # 関数: `_apply_wavep_force_japanese_text_if_enabled` の入出力契約と処理意図を定義する。
+
 def _apply_wavep_force_japanese_text_if_enabled() -> None:
     raw = os.getenv("WAVEP_MPL_FORCE_JA_TEXT", "").strip().lower()
     if raw not in {"1", "true", "yes", "on"}:
@@ -699,6 +877,7 @@ def _apply_wavep_force_japanese_text_if_enabled() -> None:
         return
 
     # 日本語グリフを持つフォントを優先して豆腐化を回避する。
+
     mpl.rcParams["font.family"] = "sans-serif"
     mpl.rcParams["font.sans-serif"] = [
         "Noto Sans CJK JP",
@@ -723,6 +902,7 @@ def _apply_wavep_force_japanese_text_if_enabled() -> None:
     def patched_set_text(self, s):
         if isinstance(s, str):
             s = _translate_wavep_text_to_japanese(s)
+
         return original_set_text(self, s)
 
     Text.set_text = patched_set_text

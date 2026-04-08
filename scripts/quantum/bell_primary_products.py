@@ -1,3 +1,10 @@
+"""
+目的: 量子 topic の bell primary products に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -6,6 +13,7 @@ import hashlib
 import importlib.util
 import json
 import math
+import os
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -19,6 +27,11 @@ from figure_japanese_localizer import enable_japanese_figure_localization
 enable_japanese_figure_localization()
 
 ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
+
 OUT_BASE = ROOT / "output" / "public" / "quantum" / "bell"
 
 
@@ -2352,29 +2365,44 @@ def _write_systematics_decomposition_15items(
     sys_over = [d.get("summary", {}).get("sys_over_stat_l2") for d in per_dataset]
     sys_over_plot = [float(v) if _safe_float(v) is not None else 0.0 for v in sys_over]
 
-    # 論文組版での縮小率を抑えつつ、上段15項目のラベルが重ならない縦配分にする。
-    fig = plt.figure(figsize=(11.2, 14.6), dpi=190)
-    gs = fig.add_gridspec(3, 1, height_ratios=[1.45, 1.10, 1.95], hspace=0.52)
+    # 論文紙面では「上段2枚 + 下段1枚」の構成にして、heatmap 側の縦幅を優先確保する。
+    fig = plt.figure(figsize=(11.2, 17.0), dpi=190)
+    gs = fig.add_gridspec(
+        2,
+        2,
+        height_ratios=[2.45, 2.30],
+        width_ratios=[0.98, 1.16],
+        hspace=0.68,
+        wspace=0.26,
+    )
 
     y = np.arange(len(labels_sorted))
     ax0 = fig.add_subplot(gs[0, 0])
     ax0.barh(y, vals_sorted, color="tab:blue", alpha=0.82)
-    ax0.set_yticks(y, labels_sorted, fontsize=13.2)
+    ax0.set_yticks(y, labels_sorted, fontsize=9.8)
     ax0.invert_yaxis()
-    ax0.set_xlabel("median |Δstat| / σ_stat", fontsize=15.2, labelpad=8)
-    ax0.set_title("15-item systematics budget (median)", fontsize=16.8, pad=8)
+    ax0.set_xlabel("median |Δstat| / σ_stat", fontsize=13.6, labelpad=8)
+    ax0.set_title("15-item systematics budget (median)", fontsize=14.6, pad=8)
     ax0.grid(True, axis="x", alpha=0.3, ls=":")
     ax0.tick_params(axis="x", labelsize=13.6)
 
-    ax1 = fig.add_subplot(gs[1, 0])
+    ax1 = fig.add_subplot(gs[0, 1])
     ax1.bar(np.arange(len(ds_labels)), sys_over_plot, color="tab:orange", alpha=0.85)
-    ax1.set_xticks(np.arange(len(ds_labels)), ds_labels, rotation=20, ha="right", fontsize=13.0)
-    ax1.set_ylabel("sys/stat (L2)", fontsize=15.2)
-    ax1.set_title("Per-dataset total systematics", fontsize=16.8, pad=10)
+    ax1.set_xticks(
+        np.arange(len(ds_labels)),
+        ds_labels,
+        rotation=90,
+        ha="center",
+        va="top",
+        fontsize=13.8,
+    )
+    ax1.set_ylabel("sys/stat (L2)", fontsize=12.4)
+    ax1.set_title("Per-dataset total systematics", fontsize=14.6, pad=10)
     ax1.grid(True, axis="y", alpha=0.3, ls=":")
-    ax1.tick_params(axis="both", labelsize=13.6)
+    ax1.tick_params(axis="x", labelsize=13.6)
+    ax1.tick_params(axis="y", labelsize=10.8)
 
-    ax2 = fig.add_subplot(gs[2, 0])
+    ax2 = fig.add_subplot(gs[1, :])
     # Heatmap は imshow ではなく pcolormesh を使い、PDF出力時のラスタ混在を避ける。
     n_items = len(item_ids)
     x_edges = np.arange(n_items + 1, dtype=float) - 0.5
@@ -2390,9 +2418,16 @@ def _write_systematics_decomposition_15items(
     )
     ax2.set_xlim(-0.5, n_items - 0.5)
     ax2.set_ylim(n_items - 0.5, -0.5)
-    ax2.set_xticks(np.arange(len(item_ids)), [item_ids[i] for i in range(len(item_ids))], rotation=90, fontsize=12.6)
-    ax2.set_yticks(np.arange(len(item_ids)), [item_ids[i] for i in range(len(item_ids))], fontsize=12.6)
-    ax2.set_title("Item correlation (across datasets)", fontsize=16.8, pad=10)
+    ax2.set_xticks(
+        np.arange(len(item_ids)),
+        [item_ids[i] for i in range(len(item_ids))],
+        rotation=62,
+        fontsize=10.8,
+        ha="right",
+        rotation_mode="anchor",
+    )
+    ax2.set_yticks(np.arange(len(item_ids)), [item_ids[i] for i in range(len(item_ids))], fontsize=10.6)
+    ax2.set_title("Item correlation (across datasets)", fontsize=15.4, pad=10)
     # colorbar を画像化せず、矩形パッチでベクター描画する。
     cax = ax2.inset_axes([1.01, 0.0, 0.028, 1.0])
     c_norm = mcolors.Normalize(vmin=-1.0, vmax=1.0)
@@ -2411,6 +2446,7 @@ def _write_systematics_decomposition_15items(
                 edgecolor="none",
             )
         )
+
     cax.set_xlim(0.0, 1.0)
     cax.set_ylim(-1.0, 1.0)
     cax.set_xticks([])
@@ -2418,9 +2454,9 @@ def _write_systematics_decomposition_15items(
     cax.tick_params(labelsize=12.8)
     cax.yaxis.tick_right()
 
-    fig.suptitle("Bell systematics decomposition (15 items; operational)", y=0.988, fontsize=18.8)
-    fig.subplots_adjust(left=0.18, right=0.992, top=0.94, bottom=0.055, hspace=0.52)
-    fig.savefig(out_png, bbox_inches="tight")
+    fig.suptitle("Bell systematics decomposition (15 items; operational)", y=0.974, fontsize=18.8)
+    fig.subplots_adjust(left=0.205, right=0.965, top=0.93, bottom=0.108, hspace=0.68, wspace=0.26)
+    fig.savefig(out_png)
     plt.close(fig)
 
     payload["plot_written"] = True
@@ -6067,6 +6103,7 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
     # --- cross-dataset covariance from sweep profiles (normalized knob u in [0,1])
     cross_cov_path = OUT_BASE / "cross_dataset_covariance.json"
     cross_cov_png = OUT_BASE / "cross_dataset_covariance.png"
+    cross_cov_pdf = OUT_BASE / "cross_dataset_covariance.pdf"
     cross_cov_obj: dict[str, Any] = {
         "generated_utc": _utc_now(),
         "phase": {"phase": 7, "step": "7.16.7", "name": "Bell: cross-dataset covariance (sweep profiles)"},
@@ -6197,9 +6234,14 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
         except Exception:
             cross_png_written = False
         else:
-            # 1列に再配置して上段ヒートマップを拡大する。
-            fig = plt.figure(figsize=(13.2, 15.2), dpi=185)
-            gs = fig.add_gridspec(3, 1, height_ratios=[1.05, 1.05, 0.85], hspace=0.36)
+            fig = plt.figure(figsize=(12.4, 10.4), dpi=185)
+            apply_wavep_figure_layout(fig, template="part2_three_panel_tall")
+            fig.set_size_inches(fig.get_figwidth(), 8.95, forward=True)
+            gs = fig.add_gridspec(2, 2, height_ratios=[1.30, 0.92], width_ratios=[1.0, 1.0], hspace=0.38, wspace=0.48)
+            title_font = get_wavep_font_size("title") * 0.92
+            axis_font = get_wavep_font_size("axis") * 1.02
+            tick_font = get_wavep_font_size("tick") * 0.92
+            suptitle_font = get_wavep_font_size("suptitle") + 2.4
 
             ax0 = fig.add_subplot(gs[0, 0])
             n_ds = len(ds_labels)
@@ -6214,11 +6256,11 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
             )
             ax0.set_xlim(-0.5, n_ds - 0.5)
             ax0.set_ylim(n_ds - 0.5, -0.5)
-            ax0.set_title("Sweep-profile covariance", fontsize=13.5)
-            ax0.set_xticks(np.arange(len(ds_labels)), ds_labels, rotation=25, ha="right")
+            ax0.set_title("Sweep-profile covariance", fontsize=title_font, pad=10.0)
+            ax0.set_xticks(np.arange(len(ds_labels)), ds_labels, rotation=24, ha="right")
             ax0.set_yticks(np.arange(len(ds_labels)), ds_labels)
-            ax0.tick_params(axis="both", labelsize=11)
-            cax0 = ax0.inset_axes([1.02, 0.0, 0.03, 1.0])
+            ax0.tick_params(axis="both", labelsize=tick_font)
+            cax0 = ax0.inset_axes([1.03, 0.02, 0.035, 0.96])
             c_norm0 = mcolors.Normalize(vmin=float(np.nanmin(cov_profile)), vmax=float(np.nanmax(cov_profile)))
             c_vals0 = np.linspace(float(np.nanmin(cov_profile)), float(np.nanmax(cov_profile)), 129)
             c_map0 = plt.get_cmap("viridis")
@@ -6235,13 +6277,14 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
                         edgecolor="none",
                     )
                 )
+
             cax0.set_xlim(0.0, 1.0)
             cax0.set_ylim(float(c_vals0[0]), float(c_vals0[-1]))
             cax0.set_xticks([])
             cax0.yaxis.tick_right()
-            cax0.tick_params(labelsize=10.5)
+            cax0.tick_params(labelsize=tick_font)
 
-            ax1 = fig.add_subplot(gs[1, 0])
+            ax1 = fig.add_subplot(gs[0, 1])
             im1 = ax1.pcolormesh(
                 x_edges,
                 y_edges,
@@ -6253,11 +6296,12 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
             )
             ax1.set_xlim(-0.5, n_ds - 0.5)
             ax1.set_ylim(n_ds - 0.5, -0.5)
-            ax1.set_title("Sweep-profile correlation", fontsize=13.5)
-            ax1.set_xticks(np.arange(len(ds_labels)), ds_labels, rotation=25, ha="right")
-            ax1.set_yticks(np.arange(len(ds_labels)), ds_labels)
-            ax1.tick_params(axis="both", labelsize=11)
-            cax1 = ax1.inset_axes([1.02, 0.0, 0.03, 1.0])
+            ax1.set_title("Sweep-profile correlation", fontsize=title_font, pad=10.0)
+            ax1.set_xticks(np.arange(len(ds_labels)), ds_labels, rotation=24, ha="right")
+            ax1.set_yticks(np.arange(len(ds_labels)))
+            ax1.set_yticklabels([])
+            ax1.tick_params(axis="both", labelsize=tick_font)
+            cax1 = ax1.inset_axes([1.03, 0.02, 0.035, 0.96])
             c_norm1 = mcolors.Normalize(vmin=-1.0, vmax=1.0)
             c_vals1 = np.linspace(-1.0, 1.0, 129)
             c_map1 = plt.get_cmap("coolwarm")
@@ -6274,12 +6318,13 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
                         edgecolor="none",
                     )
                 )
+
             cax1.set_xlim(0.0, 1.0)
             cax1.set_ylim(-1.0, 1.0)
             cax1.set_xticks([])
             cax1.set_yticks(np.linspace(-1.0, 1.0, 5))
             cax1.yaxis.tick_right()
-            cax1.tick_params(labelsize=10.5)
+            cax1.tick_params(labelsize=tick_font)
 
             eig_vals = []
             eig_obj = cross_cov_obj["matrices"].get("profile_cov_eigen")
@@ -6287,17 +6332,28 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
             if isinstance(eig_obj, dict):
                 eig_vals = [float(v) for v in eig_obj.get("eigenvalues_desc") or [] if v is not None]
 
-            ax2 = fig.add_subplot(gs[2, 0])
+            ax2 = fig.add_subplot(gs[1, :])
             ax2.bar(np.arange(len(eig_vals)), eig_vals, color="tab:blue", alpha=0.85)
-            ax2.set_title("Covariance eigenvalues", fontsize=13.5)
-            ax2.set_xlabel("mode index", fontsize=12.5)
-            ax2.set_ylabel("eigenvalue", fontsize=12.5)
+            ax2.set_title("Covariance eigenvalues", fontsize=title_font, pad=10.0)
+            ax2.set_xlabel("mode index", fontsize=axis_font)
+            ax2.set_ylabel("eigenvalue", fontsize=axis_font)
             ax2.grid(True, axis="y", alpha=0.3, ls=":")
-            ax2.tick_params(axis="both", labelsize=11)
+            ax2.tick_params(axis="both", labelsize=tick_font)
 
-            fig.suptitle("Bell cross-dataset covariance (sweep-profile, u-grid)", y=0.995, fontsize=16)
-            fig.subplots_adjust(left=0.10, right=0.98, top=0.95, bottom=0.07, hspace=0.36)
-            fig.savefig(cross_cov_png, bbox_inches="tight")
+            fig.suptitle("Bell cross-dataset covariance (sweep-profile, u-grid)", y=0.986, fontsize=suptitle_font)
+            fig.subplots_adjust(left=0.11, right=0.955, top=0.91, bottom=0.060, hspace=0.38, wspace=0.48)
+            normalize_backup = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+            try:
+                with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+                    fig.savefig(cross_cov_png)
+                    fig.savefig(cross_cov_pdf)
+            finally:
+                if normalize_backup is None:
+                    os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
+                else:
+                    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = normalize_backup
+
             plt.close(fig)
             cross_png_written = True
     else:
@@ -6449,7 +6505,7 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
             zvals.append(float(z))
             zcolors.append("tab:orange")
 
-    fig, ax = plt.subplots(2, 1, figsize=(11.8, 9.4), dpi=170)
+    fig, ax = plt.subplots(2, 1, figsize=(11.8, 8.7), dpi=170)
     x = np.arange(len(labels))
     ax[0].bar(x, ratios, color="tab:blue", alpha=0.85)
     ax[0].axhline(ratio_th, color="0.2", ls="--", lw=1.0)
@@ -6458,6 +6514,8 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
     ax[0].set_title("Selection sensitivity (ratio)")
     ax[0].grid(True, axis="y", alpha=0.3, ls=":")
     ax[0].tick_params(axis="both", labelsize=11.5)
+    ax[0].tick_params(axis="x", labelbottom=False)
+    ax[0].set_xticklabels([])
 
     ax[1].bar(x, zvals, color=zcolors, alpha=0.9)
     ax[1].axhline(delay_z_th, color="0.2", ls="--", lw=1.0)
@@ -6472,9 +6530,9 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
         if d.get("delay_z_max") is None:
             ax[1].text(float(i), 0.15, "n/a", ha="center", va="bottom", fontsize=11, color="0.35")
 
-    fig.suptitle("Bell longterm consistency (cross-dataset)", y=0.995, fontsize=15)
-    fig.tight_layout(rect=(0, 0, 1, 0.985))
-    fig.savefig(OUT_BASE / "longterm_consistency.png", bbox_inches="tight")
+    fig.suptitle("Bell longterm consistency (cross-dataset)", y=0.968, fontsize=15)
+    fig.subplots_adjust(left=0.115, right=0.985, top=0.90, bottom=0.09, hspace=0.26)
+    fig.savefig(OUT_BASE / "longterm_consistency.png")
     plt.close(fig)
 
 
@@ -7898,31 +7956,51 @@ def main() -> None:
                 zcolors.append("tab:orange")
                 z_is_na.append(False)
 
-        fig, ax = plt.subplots(2, 1, figsize=(11.8, 9.4), dpi=170)
+        fig, ax = plt.subplots(2, 1, dpi=170)
+        apply_wavep_figure_layout(fig, template="part2_two_panel_quantum_spacious")
+        fig.set_size_inches(fig.get_figwidth(), 5.85, forward=True)
+        fig.subplots_adjust(left=0.155, right=0.985, top=0.905, bottom=0.115, hspace=0.38)
+        title_font = get_wavep_font_size("title") * 0.90
+        axis_font = get_wavep_font_size("axis")
+        tick_font = get_wavep_font_size("tick")
+        suptitle_font = get_wavep_font_size("suptitle") + 1.6
         x = np.arange(len(labels))
         ax[0].bar(x, ratios, color="tab:blue", alpha=0.85)
         ax[0].axhline(ratio_th, color="0.2", ls="--", lw=1.0)
         ax[0].set_xticks(x, labels, rotation=0, ha="center")
-        ax[0].set_ylabel("Δ(stat) / σ_stat (median)")
-        ax[0].set_title("Selection sensitivity (ratio)")
+        ax[0].set_ylabel("Δ(stat) / σ_stat (median)", fontsize=axis_font)
+        ax[0].set_title("選別感度（ratio）", fontsize=title_font, pad=5.0)
         ax[0].grid(True, axis="y", alpha=0.3, ls=":")
-        ax[0].tick_params(axis="both", labelsize=11.5)
+        ax[0].tick_params(axis="both", labelsize=tick_font)
+        ax[0].tick_params(axis="x", labelbottom=False)
 
         ax[1].bar(x, zvals, color=zcolors, alpha=0.9)
         ax[1].axhline(delay_z_th, color="0.2", ls="--", lw=1.0)
         ax[1].set_xticks(x, labels, rotation=0, ha="center")
-        ax[1].set_ylabel("z = ∣Δmedian∣ / σ(Δmedian)")
-        ax[1].set_title("Delay setting-dependence (Δmedian; z)")
+        ax[1].set_ylabel("z = ∣Δmedian∣ / σ(Δmedian)", fontsize=axis_font)
+        ax[1].set_title("遅延の setting 依存（Δmedian; z）", fontsize=title_font, pad=5.0)
         ax[1].grid(True, axis="y", alpha=0.3, ls=":")
-        ax[1].tick_params(axis="both", labelsize=11.5)
+        ax[1].tick_params(axis="both", labelsize=tick_font)
         for i, is_na in enumerate(z_is_na):
             # 条件分岐: `is_na` を満たす経路を評価する。
             if is_na:
-                ax[1].text(float(i), 0.15, "n/a", ha="center", va="bottom", fontsize=11, color="0.35")
+                ax[1].text(float(i), 0.15, "n/a", ha="center", va="bottom", fontsize=tick_font, color="0.35")
 
-        fig.suptitle("Bell falsification pack (operational thresholds)", y=0.995, fontsize=15)
-        fig.tight_layout(rect=(0, 0, 1, 0.985))
-        fig.savefig(OUT_BASE / "falsification_pack.png", bbox_inches="tight")
+        out_png = OUT_BASE / "falsification_pack.png"
+        out_pdf = OUT_BASE / "falsification_pack.pdf"
+        normalize_backup = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+        os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+        try:
+            with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+                fig.suptitle("Bell 反証パック（運用 threshold）", y=0.992, fontsize=suptitle_font)
+                fig.savefig(out_png)
+                fig.savefig(out_pdf)
+        finally:
+            if normalize_backup is None:
+                os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
+            else:
+                os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = normalize_backup
+
         plt.close(fig)
 
     print(f"[ok] wrote: {OUT_BASE / 'table1_row.json'}")

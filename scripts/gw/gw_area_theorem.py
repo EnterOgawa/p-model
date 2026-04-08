@@ -1,3 +1,10 @@
+"""
+目的: 重力波 topic の gw area theorem に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -31,6 +38,12 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.utils.plot_style import (  # noqa: E402
+    apply_paper_style,
+    apply_wavep_figure_layout,
+    get_wavep_font_size,
+    resolve_wavep_cjk_font_family,
+)
 
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
@@ -49,23 +62,13 @@ def _iso_utc_now() -> str:
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
-        import matplotlib.font_manager as fm
-
-        preferred = [
-            "Yu Gothic",
-            "Meiryo",
-            "BIZ UDGothic",
-            "MS Gothic",
-            "Yu Mincho",
-            "MS Mincho",
-        ]
-        available = {f.name for f in fm.fontManager.ttflist}
-        chosen = [name for name in preferred if name in available]
+        chosen = resolve_wavep_cjk_font_family()
         # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
-        mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+        mpl.rcParams["font.family"] = [chosen, "DejaVu Sans"]
+        mpl.rcParams["font.sans-serif"] = [chosen, "DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         pass
@@ -93,6 +96,22 @@ def _read_json(path: Path) -> Dict[str, Any]:
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+# 関数: `_save_synced_figure` の入出力契約と処理意図を定義する。
+
+def _save_synced_figure(fig: plt.Figure, *, out_png: Path) -> None:
+    out_png.parent.mkdir(parents=True, exist_ok=True)
+    out_pdf = out_png.with_suffix(".pdf")
+    public_dir = _repo_root() / "output" / "public" / "gw"
+    public_dir.mkdir(parents=True, exist_ok=True)
+
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        fig.savefig(out_png, dpi=220)
+        fig.savefig(out_pdf)
+
+    shutil.copy2(out_png, public_dir / out_png.name)
+    shutil.copy2(out_pdf, public_dir / out_pdf.name)
 
 
 # 関数: `_download` の入出力契約と処理意図を定義する。
@@ -624,21 +643,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     }
     _write_json(out_json, out)
 
-    fig, ax = plt.subplots(1, 1, figsize=(11.2, 6.4))
+    apply_paper_style()
+    _set_japanese_font()
+    fig, ax = plt.subplots(1, 1)
+    apply_wavep_figure_layout(fig, template="part2_single_panel")
     t = np.array([r["time"] for r in sigma_by_time], dtype=np.float64)
     s = np.array([r["sigma"] for r in sigma_by_time], dtype=np.float64)
-    ax.plot(t, s, marker="o", ms=5.5, lw=2.2, label="combined (ringdown+pyRing)")
-    ax.axvline(ref_time, color="black", lw=1.2, ls="--", alpha=0.8, label="reference time")
+    ax.plot(t, s, marker="o", ms=4.8, lw=1.4, label="combined")
+    ax.axvline(ref_time, color="black", lw=1.0, ls="--", alpha=0.8, label="reference")
     ax.axhline(5.0, color="grey", lw=1.0, ls=":", alpha=0.8)
-    ax.set_xlabel("inspiral truncation time (M)", fontsize=15.2)
-    ax.set_ylabel("Gaussian significance (σ)", fontsize=15.2)
-    ax.set_title(f"GW250114 area theorem (data release): σ_ref={sigma_ref['sigma_gaussian_combined']:.2f}", fontsize=17.0)
-    ax.tick_params(labelsize=14.0)
+    ax.set_xlabel("inspiral truncation time (M)")
+    ax.set_ylabel("Gaussian significance (σ)")
+    ax.set_title(f"GW250114 area theorem: σ_ref={sigma_ref['sigma_gaussian_combined']:.2f}", pad=6.0)
     ax.grid(True, alpha=0.3)
-    ax.legend(fontsize=13.4)
-    fig.tight_layout()
-    fig.savefig(out_png, dpi=160)
-    fig.savefig(out_png.with_suffix(".pdf"))
+    ax.legend(fontsize=get_wavep_font_size("legend"))
+    _save_synced_figure(fig, out_png=out_png)
     plt.close(fig)
 
     try:

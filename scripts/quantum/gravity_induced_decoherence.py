@@ -1,7 +1,16 @@
+"""
+目的: 量子 topic の gravity induced decoherence に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import json
 import math
+import os
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -9,6 +18,11 @@ import numpy as np
 
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
 
 enable_japanese_figure_localization()
 
@@ -69,7 +83,7 @@ def required_sigma_y_for_visibility(*, vis: float, omega0_rad_s: float, t_s: np.
 # 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
-    root = Path(__file__).resolve().parents[2]
+    root = ROOT
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -119,7 +133,15 @@ def main() -> None:
 
     import matplotlib.pyplot as plt
 
-    fig, axes = plt.subplots(2, 1, figsize=(12.8, 10.4), dpi=165)
+    fig, axes = plt.subplots(2, 1, dpi=165)
+    apply_wavep_figure_layout(fig, template="part2_two_panel_spacious")
+    fig.set_size_inches(fig.get_figwidth(), 5.95, forward=True)
+    fig.subplots_adjust(left=0.145, right=0.985, top=0.915, bottom=0.105, hspace=0.44)
+    panel_title_font = get_wavep_font_size("title") * 0.88
+    axis_label_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    legend_font = get_wavep_font_size("legend")
+    suptitle_font = get_wavep_font_size("suptitle") + 2.0
 
     ax = axes[0]
     for c in curves:
@@ -135,12 +157,16 @@ def main() -> None:
 
     ax.set_xscale("log")
     ax.set_ylim(-0.02, 1.02)
-    ax.set_xlabel("interrogation time T (s)", fontsize=14.0)
-    ax.set_ylabel("visibility V (Ramsey contrast; model)", fontsize=14.0)
-    ax.set_title("Gravity-induced dephasing (optical clock ensemble; Gaussian height spread)", fontsize=15.2)
+    ax.set_xlabel("観測時間 T (s)", fontsize=axis_label_font)
+    ax.set_ylabel("可視度 V（Ramsey コントラスト；モデル）", fontsize=axis_label_font)
+    ax.set_title(
+        "重力誘起位相緩和（光格子時計 ensemble；Gaussian 高さ分布）",
+        fontsize=panel_title_font,
+        pad=5.0,
+    )
     ax.grid(True, which="both", ls=":", lw=0.6, alpha=0.7)
-    ax.legend(fontsize=12.0, frameon=True, loc="lower left")
-    ax.tick_params(axis="both", labelsize=12.4)
+    ax.legend(fontsize=legend_font, frameon=True, loc="lower left")
+    ax.tick_params(axis="both", labelsize=tick_font)
 
     ax = axes[1]
     colors = {0.9: "#1f77b4", 0.5: "#d62728"}
@@ -152,20 +178,33 @@ def main() -> None:
 
     ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.set_xlabel("interrogation time T (s)", fontsize=14.0)
-    ax.set_ylabel("required σ_y (RMS fractional rate noise)", fontsize=14.0)
-    ax.set_title("P-model time-structure: σ_y needed to mimic decoherence (run-to-run)", fontsize=15.2)
+    ax.set_xlabel("観測時間 T (s)", fontsize=axis_label_font)
+    ax.set_ylabel("必要な σ_y（RMS相対周波数雑音）", fontsize=axis_label_font)
+    ax.set_title(
+        "P-model 時間構造：decoherence を模擬する σ_y",
+        fontsize=panel_title_font,
+        pad=5.0,
+    )
     ax.grid(True, which="both", ls=":", lw=0.6, alpha=0.7)
-    ax.legend(fontsize=12.0, frameon=True, loc="upper right")
-    ax.tick_params(axis="both", labelsize=12.4)
+    ax.legend(fontsize=legend_font, frameon=True, loc="upper right")
+    ax.tick_params(axis="both", labelsize=tick_font)
 
-    fig.suptitle("Gravity-induced decoherence: observables and noise budget", y=0.99, fontsize=16.6)
-    fig.tight_layout(rect=(0, 0, 1, 0.97))
+    fig.suptitle("重力誘起デコヒーレンス：観測量とノイズ予算", y=0.992, fontsize=suptitle_font)
 
     out_png = out_dir / "gravity_induced_decoherence.png"
     out_pdf = out_dir / "gravity_induced_decoherence.pdf"
-    fig.savefig(out_png, bbox_inches="tight")
-    fig.savefig(out_pdf, bbox_inches="tight")
+    prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
+    os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
+    try:
+        with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
+            fig.savefig(out_png)
+            fig.savefig(out_pdf)
+    finally:
+        if prev_disable_normalize is None:
+            os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
+        else:
+            os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = prev_disable_normalize
+
     plt.close(fig)
 
     metrics = {

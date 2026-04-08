@@ -1,8 +1,16 @@
+"""
+目的: 連星パルサー topic の binary pulsar orbital decay に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import argparse
 import json
 import math
+import shutil
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -19,6 +27,12 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.utils.plot_style import (  # noqa: E402
+    apply_paper_style,
+    apply_wavep_figure_layout,
+    get_wavep_font_size,
+    resolve_wavep_cjk_font_family,
+)
 
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
@@ -37,23 +51,13 @@ def _iso_utc_now() -> str:
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
-        import matplotlib.font_manager as fm
-
-        preferred = [
-            "Yu Gothic",
-            "Meiryo",
-            "BIZ UDGothic",
-            "MS Gothic",
-            "Yu Mincho",
-            "MS Mincho",
-        ]
-        available = {f.name for f in fm.fontManager.ttflist}
-        chosen = [name for name in preferred if name in available]
+        chosen = resolve_wavep_cjk_font_family()
         # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
-        mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+        mpl.rcParams["font.family"] = [chosen, "DejaVu Sans"]
+        mpl.rcParams["font.sans-serif"] = [chosen, "DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         pass
@@ -70,6 +74,39 @@ def _read_json(path: Path) -> Dict[str, Any]:
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+# 関数: `_compact_system_label` の入出力契約と処理意図を定義する。
+
+def _compact_system_label(metric: Dict[str, Any]) -> str:
+    label_map = {
+        "psr_b1913p16": "B1913+16",
+        "psr_j0737m3039ab": "J0737-3039A/B",
+        "psr_j1738p0333": "J1738+0333",
+        "psr_j0348p0432": "J0348+0432",
+    }
+    key = str(metric.get("id") or "").strip()
+    if key in label_map:
+        return label_map[key]
+
+    raw = str(metric.get("name") or key).strip()
+    return raw or key
+
+
+# 関数: `_save_synced_figure` の入出力契約と処理意図を定義する。
+
+def _save_synced_figure(fig: plt.Figure, *, out_png: Path) -> None:
+    out_png.parent.mkdir(parents=True, exist_ok=True)
+    out_pdf = out_png.with_suffix(".pdf")
+    public_dir = _repo_root() / "output" / "public" / "pulsar"
+    public_dir.mkdir(parents=True, exist_ok=True)
+
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        fig.savefig(out_png, dpi=220)
+        fig.savefig(out_pdf)
+
+    shutil.copy2(out_png, public_dir / out_png.name)
+    shutil.copy2(out_pdf, public_dir / out_pdf.name)
 
 
 _DAY_S = 86_400.0
@@ -264,27 +301,28 @@ def _compute_metrics(systems: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 # 関数: `_render_plot` の入出力契約と処理意図を定義する。
 
 def _render_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
+    apply_paper_style()
     _set_japanese_font()
 
-    labels = [str(m.get("name") or "") for m in metrics]
+    labels = [_compact_system_label(m) for m in metrics]
     x = list(range(len(labels)))
     y = [float(m.get("R", float("nan"))) for m in metrics]
     yerr = [float(m.get("sigma_1", float("nan"))) for m in metrics]
 
-    # 図23: 論文面での可読性確保のためキャンバスと文字サイズを拡大。
-    fig, ax = plt.subplots(figsize=(14.8, 8.2), dpi=180)
-    ax.axhline(1.0, color="#666", lw=1.2, ls="--", zorder=0)
+    fig, ax = plt.subplots()
+    apply_wavep_figure_layout(fig, template="part2_single_panel_sparse")
+    ax.axhline(1.0, color="#666", lw=1.0, ls="--", zorder=0)
 
     ax.errorbar(
         x,
         y,
         yerr=yerr,
         fmt="o",
-        ms=6,
-        capsize=5,
-        elinewidth=1.4,
+        ms=5,
+        capsize=4,
+        elinewidth=1.2,
         color="#1f77b4",
-        label="観測/P-model（四重極, R=1が一致）",
+        label="観測/P-model",
     )
 
     for xi, m in zip(x, metrics):
@@ -301,19 +339,18 @@ def _render_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
 
         ax.text(
             xi,
-            r + 0.0025,
+            r + 0.002,
             f"{r:.6f}{sig_txt}",
             ha="center",
             va="bottom",
-            fontsize=14.4,
+            fontsize=get_wavep_font_size("note"),
             color="#222",
         )
 
     ax.set_xticks(x, labels, rotation=0, ha="center")
-    ax.tick_params(axis="x", labelsize=14.6)
-    ax.tick_params(axis="y", labelsize=14.6)
-    ax.set_ylabel("一致度 R = Pdot_b(obs) / Pdot_b(P-model quad)", fontsize=17.2)
-    ax.set_title("二重パルサー：軌道減衰（放射）とP-model（弱場四重極）予測の一致度", fontsize=19.0, pad=12.0)
+    ax.tick_params(axis="x", pad=4)
+    ax.set_ylabel("一致度 R")
+    ax.set_title("二重パルサー：軌道減衰の一致度 R", pad=6.0)
     ax.grid(True, alpha=0.25)
 
     # Tight y-range for readability (auto but keep around 1)
@@ -325,23 +362,18 @@ def _render_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
         pad = max(0.002, 0.25 * (hi - lo))
         ax.set_ylim(lo - pad, hi + pad)
 
-    # 図23: 凡例はグラフ左上に重ねて固定する。
-    ax.legend(loc="upper left", bbox_to_anchor=(0.02, 0.98), borderaxespad=0.2, frameon=True, fontsize=14.8)
-
-    fig.tight_layout()
-    out_png.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_png, dpi=220, bbox_inches="tight")
-    # Keep PDF in sync so LaTeX (extension-less includegraphics) does not pick stale assets.
-    fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight")
+    ax.legend(loc="upper left", frameon=True, fontsize=get_wavep_font_size("legend"))
+    _save_synced_figure(fig, out_png=out_png)
     plt.close(fig)
 
 
 # 関数: `_render_public_plot` の入出力契約と処理意図を定義する。
 
 def _render_public_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
+    apply_paper_style()
     _set_japanese_font()
 
-    labels = [str(m.get("name") or "") for m in metrics]
+    labels = [_compact_system_label(m) for m in metrics]
     x = list(range(len(labels)))
 
     delta_pct = []
@@ -357,8 +389,9 @@ def _render_public_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
 
         sigma_pct.append(sig * 100.0 if math.isfinite(sig) and sig > 0 else float("nan"))
 
-    fig, ax = plt.subplots(figsize=(12.8, 6.0), dpi=180)
-    ax.axhline(0.0, color="#666", lw=1.2, ls="--", zorder=0)
+    fig, ax = plt.subplots()
+    apply_wavep_figure_layout(fig, template="part2_single_panel_sparse")
+    ax.axhline(0.0, color="#666", lw=1.0, ls="--", zorder=0)
 
     # Bar with 1σ error (when available)
     yerr = [s if math.isfinite(s) else 0.0 for s in sigma_pct]
@@ -366,10 +399,10 @@ def _render_public_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
         x,
         [d if math.isfinite(d) else 0.0 for d in delta_pct],
         yerr=yerr,
-        capsize=6,
+        capsize=4,
         color="#1f77b4",
         alpha=0.9,
-        label="0%が完全一致（エラーバーは1σ相当）",
+        label="0% が完全一致",
     )
 
     for xi, d, s in zip(x, delta_pct, sigma_pct):
@@ -384,13 +417,20 @@ def _render_public_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
         else:
             txt = f"{d:+.3f}%"
 
-        ax.text(xi, d + (0.02 if d >= 0 else -0.02), txt, ha="center", va="bottom" if d >= 0 else "top", fontsize=10)
+        ax.text(
+            xi,
+            d + (0.02 if d >= 0 else -0.02),
+            txt,
+            ha="center",
+            va="bottom" if d >= 0 else "top",
+            fontsize=get_wavep_font_size("note"),
+        )
 
     ax.set_xticks(x, labels, rotation=0, ha="center")
     ax.set_ylabel("ずれ（観測/予測 - 1）[%]")
-    ax.set_title("二重パルサー：軌道減衰の観測はP-model（弱場四重極）とどれくらい一致？")
+    ax.set_title("二重パルサー：軌道減衰の観測はどれくらい一致するか", pad=6.0)
     ax.grid(True, alpha=0.25, axis="y")
-    ax.legend(loc="upper left", bbox_to_anchor=(0.02, 0.98), borderaxespad=0.2, frameon=True)
+    ax.legend(loc="upper left", frameon=True, fontsize=get_wavep_font_size("legend"))
 
     finite = [v for v in delta_pct if math.isfinite(v)]
     # 条件分岐: `finite` を満たす経路を評価する。
@@ -400,11 +440,7 @@ def _render_public_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
         pad = max(0.02, 0.35 * (hi - lo))
         ax.set_ylim(lo - pad, hi + pad)
 
-    fig.tight_layout()
-    out_png.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_png, dpi=220, bbox_inches="tight")
-    # Keep PDF in sync so LaTeX (extension-less includegraphics) does not pick stale assets.
-    fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight")
+    _save_synced_figure(fig, out_png=out_png)
     plt.close(fig)
 
 

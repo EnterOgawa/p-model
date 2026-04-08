@@ -1,3 +1,10 @@
+"""
+目的: 量子 topic の quantum measurement dynamic collapse simulation に対応する公開図・表・監査指標を再生成する。
+入力: script 内の既定パラメータと必要な公開データまたは基準値を用いる。
+出力: output/public と output/private の canonical artifact を更新する。
+前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
+"""
+
 from __future__ import annotations
 
 import csv
@@ -9,11 +16,47 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.font_manager import FontProperties
+
+try:
+    import matplotlib as mpl
+    from scripts.utils.plot_style import install_wavep_cjk_font_override, install_wavep_font_profile, resolve_wavep_cjk_font_family
+
+    install_wavep_cjk_font_override(preferred_name="Noto Sans CJK JP")
+    preferred_cjk = resolve_wavep_cjk_font_family(preferred_name="Noto Sans CJK JP")
+    if preferred_cjk:
+        mpl.rcParams["font.family"] = [preferred_cjk, "DejaVu Sans"]
+        mpl.rcParams["font.sans-serif"] = [preferred_cjk, "DejaVu Sans"]
+
+    mpl.rcParams["axes.unicode_minus"] = False
+except Exception:
+    pass
+
+_INSTALL_WAVEP_FONT_PROFILE = None
+try:
+    from scripts.utils.plot_style import install_wavep_font_profile as _install_wavep_font_profile
+
+    _INSTALL_WAVEP_FONT_PROFILE = _install_wavep_font_profile
+except Exception:
+    _INSTALL_WAVEP_FONT_PROFILE = None
 
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
+
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
+
+
+# 関数: `_jp_prop` の入出力契約と処理意図を定義する。
+
+def _jp_prop(size: float) -> FontProperties | None:
+    font_path = _repo_root() / "output" / "private" / "summary" / "fonts" / "NotoSansJP-Regular-static.ttf"
+    if not font_path.exists():
+        return None
+
+    prop = FontProperties(fname=str(font_path))
+    prop.set_size(float(size))
+    return prop
 
 
 # 関数: `_expect_sigma_z` の入出力契約と処理意図を定義する。
@@ -176,6 +219,9 @@ def _simulate_trajectory(
 # 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
+    if _INSTALL_WAVEP_FONT_PROFILE is not None:
+        _INSTALL_WAVEP_FONT_PROFILE(profile_name="part4_verification")
+
     root = _repo_root()
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -329,9 +375,9 @@ def main() -> None:
 
     axes[0, 0].axhline(collapse_threshold_abs_z, color="black", ls="--", lw=1.0, alpha=0.7)
     axes[0, 0].axhline(-collapse_threshold_abs_z, color="black", ls="--", lw=1.0, alpha=0.7)
-    axes[0, 0].set_title("State collapse trajectory: expectation z(t)", fontsize=16.4)
-    axes[0, 0].set_xlabel("time [s]", fontsize=14.6)
-    axes[0, 0].set_ylabel("expectation z", fontsize=14.6)
+    axes[0, 0].set_title("期待値の収束", fontsize=16.8, fontproperties=_jp_prop(16.8))
+    axes[0, 0].set_xlabel("時間 [s]", fontsize=14.6, fontproperties=_jp_prop(14.6))
+    axes[0, 0].set_ylabel("期待値 z", fontsize=14.6, fontproperties=_jp_prop(14.6))
     axes[0, 0].set_ylim(-1.05, 1.05)
     axes[0, 0].grid(ls=":", alpha=0.35)
 
@@ -343,7 +389,7 @@ def main() -> None:
             sample_pointer_hist[:, channel_index],
             lw=1.2,
             alpha=0.9,
-            label=f"channel {channel_index}",
+            label=f"第{channel_index + 1}",
         )
 
     axes[0, 1].plot(
@@ -352,12 +398,12 @@ def main() -> None:
         color="black",
         lw=1.4,
         ls="--",
-        label="channel mean",
+        label="平均",
     )
-    axes[0, 1].set_title("Detector pointer channels x_k(t) (single trajectory)", fontsize=16.4)
-    axes[0, 1].set_xlabel("time [s]", fontsize=14.6)
-    axes[0, 1].set_ylabel("pointer x_k", fontsize=14.6)
-    axes[0, 1].legend(loc="best", fontsize=13.8)
+    axes[0, 1].set_title("ポインタ軌跡", fontsize=16.8, fontproperties=_jp_prop(16.8))
+    axes[0, 1].set_xlabel("時間 [s]", fontsize=14.6, fontproperties=_jp_prop(14.6))
+    axes[0, 1].set_ylabel("ポインタ値", fontsize=14.6, fontproperties=_jp_prop(14.6))
+    axes[0, 1].legend(loc="best", prop=_jp_prop(13.0))
     axes[0, 1].grid(ls=":", alpha=0.35)
 
     # 条件分岐: `collapsed_n > 0` を満たす経路を評価する。
@@ -365,32 +411,42 @@ def main() -> None:
         axes[1, 0].hist(collapse_times[collapsed_mask], bins=24, color="#4c78a8", alpha=0.85)
         # 条件分岐: `np.isfinite(collapse_time_median_s)` を満たす経路を評価する。
         if np.isfinite(collapse_time_median_s):
-            axes[1, 0].axvline(collapse_time_median_s, color="black", ls="--", lw=1.0, label="median")
-            axes[1, 0].legend(loc="upper right", fontsize=13.6)
+            axes[1, 0].axvline(collapse_time_median_s, color="black", ls="--", lw=1.0, label="中央値")
+            axes[1, 0].legend(loc="upper right", prop=_jp_prop(13.0))
     else:
-        axes[1, 0].text(0.5, 0.5, "no collapse event in this run", ha="center", va="center", transform=axes[1, 0].transAxes, fontsize=13.0)
+        axes[1, 0].text(
+            0.5,
+            0.5,
+            "この実行では収束事象なし",
+            ha="center",
+            va="center",
+            transform=axes[1, 0].transAxes,
+            fontsize=13.8,
+            fontproperties=_jp_prop(13.8),
+        )
 
-    axes[1, 0].set_title("Collapse-time distribution", fontsize=16.4)
-    axes[1, 0].set_xlabel("collapse time [s]", fontsize=14.6)
-    axes[1, 0].set_ylabel("count", fontsize=14.6)
+    axes[1, 0].set_title("収束時刻", fontsize=16.8, fontproperties=_jp_prop(16.8))
+    axes[1, 0].set_xlabel("収束時刻 [s]", fontsize=14.6, fontproperties=_jp_prop(14.6))
+    axes[1, 0].set_ylabel("件数", fontsize=14.6, fontproperties=_jp_prop(14.6))
     axes[1, 0].grid(ls=":", alpha=0.35)
 
     color_values = np.where(collapse_states == 1, "#2ca02c", np.where(collapse_states == -1, "#d62728", "#7f7f7f"))
     axes[1, 1].scatter(final_pointer_mean, final_expect_z, s=20, alpha=0.75, c=color_values)
     axes[1, 1].axhline(0.0, color="black", ls="--", lw=1.0, alpha=0.6)
-    axes[1, 1].set_title("Final detector pointer mean vs state branch", fontsize=16.4)
-    axes[1, 1].set_xlabel("final pointer mean x̄(T)", fontsize=14.6)
-    axes[1, 1].set_ylabel("final expectation z(T)", fontsize=14.6)
+    axes[1, 1].set_title("最終状態", fontsize=16.8, fontproperties=_jp_prop(16.8))
+    axes[1, 1].set_xlabel("ポインタ平均 x̄(T)", fontsize=14.6, fontproperties=_jp_prop(14.6))
+    axes[1, 1].set_ylabel("最終期待値 z(T)", fontsize=14.6, fontproperties=_jp_prop(14.6))
     axes[1, 1].set_ylim(-1.05, 1.05)
     axes[1, 1].grid(ls=":", alpha=0.35)
 
     fig.suptitle(
-        "Dynamic collapse simulation (nonlinear measurement equation; two-state + multi-DOF detector pointer)",
-        fontsize=18.4,
+        "動的収束",
+        fontsize=25.2,
         y=0.98,
+        fontproperties=_jp_prop(25.2),
     )
     for axis in axes.ravel():
-        axis.tick_params(labelsize=13.4)
+        axis.tick_params(labelsize=13.2)
 
     fig.tight_layout(rect=[0, 0, 1, 0.96])
     out_png = out_dir / "quantum_measurement_dynamic_collapse_simulation.png"

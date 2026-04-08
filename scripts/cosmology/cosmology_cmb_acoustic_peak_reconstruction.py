@@ -658,20 +658,22 @@ def _plot(
     d46_ell = gate.get("extended_4to6", {}).get("max_abs_delta_ell", float("nan"))
     d46_amp = gate.get("extended_4to6", {}).get("max_abs_delta_amp_rel", float("nan"))
     fig.suptitle("P-model CMB acoustic-peak audit (ℓ1-ℓ3 fit + ℓ4-ℓ6 holdout)", fontsize=19.6)
-    fig.text(
-        0.5,
-        0.015,
+    ax2.text(
+        0.02,
+        0.05,
         (
             f"core={status}, extended={status_ext}; first3: max|Δℓ|={_fmt(float(max_dell_3), 3)}, "
             f"max|ΔA/A|={_fmt(float(max_damp_3), 4)}\n"
             f"holdout ℓ4: Δℓ={_fmt(float(d4_ell), 3)}, ΔA/A={_fmt(float(d4_amp), 4)}; "
             f"holdout ℓ4-ℓ6: max|Δℓ|={_fmt(float(d46_ell), 3)}, max|ΔA/A|={_fmt(float(d46_amp), 4)}"
         ),
-        ha="center",
+        transform=ax2.transAxes,
+        ha="left",
         va="bottom",
         fontsize=16.4,
+        bbox={"boxstyle": "round,pad=0.22", "facecolor": "white", "edgecolor": "#999999", "alpha": 0.92},
     )
-    plt.tight_layout(rect=(0.0, 0.07, 1.0, 0.95))
+    plt.tight_layout(rect=(0.0, 0.030, 1.0, 0.95))
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)
     fig.savefig(out_png.with_suffix(".pdf"))

@@ -34,8 +34,18 @@ if str(ROOT) not in sys.path:
 
 from scripts.summary import worklog  # noqa: E402
 
+try:
+    import matplotlib as mpl
+    from scripts.utils.plot_style import install_wavep_cjk_font_override  # noqa: E402
+
+    install_wavep_cjk_font_override(preferred_name="Noto Sans CJK JP")
+    mpl.rcParams["axes.unicode_minus"] = False
+except Exception:
+    pass
+
 
 # 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -640,6 +650,24 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
 # 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, payload: Dict[str, Any]) -> None:
+    display_labels = {
+        "action::status": "作用原理: 状態",
+        "action::criteria": "作用原理: 全判定通過",
+        "action::fail_ids": "作用原理: fail件数",
+        "nonrel::status": "非相対論: 状態",
+        "nonrel::criteria": "非相対論: 全判定通過",
+        "nonrel::fail_channels": "非相対論: 失敗チャネル件数",
+        "born_pack::route_a_gate": "Born pack: 経路A判定",
+        "born_ab::route_transition": "Born A/B: 経路と遷移",
+        "born_ab::hard_lists": "Born A/B: hard逸脱件数",
+        "deriv_pack::route_transition": "導出pack: 経路と遷移",
+        "deriv_pack::hard_lists": "導出pack: hard逸脱件数",
+        "cross::route_consistency": "横断: 経路整合",
+        "shared::overall_status": "共有指標: 全体判定",
+        "bridge::overall_not_reject": "橋渡し表: reject回避",
+        "watch::kwiat_nonhard_stability": "監視: Kwiat 非hard安定",
+        "watch::hom_nonhard_stability": "監視: HOM 非hard安定",
+    }
     rows = payload.get("checks") if isinstance(payload.get("checks"), list) else []
     labels: List[str] = []
     scores: List[float] = []
@@ -649,7 +677,7 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
         if not isinstance(row, dict):
             continue
 
-        labels.append(str(row.get("id") or ""))
+        labels.append(display_labels.get(str(row.get("id") or ""), str(row.get("id") or "")))
         score = row.get("score")
         score_f = float(score) if isinstance(score, (int, float)) else np.nan
         scores.append(score_f)
@@ -668,22 +696,38 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
 
     fig_h = max(4.8, 0.34 * len(labels) + 1.6)
     y = np.arange(len(labels))
-    fig, ax = plt.subplots(figsize=(12.4, fig_h), dpi=180)
+    status_label = {
+        "pass": "通過",
+        "watch": "監視",
+        "reject": "棄却",
+        "unknown": "不明",
+    }
+    route_label = {
+        "A_continue": "A継続",
+        "A_reject": "A棄却",
+        "unknown": "不明",
+    }
+    transition_label = {
+        "A_stay": "A維持",
+        "A_to_B": "AからBへ遷移",
+        "unknown": "不明",
+    }
+    fig, ax = plt.subplots(figsize=(12.6, fig_h), dpi=180)
     ax.barh(y, scores, color=colors)
     ax.axvline(1.0, linestyle="--", color="#6b7280", linewidth=1.2)
     ax.set_yticks(y, labels)
-    ax.tick_params(axis="y", labelsize=13.6)
-    ax.set_xlabel("consistency score (1=pass, 0=reject)", fontsize=14.8)
+    ax.tick_params(axis="y", labelsize=14.8)
+    ax.set_xlabel("整合スコア（1で通過、0で棄却）", fontsize=15.2)
     decision = payload.get("decision") if isinstance(payload.get("decision"), dict) else {}
     title_status = str(decision.get("overall_status") or "unknown")
     title_route = str(decision.get("route_a_gate") or "unknown")
     title_trans = str(decision.get("transition") or "unknown")
     ax.set_title(
-        f"Derivation-observable chain lock audit ({title_status}; {title_route}/{title_trans})",
-        fontsize=15.2,
+        f"導出と観測の連鎖固定監査（{status_label.get(title_status, title_status)}; {route_label.get(title_route, title_route)}/{transition_label.get(title_trans, title_trans)}）",
+        fontsize=15.6,
         pad=8.0,
     )
-    ax.tick_params(axis="x", labelsize=13.4)
+    ax.tick_params(axis="x", labelsize=14.4)
     ax.grid(axis="x", alpha=0.25, linestyle=":")
     fig.tight_layout()
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -784,6 +828,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     out_json = _resolve(args.out_json)
     out_csv = _resolve(args.out_csv)
     out_png = _resolve(args.out_png)
+    out_pdf = out_png.with_suffix(".pdf")
 
     for p in [action, nonrel, born_pack, born_ab, bridge, shared, deriv_pack]:
         # 条件分岐: `not p.exists()` を満たす経路を評価する。
@@ -808,10 +853,12 @@ def main(argv: Optional[List[str]] = None) -> int:
     checks = payload.get("checks") if isinstance(payload.get("checks"), list) else []
     _write_csv(out_csv, checks)
     _plot(out_png, payload)
+    _plot(out_pdf, payload)
 
     print(f"[ok] wrote: {_rel(out_json)}")
     print(f"[ok] wrote: {_rel(out_csv)}")
     print(f"[ok] wrote: {_rel(out_png)}")
+    print(f"[ok] wrote: {_rel(out_pdf)}")
 
     try:
         worklog.append_event(
