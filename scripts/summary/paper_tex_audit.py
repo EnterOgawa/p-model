@@ -33,16 +33,6 @@ if str(_ROOT) not in sys.path:
 
 from scripts.summary import paper_profile_content as profile_content, worklog
 
-_PROFILE_TO_TEX = {
-    "paper": "pmodel_paper.tex",
-    "part2_astrophysics": "pmodel_paper_part2_astrophysics.tex",
-    "part3_quantum": "pmodel_paper_part3_quantum.tex",
-    "part3a_quantum_foundations": "pmodel_paper_part3a_quantum_foundations.tex",
-    "part3b_quantum_verification": "pmodel_paper_part3b_quantum_verification.tex",
-    "part4_verification": "pmodel_paper_part4_verification.tex",
-    "part5_future_predictions": "pmodel_paper_part5_future_predictions.tex",
-}
-
 _COMPILE_FATAL_PATTERNS = [
     re.compile(r"Undefined control sequence"),
     re.compile(r"Missing \$ inserted"),
@@ -98,7 +88,6 @@ def _utc_now() -> str:
 
 
 # 関数: `_find_engine_binary` の入出力契約と処理意図を定義する。
-
 def _find_engine_binary(engine: str) -> str | None:
     from_path = shutil.which(engine)
     # 条件分岐: `from_path` を満たす経路を評価する。
@@ -151,7 +140,6 @@ def _find_engine_binary(engine: str) -> str | None:
 
 
 # 関数: `_pick_engine` の入出力契約と処理意図を定義する。
-
 def _pick_engine(choice: str) -> Tuple[str | None, str]:
     # 条件分岐: `choice == "none"` を満たす経路を評価する。
     if choice == "none":
@@ -173,7 +161,6 @@ def _pick_engine(choice: str) -> Tuple[str | None, str]:
 
 
 # 関数: `_prepare_tex_cache_env` の入出力契約と処理意図を定義する。
-
 def _prepare_tex_cache_env(base_dir: Path) -> Dict[str, str]:
     env = os.environ.copy()
     temp_root = Path(tempfile.gettempdir()).resolve()
@@ -195,7 +182,6 @@ def _prepare_tex_cache_env(base_dir: Path) -> Dict[str, str]:
 
 
 # 関数: `_strip_comment` の入出力契約と処理意図を定義する。
-
 def _strip_comment(line: str) -> str:
     out: list[str] = []
     escaped = False
@@ -224,13 +210,11 @@ def _strip_comment(line: str) -> str:
 
 
 # 関数: `_strip_inline_math` の入出力契約と処理意図を定義する。
-
 def _strip_inline_math(text: str) -> str:
     return _INLINE_MATH_RE.sub("", text)
 
 
 # 関数: `_texttt_unescape` の入出力契約と処理意図を定義する。
-
 def _texttt_unescape(payload: str) -> str:
     out = payload
     out = out.replace(r"\_", "_")
@@ -241,7 +225,6 @@ def _texttt_unescape(payload: str) -> str:
 
 
 # 関数: `_is_pathlike_token` の入出力契約と処理意図を定義する。
-
 def _is_pathlike_token(text: str) -> bool:
     low = text.lower()
     # 条件分岐: `"://" in low` を満たす経路を評価する。
@@ -272,7 +255,6 @@ def _is_pathlike_token(text: str) -> bool:
 
 
 # 関数: `_looks_like_pseudo_math_texttt` の入出力契約と処理意図を定義する。
-
 def _looks_like_pseudo_math_texttt(text: str) -> bool:
     # 条件分岐: `not text` を満たす経路を評価する。
     if not text:
@@ -301,7 +283,6 @@ def _looks_like_pseudo_math_texttt(text: str) -> bool:
 
 
 # 関数: `_mask_literal_code_spans` の入出力契約と処理意図を定義する。
-
 def _mask_literal_code_spans(tex_text: str) -> str:
     masked = _TEXTTT_RE.sub("", tex_text)
     masked = _NOLINKURL_RE.sub("", masked)
@@ -310,7 +291,6 @@ def _mask_literal_code_spans(tex_text: str) -> str:
 
 
 # 関数: `_static_audit` の入出力契約と処理意図を定義する。
-
 def _static_audit(tex_text: str) -> Dict[str, Any]:
     errors: List[str] = []
     warnings: List[str] = []
@@ -425,7 +405,6 @@ def _static_audit(tex_text: str) -> Dict[str, Any]:
 
 
 # 関数: `_run_compile` の入出力契約と処理意図を定義する。
-
 def _run_compile(
     *,
     engine: str,
@@ -491,7 +470,6 @@ def _run_compile(
 
 
 # 関数: `_audit_profile` の入出力契約と処理意図を定義する。
-
 def _audit_profile(
     *,
     profile: str,
@@ -500,8 +478,9 @@ def _audit_profile(
     engine_choice: str,
     require_engine: bool,
     fail_on_overfull: bool,
+    locale: str | None,
 ) -> Dict[str, Any]:
-    tex_name = _PROFILE_TO_TEX[profile]
+    tex_name = profile_content.resolve_tex_name(profile, locale=locale)
     tex_path = outdir / tex_name
     result: Dict[str, Any] = {
         "profile": profile,
@@ -546,7 +525,6 @@ def _audit_profile(
 
 
 # 関数: `main` の入出力契約と処理意図を定義する。
-
 def main(argv: Sequence[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Strict post-build TeX audit for paper profiles.")
     ap.add_argument(
@@ -554,6 +532,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         choices=list(profile_content.PAPER_PROFILES),
         action="append",
         help="target profile (repeatable). default: all profiles",
+    )
+    ap.add_argument(
+        "--locale",
+        default=None,
+        help="paper locale manifest key (default: env WAVEP_PAPER_LOCALE or ja)",
     )
     ap.add_argument("--outdir", default=str(_ROOT / "output" / "private" / "summary"))
     ap.add_argument("--logs-dir", default=str(_ROOT / "output" / "private" / "summary" / "logs"))
@@ -563,11 +546,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     ap.add_argument("--json-out", default=None, help="output json path (default: outdir/paper_tex_audit.json)")
     args = ap.parse_args(argv)
 
-    profiles = args.profile or list(_PROFILE_TO_TEX.keys())
+    profiles = args.profile or list(profile_content.PAPER_PROFILES)
+    locale = str(args.locale).strip().lower() if args.locale else None
+    if locale:
+        os.environ["WAVEP_PAPER_LOCALE"] = locale
+
     outdir = Path(args.outdir)
     logs_dir = Path(args.logs_dir)
     logs_dir.mkdir(parents=True, exist_ok=True)
-    json_out = Path(args.json_out) if args.json_out else (outdir / "paper_tex_audit.json")
+    default_json_name = "paper_tex_audit.json" if not locale else f"paper_tex_audit_{locale}.json"
+    json_out = Path(args.json_out) if args.json_out else (outdir / default_json_name)
 
     per_profile: Dict[str, Any] = {}
     all_ok = True
@@ -579,6 +567,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             engine_choice=str(args.engine),
             require_engine=bool(args.require_engine),
             fail_on_overfull=bool(args.fail_on_overfull),
+            locale=locale,
         )
         per_profile[profile] = res
         all_ok = all_ok and bool(res.get("ok"))

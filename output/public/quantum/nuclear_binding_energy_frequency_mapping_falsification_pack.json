@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-04-08T09:13:46.893635+00:00",
+  "generated_utc": "2026-04-09T17:11:07.215254+00:00",
   "thresholds": {
     "z_median_abs_max": 3.0,
     "z_delta_median_abs_max": 3.0,
@@ -21,11 +21,11 @@
     },
     "theory_diff_metrics_json": {
       "path": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_energy_frequency_mapping_theory_diff_metrics.json",
-      "sha256": "b678c19506312b70b690a46a227a32f23ea7620c6bbd21089f9fd242ef78277c"
+      "sha256": "5eb3a24f722709a55f308e4614f47d022bb33a285c5cd4a03fa2d31763b25855"
     },
     "differential_quantification_metrics_json": {
       "path": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_energy_frequency_mapping_differential_quantification_metrics.json",
-      "sha256": "c85c65c1ecc0f47588c41ae28ac5656f85a433964b7a05c74472d8ff1318e11e"
+      "sha256": "935116652e99dbe15aece9e30ebccc144685666e00e9a8cbdbc9932444b401cb"
     },
     "separation_energies_metrics_json": {
       "path": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_a_dependence_hf_three_body_separation_energies_metrics.json",

@@ -28,26 +28,6 @@ if str(_ROOT) not in sys.path:
 
 from scripts.summary import paper_profile_content as profile_content, worklog
 
-_PROFILE_TO_TEX: Dict[str, str] = {
-    "paper": "pmodel_paper.tex",
-    "part2_astrophysics": "pmodel_paper_part2_astrophysics.tex",
-    "part3_quantum": "pmodel_paper_part3_quantum.tex",
-    "part3a_quantum_foundations": "pmodel_paper_part3a_quantum_foundations.tex",
-    "part3b_quantum_verification": "pmodel_paper_part3b_quantum_verification.tex",
-    "part4_verification": "pmodel_paper_part4_verification.tex",
-    "part5_future_predictions": "pmodel_paper_part5_future_predictions.tex",
-}
-
-_PROFILE_TO_PDF: Dict[str, str] = {
-    "paper": "pmodel_paper.pdf",
-    "part2_astrophysics": "pmodel_paper_part2_astrophysics.pdf",
-    "part3_quantum": "pmodel_paper_part3_quantum.pdf",
-    "part3a_quantum_foundations": "pmodel_paper_part3a_quantum_foundations.pdf",
-    "part3b_quantum_verification": "pmodel_paper_part3b_quantum_verification.pdf",
-    "part4_verification": "pmodel_paper_part4_verification.pdf",
-    "part5_future_predictions": "pmodel_paper_part5_future_predictions.pdf",
-}
-
 _FATAL_PATTERNS: List[re.Pattern[str]] = [
     re.compile(r"Undefined control sequence"),
     re.compile(r"Missing \$ inserted"),
@@ -401,12 +381,29 @@ def _apply_autofix_round(
 
 # Function: keep papers/ limited to canonical paper PDFs only.
 
-def _prune_papers_dir(*, papers_dir: Path) -> List[str]:
+def _is_allowed_papers_pdf_name(name: str) -> bool:
+    path = Path(name)
+    if path.suffix.lower() != ".pdf":
+        return False
+
+    stems = {Path(profile_content.resolve_pdf_name(profile, locale="ja")).stem for profile in profile_content.PAPER_PROFILES}
+    for stem in stems:
+        if path.stem == stem:
+            return True
+
+        if path.stem.startswith(f"{stem}_"):
+            return True
+
+    return False
+
+
+# Function: keep papers/ limited to canonical paper PDFs only.
+
+def _prune_papers_dir(*, papers_dir: Path, locale: str | None = None) -> List[str]:
     papers_dir.mkdir(parents=True, exist_ok=True)
-    allowed_names = set(_PROFILE_TO_PDF.values())
     removed: List[str] = []
     for entry in list(papers_dir.iterdir()):
-        if entry.is_file() and entry.name in allowed_names and entry.suffix.lower() == ".pdf":
+        if entry.is_file() and _is_allowed_papers_pdf_name(entry.name):
             continue
 
         if entry.is_file():
@@ -423,9 +420,9 @@ def _prune_papers_dir(*, papers_dir: Path) -> List[str]:
 
 # Function: copy generated PDF into papers/ with canonical file names.
 
-def _sync_to_papers(*, pdf_src: Path, papers_dir: Path, profile: str) -> Path:
+def _sync_to_papers(*, pdf_src: Path, papers_dir: Path, profile: str, locale: str | None = None) -> Path:
     papers_dir.mkdir(parents=True, exist_ok=True)
-    out_name = _PROFILE_TO_PDF[profile]
+    out_name = profile_content.resolve_pdf_name(profile, locale=locale)
     out_path = papers_dir / out_name
     shutil.copy2(str(pdf_src), str(out_path))
     return out_path
@@ -444,9 +441,10 @@ def _build_profile_pdf(
     fail_on_overfull: bool,
     sync_papers: bool,
     papers_dir: Path,
+    locale: str | None,
 ) -> Dict[str, Any]:
-    tex_name = _PROFILE_TO_TEX[profile]
-    pdf_name = _PROFILE_TO_PDF[profile]
+    tex_name = profile_content.resolve_tex_name(profile, locale=locale)
+    pdf_name = profile_content.resolve_pdf_name(profile, locale=locale)
     tex_path = outdir / tex_name
     pdf_out = outdir / pdf_name
     build_dir = (outdir / "_tex_pdf_tmp" / profile).resolve()
@@ -494,7 +492,7 @@ def _build_profile_pdf(
 
             shutil.copy2(str(last_pdf), str(pdf_out))
             if sync_papers:
-                synced = _sync_to_papers(pdf_src=pdf_out, papers_dir=papers_dir, profile=profile)
+                synced = _sync_to_papers(pdf_src=pdf_out, papers_dir=papers_dir, profile=profile, locale=locale)
                 result["synced_papers_pdf"] = str(synced)
 
             result["ok"] = True
@@ -525,6 +523,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         action="append",
         help="target profile (repeatable). default: all profiles",
     )
+    ap.add_argument(
+        "--locale",
+        default=None,
+        help="paper locale manifest key (default: env WAVEP_PAPER_LOCALE or ja)",
+    )
     ap.add_argument("--outdir", default=str(_ROOT / "output" / "private" / "summary"))
     ap.add_argument("--logs-dir", default=str(_ROOT / "output" / "private" / "summary" / "logs"))
     ap.add_argument("--json-out", default=None, help="output json path (default: outdir/paper_pdf_build.json)")
@@ -542,7 +545,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     ap.add_argument("--papers-dir", default=str(_ROOT / "papers"), help="destination directory for --sync-papers")
     args = ap.parse_args(list(argv) if argv is not None else None)
 
-    profiles = args.profile or list(_PROFILE_TO_TEX.keys())
+    profiles = args.profile or list(profile_content.PAPER_PROFILES)
+    locale = str(args.locale).strip().lower() if args.locale else None
+    if locale:
+        os.environ["WAVEP_PAPER_LOCALE"] = locale
+
     outdir = Path(str(args.outdir))
     logs_dir = Path(str(args.logs_dir))
     logs_dir.mkdir(parents=True, exist_ok=True)
@@ -554,7 +561,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     removed_papers_entries: List[str] = []
     if sync_papers:
-        removed_papers_entries = _prune_papers_dir(papers_dir=papers_dir)
+        removed_papers_entries = _prune_papers_dir(papers_dir=papers_dir, locale=locale)
         for name in removed_papers_entries:
             print(f"[info] removed from papers/: {name}")
 
@@ -571,7 +578,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             "engine_request": str(args.engine),
             "profiles": profiles,
         }
-        json_out = Path(str(args.json_out)) if args.json_out else (outdir / "paper_pdf_build.json")
+        default_json_name = "paper_pdf_build.json" if not locale else f"paper_pdf_build_{locale}.json"
+        json_out = Path(str(args.json_out)) if args.json_out else (outdir / default_json_name)
         json_out.parent.mkdir(parents=True, exist_ok=True)
         json_out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         print(f"[ok] wrote: {json_out}")
@@ -595,6 +603,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             fail_on_overfull=bool(args.fail_on_overfull),
             sync_papers=sync_papers,
             papers_dir=papers_dir,
+            locale=locale,
         )
         results[profile] = one
         all_ok = all_ok and bool(one.get("ok"))
@@ -615,7 +624,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             "removed_papers_entries": removed_papers_entries,
         },
     }
-    json_out = Path(str(args.json_out)) if args.json_out else (outdir / "paper_pdf_build.json")
+    default_json_name = "paper_pdf_build.json" if not locale else f"paper_pdf_build_{locale}.json"
+    json_out = Path(str(args.json_out)) if args.json_out else (outdir / default_json_name)
     json_out.parent.mkdir(parents=True, exist_ok=True)
     json_out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"[ok] wrote: {json_out}")

@@ -53,7 +53,6 @@ def _repo_root() -> Path:
 
 
 # クラス: `FigureItem` の責務と境界条件を定義する。
-
 @dataclass(frozen=True)
 class FigureItem:
     section: str
@@ -63,7 +62,6 @@ class FigureItem:
 
 
 # 関数: `_resolve_repo_asset` の入出力契約と処理意図を定義する。
-
 def _resolve_repo_asset(rel: str, *, root: Path) -> Path:
     """
     Resolve repo-relative paths, remapping legacy output/<topic>/... to
@@ -113,13 +111,11 @@ def _resolve_repo_asset(rel: str, *, root: Path) -> Path:
     return cand_public
 
 # 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
-
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
 # 関数: `_rel_url` の入出力契約と処理意図を定義する。
-
 def _rel_url(from_dir: Path, target: Path) -> str:
     try:
         rel = os.path.relpath(target, start=from_dir)
@@ -130,13 +126,11 @@ def _rel_url(from_dir: Path, target: Path) -> str:
 
 
 # 関数: `_read_text` の入出力契約と処理意図を定義する。
-
 def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
 
 
 # 関数: `_markdown_to_html` の入出力契約と処理意図を定義する。
-
 def _markdown_to_html(md_text: str) -> Tuple[str, str]:
     """
     Return (html, toc_html). toc_html may be "".
@@ -188,7 +182,6 @@ def _normalize_ref_slug(text: str) -> str:
 
 
 # 関数: `_build_section_ref_map` の入出力契約と処理意図を定義する。
-
 def _build_section_ref_map(*, md_text: str, profile: str) -> Dict[str, str]:
     """
     Build a mapping from LaTeX section labels (`sec:...`) to display section numbers.
@@ -224,7 +217,6 @@ def _build_section_ref_map(*, md_text: str, profile: str) -> Dict[str, str]:
 
 
 # 関数: `_build_figure_ref_map` の入出力契約と処理意図を定義する。
-
 def _build_figure_ref_map(*, fig_map: Optional[Dict[str, Dict[str, Any]]]) -> Dict[str, Tuple[str, str]]:
     """
     Build a normalized map from figure label slug -> (anchor, display label).
@@ -260,7 +252,6 @@ def _build_figure_ref_map(*, fig_map: Optional[Dict[str, Dict[str, Any]]]) -> Di
 
 
 # 関数: `_replace_latex_refs_in_html` の入出力契約と処理意図を定義する。
-
 def _replace_latex_refs_in_html(
     rendered_html: str,
     *,
@@ -334,7 +325,6 @@ def _replace_latex_refs_in_html(
 
 
 # 関数: `_rewrite_repo_relative_asset_urls` の入出力契約と処理意図を定義する。
-
 def _rewrite_repo_relative_asset_urls(rendered_html: str, *, root: Path, out_dir: Path) -> str:
     """
     HTML 内の src/href に含まれる `output/...` 等の “repo-root 相対パス” を、
@@ -390,7 +380,6 @@ def _rewrite_repo_relative_asset_urls(rendered_html: str, *, root: Path, out_dir
 
 
 # 関数: `_clamp` の入出力契約と処理意図を定義する。
-
 def _clamp(x: float, lo: float, hi: float) -> float:
     try:
         xf = float(x)
@@ -411,7 +400,6 @@ def _clamp(x: float, lo: float, hi: float) -> float:
 
 
 # 関数: `_hsl_to_hex` の入出力契約と処理意図を定義する。
-
 def _hsl_to_hex(h: float, s: float, l: float) -> str:
     """
     Convert an HSL color to #RRGGBB.
@@ -457,7 +445,6 @@ def _hsl_to_hex(h: float, s: float, l: float) -> str:
 
 
 # 関数: `_score_to_bg_hex` の入出力契約と処理意図を定義する。
-
 def _score_to_bg_hex(score_norm_0_to_3: float) -> str:
     """
     Map discrepancy score to a readable pastel color.
@@ -494,7 +481,6 @@ def _strip_internal_source_tokens(text: str) -> str:
 
 
 # 関数: `_table1_metric_score_norm_astrophysics` の入出力契約と処理意図を定義する。
-
 def _table1_metric_score_norm_astrophysics(metric_public: str, metric_fallback: str) -> Optional[float]:
     """
     Return a normalized discrepancy score in [0,3] (smaller is better) for Part II 検証サマリ表.
@@ -612,7 +598,6 @@ def _table1_metric_score_norm_astrophysics(metric_public: str, metric_fallback: 
 
 
 # 関数: `_table1_metric_score_norm_quantum` の入出力契約と処理意図を定義する。
-
 def _table1_metric_score_norm_quantum(metric_public: str, metric_fallback: str, pmodel: str) -> Optional[float]:
     """
     Return a normalized discrepancy score in [0,3] (smaller is better) for Part III 検証サマリ表.
@@ -682,7 +667,6 @@ def _table1_metric_score_norm_quantum(metric_public: str, metric_fallback: str, 
 
 
 # 関数: `_render_table1_html_from_json` の入出力契約と処理意図を定義する。
-
 def _render_table1_html_from_json(table1_json: Path, *, profile: str) -> str:
     """
     Render 検証サマリ表 (validation summary) as an HTML table with:
@@ -763,7 +747,6 @@ def _render_table1_html_from_json(table1_json: Path, *, profile: str) -> str:
 
 
 # 関数: `_inject_table1_after_h3` の入出力契約と処理意図を定義する。
-
 def _inject_table1_after_h3(body_html: str, *, insert_html: str) -> str:
     """
     Insert 検証サマリ表 right after "4.1 検証サマリ表" heading inside the manuscript HTML.
@@ -785,7 +768,6 @@ def _inject_table1_after_h3(body_html: str, *, insert_html: str) -> str:
 
 
 # 関数: `_inject_pagebreak_before_heading_ids` の入出力契約と処理意図を定義する。
-
 def _inject_pagebreak_before_heading_ids(body_html: str, *, heading_ids: Sequence[str]) -> str:
     """
     Insert explicit page-break markers before selected heading ids.
@@ -809,7 +791,6 @@ def _inject_pagebreak_before_heading_ids(body_html: str, *, heading_ids: Sequenc
 
 
 # 関数: `_standardize_numbered_heading_ids` の入出力契約と処理意図を定義する。
-
 def _standardize_numbered_heading_ids(*, body_html: str, toc_html: str) -> Tuple[str, str]:
     """
     Normalize heading anchors like "#11" or "#1-introduction" into "#section-1-1", etc.
@@ -878,7 +859,6 @@ def _standardize_numbered_heading_ids(*, body_html: str, toc_html: str) -> Tuple
 
 
 # 関数: `_linkify_repo_paths` の入出力契約と処理意図を定義する。
-
 def _linkify_repo_paths(
     rendered_html: str,
     *,
@@ -1034,7 +1014,6 @@ def _filter_md_h2_sections_by_ref_keys(md_text: str, *, keep_keys: set[str]) -> 
 
 
 # 関数: `_inject_reference_anchors` の入出力契約と処理意図を定義する。
-
 def _inject_reference_anchors(md_text: str) -> str:
     """
     Add stable in-page anchors so citations can link to the References section.
@@ -1060,7 +1039,6 @@ def _inject_reference_anchors(md_text: str) -> str:
 
 
 # 関数: `_linkify_citations` の入出力契約と処理意図を定義する。
-
 def _linkify_citations(rendered_html: str, *, ref_keys: Sequence[str]) -> str:
     """
     Convert "[Will2014]" into links to "#ref-Will2014" when the key exists in References.
@@ -1095,8 +1073,7 @@ def _linkify_citations(rendered_html: str, *, ref_keys: Sequence[str]) -> str:
 
 
 # 関数: `_extract_png_paths_from_figures_index` の入出力契約と処理意図を定義する。
-
-def _extract_png_paths_from_figures_index(root: Path) -> List[FigureItem]:
+def _extract_png_paths_from_figures_index(root: Path, *, locale: str | None = None) -> List[FigureItem]:
     """
     Pull stable figure PNG paths (and optional captions) from doc/paper/01_figures_index.md.
 
@@ -1104,7 +1081,7 @@ def _extract_png_paths_from_figures_index(root: Path) -> List[FigureItem]:
       - `output/foo/bar.png`（説明）
       - `output/foo/bar.png` (desc)
     """
-    idx = root / "doc" / "paper" / "01_figures_index.md"
+    idx = profile_content.resolve_figures_index_path(root, locale=locale)
     # 条件分岐: `not idx.exists()` を満たす経路を評価する。
     if not idx.exists():
         return []
@@ -1171,7 +1148,6 @@ def _extract_png_paths_from_figures_index(root: Path) -> List[FigureItem]:
 
 
 # 関数: `_build_fig_anchor_map` の入出力契約と処理意図を定義する。
-
 def _build_fig_anchor_map(figs: List[FigureItem], *, root: Path) -> FigureAnchorMap:
     """
     Map `output/...png` (repo-relative, POSIX-style) -> ("#fig-001", "図1").
@@ -1215,7 +1191,6 @@ def _extract_output_png_relpaths_in_order(md_text: str) -> List[str]:
 
 
 # 関数: `_reorder_figs_by_reference_order` の入出力契約と処理意図を定義する。
-
 def _reorder_figs_by_reference_order(
     figs: List[FigureItem],
     *,
@@ -1373,7 +1348,6 @@ def _normalize_inline_markdown_segment_for_parity(text: str) -> str:
 
 
 # 関数: `_normalize_markdown_for_tex_docx_parity` の入出力契約と処理意図を定義する。
-
 def _normalize_markdown_for_tex_docx_parity(md_text: str) -> str:
     """
     Normalize inline pseudo-math in markdown prose so HTML/DOCX follows the same
@@ -1440,14 +1414,12 @@ def _read_bytes(path: Path) -> bytes:
 
 
 # 関数: `_data_uri_png` の入出力契約と処理意図を定義する。
-
 def _data_uri_png(png_bytes: bytes) -> str:
     b64 = base64.b64encode(png_bytes).decode("ascii")
     return f"data:image/png;base64,{b64}"
 
 
 # 関数: `_render_equation_png` の入出力契約と処理意図を定義する。
-
 def _render_equation_png(*, latex: str, eq_dir: Path, inline: bool = False) -> Path:
     """
     Render a LaTeX math string to a PNG file (white background, tight bbox).
@@ -1566,7 +1538,6 @@ def _render_equation_png(*, latex: str, eq_dir: Path, inline: bool = False) -> P
 
 
 # 関数: `_replace_math_blocks_with_images` の入出力契約と処理意図を定義する。
-
 def _replace_math_blocks_with_images(
     md_text: str,
     *,
@@ -1650,7 +1621,6 @@ def _replace_math_blocks_with_images(
 
 
 # 関数: `_inline_png_code_snippets` の入出力契約と処理意図を定義する。
-
 def _inline_png_code_snippets(
     rendered_html: str,
     *,
@@ -1780,7 +1750,6 @@ def _inline_png_code_snippets(
 
 
 # 関数: `_render_html` の入出力契約と処理意図を定義する。
-
 def _render_html(
     *,
     out_dir: Path,
@@ -1917,7 +1886,6 @@ def _render_html(
 
 
 # 関数: `main` の入出力契約と処理意図を定義する。
-
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Render paper (Markdown draft) as a single HTML page.")
     ap.add_argument("--outdir", default=None, help="Output directory (default: output/private/summary).")
@@ -1944,6 +1912,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         help="output HTML filename (default depends on --profile)",
     )
     ap.add_argument(
+        "--locale",
+        default=None,
+        help="paper locale manifest key (default: env WAVEP_PAPER_LOCALE or ja)",
+    )
+    ap.add_argument(
         "--no-embed-images",
         action="store_true",
         help="do not embed images as data URI (publish mode). use relative file paths instead.",
@@ -1955,6 +1928,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_dir = Path(args.outdir) if args.outdir else (root / "output" / "private" / "summary")
     mode = str(args.mode)
     profile = str(args.profile)
+    locale = str(args.locale).strip().lower() if args.locale else None
+    if locale:
+        os.environ["WAVEP_PAPER_LOCALE"] = locale
+
     embed_images = (mode == "publish") and (not bool(args.no_embed_images))
 
     # 条件分岐: `args.manuscript` を満たす経路を評価する。
@@ -1962,18 +1939,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         manuscript_md = (root / Path(str(args.manuscript))).resolve()
         manuscript_text_source = _read_text(manuscript_md)
     else:
-        manuscript_md = profile_content.resolve_manuscript_path(root, profile)
-        manuscript_text_source = profile_content.load_profile_markdown(root, profile)
+        manuscript_md = profile_content.resolve_manuscript_path(root, profile, locale=locale)
+        manuscript_text_source = profile_content.load_profile_markdown(root, profile, locale=locale)
 
-    quantum_appendix_a_md = root / "doc" / "paper" / "12_part3_quantum_appendix_a.md"
-    definitions_md = root / "doc" / "paper" / "05_definitions.md"
-    uncertainty_md = root / "doc" / "paper" / "06_uncertainty.md"
-    llr_appendix_md = root / "doc" / "paper" / "07_llr_appendix.md"
+    quantum_appendix_a_md = profile_content.resolve_quantum_appendix_a_path(root, locale=locale)
+    definitions_md = profile_content.resolve_definitions_path(root, locale=locale)
+    uncertainty_md = profile_content.resolve_uncertainty_path(root, locale=locale)
+    llr_appendix_md = profile_content.resolve_llr_appendix_path(root, locale=locale)
     table1_astrophysics_md = root / "output" / "private" / "summary" / "paper_table1_results.md"
     table1_quantum_md = root / "output" / "private" / "summary" / "paper_table1_quantum_results.md"
     table1_md = table1_quantum_md if profile_content.uses_quantum_table1(profile) else table1_astrophysics_md
-    sources_md = root / "doc" / "paper" / "20_data_sources.md"
-    refs_md = root / "doc" / "paper" / "30_references.md"
+    sources_md = profile_content.resolve_data_sources_path(root, locale=locale)
+    refs_md = profile_content.resolve_references_path(root, locale=locale)
 
     ref_keys: List[str] = []
     # 条件分岐: `refs_md.exists()` を満たす経路を評価する。
@@ -1985,7 +1962,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     # Figure numbering policy:
     # Assign "図1, 図2, ..." in the first-reference order (reading order) so numbers are ascending in the manuscript.
-    # Captions are taken from doc/paper/01_figures_index.md when available.
+    # Captions are taken from the active locale figures index when available.
 
     include_table1 = (profile == "part2_astrophysics") or profile_content.uses_quantum_table1(profile)
     include_definitions = profile == "paper"
@@ -2091,7 +2068,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     reference_relpaths = _extract_output_png_relpaths_in_order("\n".join(scan_texts))
 
-    figs_idx = _extract_png_paths_from_figures_index(root)
+    figs_idx = _extract_png_paths_from_figures_index(root, locale=locale)
     # 条件分岐: `figs_idx` を満たす経路を評価する。
     if figs_idx:
         figs = _reorder_figs_by_reference_order(figs_idx, root=root, reference_relpaths=reference_relpaths)
@@ -2380,7 +2357,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     if figs and mode != "publish":
         fig_parts: List[str] = []
-        fig_parts.append("<p class='muted'>固定パス（doc/paper/01_figures_index.md）から .png を抽出して一覧表示します。</p>")
+        active_figures_index = profile_content.resolve_figures_index_path(root, locale=locale)
+        figures_index_rel = str(active_figures_index.relative_to(root)).replace("\\", "/")
+        fig_parts.append(f"<p class='muted'>固定パス（{html.escape(figures_index_rel)}）から .png を抽出して一覧表示します。</p>")
         fig_no = 0
         current_section = None
         for fig in figs:
@@ -2480,7 +2459,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.out_name:
         out_name = str(args.out_name)
     else:
-        out_name = profile_content.resolve_html_name(profile)
+        out_name = profile_content.resolve_html_name(profile, locale=locale)
 
     title = profile_content.resolve_html_title(profile)
     subtitle = profile_content.resolve_html_subtitle(profile)

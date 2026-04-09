@@ -11,6 +11,10 @@ Outputs:
 - output/public/summary/part5_conceptual_*.png
 - output/private/summary/part5_conceptual_figures_metrics.json
 - output/public/summary/part5_conceptual_figures_metrics.json
+
+補足:
+- `ja` は上の canonical path を維持する。
+- 非 `ja` は `.../locales/<locale>/...` へ保存し、日本語図を比較基準として残す。
 """
 
 from __future__ import annotations
@@ -36,6 +40,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from scripts.utils.figure_locale_paths import localize_figure_output_path  # noqa: E402
 from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size, install_wavep_font_profile  # noqa: E402
 
 
@@ -75,10 +80,10 @@ def _sync_file(src: Path, dst: Path) -> None:
 # 関数: `_output_pair` の入出力契約と処理意図を定義する。
 def _output_pair(stem: str) -> dict[str, Path]:
     return {
-        "private_pdf": PRIVATE_FIGURES_DIR / f"{stem}.pdf",
-        "private_png": PRIVATE_FIGURES_DIR / f"{stem}.png",
-        "public_pdf": PUBLIC_SUMMARY_DIR / f"{stem}.pdf",
-        "public_png": PUBLIC_SUMMARY_DIR / f"{stem}.png",
+        "private_pdf": localize_figure_output_path(PRIVATE_FIGURES_DIR / f"{stem}.pdf", root=ROOT),
+        "private_png": localize_figure_output_path(PRIVATE_FIGURES_DIR / f"{stem}.png", root=ROOT),
+        "public_pdf": localize_figure_output_path(PUBLIC_SUMMARY_DIR / f"{stem}.pdf", root=ROOT),
+        "public_png": localize_figure_output_path(PUBLIC_SUMMARY_DIR / f"{stem}.png", root=ROOT),
     }
 
 
@@ -462,11 +467,13 @@ def _write_metrics(rows: list[dict[str, Any]]) -> None:
         "outputs": rows,
         "notes": [
             "Part V の一般読者向け概念図。",
-            "全図は Matplotlib ベクター PDF として生成し、output/public/summary を canonical とする。",
+            "全図は Matplotlib ベクター PDF として生成する。",
+            "日本語図は output/public/summary を canonical とし、非 ja は locales/<locale> 配下へ保存する。",
         ],
     }
-    private_metrics = PRIVATE_SUMMARY_DIR / METRICS_STEM
-    public_metrics = PUBLIC_SUMMARY_DIR / METRICS_STEM
+    private_metrics = localize_figure_output_path(PRIVATE_SUMMARY_DIR / METRICS_STEM, root=ROOT)
+    public_metrics = localize_figure_output_path(PUBLIC_SUMMARY_DIR / METRICS_STEM, root=ROOT)
+    private_metrics.parent.mkdir(parents=True, exist_ok=True)
     private_metrics.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     _sync_file(private_metrics, public_metrics)
 

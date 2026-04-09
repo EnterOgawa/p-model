@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-04-08T12:51:21.876933+00:00",
+  "generated_utc": "2026-04-09T17:24:14.016662+00:00",
   "profile": "part5_future_predictions",
   "outputs": [
     {
@@ -93,6 +93,7 @@
   ],
   "notes": [
     "Part V の一般読者向け概念図。",
-    "全図は Matplotlib ベクター PDF として生成し、output/public/summary を canonical とする。"
+    "全図は Matplotlib ベクター PDF として生成する。",
+    "日本語図は output/public/summary を canonical とし、非 ja は locales/<locale> 配下へ保存する。"
   ]
 }

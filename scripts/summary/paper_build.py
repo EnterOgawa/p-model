@@ -7,20 +7,14 @@ Phase 8（論文化・公開）向けの「ビルド入口」。
 
 実行内容（既定）:
   1) 検証サマリ表 を生成（paper_tables.py）
-  2) 論文HTMLを生成（paper_html.py）
-  3) 整合チェック（paper_lint.py）
-  4) TeX 生成・PDF 生成・TeX監査
+  2) 整合チェック（paper_lint.py）
+  3) TeX 生成・PDF 生成・TeX監査
+  4) 論文HTMLは `--with-html` 指定時のみ生成する
 
 出力（既定）:
   - output/private/summary/paper_table1_results.md（ほか .json/.csv）
-  - profile=paper: output/private/summary/pmodel_paper.html（Part I）
-  - profile=part2_astrophysics: output/private/summary/pmodel_paper_part2_astrophysics.html
-  - profile=part3_quantum: output/private/summary/pmodel_paper_part3_quantum.html（互換）
-  - profile=part3a_quantum_foundations: output/private/summary/pmodel_paper_part3a_quantum_foundations.html
-  - profile=part3b_quantum_verification: output/private/summary/pmodel_paper_part3b_quantum_verification.html
-  - profile=part4_verification: output/private/summary/pmodel_paper_part4_verification.html
-  - profile=part5_future_predictions: output/private/summary/pmodel_paper_part5_future_predictions.html
   - profileごとの PDF（.tex から生成）
+  - profileごとの HTML（`--with-html` 指定時のみ）
 """
 
 from __future__ import annotations
@@ -50,7 +44,6 @@ def _repo_root() -> Path:
 
 
 # 関数: `_run_best_effort` の入出力契約と処理意図を定義する。
-
 def _run_best_effort(argv: list[str], *, cwd: Path, env_overrides: Optional[dict[str, str]] = None) -> None:
     try:
         env = os.environ.copy()
@@ -65,9 +58,8 @@ def _run_best_effort(argv: list[str], *, cwd: Path, env_overrides: Optional[dict
 
 
 # 関数: `main` の入出力契約と処理意図を定義する。
-
 def main(argv: Optional[Sequence[str]] = None) -> int:
-    ap = argparse.ArgumentParser(description="Build paper artifacts (検証サマリ表 + HTML + lint).")
+    ap = argparse.ArgumentParser(description="Build paper artifacts (検証サマリ表 + TeX/PDF + lint; HTML は明示指定のみ).")
     ap.add_argument(
         "--profile",
         choices=list(profile_content.PAPER_PROFILES),
@@ -78,7 +70,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "--mode",
         choices=["publish", "internal"],
         default="publish",
-        help="paper_html render mode (default: publish).",
+        help="HTML を生成する場合の paper_html render mode (default: publish).",
     )
     ap.add_argument(
         "--outdir",
@@ -98,9 +90,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         help="Global scale applied to the shared figure font profile (default: 1.0).",
     )
     ap.add_argument(
+        "--locale",
+        default=None,
+        help="paper locale manifest key (default: env WAVEP_PAPER_LOCALE or ja).",
+    )
+    ap.add_argument(
         "--no-embed-images",
         action="store_true",
-        help="Do not embed images in publish HTML (pass-through to paper_html).",
+        help="HTML を生成する場合に publish HTML へ画像を埋め込まない。",
+    )
+    ap.add_argument(
+        "--with-html",
+        action="store_true",
+        help="HTML 生成を明示的に有効化する（既定: 無効）。",
     )
     ap.add_argument("--skip-tables", action="store_true", help="Skip 検証サマリ表 generation.")
     ap.add_argument("--skip-lint", action="store_true", help="Skip paper_lint check.")
@@ -177,8 +179,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     args = ap.parse_args(argv)
     enable_docx = bool(args.with_docx) and (not bool(args.skip_docx))
+    generate_html = bool(args.with_html) or enable_docx
     if bool(args.with_docx) and bool(args.skip_docx):
         print("[warn] --with-docx と --skip-docx が同時指定されたため DOCX はスキップします。")
+    if bool(args.no_embed_images) and not generate_html:
+        print("[warn] --no-embed-images は HTML 未生成のため無視します。")
 
     # 条件分岐: `args.skip_pdf` を満たす経路を評価する。
 
@@ -206,6 +211,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_dir = Path(args.outdir) if args.outdir else (root / "output" / "private" / "summary")
     out_dir.mkdir(parents=True, exist_ok=True)
     profile = str(args.profile)
+    locale = str(args.locale).strip().lower() if args.locale else None
+    if locale:
+        os.environ["WAVEP_PAPER_LOCALE"] = locale
+        os.environ["WAVEP_FIGURE_LOCALE"] = locale
+
     requested_figure_lang = str(args.figure_lang)
     figure_font_scale = float(args.figure_font_scale)
     if figure_font_scale <= 0:
@@ -213,7 +223,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 2
 
     env_figure_lang = os.environ.get("WAVEP_FIGURE_LANG", "").strip().lower()
-    auto_figure_lang = env_figure_lang if env_figure_lang in {"ja", "en"} else "ja"
+    auto_locale_lang = locale if locale in {"ja", "en"} else "ja"
+    auto_figure_lang = env_figure_lang if env_figure_lang in {"ja", "en"} else auto_locale_lang
     auto_lang_profiles = {
         profile_content.PART3_COMPAT_PROFILE,
         profile_content.PART3A_PROFILE,
@@ -720,27 +731,34 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         except Exception:
             pass
 
-    html_argv: list[str] = ["--profile", profile, "--mode", str(args.mode)]
-    # 条件分岐: `args.outdir` を満たす経路を評価する。
-    if args.outdir:
-        html_argv += ["--outdir", str(args.outdir)]
+    if generate_html:
+        html_argv: list[str] = ["--profile", profile, "--mode", str(args.mode)]
+        if locale:
+            html_argv += ["--locale", locale]
 
-    # 条件分岐: `args.no_embed_images` を満たす経路を評価する。
+        if args.outdir:
+            html_argv += ["--outdir", str(args.outdir)]
 
-    if args.no_embed_images:
-        html_argv.append("--no-embed-images")
+        if args.no_embed_images:
+            html_argv.append("--no-embed-images")
 
-    rc = paper_html.main(html_argv)
-    # 条件分岐: `rc != 0` を満たす経路を評価する。
-    if rc != 0:
-        return rc
+        rc = paper_html.main(html_argv)
+        if rc != 0:
+            return rc
 
     # 条件分岐: `not args.skip_lint` を満たす経路を評価する。
 
     if not args.skip_lint:
         lint_argv: list[str] = []
-        for manuscript in profile_content.resolve_lint_manuscripts(profile):
+        for manuscript in profile_content.resolve_lint_manuscripts(profile, root=root, locale=locale):
             lint_argv += ["--manuscript", manuscript]
+
+        lint_argv += [
+            "--references",
+            str(profile_content.resolve_references_path(root, locale=locale)),
+            "--figures-index",
+            str(profile_content.resolve_figures_index_path(root, locale=locale)),
+        ]
 
         rc = paper_lint.main(lint_argv)
         # 条件分岐: `rc != 0` を満たす経路を評価する。
@@ -749,9 +767,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     # 条件分岐: `profile == "paper"` を満たす経路を評価する。
 
-    html_name = profile_content.resolve_html_name(profile)
-    docx_name = profile_content.resolve_docx_name(profile)
-    pdf_name = profile_content.resolve_pdf_name(profile)
+    html_name = profile_content.resolve_html_name(profile, locale=locale)
+    docx_name = profile_content.resolve_docx_name(profile, locale=locale)
+    pdf_name = profile_content.resolve_pdf_name(profile, locale=locale)
 
     paper_html_path = out_dir / html_name
     paper_docx_path = out_dir / docx_name
@@ -783,6 +801,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # strict post-build TeX/PDF phase (Part I-IV common gate)
 
     tex_argv: list[str] = ["--profile", profile, "--outdir", str(out_dir)]
+    if locale:
+        tex_argv += ["--locale", locale]
+
     rc = paper_latex.main(tex_argv)
     # 条件分岐: `rc != 0` を満たす経路を評価する。
     if rc != 0:
@@ -797,7 +818,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "-B",
             str(root / "scripts" / "summary" / "part4_strict_figure_refresh.py"),
             "--tex",
-            str(out_dir / profile_content.resolve_tex_name(profile)),
+            str(out_dir / profile_content.resolve_tex_name(profile, locale=locale)),
         ]
         strict_rc = subprocess.run(strict_refresh_argv, cwd=str(root)).returncode
         if strict_rc != 0:
@@ -815,7 +836,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "-B",
             str(root / "scripts" / "summary" / "part3b_figure_canvas_normalize.py"),
             "--tex",
-            str(out_dir / profile_content.resolve_tex_name(profile)),
+            str(out_dir / profile_content.resolve_tex_name(profile, locale=locale)),
         ]
         try:
             subprocess.run(normalize_argv, cwd=str(root), check=True)
@@ -835,7 +856,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "--engine",
             str(args.pdf_engine),
         ]
+        if locale:
+            pdf_argv += ["--locale", locale]
         # 条件分岐: `bool(args.pdf_require_engine)` を満たす経路を評価する。
+
         if bool(args.pdf_require_engine):
             pdf_argv.append("--require-engine")
 
@@ -871,7 +895,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "--engine",
             str(args.tex_audit_engine),
         ]
+        if locale:
+            audit_argv += ["--locale", locale]
         # 条件分岐: `bool(args.tex_audit_require_engine)` を満たす経路を評価する。
+
         if bool(args.tex_audit_require_engine):
             audit_argv.append("--require-engine")
 
@@ -894,7 +921,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "mode": str(args.mode),
                 "no_embed_images": bool(args.no_embed_images),
                 "outputs": {
-                    "paper_html": paper_html_path,
+                    "paper_html": paper_html_path if (generate_html and paper_html_path.exists()) else None,
                     "paper_docx": paper_docx_path if (enable_docx and paper_docx_path.exists()) else None,
                     "paper_pdf": paper_pdf_path if ((not args.skip_pdf) and paper_pdf_path.exists()) else None,
                     "papers_pdf": (
@@ -909,7 +936,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     except Exception:
         pass
 
-    print(f"[ok] build: {paper_html_path}")
+    if generate_html and paper_html_path.exists():
+        print(f"[ok] html : {paper_html_path}")
+    print(f"[ok] tex/pdf build profile: {profile}")
     # 条件分岐: `enable_docx and paper_docx_path.exists()` を満たす経路を評価する。
     if enable_docx and paper_docx_path.exists():
         print(f"[ok] docx : {paper_docx_path}")

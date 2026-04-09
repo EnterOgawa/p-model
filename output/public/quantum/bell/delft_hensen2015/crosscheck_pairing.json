@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-04-08T09:12:27.639104+00:00",
+  "generated_utc": "2026-04-09T17:09:52.233342+00:00",
   "dataset_id": "delft_hensen2015",
   "supported": false,
   "baseline": {
@@ -13,7 +13,7 @@
   "inputs": {
     "natural_window_frozen_json": {
       "path": "output/public/quantum/bell/delft_hensen2015/natural_window_frozen.json",
-      "sha256": "af50e81391e1270d240bf75cfb6a552e025340ce705a4c6bb0c5d57c07f25548"
+      "sha256": "86b0e16d0c29da13427bd45a8596ae8e00d722d602623e7865ba3cb86072df81"
     }
   },
   "reason": "pairing crosscheck not implemented for this dataset type"

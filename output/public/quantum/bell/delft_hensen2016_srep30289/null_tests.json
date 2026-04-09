@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-04-08T09:12:26.498214+00:00",
+  "generated_utc": "2026-04-09T17:09:51.110120+00:00",
   "dataset_id": "delft_hensen2016_srep30289",
   "supported": true,
   "baseline": {
@@ -34,7 +34,7 @@
   "inputs": {
     "natural_window_frozen_json": {
       "path": "output/public/quantum/bell/delft_hensen2016_srep30289/natural_window_frozen.json",
-      "sha256": "8341e05b36fd3eb455513b531d1915250b891f2faf3ceadc0e16dcab0dc0006b"
+      "sha256": "de47cc8e5093bfb7be5bef0527209b1a5de9a855db0c6b9f72b0a3696782decb"
     }
   }
 }

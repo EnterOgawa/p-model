@@ -18,6 +18,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from scripts.summary import paper_locale_registry as locale_registry
+
 
 PAPER_PROFILES: tuple[str, ...] = (
     "paper",
@@ -35,23 +37,23 @@ PART3B_PROFILE = "part3b_quantum_verification"
 
 
 _PROFILE_TO_MANUSCRIPT: dict[str, str] = {
-    "paper": "doc/paper/10_part1_core_theory.md",
-    "part2_astrophysics": "doc/paper/11_part2_astrophysics.md",
-    PART3_COMPAT_PROFILE: "doc/paper/12_part3_quantum.md",
-    PART3A_PROFILE: "doc/paper/12_part3a_quantum_foundations.md",
-    PART3B_PROFILE: "doc/paper/12_part3b_quantum_verification.md",
-    "part4_verification": "doc/paper/13_part4_verification.md",
-    "part5_future_predictions": "doc/paper/14_part5_future_predictions.md",
+    "paper": "paper",
+    "part2_astrophysics": "part2_astrophysics",
+    PART3_COMPAT_PROFILE: "part3_quantum",
+    PART3A_PROFILE: "part3a_quantum_foundations",
+    PART3B_PROFILE: "part3b_quantum_verification",
+    "part4_verification": "part4_verification",
+    "part5_future_predictions": "part5_future_predictions",
 }
 
 _PROFILE_TO_LINT_MANUSCRIPTS: dict[str, tuple[str, ...]] = {
-    "paper": ("doc/paper/10_part1_core_theory.md",),
-    "part2_astrophysics": ("doc/paper/11_part2_astrophysics.md",),
-    PART3_COMPAT_PROFILE: ("doc/paper/12_part3_quantum.md",),
-    PART3A_PROFILE: ("doc/paper/12_part3a_quantum_foundations.md",),
-    PART3B_PROFILE: ("doc/paper/12_part3b_quantum_verification.md",),
-    "part4_verification": ("doc/paper/13_part4_verification.md",),
-    "part5_future_predictions": ("doc/paper/14_part5_future_predictions.md",),
+    "paper": ("paper",),
+    "part2_astrophysics": ("part2_astrophysics",),
+    PART3_COMPAT_PROFILE: ("part3_quantum",),
+    PART3A_PROFILE: ("part3a_quantum_foundations",),
+    PART3B_PROFILE: ("part3b_quantum_verification",),
+    "part4_verification": ("part4_verification",),
+    "part5_future_predictions": ("part5_future_predictions",),
 }
 
 _PROFILE_TO_HTML: dict[str, str] = {
@@ -128,7 +130,7 @@ _PROFILE_TO_HTML_SUBTITLE: dict[str, str] = {
     "paper": "記号規約・最小仮定・写像（公開体裁）",
     "part2_astrophysics": "応用検証：宇宙物理（公開体裁）",
     PART3_COMPAT_PROFILE: "応用検証：量子物理（公開体裁）",
-    PART3A_PROFILE: "理論基盤：Pψ 接続・測定・Bell selection の入口（公開体裁）",
+    PART3A_PROFILE: "理論基盤：Pψ 接続・測定・Bell 選別入口（公開体裁）",
     PART3B_PROFILE: "応用検証：量子データ再解析と差分予測（公開体裁）",
     "part4_verification": "検証方法と公開成果物への参照先（GitHub）",
     "part5_future_predictions": "差分予測と将来観測の決着条件（公開体裁）",
@@ -151,7 +153,71 @@ _PROFILE_TO_TEX_TITLE: dict[str, str] = {
     PART3A_PROFILE: r"時間波ダイナミクスに基づく統一理論 (The P-model)\\[0.5em]Part III-A: 量子基盤理論",
     PART3B_PROFILE: r"時間波ダイナミクスに基づく統一理論 (The P-model)\\[0.5em]Part III-B: 量子検証応用",
     "part4_verification": r"時間波ダイナミクスに基づく統一理論 (The P-model)\\[0.5em]Part IV: 再現性監査・公開成果物レジストリ・更新運用\\[1em]\large",
-    "part5_future_predictions": r"時間波ダイナミクスに基づく統一理論 (The P-model)\\[0.5em]Part V: 未来への予測（Predictions for Future Observations）\\[1em]\large",
+    "part5_future_predictions": r"時間波ダイナミクスに基づく統一理論 (The P-model)\\[0.5em]Part V: 将来観測予測\\[1em]\large",
+}
+
+_DEFAULT_ROOT = Path(__file__).resolve().parents[2]
+_FIGURES_INDEX_KEY = "figures_index"
+_DEFINITIONS_KEY = "definitions"
+_UNCERTAINTY_KEY = "uncertainty"
+_LLR_APPENDIX_KEY = "llr_appendix"
+_QUANTUM_APPENDIX_A_KEY = "quantum_appendix_a"
+_DATA_SOURCES_KEY = "data_sources"
+_REFERENCES_KEY = "references"
+
+_PROFILE_TO_POST_BIBLIOGRAPHY_TEX: dict[str, str] = {
+    "part5_future_predictions": r"""
+\clearpage
+
+\section*{最後に}
+
+私は哲学という学問について深く考えることがあった
+
+物事を深く理解しようとすると、最終的に科学に行きつく
+
+しかし、今までの科学には哲学に似た部分があったと感じている
+
+それが $\alpha$ であり、特異点である
+
+宇宙も量子も同じ物理的事象であるにもかかわらず、異なる考え方をする
+
+ここが哲学のようなものと感じるゆえんである
+
+人は不完全な存在なので不完全なものを好む
+
+これ、そのものが哲学といえる
+
+この世界には物体の位置を表す3次元と時間しかない
+
+このシンプルな問いからすべては始まった
+
+完全でなくてもいい。科学もまた、人が扱うものだから
+
+大切なことはただひとつ
+
+\textbf{「人は人のために生き、人に生かされている」}
+
+このことを深く理解することが、哲学や科学の本質といえる
+
+この理解こそが、平和へつながる唯一の道徳といえる
+
+この世には神も仏も存在しない
+
+地位も階級も存在しない
+
+存在するのは、時間という波が形を変えて在るだけに過ぎない
+
+何かにすがるのではなく
+
+今生きていること
+
+周囲の人々により生かされていることに感謝することが
+
+幸せにつながる唯一の道である
+
+\vspace{2em}
+\hfill Shunji Ogawa
+""".strip(),
 }
 
 
@@ -162,7 +228,7 @@ _PART3B_PREAMBLE = """# 時間波ダイナミクスに基づく統一理論 (The
 
 本稿は P-model 量子編のうち、公開一次データを用いた検証結果と差分予測を扱う。
 理論定義、Pψ 接続、電磁気の位置づけ、Born則の採用範囲、測定の有効記述、
-Bell selection の入口は Part III-A を正本とする。
+Bell 選別の入口は Part III-A を正本とする。
 
 ---
 
@@ -199,35 +265,50 @@ Part III-A は量子編の理論基盤を固定するための文書であり、
 """
 
 
+# 関数: `_resolve_root` の入出力契約と処理意図を定義する。
+def _resolve_root(root: Path | None = None) -> Path:
+    return root if root is not None else _DEFAULT_ROOT
+
+
+# 関数: `_to_rel_from_root` の入出力契約と処理意図を定義する。
+def _to_rel_from_root(path: Path, *, root: Path) -> str:
+    return str(path.resolve().relative_to(root.resolve())).replace("\\", "/")
+
+
 # 関数: `resolve_manuscript_path` の入出力契約と処理意図を定義する。
-def resolve_manuscript_path(root: Path, profile: str) -> Path:
-    rel = _PROFILE_TO_MANUSCRIPT[profile]
-    return root / Path(rel)
+def resolve_manuscript_path(root: Path, profile: str, locale: str | None = None) -> Path:
+    manifest_key = _PROFILE_TO_MANUSCRIPT[profile]
+    return locale_registry.resolve_source_path(root, manifest_key, locale=locale)
 
 
 # 関数: `resolve_lint_manuscripts` の入出力契約と処理意図を定義する。
-def resolve_lint_manuscripts(profile: str) -> tuple[str, ...]:
-    return _PROFILE_TO_LINT_MANUSCRIPTS[profile]
+def resolve_lint_manuscripts(profile: str, *, root: Path | None = None, locale: str | None = None) -> tuple[str, ...]:
+    resolved_root = _resolve_root(root)
+    keys = _PROFILE_TO_LINT_MANUSCRIPTS[profile]
+    return tuple(
+        _to_rel_from_root(locale_registry.resolve_source_path(resolved_root, key, locale=locale), root=resolved_root)
+        for key in keys
+    )
 
 
 # 関数: `resolve_html_name` の入出力契約と処理意図を定義する。
-def resolve_html_name(profile: str) -> str:
-    return _PROFILE_TO_HTML[profile]
+def resolve_html_name(profile: str, locale: str | None = None) -> str:
+    return locale_registry.localized_output_name(_PROFILE_TO_HTML[profile], locale=locale)
 
 
 # 関数: `resolve_docx_name` の入出力契約と処理意図を定義する。
-def resolve_docx_name(profile: str) -> str:
-    return _PROFILE_TO_DOCX[profile]
+def resolve_docx_name(profile: str, locale: str | None = None) -> str:
+    return locale_registry.localized_output_name(_PROFILE_TO_DOCX[profile], locale=locale)
 
 
 # 関数: `resolve_pdf_name` の入出力契約と処理意図を定義する。
-def resolve_pdf_name(profile: str) -> str:
-    return _PROFILE_TO_PDF[profile]
+def resolve_pdf_name(profile: str, locale: str | None = None) -> str:
+    return locale_registry.localized_output_name(_PROFILE_TO_PDF[profile], locale=locale)
 
 
 # 関数: `resolve_tex_name` の入出力契約と処理意図を定義する。
-def resolve_tex_name(profile: str) -> str:
-    return _PROFILE_TO_TEX[profile]
+def resolve_tex_name(profile: str, locale: str | None = None) -> str:
+    return locale_registry.localized_output_name(_PROFILE_TO_TEX[profile], locale=locale)
 
 
 # 関数: `resolve_font_profile` の入出力契約と処理意図を定義する。
@@ -260,6 +341,46 @@ def resolve_tex_title(profile: str) -> str:
     return _PROFILE_TO_TEX_TITLE[profile]
 
 
+# 関数: `resolve_figures_index_path` の入出力契約と処理意図を定義する。
+def resolve_figures_index_path(root: Path, locale: str | None = None) -> Path:
+    return locale_registry.resolve_source_path(root, _FIGURES_INDEX_KEY, locale=locale)
+
+
+# 関数: `resolve_definitions_path` の入出力契約と処理意図を定義する。
+def resolve_definitions_path(root: Path, locale: str | None = None) -> Path:
+    return locale_registry.resolve_source_path(root, _DEFINITIONS_KEY, locale=locale)
+
+
+# 関数: `resolve_uncertainty_path` の入出力契約と処理意図を定義する。
+def resolve_uncertainty_path(root: Path, locale: str | None = None) -> Path:
+    return locale_registry.resolve_source_path(root, _UNCERTAINTY_KEY, locale=locale)
+
+
+# 関数: `resolve_llr_appendix_path` の入出力契約と処理意図を定義する。
+def resolve_llr_appendix_path(root: Path, locale: str | None = None) -> Path:
+    return locale_registry.resolve_source_path(root, _LLR_APPENDIX_KEY, locale=locale)
+
+
+# 関数: `resolve_quantum_appendix_a_path` の入出力契約と処理意図を定義する。
+def resolve_quantum_appendix_a_path(root: Path, locale: str | None = None) -> Path:
+    return locale_registry.resolve_source_path(root, _QUANTUM_APPENDIX_A_KEY, locale=locale)
+
+
+# 関数: `resolve_data_sources_path` の入出力契約と処理意図を定義する。
+def resolve_data_sources_path(root: Path, locale: str | None = None) -> Path:
+    return locale_registry.resolve_source_path(root, _DATA_SOURCES_KEY, locale=locale)
+
+
+# 関数: `resolve_references_path` の入出力契約と処理意図を定義する。
+def resolve_references_path(root: Path, locale: str | None = None) -> Path:
+    return locale_registry.resolve_source_path(root, _REFERENCES_KEY, locale=locale)
+
+
+# 関数: `resolve_post_bibliography_tex` の入出力契約と処理意図を定義する。
+def resolve_post_bibliography_tex(profile: str) -> str:
+    return _PROFILE_TO_POST_BIBLIOGRAPHY_TEX.get(profile, "")
+
+
 # 関数: `uses_quantum_table1` の入出力契約と処理意図を定義する。
 def uses_quantum_table1(profile: str) -> bool:
     return profile in {PART3_COMPAT_PROFILE, PART3B_PROFILE}
@@ -288,6 +409,7 @@ def _split_part3_sections(md_text: str) -> tuple[str, list[str]]:
         if line.startswith("## "):
             if current:
                 sections.append(current)
+
             current = [line]
         else:
             if current:
@@ -344,6 +466,6 @@ def _retitle_part3a(text: str) -> str:
 
 
 # 関数: `load_profile_markdown` の入出力契約と処理意図を定義する。
-def load_profile_markdown(root: Path, profile: str) -> str:
-    md_path = resolve_manuscript_path(root, profile)
+def load_profile_markdown(root: Path, profile: str, locale: str | None = None) -> str:
+    md_path = resolve_manuscript_path(root, profile, locale=locale)
     return md_path.read_text(encoding="utf-8", errors="replace")

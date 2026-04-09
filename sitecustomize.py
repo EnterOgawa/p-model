@@ -300,12 +300,15 @@ def _normalize_wavep_figure_canvas_for_profile(figure: Any) -> tuple[float, floa
 
 def _enable_vector_pdf_sidecar_if_enabled() -> None:
     """
-    WAVEP_MPL_AUTOSAVE_VECTOR_PDF=1 のとき、`*.png/*.jpg` 保存時に
-    同名 `*.pdf` を追加で保存する。
+    `Figure.savefig` に共通 hook を入れる。
+
+    役割:
+    - 非 `ja` locale の図 artifact を `locales/<locale>/...` へ退避する
+    - WAVEP_MPL_AUTOSAVE_VECTOR_PDF=1 のときだけ `*.png/*.jpg` 保存時に
+      同名 `*.pdf` を追加で保存する
     """
     raw = os.getenv("WAVEP_MPL_AUTOSAVE_VECTOR_PDF", "").strip().lower()
-    if raw not in {"1", "true", "yes", "on"}:
-        return
+    autosave_pdf_enabled = raw in {"1", "true", "yes", "on"}
 
     global _VECTOR_PDF_AUTOSAVE_PATCHED
     if _VECTOR_PDF_AUTOSAVE_PATCHED:
@@ -313,6 +316,7 @@ def _enable_vector_pdf_sidecar_if_enabled() -> None:
 
     try:
         from matplotlib.figure import Figure
+        from scripts.utils.figure_locale_paths import localize_figure_output_path
     except Exception:
         return
 
@@ -329,18 +333,46 @@ def _enable_vector_pdf_sidecar_if_enabled() -> None:
         if candidate is None:
             return None
 
+        # BytesIO などの file-like object は path ではないので、locale rewrite 対象から外す。
+        if hasattr(candidate, "write") or hasattr(candidate, "read"):
+            return None
+
+        if not isinstance(candidate, (str, os.PathLike, Path)):
+            return None
+
         try:
             return str(candidate)
         except Exception:
             return None
 
+    # 関数: `_rewrite_save_target` の入出力契約と処理意図を定義する。
+    def _rewrite_save_target(args: tuple[Any, ...], kwargs: dict[str, Any]) -> tuple[tuple[Any, ...], dict[str, Any], str | None]:
+        fname = _extract_fname(args, kwargs)
+        if not fname:
+            return args, kwargs, None
+
+        localized_target = localize_figure_output_path(Path(fname))
+        try:
+            localized_target.parent.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
+
+        if args:
+            new_args = (localized_target, *args[1:])
+            return new_args, kwargs, str(localized_target)
+
+        new_kwargs = dict(kwargs)
+        new_kwargs["fname"] = localized_target
+        return args, new_kwargs, str(localized_target)
+
     # 関数: `patched_savefig` の入出力契約と処理意図を定義する。
 
     def patched_savefig(self, *args, **kwargs):
         global _VECTOR_PDF_AUTOSAVE_IN_PROGRESS
+        save_args, save_kwargs, resolved_fname = _rewrite_save_target(args, kwargs)
         original_size = _normalize_wavep_figure_canvas_for_profile(self)
         try:
-            result = original_savefig(self, *args, **kwargs)
+            result = original_savefig(self, *save_args, **save_kwargs)
         finally:
             if original_size is not None:
                 try:
@@ -351,8 +383,11 @@ def _enable_vector_pdf_sidecar_if_enabled() -> None:
         if _VECTOR_PDF_AUTOSAVE_IN_PROGRESS:
             return result
 
-        fname = _extract_fname(args, kwargs)
+        fname = resolved_fname
         if not fname:
+            return result
+
+        if not autosave_pdf_enabled:
             return result
 
         suffix = Path(fname).suffix.lower()
@@ -360,7 +395,7 @@ def _enable_vector_pdf_sidecar_if_enabled() -> None:
             return result
 
         pdf_path = str(Path(fname).with_suffix(".pdf"))
-        pdf_kwargs = dict(kwargs)
+        pdf_kwargs = dict(save_kwargs)
         pdf_kwargs["format"] = "pdf"
         # PDFでは dpi 指定は不要なので削除する。
         pdf_kwargs.pop("dpi", None)

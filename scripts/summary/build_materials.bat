@@ -5,9 +5,9 @@ REM build_materials.bat
 REM
 REM Default (full): run the full offline pipeline (heavy).
 REM Optional: pass "quick" to rebuild paper/public materials from what is already computed.
-REM Optional: pass "quick-nodocx" to rebuild HTML/PDF only (alias of quick).
+REM Optional: pass "quick-nodocx" to rebuild TeX/PDF only (alias of quick).
 REM Note: outputs are written under output\private\summary by default.
-REM Note: DOCX auto-generation is disabled by policy; this script rebuilds HTML/PDF only.
+REM Note: DOCX auto-generation is disabled by policy; this script rebuilds TeX/PDF only.
 REM Note: all modes emit LaTeX (.tex) and PDF for available paper profiles.
 REM
 REM Usage:
@@ -191,11 +191,6 @@ set "WAVEP_MPL_FORCE_JA_TEXT=1"
 echo.
 echo === paper_lint (%PROFILE%) ===
 python -B scripts\summary\paper_lint.py --manuscript doc\paper\13_part4_verification.md
-if errorlevel 1 goto fail
-
-echo.
-echo === paper_html (%PROFILE%) ===
-python -B scripts\summary\paper_html.py --profile %PROFILE% --mode publish --outdir output\private\summary
 if errorlevel 1 goto fail
 
 echo.
@@ -438,7 +433,7 @@ echo [ok] Done (quick)
 goto ok
 
 :quick_nodocx
-echo [info] Mode=quick-nodocx (paper_build only; HTML/PDF only)
+echo [info] Mode=quick-nodocx (paper_build only; TeX/PDF only)
 echo [info] ROOT=%ROOT%
 
 echo.

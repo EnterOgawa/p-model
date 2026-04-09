@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-04-08T09:13:13.193016+00:00",
+  "generated_utc": "2026-04-09T17:10:35.790138+00:00",
   "phase": 7,
   "step": "7.13.17.11",
   "inputs": {
@@ -10,7 +10,7 @@
     },
     "frozen_falsification_pack": {
       "path": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_energy_frequency_mapping_falsification_pack.json",
-      "sha256": "ad6b04e9f638c00c00cce44212b90a87f7509a9efb95c94c117b2f04e4b98cfa"
+      "sha256": "20ebcbfeed6870b91f3a131256c1085fae8faf758c190b653efaacc25184e630"
     }
   },
   "thresholds": {

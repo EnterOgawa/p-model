@@ -9,8 +9,15 @@
   - source 文字列は英語寄りのまま保持し、保存時に locale を適用する。
 
 切替:
-  - `WAVEP_FIGURE_LANG=ja|en`
-  - 未指定時は `ja`
+- `WAVEP_FIGURE_LANG=ja|en`
+- `WAVEP_FIGURE_LOCALE=ja|en|...`
+- 未指定時は `ja`
+
+補足:
+- `WAVEP_FIGURE_LANG` は図中テキストの表示言語を切り替える。
+- `WAVEP_FIGURE_LOCALE` は artifact の保存先を切り替える。
+- `ja` は現行の canonical path を維持し、非 `ja` は `locales/<locale>/...`
+  へ保存して日本語図を比較基準として残す。
 """
 
 from __future__ import annotations
@@ -689,6 +696,16 @@ def enable_figure_text_localization(*, default_lang: str = "ja") -> None:
 
         target_lang = get_figure_language(default=default_lang)
         _localize_figure_texts(self, stem=stem, target=target_lang)
+        localized_target = None
+        if target_path is not None:
+            try:
+                from scripts.utils.figure_locale_paths import localize_figure_output_path
+
+                localized_target = localize_figure_output_path(target_path)
+                localized_target.parent.mkdir(parents=True, exist_ok=True)
+            except Exception:
+                localized_target = target_path
+
         save_kwargs = dict(kwargs)
         profile_name = str(os.getenv("WAVEP_MPL_FONT_PROFILE", "")).strip()
         try:
@@ -714,10 +731,11 @@ def enable_figure_text_localization(*, default_lang: str = "ja") -> None:
             if normalize_wavep_export_canvas_to_textwidth is not None:
                 normalize_wavep_export_canvas_to_textwidth(self, profile_name=profile_name)
 
-        result = original_savefig(self, fname, *args, **save_kwargs)
+        actual_target = localized_target if localized_target is not None else fname
+        result = original_savefig(self, actual_target, *args, **save_kwargs)
 
-        if target_path is not None and target_path.suffix.lower() == ".png" and not _vector_pdf_sidecar_enabled():
-            pdf_target = target_path.with_suffix(".pdf")
+        if localized_target is not None and localized_target.suffix.lower() == ".png" and not _vector_pdf_sidecar_enabled():
+            pdf_target = localized_target.with_suffix(".pdf")
             pdf_kwargs = dict(save_kwargs)
             pdf_kwargs["format"] = "pdf"
             pdf_kwargs.pop("dpi", None)
