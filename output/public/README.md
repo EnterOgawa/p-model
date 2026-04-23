@@ -6,19 +6,21 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![License: CC BY-ND 4.0](https://img.shields.io/badge/License-CC_BY--ND_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nd/4.0/)
 
-**Document v2.0  2026-04-06 UTC**
+**Document v2.0 (Bilingual Release)  2026-04-23 UTC**
 
 ## 👤 Author
 - **Shunji Ogawa**
 - **ENTERSYSTEM Co., Ltd.**
 - **Email:** `s_ogawa@entersystem.co.jp`
 
-## 🌐 For English Readers (English version coming soon)
+## 🌐 For English Readers
 **P-model** proposes that "all matter is waves, and the medium is time itself." From a single scalar field `P(x)`, it derives gravity, clocks, light propagation, rotation, and quantum phenomena, all through one unified mapping.
 
 Key results: (1) `β=1` predicted from the null geodesic of the effective metric and confirmed by LLR and MESSENGER; (2) the fine-structure constant `α` derived, not fitted, from a single frozen action with no free parameters, matching the CODATA measured value to 0.02%. 48 verification items, 5 falsifiable predictions for 2027-2035+.
 
-Full English translation coming soon. Please **Star** this repo to stay updated!
+**Full English translation (Parts I–V) is now available on Zenodo as part of the v2.0 Bilingual Release.** Scientific content is unchanged from the Japanese v2.0; no theoretical results have been modified. Please **Star** this repo to stay updated on future predictions and verification results.
+
+📄 **[Download English PDFs from Zenodo →](https://doi.org/10.5281/zenodo.18981366)**
 
 ---
 
@@ -59,20 +61,20 @@ P-modelの核心は、たったひとつの視点の転換です。
 
 ---
 
-## 📊 検証スコアボード（現在地）
+## 📊 検証スコアボード(現在地)
 
 全48件の検証結果です。通ったもの、保留のもの、棄却されたものすべて隠さず公開しています。
 
 | 判定 | 件数 | どんな項目か |
 |---|---:|---|
-| **Pass** | 20 | 弱場テスト（LLR, Cassini, Viking 等）、β終端、XRISM、SPARC、量子系 |
-| **Watch** | 17 | EHT（精度待ち）、GW偏光（検出器増待ち）、宇宙論（高z待ち）、Bell selection 等 |
+| **Pass** | 20 | 弱場テスト(LLR, Cassini, Viking 等)、β終端、XRISM、SPARC、量子系 |
+| **Watch** | 17 | EHT(精度待ち)、GW偏光(検出器増待ち)、宇宙論(高z待ち)、Bell selection 等 |
 | **Reject** | 6 | caseA計量、純スカラー極限、Pantheon+直接fit、量子サブセット3件 |
 | **Reference** | 5 | 光偏向γ*、赤方偏移ε*、フレームドラッグ、GPS、速度飽和δ |
 
-β（光の応答指数）は理論から `β=1` と予言し、LLR と MESSENGER の2つの独立チャネルで確認。**β 終端監査: Pass。**
+β(光の応答指数)は理論から `β=1` と予言し、LLR と MESSENGER の2つの独立チャネルで確認。**β 終端監査: Pass。**
 
-α（微細構造定数）は、標準模型では 20 個以上ある自由パラメータのひとつとして実験値を手で入れます。P-model では、凍結作用から自由パラメータなしに導出される理論の出力値であり、CODATA の測定値との差は 0.02%。**v2.0 の理論側の主結果のひとつです。**
+α(微細構造定数)は、標準模型では 20 個以上ある自由パラメータのひとつとして実験値を手で入れます。P-model では、凍結作用から自由パラメータなしに導出される理論の出力値であり、CODATA の測定値との差は 0.02%。**v2.0 の理論側の主結果のひとつです。**
 
 宇宙論は率直に言って弱いです。Pantheon+ では ΛCDM に AIC で負けており、DDR には深刻な張力があります。ここは、より遠い宇宙のデータが揃うまで決着しません。
 
@@ -88,9 +90,11 @@ P-modelの核心は、たったひとつの視点の転換です。
 | **IV** | 再現性監査・公開成果物レジストリ・更新運用 | 検証結果の登録、再実行条件の記録、公開成果物のレジストリ |
 | **V** | 未来への予測 | 「いつ何を観測すれば決着するか」を8項目で固定 |
 
-> *論文本文は Zenodo で公開中です。最新版リンクは以下を参照してください。*
+> *論文本文は Zenodo で公開中です。v2.0 Bilingual Release(2026-04-23)により、日本語版と英語版の両方がダウンロードできます。*
+>
+> *The papers are available on Zenodo. The v2.0 Bilingual Release (2026-04-23) provides both Japanese and English versions.*
 
-📄 **[論文 PDF（Part I-V）はこちら  Zenodo](https://doi.org/10.5281/zenodo.18981366)**
+📄 **[論文 PDF / Papers (Part I–V, JP+EN) on Zenodo →](https://doi.org/10.5281/zenodo.18981366)**
 
 ---
 
@@ -116,29 +120,29 @@ P-modelの核心は、たったひとつの視点の転換です。
 ## この理論の特徴
 
 **β=1 はフィットではなく予言**<br>
-有効計量の null 測地線から導出された理論値です。3つの独立チャネル（Cassini, LLR, MESSENGER）で確認済み。
+有効計量の null 測地線から導出された理論値です。3つの独立チャネル(Cassini, LLR, MESSENGER)で確認済み。
 
 **α  1/137 を「測る」のではなく「導く」**<br>
 標準模型では、微細構造定数 α は 20 個以上ある自由パラメータのひとつであり、実験で測って手で入れる数字です。P-model では、α は単一の凍結作用から 2 つの独立読み出しの一致条件で導出される結果です。測定値ではなく、理論が出力した数字。その導出値と CODATA の測定値との差は 0.02%。
 
 **棄却された箇所も全部公開**<br>
-理論が合わなかった場所（caseA 棄却、CMB の形状改善ゼロ、DDR の深刻課題）を隠しません。反証条件は検証の前に凍結し、結果がどうであれ報告します。
+理論が合わなかった場所(caseA 棄却、CMB の形状改善ゼロ、DDR の深刻課題)を隠しません。反証条件は検証の前に凍結し、結果がどうであれ報告します。
 
 **参照枠に依存しない**<br>
 本文は P-model の定義と写像だけで閉じています。GR や量子力学との比較は Reference note として隔離し、P-model の定義を既存理論で置き換えることはしません。
 
 **W/Z ボソン質量を理論内部から導出**<br>
-2成分結合 Q-ball により W および Z ボソンの質量を導出（family (17,1,1)、精度 0.002%）。標準模型ではこれらは独立パラメータですが、P-model では凍結作用から得られる結合局在条件の帰結です。
+2成分結合 Q-ball により W および Z ボソンの質量を導出(family (17,1,1)、精度 0.002%)。標準模型ではこれらは独立パラメータですが、P-model では凍結作用から得られる結合局在条件の帰結です。
 
 ---
 
 ## 🔬 再現性と反証可能性
 
-すべての検証に「棄却手順（Rejection Protocol）」を適用しています。
+すべての検証に「棄却手順(Rejection Protocol)」を適用しています。
 
 1. **入力**: NASA, ESA, LIGO, NIST, EHT, AME2020 等の公開一次データ
 2. **凍結**: `β=1` 等のパラメータは Part I で固定。変更するなら Part I を改訂して全パートを再生成
-3. **棄却閾値**: 反証条件パック（JSON）として機械可読で事前固定
+3. **棄却閾値**: 反証条件パック(JSON)として機械可読で事前固定
 
 ---
 
@@ -153,27 +157,27 @@ python -B scripts/summary/run_all.py --offline --jobs 2
 
 **パートごとの個別生成**
 ```bash
-# Part I（コア理論）
+# Part I(コア理論)
 python -B scripts/summary/paper_build.py --profile paper --mode publish --outdir output/private/summary --skip-docx
 
-# Part II（宇宙物理編）
+# Part II(宇宙物理編)
 python -B scripts/summary/paper_build.py --profile part2_astrophysics --mode publish --outdir output/private/summary --skip-docx
 
-# Part III-A（量子基盤理論）
+# Part III-A(量子基盤理論)
 python -B scripts/summary/paper_build.py --profile part3a_quantum_foundations --figure-lang ja --mode publish --outdir output/private/summary --skip-docx
 
-# Part III-B（量子検証応用）
+# Part III-B(量子検証応用)
 python -B scripts/summary/paper_build.py --profile part3b_quantum_verification --figure-lang ja --mode publish --outdir output/private/summary --skip-docx
 
-# Part IV（検証資料）
+# Part IV(検証資料)
 python -B scripts/summary/paper_build.py --profile part4_verification --figure-lang ja --mode publish --outdir output/private/summary --skip-docx
 
-# Part V（未来への予測）
+# Part V(未来への予測)
 python -B scripts/summary/paper_build.py --profile part5_future_predictions --figure-lang ja --mode publish --outdir output/private/summary --skip-docx
 ```
 
-Ver.1.1 系では Part III を `III-A（量子基盤理論）` と
-`III-B（量子検証応用）` に分割して運用します。
+Ver.1.1 系では Part III を `III-A(量子基盤理論)` と
+`III-B(量子検証応用)` に分割して運用します。
 
 生成された公開データは `output/public/` に、HTML / `.tex` / PDF は `output/private/summary/` に、最終論文 PDF のみは `papers/` に配置されます。
 `paper_build.py` は既定で DOCX を生成しないため、`--skip-docx` は現行運用を明示するための互換オプションです。
@@ -183,7 +187,7 @@ Bell 再解析で使う `output/public/quantum/bell/*/normalized_events.npz` は
 
 ## 🚀 Getting Started
 
-1. **論文を読む**: Part I-V（Zenodo 公開中）
+1. **論文を読む**: Part I-V(Zenodo 公開中)
 2. **コードを動かす**: `scripts/` と `output/` で自分の環境で検証
 3. **議論する**: 反証・バグ報告は GitHub Issues へ
 
@@ -206,6 +210,6 @@ TeX ソースは **LuaLaTeX** で組版しています。TeX Live 等のフル�
 
 ---
 
-P-model v2.0 は、この視点に基づく数式閉包を固定した版です。現代物理の主要領域（重力・光伝播・回転・電磁気・弱相互作用・量子測定・核・物性・熱）に対する導出と観測写像は一通り完了しました。以後に残る課題は新しい物理法則の欠落ではなく、観測監査・数値拘束・橋渡し量の固定です。正否は、これからの観測が決めます。
+P-model v2.0 は、この視点に基づく数式閉包を固定した版です。現代物理の主要領域(重力・光伝播・回転・電磁気・弱相互作用・量子測定・核・物性・熱)に対する導出と観測写像は一通り完了しました。以後に残る課題は新しい物理法則の欠落ではなく、観測監査・数値拘束・橋渡し量の固定です。正否は、これからの観測が決めます。
 
 > *"全ての事象はシンプルである。時間は幾何学の次元ではなく、波であり、マクロな星の自転も、ミクロな素粒子のスピンも、すべてはその波の局所的な渦に過ぎない。"*
