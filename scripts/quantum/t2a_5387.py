@@ -1,0 +1,209 @@
+#!/usr/bin/env python3
+"""Generate 8.7.56.5387-.5390 scalar-proxy matching-scale gate artifacts."""
+
+from __future__ import annotations
+
+import csv
+import json
+import sys
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+import scripts.quantum.t2a_1843 as sign_base
+from scripts.utils.windows_length_policy import build_compact_artifact_stem
+from scripts.utils.windows_length_policy import build_metrics_paths
+
+
+PUBLIC_OUT = ROOT / "output" / "public" / "quantum"
+PRIOR_AUDIT = build_metrics_paths(
+    PUBLIC_OUT,
+    build_compact_artifact_stem(
+        "8.7.56.5383-5386",
+        "updated_pack_scalar_proxy_matching_scale_redrive_audit",
+        prefix="q",
+    ),
+    "declaration_gate",
+)["json"]
+
+STEP_TAG = "8.7.56.5387-5390"
+STEP_NAME = (
+    "Trial-2 numeric alpha vector Q-ball form-factor scalar-proxy "
+    "matching-scale gate / route refresh"
+)
+STEM = build_compact_artifact_stem(
+    STEP_TAG,
+    "updated_pack_scalar_proxy_matching_scale_gate",
+    prefix="q",
+)
+PRIOR_CLASS = (
+    "vector_qball_form_factor_residual_origin_missing_action_updated_pack_"
+    "scalar_proxy_matching_scale_redrive_diagnosed_matching_law_inventory_"
+    "primary_effective_beta_shift_secondary_source_materialization_reserve_gate"
+)
+BRANCH_CLASS = (
+    "vector_qball_form_factor_residual_origin_missing_action_updated_pack_"
+    "scalar_proxy_matching_scale_redrive_audited_matching_law_inventory_"
+    "primary_effective_beta_shift_secondary_source_materialization_reserve_next"
+)
+
+
+# Function: write one metrics payload as JSON and CSV.
+def write_artifact(kind: str, data: dict) -> dict[str, str]:
+    """Write one JSON payload and one rows CSV."""
+    PUBLIC_OUT.mkdir(parents=True, exist_ok=True)
+    paths = build_metrics_paths(PUBLIC_OUT, STEM, kind)
+    paths["json"].write_text(
+        json.dumps(data, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    with paths["csv"].open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=["row_id", "status", "metric", "value", "note"],
+        )
+        writer.writeheader()
+        writer.writerows(data["rows"])
+
+    return {"json": sign_base.display_path(paths["json"])}
+
+
+# Function: return formulas used by the gate refresh.
+
+def build_formulae() -> dict[str, str]:
+    """Return formulas used by the matching-scale gate."""
+    return {
+        "gate_a": "Gate A = scalar-proxy matching-scale redrive diagnostic available now",
+        "gate_b": "Gate B = scalar-proxy matching-law inventory promoted next",
+        "gate_c": "Gate C = farther hybrid continuation reopen required now",
+    }
+
+
+# Function: execute `.5387-.5390`.
+
+def main() -> None:
+    """Execute the scalar-proxy matching-scale gate / route refresh."""
+    sign_base.require(PRIOR_AUDIT)
+    prior_summary = sign_base.read_json(PRIOR_AUDIT)["summary"]
+
+    gate_a = bool(
+        prior_summary["exact_scalar_proxy_matching_scale_redrive_pack_available_now"]
+        and prior_summary["scalar_proxy_matching_scale_redrive_requires_new_law_now"]
+    )
+    gate_b = bool(gate_a)
+    gate_c = False
+    effective_beta_shift_secondary_only_now = bool(
+        prior_summary["scalar_proxy_effective_beta_shift_secondary_only_now"]
+    )
+    selected_extension_source_materialization_secondary_reserve_retained_now = bool(
+        prior_summary["selected_extension_independent_extra_q_range_source_materialization_secondary_reserve_retained_now"]
+    )
+    pack_update_required_now = bool(gate_b)
+
+    rows = [
+        sign_base.row(
+            "gate_a_updated_pack_exact_scalar_proxy_matching_scale_redrive_available_now",
+            "pass" if gate_a else "reject",
+            "gate A updated-pack exact scalar-proxy matching-scale redrive available now",
+            sign_base.truth(gate_a),
+            "The alpha(q) computation plus the old support-band review now give one coherent redrive diagnosis for q_exact versus q_star.",
+        ),
+        sign_base.row(
+            "gate_b_updated_pack_scalar_proxy_matching_law_inventory_promoted_next",
+            "pass" if gate_b else "reject",
+            "gate B updated-pack scalar-proxy matching-law inventory promoted next",
+            sign_base.truth(gate_b),
+            "The next honest blocker is to inventory and rank candidate matching laws that can reproduce q_exact from retained scalar data.",
+        ),
+        sign_base.row(
+            "gate_c_farther_hybrid_continuation_reopen_required_now",
+            "reject",
+            "gate C farther hybrid continuation reopen required now",
+            0.0,
+            "Farther hybrid continuation remains reserve-only because the live blocker is still inside the scalar proxy.",
+        ),
+        sign_base.row(
+            "scalar_proxy_effective_beta_shift_secondary_only_now",
+            "pass" if effective_beta_shift_secondary_only_now else "reject",
+            "scalar-proxy effective beta shift secondary only now",
+            sign_base.truth(effective_beta_shift_secondary_only_now),
+            "beta_eff remains useful as a sensitivity parameterization, but it does not replace the need for a primary matching-law redrive.",
+        ),
+        sign_base.row(
+            "selected_extension_independent_extra_q_range_source_materialization_secondary_reserve_retained_now",
+            "pass" if selected_extension_source_materialization_secondary_reserve_retained_now else "reject",
+            "selected-extension independent extra-q-range source-materialization secondary reserve retained now",
+            sign_base.truth(selected_extension_source_materialization_secondary_reserve_retained_now),
+            "The old extra-q branch stays demoted and reserve-only unless the scalar-proxy matching-law route dead-ends.",
+        ),
+        sign_base.row(
+            "pack_update_required_now",
+            "pass" if pack_update_required_now else "reject",
+            "updated-pack substantive route update required now",
+            sign_base.truth(pack_update_required_now),
+            "A substantive route update has happened: matching-law inventory is now the primary blocker.",
+        ),
+    ]
+
+    summary = {
+        "trial2_numeric_alpha_problem_classification": BRANCH_CLASS,
+        "prior_problem_classification": PRIOR_CLASS,
+        "alpha_target": float(prior_summary["alpha_target"]),
+        "beta1": float(prior_summary["beta1"]),
+        "q_exact_over_m0": float(prior_summary["q_exact_over_m0"]),
+        "q_star_over_m0": float(prior_summary["q_star_over_m0"]),
+        "q_correction_factor": float(prior_summary["q_correction_factor"]),
+        "q_correction_rel": float(prior_summary["q_correction_rel"]),
+        "beta_effective_from_q_exact": float(prior_summary["beta_effective_from_q_exact"]),
+        "delta_beta_effective_rel": float(prior_summary["delta_beta_effective_rel"]),
+        "gate_a_updated_pack_exact_scalar_proxy_matching_scale_redrive_available_now": gate_a,
+        "gate_b_updated_pack_scalar_proxy_matching_law_inventory_promoted_next": gate_b,
+        "gate_c_farther_hybrid_continuation_reopen_required_now": gate_c,
+        "scalar_proxy_effective_beta_shift_secondary_only_now": effective_beta_shift_secondary_only_now,
+        "selected_extension_independent_extra_q_range_source_materialization_secondary_reserve_retained_now": selected_extension_source_materialization_secondary_reserve_retained_now,
+        "pack_update_required_now": pack_update_required_now,
+        "selected_primary_completion_lane": "updated_pack_scalar_proxy_matching_law_inventory_audit",
+        "selected_secondary_completion_lane": "updated_pack_scalar_proxy_effective_beta_shift_sensitivity_review",
+        "selected_reserve_completion_lane": "updated_pack_selected_extension_independent_extra_q_range_source_materialization_numeric_rerun",
+        "selected_next_generation_route": "trial2_numeric_alpha_scalar_proxy_matching_law_inventory_audit",
+        "recommended_next_route_or_none": "8.7.56.5391",
+        "selected_followup_route": "trial2_numeric_alpha_scalar_proxy_matching_law_gate",
+        "selected_followup_route_or_none": "8.7.56.5395",
+        "physical_reject_required": False,
+    }
+
+    payload = sign_base.payload(
+        "8.7.56.5389",
+        STEP_NAME + " declaration gate",
+        {
+            "source_files": {"prior_audit": sign_base.display_path(PRIOR_AUDIT)},
+            "routes": {
+                "prior_route": PRIOR_CLASS,
+                "current_route": BRANCH_CLASS,
+                "next_route": "8.7.56.5391",
+                "followup_route": "8.7.56.5395",
+            },
+        },
+        rows,
+        summary,
+        {
+            "overall_status": "scalar_proxy_matching_scale_gate_declared",
+            "branch_completed": True,
+            "breakthrough_passed_now": False,
+            "physical_reject_required": False,
+        },
+        {"formulae": build_formulae()},
+    )
+    declaration_paths = write_artifact("declaration_gate", payload)
+    write_artifact("route_sync", payload)
+    print(f"[done] {STEP_TAG} scalar-proxy matching-scale gate completed")
+    print(f"[done] declaration: {declaration_paths['json']}")
+
+
+# Function: run the gate refresh when invoked as one CLI script.
+
+if __name__ == "__main__":
+    main()

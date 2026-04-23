@@ -1,0 +1,629 @@
+#!/usr/bin/env python3
+"""Generate 8.7.56.1527-.1530 future external-input dormant-checkpoint artifacts.
+
+This branch is the retry-gate closeout for the repeated no-new-input cycle.
+The current Downloads candidate pool is rescanned once more, but the purpose is
+not to extend the wait loop. Instead, the branch records that the same pattern
+has repeated enough times to trigger the AGENTS retry gate, so the internal
+roadmap must stay dormant until genuinely new external input arrives outside the
+already exhausted pool.
+"""
+
+from __future__ import annotations
+
+import csv
+import json
+import shutil
+import sys
+import zipfile
+from datetime import datetime
+from datetime import timezone
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.utils.windows_length_policy import build_compact_artifact_stem
+from scripts.utils.windows_length_policy import build_metrics_paths
+
+
+PUBLIC_OUT = ROOT / "output" / "public" / "quantum"
+PRIVATE_OUT = ROOT / "output" / "private" / "quantum"
+
+STATUS = ROOT / "doc" / "STATUS.md"
+ROADMAP = ROOT / "doc" / "ROADMAP.md"
+AI_CONTEXT = ROOT / "doc" / "AI_CONTEXT_MIN.json"
+WORK_HISTORY_RECENT = ROOT / "doc" / "WORK_HISTORY_RECENT.md"
+PRIMARY_SOURCES = ROOT / "doc" / "PRIMARY_SOURCES.md"
+CURRENT_PROBLEM = ROOT / "doc" / "quantum" / "34_trial2_numeric_alpha_current_problem.md"
+CURRENT_STATUS = ROOT / "doc" / "quantum" / "36_trial2_numeric_alpha_current_status.md"
+UNIFIED_ROADMAP = ROOT / "doc" / "quantum" / "39_trial2_vector_qball_unified_closure_roadmap.md"
+REOPEN_ADVICE = ROOT / "doc" / "quantum" / "40_trial2_numeric_alpha_vector_qball_reopen_advice_request.md"
+CASE_GAMMA_ADVICE = ROOT / "doc" / "quantum" / "42_trial2_numeric_alpha_vector_qball_case_gamma_advice_request.md"
+PART1 = ROOT / "doc" / "paper" / "10_part1_core_theory.md"
+PART3A = ROOT / "doc" / "paper" / "12_part3a_quantum_foundations.md"
+PART5 = ROOT / "doc" / "paper" / "14_part5_future_predictions.md"
+
+DOWNLOADS = Path(r"C:\Users\ogawa\Downloads")
+
+PRIOR_ASSIMILATION_GATE = (
+    PUBLIC_OUT
+    / "q_8_7_56_1519_1522_genuine_external_input_assimilation_declaration_gate_metrics.json"
+)
+PRIOR_WAIT_GATE = (
+    PUBLIC_OUT
+    / "q_8_7_56_1523_1526_future_external_input_wait_hold_declaration_gate_metrics.json"
+)
+PRIOR_WAIT_ROUTE = (
+    PUBLIC_OUT
+    / "q_8_7_56_1523_1526_future_external_input_wait_hold_route_sync_metrics.json"
+)
+
+SCRIPT_1519 = ROOT / "scripts" / "quantum" / "t2a_1519.py"
+SCRIPT_1523 = ROOT / "scripts" / "quantum" / "t2a_1523.py"
+
+CANONICAL_BUNDLE_DIR = PRIVATE_OUT / "expert_review_bundle_20260327_103258"
+CANONICAL_BUNDLE_ZIP = PRIVATE_OUT / "expert_review_bundle_20260327_103258.zip"
+
+STEP_TAG = "8.7.56.1527-1530"
+STEP_NAME = "Trial-2 numeric alpha vector Q-ball form-factor future external-input dormant checkpoint"
+STEM = build_compact_artifact_stem(STEP_TAG, "future_external_input_dormant_checkpoint", prefix="q")
+
+PRIOR_WAIT_CLASS = "vector_qball_form_factor_future_genuine_external_input_wait_hold_completed"
+BRANCH_CLASS = "vector_qball_form_factor_future_external_input_dormant_checkpoint_completed"
+NEXT_ROUTE_NAME = (
+    "trial2_numeric_alpha_vector_qball_form_factor_conditional_future_external_input_reactivation"
+)
+NEXT_ROUTE = "8.7.56.1531"
+NEXT_ROUTE_ACTIVATION_CONDITION = (
+    "future genuinely new external expert response or reopen input outside the exhausted current candidate pool arrives"
+)
+
+PRIMARY_TRIGGER = "exact_charge_current_noether_closure_reopen"
+SECONDARY_TRIGGER = "effective_source_theorem_reopen"
+RESERVE_TRIGGER = "observable_dictionary_exact_charge_current_bridge"
+
+RETRY_GATE_COUNT = 3.0
+
+
+# 関数: 現在UTC時刻を返す。
+def now_iso() -> str:
+    """Return the current UTC timestamp."""
+    return datetime.now(timezone.utc).isoformat()
+
+
+# 関数: 必須入力の存在を確認する。
+
+def require(path: Path) -> None:
+    """Fail when one required input path is missing."""
+    if not path.exists():
+        raise SystemExit(f"[fail] missing required input: {path}")
+
+
+# 関数: UTF-8 テキストを読み込む。
+
+def read_text(path: Path) -> str:
+    """Read one UTF-8 text file."""
+    return path.read_text(encoding="utf-8")
+
+
+# 関数: UTF-8 JSON を読み込む。
+
+def read_json(path: Path) -> dict:
+    """Read one UTF-8 JSON file."""
+    with path.open("r", encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+# 関数: repo 相対の表示パスへ変換する。
+
+def display_path(path: Path) -> str:
+    """Convert one absolute path into repo-relative display form when possible."""
+    try:
+        return str(path.relative_to(ROOT)).replace("\\", "/")
+    except ValueError:
+        return str(path).replace("\\", "/")
+
+
+# 関数: ISO UTC 文字列を datetime へ変換する。
+
+def parse_utc(text: str) -> datetime:
+    """Parse one ISO-8601 UTC string."""
+    return datetime.fromisoformat(text.replace("Z", "+00:00"))
+
+
+# 関数: 標準 row を作る。
+
+def row(row_id: str, status: str, metric: str, value: float, note: str) -> dict:
+    """Build one standard metrics row."""
+    return {
+        "row_id": row_id,
+        "status": status,
+        "metric": metric,
+        "value": float(value),
+        "note": note,
+    }
+
+
+# 関数: 標準 payload を作る。
+
+def payload(
+    step: str,
+    name: str,
+    inputs: dict,
+    rows: list[dict],
+    summary: dict,
+    decision: dict,
+    evidence: dict,
+) -> dict:
+    """Build one standard payload."""
+    return {
+        "generated_utc": now_iso(),
+        "phase": {"phase": 8, "step": step, "name": name},
+        "inputs": inputs,
+        "rows": rows,
+        "summary": summary,
+        "decision": decision,
+        "evidence": evidence,
+    }
+
+
+# 関数: compact stem で JSON / CSV を出力する。
+
+def write_artifact(kind: str, data: dict) -> dict[str, str]:
+    """Write one JSON payload and its rows CSV."""
+    PUBLIC_OUT.mkdir(parents=True, exist_ok=True)
+    paths = build_metrics_paths(PUBLIC_OUT, STEM, kind)
+    paths["json"].write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    with paths["csv"].open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=["row_id", "status", "metric", "value", "note"])
+        writer.writeheader()
+        writer.writerows(data["rows"])
+
+    return {"json": display_path(paths["json"]), "csv": display_path(paths["csv"])}
+
+
+# 関数: 真偽値を 0/1 に変換する。
+
+def truth(value: bool) -> float:
+    """Convert one boolean into 0/1 float form."""
+    return 1.0 if value else 0.0
+
+
+# 関数: live candidate note 一覧を返す。
+
+def live_candidate_notes() -> list[Path]:
+    """Return the current Downloads candidate pool for trial2/vector-Qball notes."""
+    notes = [
+        path
+        for path in DOWNLOADS.glob("*.md")
+        if any(token in path.name for token in ("trial2", "vector_qball", "pmodel_v2_trial2"))
+    ]
+    return sorted(notes, key=lambda item: item.name.lower())
+
+
+# 関数: dormant-checkpoint summary 文を返す。
+
+def build_dormant_text() -> str:
+    """Build one concise dormant-checkpoint sentence."""
+    return (
+        "The current Downloads candidate pool is still unchanged and exhausted, but the no-new-input loop has now repeated "
+        "often enough to trigger the retry gate. The route therefore moves from a repeatable wait branch into an explicit "
+        "dormant checkpoint: no further internal text-search or reopen-computation branch is admissible until genuinely new "
+        "external input arrives outside the exhausted pool."
+    )
+
+
+# 関数: bundle README を返す。
+
+def bundle_readme_text() -> str:
+    """Return the canonical README text for the dormant-checkpoint bundle."""
+    return (
+        "Future external-input dormant-checkpoint bundle\n\n"
+        "Purpose\n"
+        "- Current route: Trial-2 numeric alpha vector-Qball future external-input dormant checkpoint.\n"
+        "- Outcome: the exhausted current candidate pool is still unchanged, and the retry gate now blocks any further internal loop extension.\n"
+        "- Physical reject required: false.\n\n"
+        "Frozen ordering\n"
+        f"- Primary: {PRIMARY_TRIGGER}\n"
+        f"- Secondary: {SECONDARY_TRIGGER}\n"
+        f"- Reserve: {RESERVE_TRIGGER}\n\n"
+        "Rule\n"
+        "- Do not create another internal wait-hold or wording branch from the current pack.\n"
+        "- Only future genuinely new external input outside the exhausted current candidate pool can reactivate the roadmap.\n"
+    )
+
+
+# 関数: bundle note を返す。
+
+def bundle_note_text() -> str:
+    """Return the canonical bundle note for the dormant-checkpoint result."""
+    return (
+        "Future external-input dormant-checkpoint note\n\n"
+        "Result\n"
+        "- The live Downloads candidate scan still matches the already exhausted candidate pool.\n"
+        "- No candidate note is newer than the prior future-input hold audit.\n"
+        "- The same no-new-input pattern has now repeated enough times to trigger the retry gate.\n"
+        "- Therefore the roadmap enters a dormant checkpoint instead of extending the internal wait loop.\n\n"
+        "Operational consequence\n"
+        "- No internal wording or reopen-computation branch may restart now.\n"
+        "- Only future genuinely new external input can open the next branch.\n"
+    )
+
+
+# 関数: review questions を返す。
+
+def questions_text() -> str:
+    """Return review questions for the dormant-checkpoint bundle."""
+    return (
+        "Questions during the future external-input dormant checkpoint\n\n"
+        "1. Does future input provide an exact charge-current / Noether-current closure for the restored exact vector branch?\n"
+        "2. If not, does it provide a stronger effective-source theorem than the current pack?\n"
+        "3. If neither opens, should the frozen primary / secondary / reserve ordering remain unchanged?\n"
+    )
+
+
+# 関数: manifest を返す。
+
+def manifest_text(copied_sources: list[Path]) -> str:
+    """Return the manifest text for the dormant-checkpoint bundle."""
+    lines = [
+        "Future external-input dormant-checkpoint bundle manifest",
+        f"Generated: {now_iso()}",
+        f"COPIED_COUNT={len(copied_sources)}",
+        "",
+    ]
+    lines.extend(display_path(path) for path in copied_sources)
+    return "\n".join(lines) + "\n"
+
+
+# 関数: canonical bundle を rebuilt する。
+
+def rebuild_bundle(files_to_copy: list[Path]) -> dict[str, object]:
+    """Rebuild the canonical expert bundle in place with dormant-checkpoint text."""
+    if CANONICAL_BUNDLE_DIR.exists():
+        shutil.rmtree(CANONICAL_BUNDLE_DIR)
+
+    if CANONICAL_BUNDLE_ZIP.exists():
+        CANONICAL_BUNDLE_ZIP.unlink()
+
+    CANONICAL_BUNDLE_DIR.mkdir(parents=True, exist_ok=True)
+
+    copied_sources: list[Path] = []
+    for source in files_to_copy:
+        require(source)
+        shutil.copy2(source, CANONICAL_BUNDLE_DIR / source.name)
+        copied_sources.append(source)
+
+    (CANONICAL_BUNDLE_DIR / "README.txt").write_text(bundle_readme_text(), encoding="utf-8")
+    (CANONICAL_BUNDLE_DIR / "BUNDLE_NOTE.txt").write_text(bundle_note_text(), encoding="utf-8")
+    (CANONICAL_BUNDLE_DIR / "QUESTIONS_FOR_REVIEW.txt").write_text(questions_text(), encoding="utf-8")
+    (CANONICAL_BUNDLE_DIR / "BUNDLE_MANIFEST.txt").write_text(manifest_text(copied_sources), encoding="utf-8")
+
+    with zipfile.ZipFile(CANONICAL_BUNDLE_ZIP, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        for path in sorted(CANONICAL_BUNDLE_DIR.iterdir()):
+            if path.is_file():
+                archive.write(path, arcname=path.name)
+
+    with zipfile.ZipFile(CANONICAL_BUNDLE_ZIP, "r") as archive:
+        zip_file_count = len(archive.namelist())
+
+    return {
+        "copied_count": len(copied_sources),
+        "staging_file_count": len(list(CANONICAL_BUNDLE_DIR.iterdir())),
+        "zip_file_count": zip_file_count,
+        "bundle_dir": display_path(CANONICAL_BUNDLE_DIR),
+        "bundle_zip": display_path(CANONICAL_BUNDLE_ZIP),
+    }
+
+
+# 関数: `.1527-.1530` を実行する。
+
+def main() -> None:
+    """Execute the future external-input dormant-checkpoint branch."""
+    for path in (
+        STATUS,
+        ROADMAP,
+        AI_CONTEXT,
+        WORK_HISTORY_RECENT,
+        PRIMARY_SOURCES,
+        CURRENT_PROBLEM,
+        CURRENT_STATUS,
+        UNIFIED_ROADMAP,
+        REOPEN_ADVICE,
+        CASE_GAMMA_ADVICE,
+        PART1,
+        PART3A,
+        PART5,
+        PRIOR_ASSIMILATION_GATE,
+        PRIOR_WAIT_GATE,
+        PRIOR_WAIT_ROUTE,
+        SCRIPT_1519,
+        SCRIPT_1523,
+    ):
+        require(path)
+
+    prior_assimilation = read_json(PRIOR_ASSIMILATION_GATE)["summary"]
+    prior_wait_gate = read_json(PRIOR_WAIT_GATE)
+    prior_wait_summary = prior_wait_gate["summary"]
+    prior_wait_route = read_json(PRIOR_WAIT_ROUTE)["summary"]
+
+    prior_wait_utc = parse_utc(prior_wait_gate["generated_utc"])
+    expected_pool = sorted(Path(path).name for path in prior_wait_gate["inputs"]["live_candidate_pool"])
+    live_notes = live_candidate_notes()
+    live_pool = sorted(path.name for path in live_notes)
+
+    extra_names = sorted(set(live_pool) - set(expected_pool))
+    missing_names = sorted(set(expected_pool) - set(live_pool))
+
+    candidate_rows: list[dict] = []
+    updated_after_prior_wait = 0
+    for note in live_notes:
+        mtime_utc = datetime.fromtimestamp(note.stat().st_mtime, tz=timezone.utc)
+        updated_now = mtime_utc > prior_wait_utc
+        updated_after_prior_wait += 1 if updated_now else 0
+        candidate_rows.append(
+            {
+                "note": display_path(note),
+                "note_name": note.name,
+                "mtime_utc": mtime_utc.isoformat(),
+                "in_expected_exhausted_pool": note.name in expected_pool,
+                "updated_after_prior_wait_hold": updated_now,
+            }
+        )
+
+    prior_no_new_input_assimilation_available = bool(
+        prior_assimilation.get("candidate_pool_exhausted", False)
+        and prior_assimilation.get("no_new_input_detected", False)
+    )
+    prior_wait_hold_available = bool(
+        prior_wait_summary.get("trial2_numeric_alpha_problem_classification") == PRIOR_WAIT_CLASS
+        and prior_wait_summary.get("future_external_input_wait_hold_completed", False)
+        and prior_wait_route.get("future_external_input_still_required", False)
+    )
+    no_extra_candidate_name_detected = len(extra_names) == 0
+    no_candidate_updated_after_prior_wait = updated_after_prior_wait == 0
+    live_pool_matches_exhausted_pool = no_extra_candidate_name_detected and len(missing_names) == 0
+    genuinely_new_external_input_detected_now = (not no_extra_candidate_name_detected) or (
+        not no_candidate_updated_after_prior_wait
+    )
+    retry_gate_triggered = (
+        RETRY_GATE_COUNT >= 3.0
+        and prior_no_new_input_assimilation_available
+        and prior_wait_hold_available
+        and not genuinely_new_external_input_detected_now
+    )
+    internal_loop_terminated_until_new_input = retry_gate_triggered
+    dormant_checkpoint_honest = all(
+        [
+            prior_no_new_input_assimilation_available,
+            prior_wait_hold_available,
+            live_pool_matches_exhausted_pool,
+            no_candidate_updated_after_prior_wait,
+            retry_gate_triggered,
+        ]
+    )
+    dormant_checkpoint_completed = dormant_checkpoint_honest
+
+    rows = [
+        row(
+            "prior_no_new_input_assimilation_available",
+            "pass" if prior_no_new_input_assimilation_available else "reject",
+            "prior no-new-input assimilation available",
+            truth(prior_no_new_input_assimilation_available),
+            "The retry gate only matters after the current candidate pool was already proven exhausted once.",
+        ),
+        row(
+            "prior_wait_hold_available",
+            "pass" if prior_wait_hold_available else "reject",
+            "prior future-input wait-hold available",
+            truth(prior_wait_hold_available),
+            "The dormant checkpoint should inherit the already completed future-input-only hold state.",
+        ),
+        row(
+            "live_candidate_count",
+            "pass",
+            "current live candidate-note count",
+            float(len(live_pool)),
+            "The current vector-Qball candidate pool remains the live Downloads note set.",
+        ),
+        row(
+            "no_extra_candidate_name_detected",
+            "pass" if no_extra_candidate_name_detected else "watch",
+            "no extra candidate name detected outside exhausted pool",
+            truth(no_extra_candidate_name_detected),
+            "An extra candidate name would immediately open the conditional future-input branch.",
+        ),
+        row(
+            "no_candidate_updated_after_prior_wait",
+            "pass" if no_candidate_updated_after_prior_wait else "watch",
+            "no candidate updated after prior wait-hold audit",
+            truth(no_candidate_updated_after_prior_wait),
+            "A touched candidate after the prior hold audit would count as genuinely new input now.",
+        ),
+        row(
+            "live_pool_matches_exhausted_pool",
+            "pass" if live_pool_matches_exhausted_pool else "watch",
+            "live candidate pool matches exhausted pool exactly",
+            truth(live_pool_matches_exhausted_pool),
+            "The dormant checkpoint depends on the current pool staying identical to the exhausted pool.",
+        ),
+        row(
+            "genuinely_new_external_input_detected_now",
+            "reject" if genuinely_new_external_input_detected_now else "pass",
+            "genuinely new external input detected now",
+            truth(genuinely_new_external_input_detected_now),
+            "If true, the roadmap should reactivate rather than enter a dormant checkpoint.",
+        ),
+        row(
+            "same_pattern_retry_count",
+            "pass" if RETRY_GATE_COUNT >= 3.0 else "watch",
+            "same-pattern retry count",
+            RETRY_GATE_COUNT,
+            "The no-new-input scan / hold pattern has repeated enough times to trigger the retry gate.",
+        ),
+        row(
+            "retry_gate_triggered",
+            "pass" if retry_gate_triggered else "reject",
+            "AGENTS retry gate triggered",
+            truth(retry_gate_triggered),
+            "The route must now choose whether text search or computation is admissible; with no new input, neither internal branch should restart.",
+        ),
+        row(
+            "internal_loop_terminated_until_new_input",
+            "pass" if internal_loop_terminated_until_new_input else "reject",
+            "internal loop terminated until future new input arrives",
+            truth(internal_loop_terminated_until_new_input),
+            "The correct next action is a dormant checkpoint, not another cloned wait branch.",
+        ),
+        row(
+            "dormant_checkpoint_honest",
+            "pass" if dormant_checkpoint_honest else "reject",
+            "future external-input dormant checkpoint wording honest",
+            truth(dormant_checkpoint_honest),
+            "The dormant checkpoint is only honest when the pool is still exhausted and the retry gate is active.",
+        ),
+        row(
+            "dormant_checkpoint_completed",
+            "pass" if dormant_checkpoint_completed else "reject",
+            "future external-input dormant checkpoint completed",
+            truth(dormant_checkpoint_completed),
+            "Completion here means the internal roadmap is explicitly frozen until genuinely new external input arrives.",
+        ),
+    ]
+
+    inputs = {
+        "source_files": {
+            "status": display_path(STATUS),
+            "roadmap": display_path(ROADMAP),
+            "ai_context": display_path(AI_CONTEXT),
+            "current_problem": display_path(CURRENT_PROBLEM),
+            "current_status": display_path(CURRENT_STATUS),
+            "unified_roadmap": display_path(UNIFIED_ROADMAP),
+            "part5": display_path(PART5),
+        },
+        "prior_metrics": {
+            "prior_assimilation_gate": display_path(PRIOR_ASSIMILATION_GATE),
+            "prior_wait_gate": display_path(PRIOR_WAIT_GATE),
+            "prior_wait_route": display_path(PRIOR_WAIT_ROUTE),
+        },
+        "live_candidate_pool": [display_path(path) for path in live_notes],
+        "constants": {
+            "prior_wait_utc": prior_wait_utc.isoformat(),
+            "retry_gate_count": RETRY_GATE_COUNT,
+            "primary_future_reopen_trigger": PRIMARY_TRIGGER,
+            "secondary_future_reopen_trigger": SECONDARY_TRIGGER,
+            "reserve_future_reopen_trigger": RESERVE_TRIGGER,
+            "next_route_name": NEXT_ROUTE_NAME,
+            "next_route": NEXT_ROUTE,
+            "next_route_activation_condition": NEXT_ROUTE_ACTIVATION_CONDITION,
+        },
+    }
+
+    common_summary = {
+        "trial2_numeric_alpha_problem_classification": BRANCH_CLASS,
+        "prior_wait_problem_classification": PRIOR_WAIT_CLASS,
+        "prior_no_new_input_assimilation_available": prior_no_new_input_assimilation_available,
+        "prior_wait_hold_available": prior_wait_hold_available,
+        "live_candidate_count": len(live_pool),
+        "no_extra_candidate_name_detected": no_extra_candidate_name_detected,
+        "no_candidate_updated_after_prior_wait": no_candidate_updated_after_prior_wait,
+        "live_pool_matches_exhausted_pool": live_pool_matches_exhausted_pool,
+        "genuinely_new_external_input_detected_now": genuinely_new_external_input_detected_now,
+        "same_pattern_retry_count": RETRY_GATE_COUNT,
+        "retry_gate_triggered": retry_gate_triggered,
+        "text_search_vs_computation_judgment": "blocked_by_absent_external_input",
+        "internal_loop_terminated_until_new_input": internal_loop_terminated_until_new_input,
+        "dormant_checkpoint_honest": dormant_checkpoint_honest,
+        "dormant_checkpoint_completed": dormant_checkpoint_completed,
+        "future_external_input_still_required": True,
+        "internal_wording_loop_extension_admissible": False,
+        "internal_restart_without_new_input_admissible": False,
+        "physical_reject_required": False,
+        "selected_next_generation_route": NEXT_ROUTE_NAME,
+        "recommended_next_route_or_none": NEXT_ROUTE,
+    }
+    common_decision = {
+        "overall_status": f"{BRANCH_CLASS}_documented",
+        "branch_completed": dormant_checkpoint_completed,
+        "next_required_artifacts": [NEXT_ROUTE_NAME],
+    }
+    common_evidence = {
+        "candidate_rows": candidate_rows,
+        "extra_names": extra_names,
+        "missing_names": missing_names,
+        "dormant_text": build_dormant_text(),
+    }
+
+    inventory_paths = write_artifact(
+        "inventory",
+        payload(STEP_TAG, STEP_NAME, inputs, rows, common_summary, common_decision, common_evidence),
+    )
+    audit_paths = write_artifact(
+        "audit",
+        payload(STEP_TAG, STEP_NAME, inputs, rows, common_summary, common_decision, common_evidence),
+    )
+    gate_paths = write_artifact(
+        "declaration_gate",
+        payload(STEP_TAG, STEP_NAME, inputs, rows, common_summary, common_decision, common_evidence),
+    )
+
+    refresh_candidates = [
+        STATUS,
+        ROADMAP,
+        AI_CONTEXT,
+        WORK_HISTORY_RECENT,
+        PRIMARY_SOURCES,
+        CURRENT_PROBLEM,
+        CURRENT_STATUS,
+        UNIFIED_ROADMAP,
+        REOPEN_ADVICE,
+        CASE_GAMMA_ADVICE,
+        PART1,
+        PART3A,
+        PART5,
+        SCRIPT_1519,
+        SCRIPT_1523,
+        Path(__file__),
+        PRIOR_ASSIMILATION_GATE,
+        PRIOR_WAIT_GATE,
+        PRIOR_WAIT_ROUTE,
+        ROOT / inventory_paths["json"],
+        ROOT / audit_paths["json"],
+        ROOT / gate_paths["json"],
+    ]
+    bundle_stats = rebuild_bundle(refresh_candidates)
+
+    route_summary = {
+        **common_summary,
+        "share_pack_bundle_dir": bundle_stats["bundle_dir"],
+        "share_pack_bundle_zip": bundle_stats["bundle_zip"],
+        "share_pack_bundle_refresh_count": bundle_stats["copied_count"],
+        "share_pack_staging_file_count": bundle_stats["staging_file_count"],
+        "share_pack_zip_file_count": bundle_stats["zip_file_count"],
+        "numeric_state_changed_by_current_branch": False,
+        "route_state_changed_by_current_branch": True,
+    }
+    route_evidence = {
+        "bundle_stats": bundle_stats,
+        "dormant_text": build_dormant_text(),
+        "candidate_rows": candidate_rows,
+        "retained_numeric_state": {
+            "scalar_F_exact_at_q_theory": 0.2998913524347805,
+            "scalar_alpha_exact_at_q_theory": 0.00715678583937324,
+            "vector_F_at_q_theory": -0.083735013520183,
+            "vector_alpha_at_q_theory": 0.0005579616187042394,
+        },
+    }
+    write_artifact(
+        "route_sync",
+        payload(STEP_TAG, STEP_NAME, inputs, rows, route_summary, common_decision, route_evidence),
+    )
+
+    print(f"[ok] wrote compact artifacts for {STEP_TAG}: {STEM}")
+
+
+if __name__ == "__main__":
+    main()
