@@ -1,0 +1,8 @@
+category,count,status,note
+exact_source_py_files,13,present,Canonical .py source files under scripts/quantum.
+exact_metric_json_files,6,present,Exact metric filenames under the copied repo tree.
+source_pyc_files,13,present,Bytecode remnants under scripts/quantum/__pycache__.
+zip_entries,0,absent,Exact target entries inside repo zip bundles.
+text_references,628,present,References in logs/manifests/docs/scripts.
+git_history,0,absent,Tracked git history for canonical target paths.
+stash_untracked_entries,17,present,Exact target entries in stash third-parent untracked trees.

@@ -1,0 +1,359 @@
+{
+  "generated_utc": "2026-04-23T12:43:47.580428+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.56.331",
+    "name": "Trial-3 two-component shooting solver implementation"
+  },
+  "inputs": {
+    "expert_note_markdown": "C:\\Users\\ogawa\\Downloads\\pmodel_v2_trial3_two_component_pivot.md",
+    "expert_note_available": false,
+    "expert_note_candidates": [
+      "C:\\Users\\ogawa\\Downloads\\pmodel_v2_trial3_two_component_pivot.md",
+      "C:\\develop\\waveP\\doc\\quantum\\pmodel_v2_trial3_two_component_pivot.md"
+    ],
+    "status_markdown": "doc/STATUS.md",
+    "roadmap_markdown": "doc/ROADMAP.md",
+    "ai_context_json": "doc/AI_CONTEXT_MIN.json",
+    "mass_origin_v2_post_photon_nontransverse_two_by_two_quadratic_form_json": "output/public/quantum/mass_origin_v2_post_photon_nontransverse_two_by_two_quadratic_form_metrics.json",
+    "mass_origin_v2_post_photon_nontransverse_diagonalization_basis_statement_json": "output/public/quantum/mass_origin_v2_post_photon_nontransverse_diagonalization_basis_statement_metrics.json",
+    "mass_origin_v2_trial1_breakthrough_declaration_gate_json": "output/public/quantum/mass_origin_v2_trial1_breakthrough_declaration_gate_metrics.json",
+    "mass_origin_v2_trial2_declaration_gate_json": "output/public/quantum/mass_origin_v2_trial2_declaration_gate_metrics.json",
+    "mass_origin_v2_trial3_refactored_post_ell30_same_family_incumbent_anchor_displacement_witness_audit_json": "output/public/quantum/mass_origin_v2_trial3_refactored_post_ell30_same_family_incumbent_anchor_displacement_witness_audit_metrics.json",
+    "mass_origin_v2_trial3_refactored_declaration_thirteenth_gate_json": "output/public/quantum/mass_origin_v2_trial3_refactored_declaration_thirteenth_gate_metrics.json",
+    "mass_origin_v2_trial3_refactored_paper_sync_trial4_disposition_twenty_fifth_refresh_json": "output/public/quantum/mass_origin_v2_trial3_refactored_paper_sync_trial4_disposition_twenty_fifth_refresh_metrics.json",
+    "mass_origin_v2_t3_post_ell30_displacement_witness_branch_py": "scripts/quantum/mass_origin_v2_t3_post_ell30_displacement_witness_branch.py"
+  },
+  "intent": "Implement a standalone four-state two-component shooting solver for the coupled nontransverse pilot before the full Trial-3 spectrum scan.",
+  "formulas": {
+    "state_vector": "y = (f_0, f_0', f_L, f_L')",
+    "integration_method": "solve_ivp on the coupled four-state radial system",
+    "smoke_scan_grid": {
+      "beta_values": [
+        0.35,
+        0.55,
+        0.75,
+        0.9
+      ],
+      "ell_values": [
+        1,
+        2,
+        3
+      ],
+      "amp0_values": [
+        0.01,
+        0.02,
+        0.05
+      ],
+      "amp_l_values": [
+        0.005,
+        0.01,
+        0.02
+      ]
+    },
+    "smoke_success_rule": "implementation is accepted if the coupled solver runs finite integrations on the smoke grid without introducing new parameters"
+  },
+  "rows": [
+    {
+      "row_id": "trial3_two_component_shooting_solver_implementation_complete",
+      "status": "pass",
+      "metric": "Trial-3 two-component shooting solver implementation complete",
+      "value": 1.0,
+      "note": "The standalone coupled solver is implemented for the pivot branch."
+    },
+    {
+      "row_id": "trial3_two_component_solver_state_dimension",
+      "status": "pass",
+      "metric": "two-component shooting solver state dimension",
+      "value": 4.0,
+      "note": "The pilot solver evolves (f_0, f_0', f_L, f_L')."
+    },
+    {
+      "row_id": "trial3_two_component_smoke_integration_finite",
+      "status": "pass",
+      "metric": "two-component smoke integration finite",
+      "value": 1.0,
+      "note": "The smoke scan confirms that the coupled implementation runs finite integrations."
+    },
+    {
+      "row_id": "trial3_two_component_smoke_decay_hint",
+      "status": "watch",
+      "metric": "two-component smoke decay hint",
+      "value": 0.0,
+      "note": "A decay hint is welcome but not required before the full spectrum scan."
+    },
+    {
+      "row_id": "trial3_two_component_full_spectrum_not_yet_run",
+      "status": "pass",
+      "metric": "full two-component spectrum scan still pending",
+      "value": 1.0,
+      "note": "Implementation is complete, but the W/Z scan belongs to the next official step."
+    }
+  ],
+  "summary": {
+    "two_component_shooting_solver_implemented": true,
+    "two_component_smoke_scan_size": 108,
+    "two_component_smoke_success": true,
+    "two_component_smoke_decay_hint": false,
+    "two_component_best_smoke_or_none": {
+      "success": true,
+      "beta": 0.9,
+      "ell": 3,
+      "amp0": 0.02,
+      "amp_l": 0.02,
+      "tail_norm": 0.29164154867605574,
+      "input_norm": 0.0282842712474619,
+      "tail_to_input_ratio": 10.31108583722928,
+      "max_abs_f0": 8.88507410284305,
+      "max_abs_f_l": 95.87768757222713,
+      "final_f0": 0.2815940634677893,
+      "final_f_l": 0.07589187264698932,
+      "r_max": 40.0,
+      "max_step": 0.05
+    },
+    "full_spectrum_scan_ready": true,
+    "recommended_next_route_or_none": "8.7.56.332"
+  },
+  "decision": {
+    "overall_status": "trial3_two_component_shooting_solver_implemented",
+    "advance_to_8_7_56_332": true,
+    "next_required_artifacts": [
+      "trial3_two_component_spectrum_computation",
+      "trial3_two_component_wz_target_comparison",
+      "trial3_two_component_declaration_gate"
+    ]
+  },
+  "evidence": {
+    "advice_step2_line": null,
+    "advice_step3_line": null,
+    "smoke_scan_sample_rows": [
+      {
+        "success": true,
+        "beta": 0.35,
+        "ell": 1,
+        "amp0": 0.01,
+        "amp_l": 0.005,
+        "tail_norm": 0.9596600913079751,
+        "input_norm": 0.011180339887498949,
+        "tail_to_input_ratio": 85.8346079783315,
+        "max_abs_f0": 1.2723005049850387,
+        "max_abs_f_l": 0.052914914801357224,
+        "final_f0": 0.9596598667491244,
+        "final_f_l": -0.0006565061187046721,
+        "r_max": 40.0,
+        "max_step": 0.05
+      },
+      {
+        "success": true,
+        "beta": 0.35,
+        "ell": 2,
+        "amp0": 0.01,
+        "amp_l": 0.005,
+        "tail_norm": 0.9588305967034906,
+        "input_norm": 0.011180339887498949,
+        "tail_to_input_ratio": 85.76041572542763,
+        "max_abs_f0": 1.0153519218433453,
+        "max_abs_f_l": 4.961886787503267,
+        "final_f0": 0.9581541244508082,
+        "final_f_l": 0.03601092851728452,
+        "r_max": 40.0,
+        "max_step": 0.05
+      },
+      {
+        "success": true,
+        "beta": 0.35,
+        "ell": 3,
+        "amp0": 0.01,
+        "amp_l": 0.005,
+        "tail_norm": 1.2253353440754167,
+        "input_norm": 0.011180339887498949,
+        "tail_to_input_ratio": 109.59732498342903,
+        "max_abs_f0": 4.785766671862754,
+        "max_abs_f_l": 69.04115018393436,
+        "final_f0": 1.2228654071046736,
+        "final_f_l": -0.077761825770366,
+        "r_max": 40.0,
+        "max_step": 0.05
+      },
+      {
+        "success": true,
+        "beta": 0.55,
+        "ell": 1,
+        "amp0": 0.01,
+        "amp_l": 0.005,
+        "tail_norm": 0.9742118935189639,
+        "input_norm": 0.011180339887498949,
+        "tail_to_input_ratio": 87.1361607358876,
+        "max_abs_f0": 1.2209496157962991,
+        "max_abs_f_l": 0.07596902562853354,
+        "final_f0": 0.9742104389392136,
+        "final_f_l": -0.0016834891356887973,
+        "r_max": 40.0,
+        "max_step": 0.05
+      },
+      {
+        "success": true,
+        "beta": 0.55,
+        "ell": 2,
+        "amp0": 0.01,
+        "amp_l": 0.005,
+        "tail_norm": 0.9548323685381885,
+        "input_norm": 0.011180339887498949,
+        "tail_to_input_ratio": 85.40280332674084,
+        "max_abs_f0": 0.9786236878816045,
+        "max_abs_f_l": 3.962152384415295,
+        "final_f0": 0.9537962547912506,
+        "final_f_l": -0.04446972402017823,
+        "r_max": 40.0,
+        "max_step": 0.05
+      },
+      {
+        "success": true,
+        "beta": 0.55,
+        "ell": 3,
+        "amp0": 0.01,
+        "amp_l": 0.005,
+        "tail_norm": 0.9005941918489115,
+        "input_norm": 0.011180339887498949,
+        "tail_to_input_ratio": 80.55159332462613,
+        "max_abs_f0": 5.635057344048074,
+        "max_abs_f_l": 65.56631969475104,
+        "final_f0": 0.8718577079021546,
+        "final_f_l": 0.22568570083989695,
+        "r_max": 40.0,
+        "max_step": 0.05
+      },
+      {
+        "success": true,
+        "beta": 0.75,
+        "ell": 1,
+        "amp0": 0.01,
+        "amp_l": 0.005,
+        "tail_norm": 0.8520581624117531,
+        "input_norm": 0.011180339887498949,
+        "tail_to_input_ratio": 76.21039887744945,
+        "max_abs_f0": 1.1468776101572626,
+        "max_abs_f_l": 0.08812465878061676,
+        "final_f0": 0.8520535178950992,
+        "final_f_l": -0.002813321005403065,
+        "r_max": 40.0,
+        "max_step": 0.05
+      },
+      {
+        "success": true,
+        "beta": 0.75,
+        "ell": 2,
+        "amp0": 0.01,
+        "amp_l": 0.005,
+        "tail_norm": 0.8931651900636857,
+        "input_norm": 0.011180339887498949,
+        "tail_to_input_ratio": 79.88712320475683,
+        "max_abs_f0": 0.9876994729872238,
+        "max_abs_f_l": 2.2021105446008273,
+        "final_f0": -0.8929167335604616,
+        "final_f_l": -0.021065698877920976,
+        "r_max": 40.0,
+        "max_step": 0.05
+      },
+      {
+        "success": true,
+        "beta": 0.75,
+        "ell": 3,
+        "amp0": 0.01,
+        "amp_l": 0.005,
+        "tail_norm": 0.6080758458307477,
+        "input_norm": 0.011180339887498949,
+        "tail_to_input_ratio": 54.38795707012936,
+        "max_abs_f0": 6.033017927128303,
+        "max_abs_f_l": 61.43840298984414,
+        "final_f0": -0.5358646361464271,
+        "final_f_l": 0.28741142289484,
+        "r_max": 40.0,
+        "max_step": 0.05
+      },
+      {
+        "success": true,
+        "beta": 0.9,
+        "ell": 1,
+        "amp0": 0.01,
+        "amp_l": 0.005,
+        "tail_norm": 0.8597342611889451,
+        "input_norm": 0.011180339887498949,
+        "tail_to_input_ratio": 76.89697002416162,
+        "max_abs_f0": 1.075774365879858,
+        "max_abs_f_l": 0.09085517877160967,
+        "final_f0": 0.8597169604922825,
+        "final_f_l": -0.005454145580425918,
+        "r_max": 40.0,
+        "max_step": 0.05
+      },
+      {
+        "success": true,
+        "beta": 0.9,
+        "ell": 2,
+        "amp0": 0.01,
+        "amp_l": 0.005,
+        "tail_norm": 0.7951221900316862,
+        "input_norm": 0.011180339887498949,
+        "tail_to_input_ratio": 71.11789069317423,
+        "max_abs_f0": 1.0733626017911462,
+        "max_abs_f_l": 2.408841053035142,
+        "final_f0": 0.7951188623408763,
+        "final_f_l": -0.0023003979080989277,
+        "r_max": 40.0,
+        "max_step": 0.05
+      },
+      {
+        "success": true,
+        "beta": 0.9,
+        "ell": 3,
+        "amp0": 0.01,
+        "amp_l": 0.005,
+        "tail_norm": 0.5771880936056203,
+        "input_norm": 0.011180339887498949,
+        "tail_to_input_ratio": 51.62527252422715,
+        "max_abs_f0": 6.232934796477447,
+        "max_abs_f_l": 57.72750165233097,
+        "final_f0": 0.48884268333788333,
+        "final_f_l": 0.3068858523084898,
+        "r_max": 40.0,
+        "max_step": 0.05
+      }
+    ],
+    "best_smoke_or_none": {
+      "success": true,
+      "beta": 0.9,
+      "ell": 3,
+      "amp0": 0.02,
+      "amp_l": 0.02,
+      "tail_norm": 0.29164154867605574,
+      "input_norm": 0.0282842712474619,
+      "tail_to_input_ratio": 10.31108583722928,
+      "max_abs_f0": 8.88507410284305,
+      "max_abs_f_l": 95.87768757222713,
+      "final_f0": 0.2815940634677893,
+      "final_f_l": 0.07589187264698932,
+      "r_max": 40.0,
+      "max_step": 0.05
+    },
+    "current_ai_context_step": "baryon_mass_ratio_and_proton_radius_readiness_stash_source_found",
+    "trial1_breakthrough_summary": {
+      "trial1_breakthrough_pass_under_working_action": true,
+      "trial2_unlock_ready": true,
+      "trial3_explicit_k_positive_branch_state": "fallback_hold",
+      "global_legacy_reaudit_required": true,
+      "paper_side_sync_required": true,
+      "recommended_next_route_or_none": "8.7.56.5"
+    },
+    "trial2_declaration_summary": {
+      "trial2_pass_level": "foundational_structural_pass_numeric_alpha_open",
+      "trial2_foundational_route_confirmed": true,
+      "trial2_alpha_numeric_precision_ready": false,
+      "v2_minimum_condition_satisfied_under_breakthrough_working_action": true,
+      "paper_side_sync_required": true,
+      "global_legacy_reaudit_required": true,
+      "trial3_fallback_hold_release_ready": false,
+      "recommended_next_route_or_none": "8.7.56.160"
+    }
+  }
+}

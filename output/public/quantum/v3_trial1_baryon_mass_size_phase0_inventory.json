@@ -1,0 +1,276 @@
+{
+  "generated_utc": "2026-04-23T12:53:25.591782+00:00",
+  "phase": {
+    "program": "P-model v3.0",
+    "trial": "Trial-1 baryon mass ratio and proton radius",
+    "step": "Phase 0 readiness inventory"
+  },
+  "workflow_source": {
+    "path": "C:\\Users\\ogawa\\Downloads\\v3_trial1_baryon_mass_size_workflow.md",
+    "exists": true,
+    "size_bytes": 11771,
+    "mtime_utc": "2026-04-23T10:09:52.272238+00:00",
+    "sha256": "0f7756a8c90315a16da2ea0bbf908d83d31207d0e6128a11d077c9f32d6d4e66"
+  },
+  "environment": {
+    "python_version": "3.13.13 (tags/v3.13.13:01104ce, Apr  7 2026, 19:25:48) [MSC v.1944 64 bit (AMD64)]",
+    "python_executable": "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "packages": {
+      "numpy": "2.4.4",
+      "scipy": "1.17.1",
+      "matplotlib": "3.10.8",
+      "pandas": "3.0.2"
+    },
+    "pip_freeze": {
+      "path": "output/private/quantum/v3_trial1_pip_freeze.txt",
+      "sha256": "fbfd86e11f58d4389726d74dc74331277782ada9bcabe3da4319172077ccc37f",
+      "returncode": 0,
+      "line_count": 18
+    },
+    "wz_requirements_reference_found": false,
+    "wz_requirements_reference_note": "No historical W/Z scan-time requirements or pip-freeze baseline was found; the current interpreter environment is frozen as the Trial-1 continuation baseline."
+  },
+  "expected_wz_contract": {
+    "anchor_family_or_none": {
+      "k": 17,
+      "ell": 1,
+      "s": 1
+    },
+    "localized_solution_count_total": 41,
+    "exact_vector_row_count_total": 905838,
+    "exact_w_kappa_coupled": 1.6024037199246677,
+    "exact_z_kappa_coupled": 1.6817234303593958
+  },
+  "artifacts": {
+    "public_summary_metrics": {
+      "path": "output/public/quantum/v2_trial3_weak_checkpoint_summary_metrics.json",
+      "exists": true,
+      "size_bytes": 1425,
+      "mtime_utc": "2026-04-10T15:33:16.149548+00:00",
+      "sha256": "f35498431d597a8745a2c623f2fa5e1c6cdbcfd491d61be3ed070bf3b3332b96"
+    },
+    "public_summary_value_check": {
+      "all_expected_values_present": true,
+      "checks": [
+        {
+          "field": "anchor_family_or_none",
+          "expected": {
+            "k": 17,
+            "ell": 1,
+            "s": 1
+          },
+          "observed": {
+            "k": 17,
+            "ell": 1,
+            "s": 1
+          },
+          "status": "pass"
+        },
+        {
+          "field": "localized_solution_count_total",
+          "expected": 41,
+          "observed": 41,
+          "status": "pass"
+        },
+        {
+          "field": "exact_vector_row_count_total",
+          "expected": 905838,
+          "observed": 905838,
+          "status": "pass"
+        },
+        {
+          "field": "exact_w_kappa_coupled",
+          "expected": 1.6024037199246677,
+          "observed": 1.6024037199246677,
+          "status": "pass"
+        },
+        {
+          "field": "exact_z_kappa_coupled",
+          "expected": 1.6817234303593958,
+          "observed": 1.6817234303593958,
+          "status": "pass"
+        }
+      ]
+    },
+    "summary_referenced_metrics": [
+      {
+        "path": "output/public/quantum/mass_origin_v2_t3_t2_coupled_localization_closeout_audit_metrics.json",
+        "exists": true,
+        "size_bytes": 8107,
+        "mtime_utc": "2026-04-23T12:49:50.776459+00:00",
+        "sha256": "d16f2f069305a17c74d3a477d391a78a479f5a59d73f77e3f0a58fce582c95e1"
+      },
+      {
+        "path": "output/public/quantum/mass_origin_v2_trial3_two_component_shooting_solver_implementation_metrics.json",
+        "exists": true,
+        "size_bytes": 12990,
+        "mtime_utc": "2026-04-23T12:43:47.582129+00:00",
+        "sha256": "9f979152ced9532c63b99894cde1a041f969fa584433f2af5dd15f9155ec4e17"
+      },
+      {
+        "path": "output/public/quantum/mass_origin_v2_trial3_two_component_coupled_radial_ode_derivation_metrics.json",
+        "exists": true,
+        "size_bytes": 6821,
+        "mtime_utc": "2026-04-23T12:43:47.581128+00:00",
+        "sha256": "121bad0e80421adae31f1716ffdc1763177b10d5bcb7856f6f5f9656631854b3"
+      },
+      {
+        "path": "output/public/quantum/mass_origin_v2_trial3_two_component_spectrum_computation_metrics.json",
+        "exists": true,
+        "size_bytes": 66206,
+        "mtime_utc": "2026-04-23T12:49:08.120260+00:00",
+        "sha256": "31ad6b53e326f47b4f3301037e5639818bad34bd50c8917843e339e29b7333c2"
+      }
+    ],
+    "private_closeout_candidates": [
+      {
+        "path": "output/private/quantum/expert_review_bundle_20260323_215604/mass_origin_v2_t3_t2_coupled_localization_closeout_audit_metrics.json",
+        "exists": true,
+        "size_bytes": 7889,
+        "mtime_utc": "2026-03-22T06:45:51.063099+00:00",
+        "sha256": "367771bfd6a1d5f7b663aee1976277ee8a112e76e47383d02602200a6d3cd533"
+      },
+      {
+        "path": "output/private/quantum/expert_review_bundle_20260323_074845/mass_origin_v2_t3_t2_coupled_localization_closeout_audit_metrics.json",
+        "exists": true,
+        "size_bytes": 7889,
+        "mtime_utc": "2026-03-22T06:45:51.063099+00:00",
+        "sha256": "367771bfd6a1d5f7b663aee1976277ee8a112e76e47383d02602200a6d3cd533"
+      }
+    ],
+    "private_closeout_value_check": {
+      "all_expected_values_present": false,
+      "checks": [
+        {
+          "field": "anchor_family_or_none",
+          "expected": {
+            "k": 17,
+            "ell": 1,
+            "s": 1
+          },
+          "observed": {
+            "k": 17,
+            "ell": 1,
+            "s": 1
+          },
+          "status": "pass"
+        },
+        {
+          "field": "localized_solution_count_total",
+          "expected": 41,
+          "observed": null,
+          "status": "fail"
+        },
+        {
+          "field": "exact_vector_row_count_total",
+          "expected": 905838,
+          "observed": null,
+          "status": "fail"
+        },
+        {
+          "field": "exact_w_kappa_coupled",
+          "expected": 1.6024037199246677,
+          "observed": 1.6024037199246677,
+          "status": "pass"
+        },
+        {
+          "field": "exact_z_kappa_coupled",
+          "expected": 1.6817234303593958,
+          "observed": 1.6817234303593958,
+          "status": "pass"
+        }
+      ]
+    },
+    "reproduction_script_candidates": [
+      {
+        "path": "scripts/quantum/mass_origin_vector_qball_route_branch.py",
+        "exists": true,
+        "size_bytes": 31842,
+        "mtime_utc": "2026-04-23T12:37:00.636613+00:00",
+        "sha256": "f25e53b0b4f345fd51c564aeefb51f3b20325d31f328e95875a3d88ef1d88af3"
+      },
+      {
+        "path": "scripts/quantum/mass_origin_vector_qball_numerical_solver_branch.py",
+        "exists": true,
+        "size_bytes": 42070,
+        "mtime_utc": "2026-04-23T12:37:00.603719+00:00",
+        "sha256": "3d3fbd8c83a60104c13ece3542831c93d9c942d480292b7f3955bdefbe65f226"
+      },
+      {
+        "path": "scripts/quantum/mass_origin_vector_qball_full_coupled_solver_branch.py",
+        "exists": true,
+        "size_bytes": 30443,
+        "mtime_utc": "2026-04-23T12:37:00.569569+00:00",
+        "sha256": "7af9b69b4bdb3d52c41796678558797641370467c955459e5d7b64a19802b111"
+      },
+      {
+        "path": "scripts/quantum/mass_origin_v2_trial3_two_component_pivot_branch.py",
+        "exists": true,
+        "size_bytes": 26272,
+        "mtime_utc": "2026-04-23T12:43:31.464991+00:00",
+        "sha256": "4967bf50fd6d12f5593c5de65c0c132a194e36d4377fd1f875898b63c32a1bfa"
+      },
+      {
+        "path": "scripts/quantum/mass_origin_v2_trial3_two_component_spectrum_branch.py",
+        "exists": true,
+        "size_bytes": 38881,
+        "mtime_utc": "2026-04-23T12:43:35.864680+00:00",
+        "sha256": "a61589aa153b46b474ca72a7ed9315ea303bd02c2ce0ea3b057c24ec8d0aa8f1"
+      },
+      {
+        "path": "scripts/quantum/mass_origin_v2_t3_t2_coupled_localization_closeout_branch.py",
+        "exists": true,
+        "size_bytes": 27466,
+        "mtime_utc": "2026-04-23T12:49:31.073768+00:00",
+        "sha256": "9618ca1ff2702f1ffaf5cc1d3bd5b93346f73cd14b36f8c216369b485bb56698"
+      }
+    ]
+  },
+  "gate": {
+    "phase0_1_python_environment_freeze": "pass",
+    "phase0_2_wz_reproduction": "pass",
+    "phase0_3_random_seed": "pass",
+    "phase0_4_hash_record": "pass",
+    "overall_status": "ready_for_phase1",
+    "can_advance_to_phase1": true,
+    "blockers": [],
+    "warnings": [
+      "Historical W/Z scan-time NumPy/SciPy equality cannot be certified because no old pip-freeze baseline was found.",
+      "Private expert-review closeout bundle is incomplete for aggregate spectrum fields; public regenerated metrics are used as canonical."
+    ],
+    "next_action": "Proceed to Phase 1 nucleon-scale scan under the frozen current environment."
+  },
+  "csv_rows": [
+    {
+      "gate": "0.1_python_environment_freeze",
+      "status": "pass",
+      "evidence": "python=3.13.13 packages={'numpy': '2.4.4', 'scipy': '1.17.1', 'matplotlib': '3.10.8', 'pandas': '3.0.2'}",
+      "note": "Current environment was frozen; historical equality baseline is unavailable and recorded as a warning."
+    },
+    {
+      "gate": "0.2_wz_reproduction",
+      "status": "pass",
+      "evidence": "missing_scripts=0 missing_source_metrics=0",
+      "note": "W/Z source metrics and reproduction scripts are present; public retained values match the expected contract."
+    },
+    {
+      "gate": "0.3_random_seed",
+      "status": "pass",
+      "evidence": "seed=20260422",
+      "note": "Seed is fixed for future scans; no random scan was run in this audit."
+    },
+    {
+      "gate": "0.4_hash_record",
+      "status": "pass",
+      "evidence": "workflow/source/artifact hashes recorded where files exist",
+      "note": "Hash chain covers the workflow source, restored scripts, and regenerated public artifacts where present."
+    },
+    {
+      "gate": "retained_wz_value_check",
+      "status": "pass",
+      "evidence": "public summary and private closeout bundle checked",
+      "note": "This checks retained values only; it is not a substitute for rerunning the scan."
+    }
+  ]
+}

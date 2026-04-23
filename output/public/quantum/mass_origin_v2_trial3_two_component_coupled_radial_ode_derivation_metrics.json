@@ -1,0 +1,112 @@
+{
+  "generated_utc": "2026-04-23T12:43:44.777302+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.56.330",
+    "name": "Trial-3 two-component coupled radial ODE derivation"
+  },
+  "inputs": {
+    "expert_note_markdown": "C:\\Users\\ogawa\\Downloads\\pmodel_v2_trial3_two_component_pivot.md",
+    "expert_note_available": false,
+    "expert_note_candidates": [
+      "C:\\Users\\ogawa\\Downloads\\pmodel_v2_trial3_two_component_pivot.md",
+      "C:\\develop\\waveP\\doc\\quantum\\pmodel_v2_trial3_two_component_pivot.md"
+    ],
+    "status_markdown": "doc/STATUS.md",
+    "roadmap_markdown": "doc/ROADMAP.md",
+    "ai_context_json": "doc/AI_CONTEXT_MIN.json",
+    "mass_origin_v2_post_photon_nontransverse_two_by_two_quadratic_form_json": "output/public/quantum/mass_origin_v2_post_photon_nontransverse_two_by_two_quadratic_form_metrics.json",
+    "mass_origin_v2_post_photon_nontransverse_diagonalization_basis_statement_json": "output/public/quantum/mass_origin_v2_post_photon_nontransverse_diagonalization_basis_statement_metrics.json",
+    "mass_origin_v2_trial1_breakthrough_declaration_gate_json": "output/public/quantum/mass_origin_v2_trial1_breakthrough_declaration_gate_metrics.json",
+    "mass_origin_v2_trial2_declaration_gate_json": "output/public/quantum/mass_origin_v2_trial2_declaration_gate_metrics.json",
+    "mass_origin_v2_trial3_refactored_post_ell30_same_family_incumbent_anchor_displacement_witness_audit_json": "output/public/quantum/mass_origin_v2_trial3_refactored_post_ell30_same_family_incumbent_anchor_displacement_witness_audit_metrics.json",
+    "mass_origin_v2_trial3_refactored_declaration_thirteenth_gate_json": "output/public/quantum/mass_origin_v2_trial3_refactored_declaration_thirteenth_gate_metrics.json",
+    "mass_origin_v2_trial3_refactored_paper_sync_trial4_disposition_twenty_fifth_refresh_json": "output/public/quantum/mass_origin_v2_trial3_refactored_paper_sync_trial4_disposition_twenty_fifth_refresh_metrics.json",
+    "mass_origin_v2_t3_post_ell30_displacement_witness_branch_py": "scripts/quantum/mass_origin_v2_t3_post_ell30_displacement_witness_branch.py"
+  },
+  "intent": "Freeze the coupled radial-ODE template implied by the already frozen post-photon 2x2 nontransverse form and the two-component ansatz from the expert note.",
+  "formulas": {
+    "nontransverse_basis": "{delta P_0, delta P_L}",
+    "fourier_space_quadratic_form": "M(omega,k) = [[k^2 + 4 lambda v^2 / Z_P, -omega k], [-omega k, omega^2]]",
+    "two_component_ansatz": "delta P_0(r,t) = f_0(r) exp(i omega t), delta P_i^L(r,t) = f_L(r) r_hat_i exp(i omega t)",
+    "dimensionless_coupling_proxy": "C_ell(beta,r) = beta sqrt(ell(ell+1)) / r",
+    "dimensionless_radius_rule": "x = m_base r, beta = omega / m_base",
+    "pilot_radial_ode_f0": "f_0'' + 2 f_0'/x + (beta^2 - 4) f_0 + C_ell(beta,x) f_L + (3 rho + rho^2) f_0 = 0",
+    "pilot_radial_ode_fL": "f_L'' + 2 f_L'/x - ell(ell+1) f_L / x^2 + beta^2 f_L + C_ell(beta,x) f_0 + (3 rho + rho^2) f_L = 0",
+    "rho_definition": "rho = sqrt(f_0^2 + f_L^2)",
+    "boundary_conditions": "f_0'(0)=0, f_L(0)=0, f_0(infty)=0, f_L(infty)=0"
+  },
+  "rows": [
+    {
+      "row_id": "trial3_two_component_coupled_radial_ode_derivation_complete",
+      "status": "pass",
+      "metric": "Trial-3 two-component coupled radial ODE derivation complete",
+      "value": 1.0,
+      "note": "The coupled radial-ODE template is frozen from the post-photon 2x2 basis."
+    },
+    {
+      "row_id": "trial3_two_component_off_diagonal_coupling_retained",
+      "status": "pass",
+      "metric": "off-diagonal temporal/longitudinal coupling retained",
+      "value": 1.0,
+      "note": "The pivot keeps the kinetic mixing implied by the post-photon nontransverse 2x2 form."
+    },
+    {
+      "row_id": "trial3_two_component_radial_mass_formula_inherited",
+      "status": "pass",
+      "metric": "radial mass formula inherited from current canon",
+      "value": 4.0,
+      "note": "The radial/time-like mode keeps m_0^2 = 4 lambda v^2 / Z_P in the dimensionless pilot bookkeeping."
+    },
+    {
+      "row_id": "trial3_two_component_longitudinal_direct_mass_inherited",
+      "status": "pass",
+      "metric": "direct longitudinal mexican-hat mass contribution",
+      "value": 0.0,
+      "note": "The longitudinal branch keeps the frozen direct mexican-hat mass contribution of zero."
+    },
+    {
+      "row_id": "trial3_two_component_no_new_parameters",
+      "status": "pass",
+      "metric": "two-component ODE introduces no new free parameters",
+      "value": 1.0,
+      "note": "The coupling proxy is built only from beta and ell and does not add a new tunable constant."
+    }
+  ],
+  "summary": {
+    "two_component_coupled_radial_ode_template_ready": true,
+    "off_diagonal_coupling_source": "post_photon_nontransverse_two_by_two_quadratic_form",
+    "radial_mass_squared_formula": "m_0^2 = 4 lambda v^2 / Z_P",
+    "longitudinal_direct_mass_squared_formula": "m_L,dir^2 = 0",
+    "new_free_parameters_introduced": [],
+    "full_spectrum_scan_not_yet_executed": true,
+    "next_required_route": "trial3_two_component_shooting_solver_implementation"
+  },
+  "decision": {
+    "overall_status": "trial3_two_component_coupled_radial_ode_template_frozen",
+    "advance_to_8_7_56_331": true,
+    "next_required_artifacts": [
+      "trial3_two_component_shooting_solver_implementation"
+    ]
+  },
+  "evidence": {
+    "advice_ansatz_line": null,
+    "advice_coupling_line": null,
+    "advice_step1_line": null,
+    "post_photon_quadratic_form_formulas": {
+      "working_action": "-(Z_P/4) F_(P)^2 + (lambda/4) (|P|^2 - v^2)^2 + g_P P_mu J^mu",
+      "background_vev": "P_mu^(0) = (v, 0, 0, 0)",
+      "photon_branch": "A_mu = delta P_mu^T / sqrt(Z_P)",
+      "nontransverse_basis": "{delta P_0, delta P_L}",
+      "quadratic_form_matrix": "M(omega,k) = [[k^2 + 4 lambda v^2 / Z_P, -omega k], [-omega k, omega^2]]",
+      "eigenvalues": "lambda_±(omega,k) = 1/2[(omega^2 + k^2 + 4 lambda v^2 / Z_P) ± sqrt((omega^2 - k^2 - 4 lambda v^2 / Z_P)^2 + 4 omega^2 k^2)]",
+      "radial_mass_formula": "m_0^2 = 4 lambda v^2 / Z_P"
+    },
+    "post_photon_diagonalization_formulas": {
+      "diagonalization_result": "one massive propagating radial/Higgs-analog mode plus one non-propagating constraint branch",
+      "propagating_mass_squared": "m_0^2 = 4 lambda v^2 / Z_P",
+      "constraint_branch_rule": "the orthogonal nontransverse combination remains non-propagating and is absorbed into the constraint/Stueckelberg structure",
+      "basis_statement": "after extracting the photon A_mu, the remaining post-photon nontransverse sector is represented by {delta P_0, delta P_L}, diagonalized into one massive mode and one constraint branch"
+    }
+  }
+}

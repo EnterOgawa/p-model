@@ -1,0 +1,6 @@
+gate,status,evidence,note
+0.1_python_environment_freeze,pass,"python=3.13.13 packages={'numpy': '2.4.4', 'scipy': '1.17.1', 'matplotlib': '3.10.8', 'pandas': '3.0.2'}",Current environment was frozen; historical equality baseline is unavailable and recorded as a warning.
+0.2_wz_reproduction,pass,missing_scripts=0 missing_source_metrics=0,W/Z source metrics and reproduction scripts are present; public retained values match the expected contract.
+0.3_random_seed,pass,seed=20260422,Seed is fixed for future scans; no random scan was run in this audit.
+0.4_hash_record,pass,workflow/source/artifact hashes recorded where files exist,"Hash chain covers the workflow source, restored scripts, and regenerated public artifacts where present."
+retained_wz_value_check,pass,public summary and private closeout bundle checked,This checks retained values only; it is not a substitute for rerunning the scan.

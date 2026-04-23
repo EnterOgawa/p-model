@@ -1,0 +1,1137 @@
+{
+  "generated_utc": "2026-04-23T13:36:57.390041+00:00",
+  "phase": {
+    "program": "P-model v3.0",
+    "trial": "Trial-1 baryon mass ratio and proton radius",
+    "step": "Phase 1 nucleon-scale dependency inventory"
+  },
+  "workflow_source": {
+    "path": "C:\\Users\\ogawa\\Downloads\\v3_trial1_baryon_mass_size_workflow.md",
+    "exists": true,
+    "size_bytes": 11771,
+    "mtime_utc": "2026-04-23T10:09:52.272238+00:00",
+    "sha256": "0f7756a8c90315a16da2ea0bbf908d83d31207d0e6128a11d077c9f32d6d4e66"
+  },
+  "phase0_inventory": {
+    "path": "output/public/quantum/v3_trial1_baryon_mass_size_phase0_inventory.json",
+    "exists": true,
+    "size_bytes": 10351,
+    "mtime_utc": "2026-04-23T12:53:25.597070+00:00",
+    "sha256": "6f08a5339bf97028f00923721ea1e323ea50bb69d6f1d564736af4e1098d0477"
+  },
+  "push_scope_doc": {
+    "path": "doc/quantum/187_v3_trial1_push_scope_cleanup.md",
+    "exists": true,
+    "size_bytes": 3106,
+    "mtime_utc": "2026-04-23T13:29:02.561640+00:00",
+    "sha256": "c6c54084b940a380cb37ebf8b6ecca3f673f42e3d6b4ac64f49f5ea313f2a137"
+  },
+  "source_scripts": {
+    "route_contract": {
+      "path": "scripts/quantum/mass_origin_vector_qball_route_branch.py",
+      "exists": true,
+      "size_bytes": 31842,
+      "mtime_utc": "2026-04-23T12:37:00.636613+00:00",
+      "sha256": "f25e53b0b4f345fd51c564aeefb51f3b20325d31f328e95875a3d88ef1d88af3",
+      "parse_ok": true,
+      "functions": [
+        "build_pilot_sectors",
+        "hit",
+        "main",
+        "now_iso",
+        "payload",
+        "read_json",
+        "read_text",
+        "rel",
+        "req",
+        "row",
+        "write_artifact"
+      ],
+      "imports": [
+        "__future__",
+        "csv",
+        "datetime",
+        "json",
+        "pathlib"
+      ],
+      "constants": {
+        "ROOT": "<non-literal>",
+        "OUT": "<non-literal>",
+        "PART1": "<non-literal>",
+        "PART2": "<non-literal>",
+        "PART3A": "<non-literal>",
+        "MEXICAN": "<non-literal>",
+        "QBALL_SPECTRUM": "<non-literal>",
+        "QBALL_RATIO": "<non-literal>",
+        "CLOSEOUT": "<non-literal>",
+        "ROT_AUDIT": "<non-literal>"
+      }
+    },
+    "effective_numerical_solver": {
+      "path": "scripts/quantum/mass_origin_vector_qball_numerical_solver_branch.py",
+      "exists": true,
+      "size_bytes": 42070,
+      "mtime_utc": "2026-04-23T12:37:00.603719+00:00",
+      "sha256": "3d3fbd8c83a60104c13ece3542831c93d9c942d480292b7f3955bdefbe65f226",
+      "parse_ok": true,
+      "functions": [
+        "amplitude_grid",
+        "build_base_modes",
+        "build_scalar_recovery_rows",
+        "build_spin_orbit_rows",
+        "build_trial_state_rows",
+        "cached_profile",
+        "cached_tail",
+        "compare_known_targets",
+        "count_radial_nodes",
+        "find_sector_amplitude",
+        "find_sector_amplitudes",
+        "group_base_modes_by_ell",
+        "hit",
+        "interpolate_integer_modes",
+        "main",
+        "now_iso",
+        "ode",
+        "payload",
+        "pilot_beta_grid",
+        "read_json",
+        "read_text",
+        "rel",
+        "req",
+        "row",
+        "sample",
+        "scan_ell_sector",
+        "solve_sector_profile",
+        "write_artifact"
+      ],
+      "imports": [
+        "__future__",
+        "csv",
+        "datetime",
+        "functools",
+        "json",
+        "math",
+        "numpy",
+        "pathlib",
+        "scipy.integrate",
+        "scipy.optimize"
+      ],
+      "constants": {
+        "ROOT": "<non-literal>",
+        "OUT": "<non-literal>",
+        "VECTOR_ROUTE": "<non-literal>",
+        "VECTOR_SPEC": "<non-literal>",
+        "VECTOR_SPIN": "<non-literal>",
+        "SCALAR_SPECTRUM": "<non-literal>",
+        "QBALL_RATIO": "<non-literal>",
+        "PART1": "<non-literal>",
+        "PART2": "<non-literal>"
+      }
+    },
+    "full_coupled_solver": {
+      "path": "scripts/quantum/mass_origin_vector_qball_full_coupled_solver_branch.py",
+      "exists": true,
+      "size_bytes": 30443,
+      "mtime_utc": "2026-04-23T12:37:00.569569+00:00",
+      "sha256": "7af9b69b4bdb3d52c41796678558797641370467c955459e5d7b64a19802b111",
+      "parse_ok": true,
+      "functions": [
+        "build_exact_ladder",
+        "compare_known_targets",
+        "coupled_charge_factor",
+        "coupled_mass_factor",
+        "hit",
+        "load_previous_branch",
+        "main",
+        "now_iso",
+        "payload",
+        "polarization_weight",
+        "read_json",
+        "read_text",
+        "rel",
+        "req",
+        "row",
+        "sample",
+        "write_artifact"
+      ],
+      "imports": [
+        "__future__",
+        "csv",
+        "datetime",
+        "importlib.util",
+        "json",
+        "math",
+        "pathlib"
+      ],
+      "constants": {
+        "ROOT": "<non-literal>",
+        "OUT": "<non-literal>",
+        "PART1": "<non-literal>",
+        "PART3A": "<non-literal>",
+        "VECTOR_ROUTE": "<non-literal>",
+        "VECTOR_SPEC": "<non-literal>",
+        "VECTOR_SPIN": "<non-literal>",
+        "VECTOR_RADIAL": "<non-literal>",
+        "VECTOR_EFFECTIVE": "<non-literal>",
+        "SCALAR_SPECTRUM": "<non-literal>",
+        "NUMERICAL_BRANCH": "<non-literal>"
+      }
+    },
+    "two_component_pivot": {
+      "path": "scripts/quantum/mass_origin_v2_trial3_two_component_pivot_branch.py",
+      "exists": true,
+      "size_bytes": 26272,
+      "mtime_utc": "2026-04-23T12:43:31.464991+00:00",
+      "sha256": "4967bf50fd6d12f5593c5de65c0c132a194e36d4377fd1f875898b63c32a1bfa",
+      "parse_ok": true,
+      "functions": [
+        "hit",
+        "main",
+        "now_iso",
+        "ode",
+        "payload",
+        "read_json",
+        "read_text",
+        "rel",
+        "req",
+        "resolve_optional_advice",
+        "row",
+        "run_cli",
+        "run_smoke_scan",
+        "sample",
+        "solve_two_component_profile",
+        "write_artifact"
+      ],
+      "imports": [
+        "__future__",
+        "csv",
+        "datetime",
+        "json",
+        "math",
+        "numpy",
+        "pathlib",
+        "scipy.integrate"
+      ],
+      "constants": {
+        "ROOT": "<non-literal>",
+        "OUT": "<non-literal>",
+        "STATUS": "<non-literal>",
+        "ROADMAP": "<non-literal>",
+        "AI_CONTEXT": "<non-literal>",
+        "ADVICE_CANDIDATES": "<non-literal>",
+        "POST_PHOTON_QFORM": "<non-literal>",
+        "POST_PHOTON_DIAG": "<non-literal>",
+        "TRIAL1_BREAKTHROUGH": "<non-literal>",
+        "TRIAL2_DECLARATION": "<non-literal>",
+        "TRIAL3_WITNESS_AUDIT": "<non-literal>",
+        "TRIAL3_DECLARATION": "<non-literal>",
+        "TRIAL3_DISPOSITION": "<non-literal>",
+        "PREVIOUS_BRANCH": "<non-literal>",
+        "SMOKE_BETAS": [
+          0.35,
+          0.55,
+          0.75,
+          0.9
+        ],
+        "SMOKE_ELLS": [
+          1,
+          2,
+          3
+        ],
+        "SMOKE_AMP0": [
+          0.01,
+          0.02,
+          0.05
+        ],
+        "SMOKE_AMPL": [
+          0.005,
+          0.01,
+          0.02
+        ],
+        "RADIAL_MASS_SQUARED": 4.0,
+        "LONGITUDINAL_DIRECT_MASS_SQUARED": 0.0
+      }
+    },
+    "two_component_spectrum": {
+      "path": "scripts/quantum/mass_origin_v2_trial3_two_component_spectrum_branch.py",
+      "exists": true,
+      "size_bytes": 38881,
+      "mtime_utc": "2026-04-23T12:43:35.864680+00:00",
+      "sha256": "a61589aa153b46b474ca72a7ed9315ea303bd02c2ce0ea3b057c24ec8d0aa8f1",
+      "parse_ok": true,
+      "functions": [
+        "best_ratio_pair_fast",
+        "hit",
+        "interpolate_two_component_modes",
+        "load_module",
+        "main",
+        "now_iso",
+        "ode",
+        "payload",
+        "read_json",
+        "read_text",
+        "rel",
+        "req",
+        "resolve_optional_advice",
+        "row",
+        "run_cli",
+        "run_two_component_scan",
+        "sample",
+        "solve_two_component_profile",
+        "write_artifact"
+      ],
+      "imports": [
+        "__future__",
+        "csv",
+        "datetime",
+        "heapq",
+        "importlib.util",
+        "json",
+        "math",
+        "numpy",
+        "pathlib",
+        "scipy.integrate"
+      ],
+      "constants": {
+        "ROOT": "<non-literal>",
+        "OUT": "<non-literal>",
+        "STATUS": "<non-literal>",
+        "ROADMAP": "<non-literal>",
+        "AI_CONTEXT": "<non-literal>",
+        "ADVICE_CANDIDATES": "<non-literal>",
+        "HELPER_BRANCH": "<non-literal>",
+        "PIVOT_BRANCH": "<non-literal>",
+        "NUMERICAL_BRANCH": "<non-literal>",
+        "FULL_BRANCH": "<non-literal>",
+        "PIVOT_ROUTE": "<non-literal>",
+        "PIVOT_ODE": "<non-literal>",
+        "PIVOT_IMPLEMENTATION": "<non-literal>",
+        "POST_PHOTON_PRESERVATION": "<non-literal>",
+        "SCALAR_SPECTRUM": "<non-literal>",
+        "VECTOR_SPIN": "<non-literal>",
+        "ELL_VALUES": "<non-literal>",
+        "BETA_GRID": [
+          0.5,
+          0.8,
+          0.95
+        ],
+        "AMP0_GRID": [
+          0.1,
+          2.0,
+          8.0
+        ],
+        "AMPL_GRID": [
+          2.0,
+          8.0
+        ],
+        "TAIL_RATIO_THRESHOLD": 0.2,
+        "R_MAX": 25.0,
+        "MAX_STEP": 0.1,
+        "RTOL": 1e-07,
+        "ATOL": 1e-09,
+        "PAIR_NEAR_PASS_THRESHOLD": 0.15,
+        "W_MASS_MEV": 80369.0,
+        "Z_MASS_MEV": 91187.6,
+        "ELECTRON_MASS_MEV": 0.51099895,
+        "W_TARGET": "<non-literal>",
+        "Z_TARGET": "<non-literal>",
+        "WZ_RATIO_TARGET": "<non-literal>",
+        "SIN2_THETA_W_TARGET": "<non-literal>",
+        "PASS_THRESHOLD": 0.1
+      }
+    },
+    "coupled_localization_closeout": {
+      "path": "scripts/quantum/mass_origin_v2_t3_t2_coupled_localization_closeout_branch.py",
+      "exists": true,
+      "size_bytes": 27466,
+      "mtime_utc": "2026-04-23T12:49:31.073768+00:00",
+      "sha256": "9618ca1ff2702f1ffaf5cc1d3bd5b93346f73cd14b36f8c216369b485bb56698",
+      "parse_ok": true,
+      "functions": [
+        "compact",
+        "coupled_kappa",
+        "coupled_kappa_squared",
+        "hit",
+        "main",
+        "now_iso",
+        "on_zero_kappa_clip",
+        "payload",
+        "read_json",
+        "read_text",
+        "rel",
+        "req",
+        "resolve_optional_advice",
+        "row",
+        "run_cli",
+        "write_artifact"
+      ],
+      "imports": [
+        "__future__",
+        "csv",
+        "datetime",
+        "json",
+        "math",
+        "pathlib"
+      ],
+      "constants": {
+        "ROOT": "<non-literal>",
+        "OUT": "<non-literal>",
+        "STATUS": "<non-literal>",
+        "ROADMAP": "<non-literal>",
+        "AI_CONTEXT": "<non-literal>",
+        "PART1": "<non-literal>",
+        "PART3A": "<non-literal>",
+        "PART5": "<non-literal>",
+        "FULL_SOLVER": "<non-literal>",
+        "ADVICE_CANDIDATES": "<non-literal>",
+        "POST_PHOTON_QFORM": "<non-literal>",
+        "POST_PHOTON_DIAG": "<non-literal>",
+        "PRIOR_SOURCE": "<non-literal>",
+        "PRIOR_AUDIT": "<non-literal>",
+        "PRIOR_GATE": "<non-literal>",
+        "PRIOR_DISP": "<non-literal>",
+        "ANCHOR": {
+          "k": 17,
+          "ell": 1,
+          "s": 1
+        },
+        "MASSIVE_MODE_MASS_SQUARED": 4.0,
+        "NEXT_ROUTE": "8.7.56.403",
+        "TRIAL2_STATE": "reopened_after_trial3_closeout"
+      }
+    },
+    "post_ell18_helper": {
+      "path": "scripts/quantum/mass_origin_v2_t3_post_ell18_amplitude_branch.py",
+      "exists": true,
+      "size_bytes": 46132,
+      "mtime_utc": "2026-04-23T12:43:59.034921+00:00",
+      "sha256": "961d87c111a34f79139c9a62ca70fc6c0f10ec5140fda9fa80cafb52aed78b49",
+      "parse_ok": true,
+      "functions": [
+        "artifact_names",
+        "best_ratio_pair",
+        "closest_state",
+        "extended_amplitude_grid",
+        "hit",
+        "load_module",
+        "main",
+        "normalize_vector_rows",
+        "now_iso",
+        "payload",
+        "read_json",
+        "read_text",
+        "rel",
+        "req",
+        "row",
+        "sample",
+        "scan_amplitude_extended_sector",
+        "sector_summary",
+        "write_artifact"
+      ],
+      "imports": [
+        "__future__",
+        "csv",
+        "datetime",
+        "importlib.util",
+        "json",
+        "math",
+        "pathlib",
+        "scipy.optimize"
+      ],
+      "constants": {
+        "ROOT": "<non-literal>",
+        "OUT": "<non-literal>",
+        "STATUS": "<non-literal>",
+        "ROADMAP": "<non-literal>",
+        "AI_CONTEXT": "<non-literal>",
+        "POST_PHOTON_PRESERVATION": "<non-literal>",
+        "TRIAL3_REFACTORED_AUDIT": "<non-literal>",
+        "TRIAL3_REFACTORED_GATE": "<non-literal>",
+        "TRIAL3_REFACTORED_DISPOSITION": "<non-literal>",
+        "TRIAL3_WINDOW_AUDIT": "<non-literal>",
+        "TRIAL3_WINDOW_GATE": "<non-literal>",
+        "TRIAL3_WINDOW_DISPOSITION": "<non-literal>",
+        "TRIAL3_SOLVER_REFACTOR_EXECUTION": "<non-literal>",
+        "TRIAL3_SOLVER_REFACTOR_WEAK": "<non-literal>",
+        "VECTOR_SPIN": "<non-literal>",
+        "SCALAR_SPECTRUM": "<non-literal>",
+        "EXACT_HANDOFF": "<non-literal>",
+        "NUMERICAL_BRANCH": "<non-literal>",
+        "FULL_COUPLED_BRANCH": "<non-literal>",
+        "EXTENDED_BRANCH": "<non-literal>",
+        "PREVIOUS_BRANCH": "<non-literal>",
+        "W_MASS_MEV": 80369.0,
+        "Z_MASS_MEV": 91187.6,
+        "ELECTRON_MASS_MEV": 0.51099895,
+        "W_TARGET": "<non-literal>",
+        "Z_TARGET": "<non-literal>",
+        "WZ_RATIO_TARGET": "<non-literal>",
+        "SIN2_THETA_W_TARGET": "<non-literal>",
+        "PASS_THRESHOLD": 0.1,
+        "LOW_ELL_VALUES": [
+          1,
+          2,
+          3
+        ],
+        "STANDARD_EXTENSION_ELLS": "<non-literal>",
+        "PRIMARY_POST_ELL18_VALUES": "<non-literal>",
+        "TAIL_POST_ELL18_VALUES": "<non-literal>",
+        "PRIMARY_WIDENED_BETA_GRID": [
+          0.01,
+          0.02,
+          0.03,
+          0.04,
+          0.05,
+          0.06,
+          0.08,
+          0.1,
+          0.12,
+          0.16,
+          0.2,
+          0.26,
+          0.34,
+          0.44,
+          0.56,
+          0.7,
+          0.84,
+          0.94,
+          0.98
+        ],
+        "TAIL_WIDENED_BETA_GRID": [
+          0.01,
+          0.03,
+          0.05,
+          0.08,
+          0.12,
+          0.18,
+          0.26,
+          0.36,
+          0.48,
+          0.62,
+          0.78,
+          0.92,
+          0.98
+        ],
+        "PRIMARY_EXTENDED_AMPLITUDES": [
+          1.0,
+          1.2,
+          1.5,
+          2.0,
+          2.5,
+          3.0,
+          4.0,
+          5.0,
+          7.5,
+          10.0
+        ],
+        "TAIL_EXTENDED_AMPLITUDES": [
+          1.0,
+          1.5,
+          2.0,
+          3.0,
+          4.0,
+          5.0,
+          7.5,
+          10.0
+        ]
+      }
+    },
+    "phase0_inventory": {
+      "path": "scripts/quantum/v3_trial1_baryon_mass_size_phase0_inventory.py",
+      "exists": true,
+      "size_bytes": 14961,
+      "mtime_utc": "2026-04-23T12:50:39.441570+00:00",
+      "sha256": "404cc6c9da19d044a436c44a07b34f2d1fb3cf57941902e82fc3afbd0d195cbd",
+      "parse_ok": true,
+      "functions": [
+        "compare_wz_values",
+        "extract_wz_summary",
+        "main",
+        "package_version",
+        "path_record",
+        "read_json",
+        "sha256_file",
+        "utc_now_iso",
+        "write_gate_csv",
+        "write_pip_freeze"
+      ],
+      "imports": [
+        "__future__",
+        "csv",
+        "datetime",
+        "hashlib",
+        "importlib.metadata",
+        "json",
+        "pathlib",
+        "platform",
+        "subprocess",
+        "sys",
+        "typing"
+      ],
+      "constants": {
+        "ROOT": "<non-literal>",
+        "PUBLIC_OUT": "<non-literal>",
+        "PRIVATE_OUT": "<non-literal>",
+        "WORKFLOW_SOURCE": "<non-literal>",
+        "EXPECTED_WZ": {
+          "anchor_family_or_none": {
+            "k": 17,
+            "ell": 1,
+            "s": 1
+          },
+          "localized_solution_count_total": 41,
+          "exact_vector_row_count_total": 905838,
+          "exact_w_kappa_coupled": 1.6024037199246677,
+          "exact_z_kappa_coupled": 1.6817234303593958
+        },
+        "SUMMARY_METRICS": "<non-literal>",
+        "SUMMARY_REFERENCED_METRICS": "<non-literal>",
+        "PRIVATE_CLOSEOUT_CANDIDATES": "<non-literal>",
+        "REPRODUCTION_SCRIPT_CANDIDATES": "<non-literal>",
+        "PACKAGE_NAMES": [
+          "numpy",
+          "scipy",
+          "matplotlib",
+          "pandas"
+        ],
+        "TRIAL_RANDOM_SEED": 20260422
+      }
+    },
+    "strict_search": {
+      "path": "scripts/quantum/v3_trial1_wz_source_strict_search.py",
+      "exists": true,
+      "size_bytes": 14643,
+      "mtime_utc": "2026-04-23T12:29:56.410464+00:00",
+      "sha256": "7626010b2416fc977616ddb2c34de82c648c21c6793d2b3fe8e6c060d146c1fc",
+      "parse_ok": true,
+      "functions": [
+        "display_path",
+        "file_record",
+        "iter_repo_files",
+        "main",
+        "pyc_record",
+        "search_git_history",
+        "search_stash_untracked_entries",
+        "search_text_references",
+        "search_zip_entries",
+        "sha256_file",
+        "utc_now_iso",
+        "write_csv"
+      ],
+      "imports": [
+        "__future__",
+        "csv",
+        "datetime",
+        "hashlib",
+        "json",
+        "pathlib",
+        "re",
+        "struct",
+        "subprocess",
+        "sys",
+        "typing",
+        "zipfile"
+      ],
+      "constants": {
+        "ROOT": "<non-literal>",
+        "PUBLIC_OUT": "<non-literal>",
+        "SOURCE_STEMS": [
+          "mass_origin_vector_qball_full_coupled_solver_branch",
+          "mass_origin_vector_qball_numerical_solver_branch",
+          "mass_origin_vector_qball_extended_hierarchy_branch",
+          "mass_origin_vector_qball_route_branch",
+          "mass_origin_v2_trial3_two_component_spectrum_branch",
+          "mass_origin_v2_trial3_two_component_family_bridge_branch",
+          "mass_origin_v2_trial3_two_component_pivot_branch",
+          "mass_origin_v2_trial3_two_component_anchor_split_branch",
+          "mass_origin_v2_trial3_two_component_anchor_family_absolute_support_branch",
+          "mass_origin_v2_trial3_two_component_anchor_family_floor_lowering_branch",
+          "mass_origin_v2_trial3_two_component_anchor_family_upper_charge_window_extension_branch",
+          "mass_origin_v2_trial3_weak_sector_branch",
+          "mass_origin_v2_trial3_relaunched_weak_sector_branch"
+        ],
+        "METRIC_FILENAMES": [
+          "mass_origin_v2_t3_t2_coupled_localization_closeout_audit_metrics.json",
+          "mass_origin_v2_trial3_two_component_shooting_solver_implementation_metrics.json",
+          "mass_origin_v2_trial3_two_component_coupled_radial_ode_derivation_metrics.json",
+          "mass_origin_v2_trial3_two_component_spectrum_computation_metrics.json"
+        ],
+        "TARGET_SOURCE_FILENAMES": "<non-literal>",
+        "TARGET_FILENAMES": "<non-literal>",
+        "TARGET_SUBSTRINGS": "<non-literal>",
+        "SKIP_DIR_NAMES": [
+          ".venv_wsl",
+          ".git"
+        ]
+      }
+    },
+    "phase1_inventory": {
+      "path": "scripts/quantum/v3_trial1_nucleon_scale_phase1_inventory.py",
+      "exists": true,
+      "size_bytes": 22700,
+      "mtime_utc": "2026-04-23T13:36:45.529014+00:00",
+      "sha256": "14ef66117a18a6babf63be61526536cc141e350f382d9231932dbf39d7ff5cab",
+      "parse_ok": true,
+      "functions": [
+        "build_dependency_list",
+        "csv_row",
+        "function_gate",
+        "get_dotted",
+        "json_safe",
+        "main",
+        "metric_gate",
+        "nucleon_scale_diagnostics",
+        "parse_python_surface",
+        "path_record",
+        "read_json",
+        "rel",
+        "sha256_file",
+        "utc_now_iso",
+        "value_matches",
+        "write_csv"
+      ],
+      "imports": [
+        "__future__",
+        "ast",
+        "csv",
+        "datetime",
+        "hashlib",
+        "json",
+        "math",
+        "pathlib",
+        "typing"
+      ],
+      "constants": {
+        "ROOT": "<non-literal>",
+        "PUBLIC_OUT": "<non-literal>",
+        "WORKFLOW_SOURCE": "<non-literal>",
+        "PHASE0_INVENTORY": "<non-literal>",
+        "PUSH_SCOPE_DOC": "<non-literal>",
+        "UNTRACKED_METRIC_MANIFEST": "<non-literal>",
+        "SOURCE_SCRIPTS": "<non-literal>",
+        "PUBLIC_METRICS": "<non-literal>",
+        "REQUIRED_FUNCTIONS": {
+          "effective_numerical_solver": [
+            "solve_sector_profile",
+            "cached_profile",
+            "scan_ell_sector",
+            "interpolate_integer_modes",
+            "build_base_modes"
+          ],
+          "full_coupled_solver": [
+            "polarization_weight",
+            "coupled_charge_factor",
+            "coupled_mass_factor",
+            "build_exact_ladder"
+          ],
+          "two_component_pivot": [
+            "solve_two_component_profile"
+          ],
+          "two_component_spectrum": [
+            "solve_two_component_profile",
+            "interpolate_two_component_modes",
+            "best_ratio_pair_fast"
+          ],
+          "post_ell18_helper": [
+            "normalize_vector_rows",
+            "best_ratio_pair"
+          ]
+        },
+        "REQUIRED_METRIC_CHECKS": {
+          "weak_checkpoint_summary": {
+            "summary.localized_solution_count_total": 41,
+            "summary.exact_vector_row_count_total": 905838,
+            "summary.exact_w_kappa_coupled": 1.6024037199246677,
+            "summary.exact_z_kappa_coupled": 1.6817234303593958
+          },
+          "two_component_spectrum": {
+            "summary.localized_solution_count_total": 41,
+            "summary.base_mode_count_total": 324937,
+            "summary.exact_vector_row_count_total": 905838
+          },
+          "two_component_radial_ode": {
+            "summary.two_component_coupled_radial_ode_template_ready": true,
+            "summary.new_free_parameters_introduced": []
+          },
+          "two_component_shooting": {
+            "summary.two_component_shooting_solver_implemented": true,
+            "summary.full_spectrum_scan_ready": true
+          },
+          "coupled_localization_closeout": {
+            "summary.anchor_family_or_none": {
+              "k": 17,
+              "ell": 1,
+              "s": 1
+            }
+          }
+        },
+        "PROHIBITED_MODIFICATIONS": [
+          "new independent model constants",
+          "new coupling term",
+          "new potential term",
+          "boundary-condition intermediate target",
+          "relaxed mass-ratio or radius target",
+          "invasive rewrite of the restored W/Z solver"
+        ],
+        "ALLOWED_MINIMAL_MODIFICATIONS": [
+          "retarget absolute energy scale from W/Z to m_N ~= 0.94 GeV",
+          "expand family labels n0/nL/nT for the nucleon-scale search",
+          "keep or refine spatial grid so 0.84 fm is resolved"
+        ],
+        "PROTON_MASS_MEV": 938.272,
+        "W_MASS_MEV": 80369.0,
+        "RADIUS_TARGET_FM": 0.84,
+        "HBARC_MEV_FM": 197.3269804,
+        "CURRENT_TWO_COMPONENT_R_MAX": 25.0,
+        "CURRENT_TWO_COMPONENT_MAX_STEP": 0.1
+      }
+    }
+  },
+  "public_metrics": {
+    "weak_checkpoint_summary": {
+      "path": "output/public/quantum/v2_trial3_weak_checkpoint_summary_metrics.json",
+      "exists": true,
+      "size_bytes": 1425,
+      "mtime_utc": "2026-04-10T15:33:16.149548+00:00",
+      "sha256": "f35498431d597a8745a2c623f2fa5e1c6cdbcfd491d61be3ed070bf3b3332b96"
+    },
+    "phase0_inventory": {
+      "path": "output/public/quantum/v3_trial1_baryon_mass_size_phase0_inventory.json",
+      "exists": true,
+      "size_bytes": 10351,
+      "mtime_utc": "2026-04-23T12:53:25.597070+00:00",
+      "sha256": "6f08a5339bf97028f00923721ea1e323ea50bb69d6f1d564736af4e1098d0477"
+    },
+    "strict_search": {
+      "path": "output/public/quantum/v3_trial1_wz_source_strict_search.json",
+      "exists": true,
+      "size_bytes": 189000,
+      "mtime_utc": "2026-04-23T12:53:22.509882+00:00",
+      "sha256": "a5eecae6f46e69d98c882c892b61249cfae2a92390b180067a5a887ed58bfc8b"
+    },
+    "two_component_radial_ode": {
+      "path": "output/public/quantum/mass_origin_v2_trial3_two_component_coupled_radial_ode_derivation_metrics.json",
+      "exists": true,
+      "size_bytes": 6821,
+      "mtime_utc": "2026-04-23T12:43:47.581128+00:00",
+      "sha256": "121bad0e80421adae31f1716ffdc1763177b10d5bcb7856f6f5f9656631854b3"
+    },
+    "two_component_shooting": {
+      "path": "output/public/quantum/mass_origin_v2_trial3_two_component_shooting_solver_implementation_metrics.json",
+      "exists": true,
+      "size_bytes": 12990,
+      "mtime_utc": "2026-04-23T12:43:47.582129+00:00",
+      "sha256": "9f979152ced9532c63b99894cde1a041f969fa584433f2af5dd15f9155ec4e17"
+    },
+    "two_component_spectrum": {
+      "path": "output/public/quantum/mass_origin_v2_trial3_two_component_spectrum_computation_metrics.json",
+      "exists": true,
+      "size_bytes": 66206,
+      "mtime_utc": "2026-04-23T12:49:08.120260+00:00",
+      "sha256": "31ad6b53e326f47b4f3301037e5639818bad34bd50c8917843e339e29b7333c2"
+    },
+    "coupled_localization_closeout": {
+      "path": "output/public/quantum/mass_origin_v2_t3_t2_coupled_localization_closeout_audit_metrics.json",
+      "exists": true,
+      "size_bytes": 8107,
+      "mtime_utc": "2026-04-23T12:49:50.776459+00:00",
+      "sha256": "d16f2f069305a17c74d3a477d391a78a479f5a59d73f77e3f0a58fce582c95e1"
+    }
+  },
+  "function_checks": [
+    {
+      "dependency": "effective_numerical_solver.solve_sector_profile",
+      "script": "scripts/quantum/mass_origin_vector_qball_numerical_solver_branch.py",
+      "function": "solve_sector_profile",
+      "status": "pass"
+    },
+    {
+      "dependency": "effective_numerical_solver.cached_profile",
+      "script": "scripts/quantum/mass_origin_vector_qball_numerical_solver_branch.py",
+      "function": "cached_profile",
+      "status": "pass"
+    },
+    {
+      "dependency": "effective_numerical_solver.scan_ell_sector",
+      "script": "scripts/quantum/mass_origin_vector_qball_numerical_solver_branch.py",
+      "function": "scan_ell_sector",
+      "status": "pass"
+    },
+    {
+      "dependency": "effective_numerical_solver.interpolate_integer_modes",
+      "script": "scripts/quantum/mass_origin_vector_qball_numerical_solver_branch.py",
+      "function": "interpolate_integer_modes",
+      "status": "pass"
+    },
+    {
+      "dependency": "effective_numerical_solver.build_base_modes",
+      "script": "scripts/quantum/mass_origin_vector_qball_numerical_solver_branch.py",
+      "function": "build_base_modes",
+      "status": "pass"
+    },
+    {
+      "dependency": "full_coupled_solver.polarization_weight",
+      "script": "scripts/quantum/mass_origin_vector_qball_full_coupled_solver_branch.py",
+      "function": "polarization_weight",
+      "status": "pass"
+    },
+    {
+      "dependency": "full_coupled_solver.coupled_charge_factor",
+      "script": "scripts/quantum/mass_origin_vector_qball_full_coupled_solver_branch.py",
+      "function": "coupled_charge_factor",
+      "status": "pass"
+    },
+    {
+      "dependency": "full_coupled_solver.coupled_mass_factor",
+      "script": "scripts/quantum/mass_origin_vector_qball_full_coupled_solver_branch.py",
+      "function": "coupled_mass_factor",
+      "status": "pass"
+    },
+    {
+      "dependency": "full_coupled_solver.build_exact_ladder",
+      "script": "scripts/quantum/mass_origin_vector_qball_full_coupled_solver_branch.py",
+      "function": "build_exact_ladder",
+      "status": "pass"
+    },
+    {
+      "dependency": "two_component_pivot.solve_two_component_profile",
+      "script": "scripts/quantum/mass_origin_v2_trial3_two_component_pivot_branch.py",
+      "function": "solve_two_component_profile",
+      "status": "pass"
+    },
+    {
+      "dependency": "two_component_spectrum.solve_two_component_profile",
+      "script": "scripts/quantum/mass_origin_v2_trial3_two_component_spectrum_branch.py",
+      "function": "solve_two_component_profile",
+      "status": "pass"
+    },
+    {
+      "dependency": "two_component_spectrum.interpolate_two_component_modes",
+      "script": "scripts/quantum/mass_origin_v2_trial3_two_component_spectrum_branch.py",
+      "function": "interpolate_two_component_modes",
+      "status": "pass"
+    },
+    {
+      "dependency": "two_component_spectrum.best_ratio_pair_fast",
+      "script": "scripts/quantum/mass_origin_v2_trial3_two_component_spectrum_branch.py",
+      "function": "best_ratio_pair_fast",
+      "status": "pass"
+    },
+    {
+      "dependency": "post_ell18_helper.normalize_vector_rows",
+      "script": "scripts/quantum/mass_origin_v2_t3_post_ell18_amplitude_branch.py",
+      "function": "normalize_vector_rows",
+      "status": "pass"
+    },
+    {
+      "dependency": "post_ell18_helper.best_ratio_pair",
+      "script": "scripts/quantum/mass_origin_v2_t3_post_ell18_amplitude_branch.py",
+      "function": "best_ratio_pair",
+      "status": "pass"
+    }
+  ],
+  "metric_checks": [
+    {
+      "dependency": "weak_checkpoint_summary",
+      "field": "summary.localized_solution_count_total",
+      "expected": 41,
+      "observed": 41,
+      "status": "pass"
+    },
+    {
+      "dependency": "weak_checkpoint_summary",
+      "field": "summary.exact_vector_row_count_total",
+      "expected": 905838,
+      "observed": 905838,
+      "status": "pass"
+    },
+    {
+      "dependency": "weak_checkpoint_summary",
+      "field": "summary.exact_w_kappa_coupled",
+      "expected": 1.6024037199246677,
+      "observed": 1.6024037199246677,
+      "status": "pass"
+    },
+    {
+      "dependency": "weak_checkpoint_summary",
+      "field": "summary.exact_z_kappa_coupled",
+      "expected": 1.6817234303593958,
+      "observed": 1.6817234303593958,
+      "status": "pass"
+    },
+    {
+      "dependency": "two_component_spectrum",
+      "field": "summary.localized_solution_count_total",
+      "expected": 41,
+      "observed": 41,
+      "status": "pass"
+    },
+    {
+      "dependency": "two_component_spectrum",
+      "field": "summary.base_mode_count_total",
+      "expected": 324937,
+      "observed": 324937,
+      "status": "pass"
+    },
+    {
+      "dependency": "two_component_spectrum",
+      "field": "summary.exact_vector_row_count_total",
+      "expected": 905838,
+      "observed": 905838,
+      "status": "pass"
+    },
+    {
+      "dependency": "two_component_radial_ode",
+      "field": "summary.two_component_coupled_radial_ode_template_ready",
+      "expected": true,
+      "observed": true,
+      "status": "pass"
+    },
+    {
+      "dependency": "two_component_radial_ode",
+      "field": "summary.new_free_parameters_introduced",
+      "expected": [],
+      "observed": [],
+      "status": "pass"
+    },
+    {
+      "dependency": "two_component_shooting",
+      "field": "summary.two_component_shooting_solver_implemented",
+      "expected": true,
+      "observed": true,
+      "status": "pass"
+    },
+    {
+      "dependency": "two_component_shooting",
+      "field": "summary.full_spectrum_scan_ready",
+      "expected": true,
+      "observed": true,
+      "status": "pass"
+    },
+    {
+      "dependency": "coupled_localization_closeout",
+      "field": "summary.anchor_family_or_none",
+      "expected": {
+        "k": 17,
+        "ell": 1,
+        "s": 1
+      },
+      "observed": {
+        "k": 17,
+        "ell": 1,
+        "s": 1
+      },
+      "status": "pass"
+    }
+  ],
+  "minimal_modification_contract": {
+    "allowed_modifications": [
+      "retarget absolute energy scale from W/Z to m_N ~= 0.94 GeV",
+      "expand family labels n0/nL/nT for the nucleon-scale search",
+      "keep or refine spatial grid so 0.84 fm is resolved"
+    ],
+    "prohibited_modifications": [
+      "new independent model constants",
+      "new coupling term",
+      "new potential term",
+      "boundary-condition intermediate target",
+      "relaxed mass-ratio or radius target",
+      "invasive rewrite of the restored W/Z solver"
+    ],
+    "no_new_independent_constants": true,
+    "no_bc_intermediate_phase": true,
+    "do_not_relax_targets": true
+  },
+  "nucleon_scale_diagnostics": {
+    "proton_mass_mev_target_for_scoring": 938.272,
+    "w_mass_mev_previous_absolute_scale": 80369.0,
+    "nucleon_to_w_absolute_scale_factor": 0.011674551132899502,
+    "hbarc_mev_fm_unit_conversion": 197.3269804,
+    "nucleon_length_fm": 0.21030893003308207,
+    "radius_target_fm": 0.84,
+    "radius_target_dimensionless_x": 3.994124262188325,
+    "current_two_component_r_max_dimensionless": 25.0,
+    "current_two_component_r_max_fm_at_nucleon_scale": 5.257723250827052,
+    "current_two_component_max_step_dimensionless": 0.1,
+    "current_two_component_max_step_fm_at_nucleon_scale": 0.02103089300330821,
+    "grid_resolves_0p84fm_target": true
+  },
+  "dependency_list": {
+    "paper_critical_scripts": [
+      "scripts/quantum/v3_trial1_nucleon_scale_phase1_inventory.py",
+      "scripts/quantum/v3_trial1_baryon_mass_size_phase0_inventory.py",
+      "scripts/quantum/v3_trial1_wz_source_strict_search.py",
+      "scripts/quantum/mass_origin_vector_qball_numerical_solver_branch.py",
+      "scripts/quantum/mass_origin_vector_qball_full_coupled_solver_branch.py",
+      "scripts/quantum/mass_origin_v2_trial3_two_component_pivot_branch.py",
+      "scripts/quantum/mass_origin_v2_trial3_two_component_spectrum_branch.py",
+      "scripts/quantum/mass_origin_v2_t3_t2_coupled_localization_closeout_branch.py",
+      "scripts/quantum/mass_origin_v2_t3_post_ell18_amplitude_branch.py"
+    ],
+    "paper_critical_public_outputs": [
+      "output/public/quantum/v3_trial1_nucleon_scale_phase1_inventory.json",
+      "output/public/quantum/v3_trial1_nucleon_scale_phase1_inventory.csv",
+      "output/public/quantum/v3_trial1_baryon_mass_size_phase0_inventory.json",
+      "output/public/quantum/v3_trial1_baryon_mass_size_phase0_inventory.csv",
+      "output/public/quantum/v3_trial1_wz_source_strict_search.json",
+      "output/public/quantum/v3_trial1_wz_source_strict_search.csv",
+      "output/public/quantum/v2_trial3_weak_checkpoint_summary_metrics.json",
+      "output/public/quantum/mass_origin_v2_trial3_two_component_coupled_radial_ode_derivation_metrics.json",
+      "output/public/quantum/mass_origin_v2_trial3_two_component_shooting_solver_implementation_metrics.json",
+      "output/public/quantum/mass_origin_v2_trial3_two_component_spectrum_computation_metrics.json",
+      "output/public/quantum/mass_origin_v2_t3_t2_coupled_localization_closeout_audit_metrics.json"
+    ],
+    "holding_local_only": [
+      "output/private/summary/windows_worksets/v3_trial1_untracked_public_quantum_metrics_20260423.csv",
+      "80 untracked output/public/quantum metrics recorded in the manifest above"
+    ],
+    "excluded_by_default": [
+      "fb7ed024 broad restored quantum-script set unless a later dependency map promotes individual files",
+      "b8e78baa Cassini/Mercury set for this Trial-1 branch unless cited by an active paper surface",
+      "failed-route / archive-only / exploratory calculation scripts"
+    ],
+    "reason": "Phase 1 needs only the restored W/Z solver chain and this inventory; broad existence-based staging is prohibited."
+  },
+  "gate": {
+    "overall_status": "ready_for_phase2_scan_implementation",
+    "can_advance_to_phase2_scan_implementation": true,
+    "blockers": [],
+    "warnings": [
+      "This inventory does not run the nucleon scan; it freezes the dependency and adapter contract only.",
+      "The 0.94 GeV mass and 0.84 fm radius are scoring targets / unit scales, not new P-model free parameters."
+    ],
+    "next_action": "Implement the Phase-2 broad nucleon-scale scan using only the listed paper-critical solver chain."
+  },
+  "csv_rows": [
+    {
+      "gate": "1.1_wz_archive_assets",
+      "status": "pass",
+      "evidence": "missing_metrics=0 failed_metric_checks=0",
+      "note": "41 localized sectors and 905838 exact vector rows are required before nucleon scaling."
+    },
+    {
+      "gate": "1.1_reusable_solver_functions",
+      "status": "pass",
+      "evidence": "missing_scripts=0 missing_functions=0",
+      "note": "Reusable y_beta/profile, interpolation, four-state shooting, and exact-ladder surfaces are present."
+    },
+    {
+      "gate": "1.2_minimal_modification_contract",
+      "status": "pass",
+      "evidence": "allowed=energy_scale, family_range, spatial_grid prohibited=new_constants,new_terms,target_relaxation",
+      "note": "Phase 2 must retarget only scale/range/grid and must not alter the physical model."
+    },
+    {
+      "gate": "1.2_radius_grid_resolution",
+      "status": "pass",
+      "evidence": "r_max_fm=5.25772 step_fm=0.0210309",
+      "note": "The existing dimensionless grid is sufficient at nucleon scale for an initial 0.84 fm RMS audit."
+    },
+    {
+      "gate": "paper_critical_dependency_list",
+      "status": "pass",
+      "evidence": "dependency_list_present=true",
+      "note": "Only listed paper-critical scripts and outputs may be staged for the next Trial-1 commit."
+    }
+  ]
+}

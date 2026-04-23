@@ -1,64 +1,59 @@
 # STATUS
 
-- Current focus: v3.0 Trial-1 baryon mass-ratio / proton-radius challenge, Phase 0 readiness restoration.
-- Status: restored and recalculated. Phase 0 now reports `overall_status=ready_for_phase1`, `can_advance_to_phase1=true`.
-- What was restored:
-  - W/Z / Trial-3 source scripts from `stash@{0}^3` (`On main: pre-tag leftover untracked scripts`).
-  - Public W/Z source metrics and upstream dependency metrics from `stash@{1}^3` (`On main: pre-tag leftover public temp artifacts`).
-  - Restoration/audit manifest: `output/private/summary/windows_worksets/v3_trial1_restored_wz_sources.txt`.
-- Recalculation commands completed:
-  - `python -B scripts/quantum/mass_origin_vector_qball_route_branch.py`
-  - `python -B scripts/quantum/mass_origin_vector_qball_numerical_solver_branch.py`
-  - `python -B scripts/quantum/mass_origin_vector_qball_full_coupled_solver_branch.py`
-  - `python -B scripts/quantum/mass_origin_v2_trial3_two_component_pivot_branch.py`
-  - `python -B scripts/quantum/mass_origin_v2_trial3_two_component_spectrum_branch.py`
-  - `python -B scripts/quantum/mass_origin_v2_t3_t2_coupled_localization_closeout_branch.py`
-  - `python -B scripts/quantum/v3_trial1_baryon_mass_size_phase0_inventory.py`
-  - `python -B scripts/quantum/v3_trial1_wz_source_strict_search.py`
-- Results:
-  - Phase 0 gates: environment freeze `pass`, W/Z reproduction `pass`, random seed `pass`, hash record `pass`.
-  - W/Z contract values match:
-    - anchor family `{k:17, ell:1, s:1}`
-    - localized solutions `41`
-    - exact vector rows `905838`
-    - `exact_w_kappa_coupled=1.6024037199246677`
-    - `exact_z_kappa_coupled=1.6817234303593958`
-  - Spectrum recomputation:
-    - base modes `324937`
-    - exact vector rows `905838`
-    - rebuilt ceiling/electron `50007305.25347868`
-  - Strict search after restore:
-    - `conclusion=source_py_present`
-    - exact source `.py` count `13`
-    - source `.pyc` count `13`
-    - exact metric JSON count `6`
-    - text references `628`
-    - stash untracked entries `17`
-- Outputs:
-  - `output/public/quantum/v3_trial1_baryon_mass_size_phase0_inventory.json`
-  - `output/public/quantum/v3_trial1_baryon_mass_size_phase0_inventory.csv`
-  - `output/public/quantum/v3_trial1_wz_source_strict_search.json`
-  - `output/public/quantum/v3_trial1_wz_source_strict_search.csv`
-  - `output/private/quantum/v3_trial1_pip_freeze.txt`
-- Rule update:
-  - `AGENTS.md` now includes `0.3.1 stash / untracked 復元確認ゲート（必須）`.
-  - Before declaring an important source/artifact absent, check worktree including ignored files, `__pycache__`, release/dirty manifests, normal git history, `git stash list`, and stash `^3` untracked parents.
-  - External `Downloads` notes are no longer allowed as hard required inputs; scripts must use repo-local `doc/` sources or optional fallback.
-  - Push scope is now limited to paper-critical computation code: scripts that regenerate paper text values, figures, validation tables, or the public metrics directly cited by those surfaces.
-  - Exploratory, abandoned, or archive-only calculations are not pushed just because they exist. They stay local or in a manifest unless promoted into the paper-critical dependency chain.
-  - Before the next Trial-1 commit/push, create an explicit paper-critical dependency list for the active calculation and stage only that list plus any required public metric artifacts.
-- Cleanup note:
-  - Scope record: `doc/quantum/187_v3_trial1_push_scope_cleanup.md`.
-  - Untracked Phase 0 public metrics were hashed into `output/private/summary/windows_worksets/v3_trial1_untracked_public_quantum_metrics_20260423.csv` and were not staged.
-  - Existing broad pushed script commits were not rewritten or mass-removed; any removal from tracking requires a separate dependency audit.
-- Verification:
-  - `python -B scripts/summary/enforce_python_block_spacing.py --paths-file output/private/summary/windows_worksets/v3_trial1_restored_wz_sources.txt`
-  - `python -B scripts/summary/enforce_python_def_class_comments.py --paths-file output/private/summary/windows_worksets/v3_trial1_restored_wz_sources.txt`
-  - `Get-Content output/private/summary/windows_worksets/v3_trial1_restored_wz_sources.txt | ForEach-Object { python -m py_compile $_ }`
+- Current focus: v3.0 Trial-1 baryon mass-ratio / proton-radius challenge, Phase 1 nucleon-scale dependency inventory.
+- Status: Phase 1 is complete. `overall_status=ready_for_phase2_scan_implementation`, `can_advance_to_phase2_scan_implementation=true`.
+- Roadmap state:
+  - Phase 0 readiness restoration: closed.
+  - Phase 1 paper-critical dependency inventory: closed.
+  - Phase 2 broad nucleon-scale scan: next.
+  - No theory-stuck branch was reached in this turn, so the roadmap was not reorganized.
+- New script:
+  - `scripts/quantum/v3_trial1_nucleon_scale_phase1_inventory.py`
+- New note:
+  - `doc/quantum/188_v3_trial1_nucleon_scale_phase1_inventory.md`
+- New outputs:
+  - `output/public/quantum/v3_trial1_nucleon_scale_phase1_inventory.json`
+  - `output/public/quantum/v3_trial1_nucleon_scale_phase1_inventory.csv`
+- Phase 1 gate results:
+  - W/Z archive assets: `pass`
+  - reusable solver functions: `pass`
+  - minimal modification contract: `pass`
+  - nucleon-scale radius grid resolution: `pass`
+  - paper-critical dependency list: `pass`
+- Retained W/Z / Trial-3 checks:
+  - localized sectors `41`
+  - exact vector rows `905838`
+  - `kappa_W=1.6024037199246677`
+  - `kappa_Z=1.6817234303593958`
+  - base modes `324937`
+- Nucleon-scale diagnostics:
+  - proton mass target for scoring: `938.272 MeV`
+  - scale factor from W to nucleon mass: `0.011674551132899502`
+  - nucleon length: `0.21030893003308207 fm`
+  - `0.84 fm` target in dimensionless units: `3.994124262188325`
+  - current `R_MAX=25` at nucleon scale: `5.257723250827052 fm`
+  - current `MAX_STEP=0.10` at nucleon scale: `0.02103089300330821 fm`
+- Minimal modification contract for Phase 2:
+  - Allowed: absolute energy-scale retargeting, family-range expansion, grid refinement.
+  - Prohibited: new independent constants, new coupling/potential terms, target relaxation, intermediate boundary-condition targets, invasive W/Z solver rewrite.
+- Paper-critical push scope:
+  - The Phase 1 JSON contains `dependency_list.paper_critical_scripts` and `dependency_list.paper_critical_public_outputs`.
+  - Only those files are eligible for the next Trial-1 commit/push by default.
+  - The remaining 80 restored `output/public/quantum` metrics remain local holding artifacts in `output/private/summary/windows_worksets/v3_trial1_untracked_public_quantum_metrics_20260423.csv`.
+- Verification completed:
+  - `python -B scripts/summary/enforce_python_block_spacing.py --paths scripts/quantum/v3_trial1_nucleon_scale_phase1_inventory.py --fix`
+  - `python -B scripts/summary/enforce_python_def_class_comments.py --paths scripts/quantum/v3_trial1_nucleon_scale_phase1_inventory.py --fix`
+  - `python -B scripts/summary/enforce_python_block_spacing.py --paths scripts/quantum/v3_trial1_nucleon_scale_phase1_inventory.py`
+  - `python -B scripts/summary/enforce_python_def_class_comments.py --paths scripts/quantum/v3_trial1_nucleon_scale_phase1_inventory.py`
+  - `python -m py_compile scripts/quantum/v3_trial1_nucleon_scale_phase1_inventory.py`
+  - `python -B scripts/quantum/v3_trial1_nucleon_scale_phase1_inventory.py`
+  - `python -m json.tool output/public/quantum/v3_trial1_nucleon_scale_phase1_inventory.json`
 - Warnings:
-  - The historical W/Z scan-time pip-freeze baseline was not found; current Python environment was frozen and used for the rerun.
-  - Private expert-review closeout bundles remain incomplete for aggregate spectrum fields; regenerated public metrics are canonical.
-  - Paper build was not run, per AGENTS rule requiring explicit user instruction.
+  - This Phase 1 step does not run the nucleon scan; it only freezes the adapter and dependency contract.
+  - The external workflow note under `C:\Users\ogawa\Downloads\` was read as user-supplied context, but repo-local scripts and outputs are now the reproducible surface.
+  - Paper build was not run, per the rule requiring explicit user instruction.
 - Next:
-  1. Treat Phase 0 as closed for the current environment.
-  2. Start Phase 1 nucleon-scale scan for `m_n/m_p` and proton radius by first writing the paper-critical dependency list, then committing/pushing only the scripts required to regenerate that calculation's paper-facing outputs.
+  1. Implement `scripts/quantum/v3_trial1_nucleon_scale_phase2_scan.py` or the repo-local equivalent by reusing the listed W/Z / two-component solver chain.
+  2. Run the broad scan against both `m_n/m_p=1.001378...` and `r_p ~= 0.84 fm`.
+  3. Write fixed public JSON/CSV candidate and rejection outputs.
+  4. If no admissible candidate survives, classify the blocker as computation coverage, model-surface limitation, or theory-ansatz failure before changing the roadmap.

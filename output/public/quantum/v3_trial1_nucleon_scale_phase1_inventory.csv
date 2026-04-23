@@ -1,0 +1,6 @@
+gate,status,evidence,note
+1.1_wz_archive_assets,pass,missing_metrics=0 failed_metric_checks=0,41 localized sectors and 905838 exact vector rows are required before nucleon scaling.
+1.1_reusable_solver_functions,pass,missing_scripts=0 missing_functions=0,"Reusable y_beta/profile, interpolation, four-state shooting, and exact-ladder surfaces are present."
+1.2_minimal_modification_contract,pass,"allowed=energy_scale, family_range, spatial_grid prohibited=new_constants,new_terms,target_relaxation",Phase 2 must retarget only scale/range/grid and must not alter the physical model.
+1.2_radius_grid_resolution,pass,r_max_fm=5.25772 step_fm=0.0210309,The existing dimensionless grid is sufficient at nucleon scale for an initial 0.84 fm RMS audit.
+paper_critical_dependency_list,pass,dependency_list_present=true,Only listed paper-critical scripts and outputs may be staged for the next Trial-1 commit.

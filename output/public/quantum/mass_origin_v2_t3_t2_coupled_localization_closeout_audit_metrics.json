@@ -1,0 +1,152 @@
+{
+  "generated_utc": "2026-04-23T12:49:50.775163+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.56.400",
+    "name": "trial3_t2_coupled_localization_closeout_audit"
+  },
+  "inputs": {
+    "status_markdown": "doc/STATUS.md",
+    "roadmap_markdown": "doc/ROADMAP.md",
+    "ai_context_json": "doc/AI_CONTEXT_MIN.json",
+    "part1_core_theory_markdown": "doc/paper/10_part1_core_theory.md",
+    "part3a_quantum_foundations_markdown": "doc/paper/12_part3a_quantum_foundations.md",
+    "part5_future_predictions_markdown": "doc/paper/14_part5_future_predictions.md",
+    "mass_origin_vector_qball_full_coupled_solver_branch_py": "scripts/quantum/mass_origin_vector_qball_full_coupled_solver_branch.py",
+    "expert_note_markdown": "C:\\Users\\ogawa\\Downloads\\pmodel_v2_trial3_closeout.md",
+    "expert_note_available": false,
+    "expert_note_candidates": [
+      "C:\\Users\\ogawa\\Downloads\\pmodel_v2_trial3_closeout.md",
+      "C:\\develop\\waveP\\doc\\quantum\\pmodel_v2_trial3_closeout.md"
+    ],
+    "mass_origin_v2_post_photon_nontransverse_two_by_two_quadratic_form_json": "output/public/quantum/mass_origin_v2_post_photon_nontransverse_two_by_two_quadratic_form_metrics.json",
+    "mass_origin_v2_post_photon_nontransverse_diagonalization_basis_statement_json": "output/public/quantum/mass_origin_v2_post_photon_nontransverse_diagonalization_basis_statement_metrics.json",
+    "mass_origin_v2_t3_t2_clip_branch_physical_admissibility_statement_part1_primary_surface_source_inventory_json": "output/public/quantum/mass_origin_v2_t3_t2_clip_branch_physical_admissibility_statement_part1_primary_surface_source_inventory_metrics.json",
+    "mass_origin_v2_t3_t2_clip_branch_physical_admissibility_statement_part1_primary_surface_audit_json": "output/public/quantum/mass_origin_v2_t3_t2_clip_branch_physical_admissibility_statement_part1_primary_surface_audit_metrics.json",
+    "mass_origin_v2_t3_t2_clip_branch_physical_admissibility_statement_part1_primary_surface_declaration_gate_json": "output/public/quantum/mass_origin_v2_t3_t2_clip_branch_physical_admissibility_statement_part1_primary_surface_declaration_gate_metrics.json",
+    "mass_origin_v2_t3_t2_paper_sync_trial4_disp_42nd_refresh_json": "output/public/quantum/mass_origin_v2_t3_t2_paper_sync_trial4_disp_42nd_refresh_metrics.json"
+  },
+  "intent": "Audit whether the frozen post-photon two-component canon already supplies a positive decaying eigenmode for the exact same-family W/Z anchors, thereby replacing the legacy single-component clip criterion as the honest Trial-3 localization test.",
+  "formulas": {
+    "legacy_rule": "kappa_single^2 = 1 - beta_n^2 for an isolated component",
+    "coupled_rule": "kappa_coupled^2 = m_0^2 - beta_n^2 with m_0^2 = 4 lambda v^2 / Z_P for the propagating post-photon eigenmode",
+    "closeout_rule": "if exact anchors are numerically exact and both satisfy kappa_coupled > 0 on the already frozen coupled eigenmode, the beta>1 clip is reclassified as a component-level artifact rather than a physical rejection"
+  },
+  "rows": [
+    {
+      "row_id": "audit_complete",
+      "status": "pass",
+      "metric": "audit complete",
+      "value": 1.0,
+      "note": "coupled-localization audit frozen"
+    },
+    {
+      "row_id": "exact_same_family_anchor_numerical_pass",
+      "status": "pass",
+      "metric": "exact same-family W/Z anchors numerically pass",
+      "value": 1.0,
+      "note": "Numerical exactness is already achieved before the coupled-localization reinterpretation."
+    },
+    {
+      "row_id": "exact_w_coupled_localization_positive",
+      "status": "pass",
+      "metric": "exact W anchor has positive coupled kappa",
+      "value": 1.6024037199246677,
+      "note": "The exact W anchor localizes on the propagating coupled eigenmode."
+    },
+    {
+      "row_id": "exact_z_coupled_localization_positive",
+      "status": "pass",
+      "metric": "exact Z anchor has positive coupled kappa",
+      "value": 1.6817234303593958,
+      "note": "The exact Z anchor localizes on the propagating coupled eigenmode."
+    },
+    {
+      "row_id": "single_component_clip_reclassified_as_component_artifact",
+      "status": "pass",
+      "metric": "legacy single-component clip reclassified as component artifact",
+      "value": 1.0,
+      "note": "The old clip is not the physical localization test once the coupled eigenmode is used."
+    },
+    {
+      "row_id": "coupled_localization_statement_synced_on_part1_primary_surface",
+      "status": "pass",
+      "metric": "coupled-localization statement synced on Part I primary surface",
+      "value": 1.0,
+      "note": "The new criterion is written on the primary canon surface."
+    },
+    {
+      "row_id": "beta_above_unity_anchor_support_admissible_under_coupled_canon",
+      "status": "pass",
+      "metric": "beta-above-unity exact-anchor support admissible under coupled canon",
+      "value": 1.0,
+      "note": "This is the honest closeout criterion for the current Trial-3 branch."
+    }
+  ],
+  "summary": {
+    "anchor_family_or_none": {
+      "k": 17,
+      "ell": 1,
+      "s": 1
+    },
+    "exact_w_relative_error": 2.401039596805487e-05,
+    "exact_z_relative_error": 2.0718885912510303e-05,
+    "exact_w_beta_n": 1.1967883348243278,
+    "exact_z_beta_n": 1.0825000248407513,
+    "exact_w_kappa_coupled_squared": 2.5676976816284127,
+    "exact_z_kappa_coupled_squared": 2.828193696219773,
+    "exact_w_kappa_coupled": 1.6024037199246677,
+    "exact_z_kappa_coupled": 1.6817234303593958,
+    "legacy_clip_is_component_artifact": true,
+    "beta_above_unity_anchor_support_admissible_under_coupled_canon": true,
+    "next_required_route": "trial3_t2_coupled_localization_closeout_declaration_eighteenth_gate"
+  },
+  "decision": {
+    "overall_status": "trial3_t2_coupled_localization_closeout_audited",
+    "advance_to_8_7_56_401": true,
+    "next_required_artifacts": [
+      "trial3_t2_coupled_localization_closeout_declaration_gate"
+    ]
+  },
+  "evidence": {
+    "prior_source_summary": {
+      "anchor_family_or_none": {
+        "k": 17,
+        "ell": 1,
+        "s": 1
+      },
+      "exact_anchor_zero_kappa_clip_signature_confirmed": true,
+      "part1_primary_surface_present": true,
+      "part1_primary_baseline_present": true,
+      "part3a_secondary_only_status_preserved": true,
+      "part5_no_surface_status_preserved": true,
+      "part1_primary_surface_statement_present": false,
+      "part3a_secondary_surface_statement_present": false,
+      "next_required_route": "trial3_t2_clip_branch_physical_admissibility_statement_part1_primary_surface_audit"
+    },
+    "prior_audit_summary": {
+      "anchor_family_or_none": {
+        "k": 17,
+        "ell": 1,
+        "s": 1
+      },
+      "exact_anchor_zero_kappa_clip_signature_confirmed": true,
+      "part1_primary_surface_required_for_honest_closeout": true,
+      "part1_primary_surface_statement_complete_under_current_canon": false,
+      "part1_primary_surface_statement_absence_dominant_blocker": true,
+      "part3a_secondary_fallback_only_under_current_canon": true,
+      "next_required_route": "trial3_t2_clip_branch_physical_admissibility_statement_part1_primary_surface_declaration_seventeenth_gate"
+    },
+    "prior_gate_summary": {
+      "solver_range_blocker_removed": true,
+      "exact_anchor_zero_kappa_clip_signature_confirmed": true,
+      "part1_primary_surface_statement_complete_under_current_canon": false,
+      "trial3_current_branch_closeable": false,
+      "selected_residual_route": "trial3_two_component_beta_above_unity_clip_branch_physical_admissibility_statement_part1_primary_surface_statement_identification",
+      "missing_v2_artifact": "trial3_two_component_beta_above_unity_clip_branch_physical_admissibility_statement_part1_primary_surface_statement_pack",
+      "recommended_next_route_or_none": "8.7.56.399"
+    },
+    "exact_w_kappa_coupled_squared_formula": "4 - beta_W^2",
+    "exact_z_kappa_coupled_squared_formula": "4 - beta_Z^2"
+  }
+}
