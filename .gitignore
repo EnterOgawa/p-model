@@ -25,11 +25,11 @@ cookies.txt
 doc/
 AGENTS.md
 
-# Legacy folders (kept local; scripts/ + output/ are canonical)
-cassini/
-gps/
-mercury/
-viking/
+# Legacy root folders (kept local; scripts/ + output/ are canonical)
+/cassini/
+/gps/
+/mercury/
+/viking/
 
 # Generated outputs
 # - Public artifacts (tracked): output/public/
