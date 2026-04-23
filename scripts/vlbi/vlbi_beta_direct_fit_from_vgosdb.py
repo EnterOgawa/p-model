@@ -34,6 +34,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
@@ -112,6 +113,20 @@ IONO_CAL_FLAG_CANDIDATES = [
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
+
+
+# 関数: 英語 localized surface かどうかを判定する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
+
+
+# 関数: public 出力先を locale ごとに解決する。
+def _public_output_dir(root: Path) -> Path:
+    base = root / "output" / "public" / "vlbi"
+    if _is_en_figure():
+        return base / "locales" / "en"
+
+    return base
 
 
 # 関数: `_safe_float` の入出力契約と処理意図を定義する。
@@ -666,6 +681,11 @@ def _plot_result(
     except Exception:
         return
 
+    font_scale = 1.22 if _is_en_figure() else 1.0
+    title_font = 14.0 * font_scale
+    axis_font = 12.8 * font_scale
+    tick_font = 11.4 * font_scale
+    legend_font = 11.2 * font_scale
     x_ps = x * 1.0e12
     y_ps = y * 1.0e12
     yhat_ps = yhat * 1.0e12
@@ -674,15 +694,22 @@ def _plot_result(
     fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(11.0, 8.0), gridspec_kw={"height_ratios": [2.2, 1.0]})
     ax0.scatter(x_ps, y_ps, s=8, alpha=0.35, label="residual vs template")
     ax0.plot(x_ps[order], yhat_ps[order], color="tab:red", linewidth=2.0, label="weighted fit")
-    ax0.set_xlabel(x_label)
-    ax0.set_ylabel(y_label)
-    ax0.set_title(title)
+    ax0.set_xlabel(x_label, fontsize=axis_font)
+    ax0.set_ylabel(y_label, fontsize=axis_font)
+    ax0.set_title(title, fontsize=title_font)
     ax0.grid(True, alpha=0.3)
-    ax0.legend(loc="best")
+    ax0.legend(loc="best", fontsize=legend_font)
+    ax0.tick_params(labelsize=tick_font)
     ax1.hist(resid_ps, bins=60, color="tab:gray", alpha=0.85)
-    ax1.set_xlabel("Residual - fit [ps]")
-    ax1.set_ylabel("Count")
+    ax1.set_xlabel("Residual - fit [ps]", fontsize=axis_font)
+    ax1.set_ylabel("Count", fontsize=axis_font)
     ax1.grid(True, alpha=0.3)
+
+    ax1.tick_params(labelsize=tick_font)
+    for axis in (ax0, ax1):
+        for tick in [*axis.get_xticklabels(), *axis.get_yticklabels()]:
+            tick.set_fontsize(tick_font)
+
     fig.tight_layout()
     fig.savefig(str(pdf_path))
     fig.savefig(str(png_path), dpi=170)
@@ -692,7 +719,7 @@ def _plot_result(
 # 関数: `_sync_public` の入出力契約と処理意図を定義する。
 
 def _sync_public(root: Path, outputs: Sequence[Path]) -> None:
-    dst = root / "output" / "public" / "vlbi"
+    dst = _public_output_dir(root)
     dst.mkdir(parents=True, exist_ok=True)
     for path in outputs:
         if path.exists():

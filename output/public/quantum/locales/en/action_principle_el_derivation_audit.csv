@@ -1,0 +1,5 @@
+id,metric,value,threshold,operator,pass,note
+covariant_derivative_gauge_covariance,max_rel_error(D_mu P),2.2702936342993408e-13,5e-08,<=,True,D_mu P のゲージ共変性（D_mu'P' = exp(iχ) D_mu P）を有限差分で監査。
+kinetic_density_gauge_invariance,max_rel_error(|D_mu P|^2),1.3428848075580854e-13,5e-08,<=,True,運動項 |D_mu P|^2 のゲージ不変性を有限差分で監査。
+noether_current_gauge_invariance,max_rel_error(j_mu),6.967109216209619e-14,5e-08,<=,True,Noether 電流 j_mu のゲージ不変性を有限差分で監査。
+noether_current_realness,max_abs_imag_over_real(j_spatial),0.0,5e-10,<=,True,電流密度の実数性（数値誤差レベル）を確認。

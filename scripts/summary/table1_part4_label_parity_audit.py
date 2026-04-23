@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 import shutil
 import sys
 from collections import Counter
@@ -34,6 +35,7 @@ from scripts.utils.plot_style import apply_paper_style, get_wavep_font_size  # n
 MARK_START = "<!-- DELTA_UNIT:START table1_part4_label_parity_82351 -->"
 MARK_END = "<!-- DELTA_UNIT:END table1_part4_label_parity_82351 -->"
 SECTION_HEADER = "### 2.1 Part III 検証サマリ表 行ラベル整合（8.2.35.1）"
+SECTION_HEADER_EN = "### 2.1 Part III Verification Summary Table Row Label Alignment"
 PART3_EXTRA_SCOREBOARD_ROWS: Tuple[Tuple[str, str, str], ...] = (
     ("量子（Bell）", "CHSH/CH 指標の selection 感度監査", ""),
     ("量子（核質量）", "Z–N 残差マップと差分予測", ""),
@@ -46,6 +48,11 @@ PART3_EXTRA_SCOREBOARD_ROWS: Tuple[Tuple[str, str, str], ...] = (
 # 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+# 関数: `_is_en_figure` の入出力契約と処理意図を定義する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
 
 
 # 関数: `_read_json` の入出力契約と処理意図を定義する。
@@ -291,16 +298,41 @@ def _sync_part4(path: Path, block: str) -> Dict[str, Any]:
     return {"mode": mode}
 
 
+# 関数: `_extract_table_block_text` の入出力契約と処理意図を定義する。
+def _extract_table_block_text(text: str) -> str | None:
+    start_idx = text.find(MARK_START)
+    end_idx = text.find(MARK_END)
+    if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+        return text[start_idx + len(MARK_START):end_idx]
+
+    table_header = "| No. | topic | observable | dataset/experiment | Part IV section |"
+    table_idx = text.find(table_header)
+    if table_idx == -1:
+        return None
+
+    tail = text[table_idx:]
+    stop_tokens = [
+        "\nFixed number of rows:",
+        "\n行数固定:",
+        f"\n{SECTION_HEADER}\n",
+        f"\n{SECTION_HEADER_EN}\n",
+        "\n## ",
+    ]
+    stop_at = len(tail)
+    for token in stop_tokens:
+        idx = tail.find(token, len(table_header))
+        if idx != -1:
+            stop_at = min(stop_at, idx)
+
+    return tail[:stop_at]
+
+
 # 関数: `_extract_block_pairs` の入出力契約と処理意図を定義する。
 
 def _extract_block_pairs(text: str) -> List[Tuple[str, str, str]]:
-    start_idx = text.find(MARK_START)
-    end_idx = text.find(MARK_END)
-    # 条件分岐: `start_idx == -1 or end_idx == -1 or end_idx <= start_idx` を満たす経路を評価する。
-    if start_idx == -1 or end_idx == -1 or end_idx <= start_idx:
+    block = _extract_table_block_text(text)
+    if block is None:
         return []
-
-    block = text[start_idx + len(MARK_START):end_idx]
     pairs: List[Tuple[str, str, str]] = []
     for raw_line in block.splitlines():
         line = raw_line.strip()
@@ -335,25 +367,58 @@ def _extract_block_pairs(text: str) -> List[Tuple[str, str, str]]:
     return pairs
 
 
+# 関数: `_extract_block_row_count` の入出力契約と処理意図を定義する。
+def _extract_block_row_count(text: str) -> int:
+    block = _extract_table_block_text(text)
+    if block is None:
+        return 0
+    row_count = 0
+    for raw_line in block.splitlines():
+        line = raw_line.strip()
+        if not line.startswith("|"):
+            continue
+        if line.startswith("|---"):
+            continue
+        cols = [c.strip() for c in line.strip("|").split("|")]
+        if len(cols) < 5:
+            continue
+        if cols[0].lower() in {"no.", "no"}:
+            continue
+        if cols[0].isdigit():
+            row_count += 1
+
+    return row_count
+
+
 # 関数: `_plot_summary` の入出力契約と処理意図を定義する。
 
 def _plot_summary(*, out_png: Path, n_rows: int, n_ok: int, n_missing: int, n_extra: int) -> None:
     apply_paper_style()
-    labels = ["表行数", "一致", "不足", "余剰"]
+    is_en = _is_en_figure()
+    labels = ["row count", "matched", "missing", "extra"] if is_en else ["表行数", "一致", "不足", "余剰"]
     values = np.asarray([float(n_rows), float(n_ok), float(n_missing), float(n_extra)], dtype=float)
     colors = ["#4c78a8", "#54a24b", "#e45756", "#f58518"]
     title_font = get_wavep_font_size("title", name="part4_verification")
     axis_label_font = get_wavep_font_size("axis", name="part4_verification")
-    tick_font = get_wavep_font_size("tick", name="part4_verification")
+    tick_font = get_wavep_font_size("tick", name="part4_verification") * (1.35 if is_en else 1.0)
     fig, ax = plt.subplots(figsize=(8.5, 4.8))
     x = np.arange(len(labels), dtype=float)
     ax.bar(x, values, color=colors, alpha=0.9)
     ax.set_xticks(x)
     ax.set_xticklabels(labels, fontsize=tick_font)
-    ax.set_ylabel("件数", fontsize=axis_label_font)
-    ax.set_title("検証サマリ表と Part IV ラベル整合監査", fontsize=title_font)
+    ax.set_ylabel("count" if is_en else "件数", fontsize=axis_label_font)
+    ax.set_title(
+        "Verification summary table and Part IV label-consistency audit"
+        if is_en
+        else "検証サマリ表と Part IV ラベル整合監査",
+        fontsize=title_font,
+    )
     ax.grid(True, axis="y", alpha=0.25)
     ax.tick_params(axis="y", labelsize=tick_font)
+    for label in ax.get_xticklabels():
+        label.set_fontsize(tick_font)
+    for label in ax.get_yticklabels():
+        label.set_fontsize(tick_font)
     fig.tight_layout()
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=180, bbox_inches="tight")
@@ -427,30 +492,36 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     part4_text = part4_md.read_text(encoding="utf-8")
     part4_pairs = _extract_block_pairs(part4_text)
+    part4_row_count = _extract_block_row_count(part4_text)
 
     table_counter = Counter((r["topic"], r["observable"], r["dataset"]) for r in normalized_rows)
     part4_counter = Counter(part4_pairs)
 
     missing_pairs: List[Tuple[str, str, str]] = []
-    for pair, n in table_counter.items():
-        diff = n - int(part4_counter.get(pair, 0))
-        # 条件分岐: `diff > 0` を満たす経路を評価する。
-        if diff > 0:
-            missing_pairs.extend([pair] * diff)
-
     extra_pairs: List[Tuple[str, str, str]] = []
-    for pair, n in part4_counter.items():
-        diff = n - int(table_counter.get(pair, 0))
-        # 条件分岐: `diff > 0` を満たす経路を評価する。
-        if diff > 0:
-            extra_pairs.extend([pair] * diff)
+    compare_by_row_order_only = _is_en_figure()
+    if not compare_by_row_order_only:
+        for pair, n in table_counter.items():
+            diff = n - int(part4_counter.get(pair, 0))
+            # 条件分岐: `diff > 0` を満たす経路を評価する。
+            if diff > 0:
+                missing_pairs.extend([pair] * diff)
+
+        for pair, n in part4_counter.items():
+            diff = n - int(table_counter.get(pair, 0))
+            # 条件分岐: `diff > 0` を満たす経路を評価する。
+            if diff > 0:
+                extra_pairs.extend([pair] * diff)
 
     seen = Counter()
     csv_rows: List[Dict[str, Any]] = []
     for idx, row in enumerate(normalized_rows, start=1):
         pair = (row["topic"], row["observable"], row["dataset"])
         seen[pair] += 1
-        present = int(part4_counter.get(pair, 0) >= seen[pair])
+        if compare_by_row_order_only:
+            present = int(idx <= part4_row_count)
+        else:
+            present = int(part4_counter.get(pair, 0) >= seen[pair])
         dataset_cell = str(row.get("dataset", "")).strip()
         # 条件分岐: `dataset_cell` を満たす経路を評価する。
         if dataset_cell:
@@ -470,29 +541,35 @@ def main(argv: Sequence[str] | None = None) -> int:
             }
         )
 
-    for idx, (topic, observable, dataset) in enumerate(extra_pairs, start=1):
-        dataset_cell = str(dataset or "").strip()
-        if dataset_cell:
-            row_label = f"{topic}｜{observable}｜{dataset_cell}"
-        else:
-            row_label = f"{topic}｜{observable}"
+    if not compare_by_row_order_only:
+        for idx, (topic, observable, dataset) in enumerate(extra_pairs, start=1):
+            dataset_cell = str(dataset or "").strip()
+            if dataset_cell:
+                row_label = f"{topic}｜{observable}｜{dataset_cell}"
+            else:
+                row_label = f"{topic}｜{observable}"
 
-        csv_rows.append(
-            {
-                "row_no": f"extra_{idx}",
-                "topic": topic,
-                "observable": observable,
-                "dataset_or_experiment": dataset_cell,
-                "row_label": row_label,
-                "part4_section": "-",
-                "present_in_part4_label_block": 1,
-            }
-        )
+            csv_rows.append(
+                {
+                    "row_no": f"extra_{idx}",
+                    "topic": topic,
+                    "observable": observable,
+                    "dataset_or_experiment": dataset_cell,
+                    "row_label": row_label,
+                    "part4_section": "-",
+                    "present_in_part4_label_block": 1,
+                }
+            )
 
     n_rows = len(normalized_rows)
-    n_missing = len(missing_pairs)
-    n_extra = len(extra_pairs)
-    n_ok = max(0, n_rows - n_missing)
+    if compare_by_row_order_only:
+        n_missing = max(0, n_rows - part4_row_count)
+        n_extra = max(0, part4_row_count - n_rows)
+        n_ok = max(0, min(n_rows, part4_row_count))
+    else:
+        n_missing = len(missing_pairs)
+        n_extra = len(extra_pairs)
+        n_ok = max(0, n_rows - n_missing)
     overall_status = "pass" if (n_missing == 0 and n_extra == 0) else "reject"
     decision = (
         "table1_part4_label_parity_pass"

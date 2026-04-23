@@ -20,6 +20,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -44,6 +45,20 @@ except Exception:
     plt = None
 
 KM_S_TO_KPC_GYR = 1.0227121650537077
+
+
+# 関数: `WAVEP_FIGURE_LANG` から英語 surface かどうかを判定する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
+
+
+# 関数: locale ごとの既定出力先を解決する。
+def _default_output_dir(kind: str) -> Path:
+    base = ROOT / "output" / kind / "cosmology"
+    if _is_en_figure():
+        return base / "locales" / "en"
+
+    return base
 
 
 # クラス: `Scenario` の責務と境界条件を定義する。
@@ -99,6 +114,13 @@ def _render_png(path: Path, rows: Sequence[Dict[str, Any]], *, lpath0_kpc: float
         path.write_bytes(b"")
         return
 
+    font_scale = 1.16 if _is_en_figure() else 1.0
+    axis_font = 13.2 * font_scale
+    title_font = 14.2 * font_scale
+    tick_font = 11.6 * font_scale
+    legend_font = 12.0 * font_scale
+    suptitle_font = 15.4 * font_scale
+    note_font = 12.0 * font_scale
     labels = [str(row["scenario_id"]) for row in rows]
     ratios = [float(row["lpath_ratio"]) for row in rows]
     tau_vals = [float(row["tau_free_pred_gyr"]) for row in rows]
@@ -106,22 +128,26 @@ def _render_png(path: Path, rows: Sequence[Dict[str, Any]], *, lpath0_kpc: float
     fig, axes = plt.subplots(1, 2, figsize=(12.8, 5.2), dpi=150)
     axes[0].bar(labels, ratios, color="#4c78a8")
     axes[0].axhline(1.0, color="#666666", linestyle="--", linewidth=1.0)
-    axes[0].set_ylabel("L_path / L_path,0", fontsize=13.2)
-    axes[0].set_title("universal scaling ratios", fontsize=14.2)
-    axes[0].tick_params(axis="x", rotation=25, labelsize=11.6)
-    axes[0].tick_params(axis="y", labelsize=11.6)
+    axes[0].set_ylabel("L_path / L_path,0", fontsize=axis_font)
+    axes[0].set_title("universal scaling ratios", fontsize=title_font)
+    axes[0].tick_params(axis="x", rotation=25, labelsize=tick_font)
+    axes[0].tick_params(axis="y", labelsize=tick_font)
     axes[0].grid(True, axis="y", alpha=0.25)
 
     axes[1].bar(labels, tau_vals, color="#f58518")
     axes[1].axhline(float(tau0_gyr), color="#666666", linestyle="--", linewidth=1.0, label="baseline tau_free")
-    axes[1].set_ylabel("tau_free predicted [Gyr]", fontsize=13.2)
-    axes[1].set_title("Coarse-grained relaxation time", fontsize=14.2)
-    axes[1].tick_params(axis="x", rotation=25, labelsize=11.6)
-    axes[1].tick_params(axis="y", labelsize=11.6)
+    axes[1].set_ylabel("tau_free predicted [Gyr]", fontsize=axis_font)
+    axes[1].set_title("Coarse-grained relaxation time", fontsize=title_font)
+    axes[1].tick_params(axis="x", rotation=25, labelsize=tick_font)
+    axes[1].tick_params(axis="y", labelsize=tick_font)
     axes[1].grid(True, axis="y", alpha=0.25)
-    axes[1].legend(loc="upper right", fontsize=12.0)
+    axes[1].legend(loc="upper right", fontsize=legend_font)
 
-    fig.suptitle("L_path scaling from L_int = g_P P_mu J^mu", fontsize=15.4)
+    for axis in axes:
+        for tick in [*axis.get_xticklabels(), *axis.get_yticklabels()]:
+            tick.set_fontsize(tick_font)
+
+    fig.suptitle("L_path scaling from L_int = g_P P_mu J^mu", fontsize=suptitle_font)
     fig.text(
         0.01,
         -0.02,
@@ -129,11 +155,12 @@ def _render_png(path: Path, rows: Sequence[Dict[str, Any]], *, lpath0_kpc: float
             f"baseline: L_path,0={lpath0_kpc:.4f} kpc, tau_free,0={tau0_gyr:.6f} Gyr, "
             f"Pi0={pi0:.6f} (Pi0=tau_int,0/tau_free,0-1)"
         ),
-        fontsize=12.0,
+        fontsize=note_font,
         va="top",
     )
     fig.tight_layout()
     fig.savefig(path, bbox_inches="tight")
+    fig.savefig(path.with_suffix(".pdf"), bbox_inches="tight")
     plt.close(fig)
 
 
@@ -265,6 +292,16 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    requested_private = args.outdir.resolve()
+    requested_public = args.public_outdir.resolve()
+    default_private = (ROOT / "output" / "private" / "cosmology").resolve()
+    default_public = (ROOT / "output" / "public" / "cosmology").resolve()
+    if _is_en_figure():
+        if requested_private == default_private:
+            args.outdir = _default_output_dir("private")
+        if requested_public == default_public:
+            args.public_outdir = _default_output_dir("public")
+
     ref = _load_reference(args.input_json)
     pi0 = float(ref["pi0_median"])
     tau0 = float(ref["tau_free0_gyr"])
@@ -346,9 +383,11 @@ def main() -> int:
     out_private_json = args.outdir / "cosmology_lpath_scaling_law_prediction.json"
     out_private_csv = args.outdir / "cosmology_lpath_scaling_law_prediction.csv"
     out_private_png = args.outdir / "cosmology_lpath_scaling_law_prediction.png"
+    out_private_pdf = args.outdir / "cosmology_lpath_scaling_law_prediction.pdf"
     out_public_json = args.public_outdir / "cosmology_lpath_scaling_law_prediction.json"
     out_public_csv = args.public_outdir / "cosmology_lpath_scaling_law_prediction.csv"
     out_public_png = args.public_outdir / "cosmology_lpath_scaling_law_prediction.png"
+    out_public_pdf = args.public_outdir / "cosmology_lpath_scaling_law_prediction.pdf"
 
     _write_csv(
         out_private_csv,
@@ -442,9 +481,11 @@ def main() -> int:
             "private_json": _rel(out_private_json),
             "private_csv": _rel(out_private_csv),
             "private_png": _rel(out_private_png),
+            "private_pdf": _rel(out_private_pdf),
             "public_json": _rel(out_public_json),
             "public_csv": _rel(out_public_csv),
             "public_png": _rel(out_public_png),
+            "public_pdf": _rel(out_public_pdf),
         },
     }
 
@@ -459,7 +500,7 @@ def main() -> int:
                 {
                     "status": overall_status,
                     "decision": decision,
-                    "outputs": [_rel(out_public_json), _rel(out_public_csv), _rel(out_public_png)],
+                    "outputs": [_rel(out_public_json), _rel(out_public_csv), _rel(out_public_png), _rel(out_public_pdf)],
                 },
             )
         except Exception:

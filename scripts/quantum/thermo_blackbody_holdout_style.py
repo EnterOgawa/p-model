@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import os
 import re
+from pathlib import Path
 from typing import Iterable
 
 import matplotlib.pyplot as plt
@@ -13,7 +15,7 @@ from scripts.utils.plot_style import (
 )
 
 
-_BLACKBODY_HOLDOUT_FONT_SCALE = 1.22
+_BLACKBODY_HOLDOUT_FONT_SCALE = 1.36
 
 _TITLE_REPLACEMENTS: tuple[tuple[str, str], ...] = (
     ("Blackbody Helmholtz free-energy density holdout", "黒体ヘルムホルツ自由エネルギー密度の温度帯分割監査"),
@@ -87,6 +89,24 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_figure_lang` の入出力契約と処理意図を定義する。
+def _figure_lang() -> str:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower() or "ja"
+
+
+# 関数: `_is_english_surface` の入出力契約と処理意図を定義する。
+def _is_english_surface() -> bool:
+    return _figure_lang().startswith("en")
+
+
+# 関数: `resolve_blackbody_holdout_output_dir` の入出力契約と処理意図を定義する。
+def resolve_blackbody_holdout_output_dir(root: Path) -> Path:
+    base = Path(root) / "output" / "public" / "quantum"
+    if _is_english_surface():
+        return base / "locales" / "en"
+    return base
+
+
 # 関数: `get_blackbody_holdout_font` の入出力契約と処理意図を定義する。
 
 def get_blackbody_holdout_font(role: str) -> float:
@@ -97,7 +117,8 @@ def get_blackbody_holdout_font(role: str) -> float:
 
 def create_blackbody_holdout_figure():
     apply_paper_style()
-    _set_japanese_font()
+    if not _is_english_surface():
+        _set_japanese_font()
     fig = plt.figure(figsize=(10.6, 4.2), dpi=170)
     fig.subplots_adjust(top=0.860, bottom=0.205, left=0.085, right=0.985)
     ax = fig.add_subplot(1, 1, 1)
@@ -107,6 +128,13 @@ def create_blackbody_holdout_figure():
 # 関数: `translate_blackbody_split_name` の入出力契約と処理意図を定義する。
 
 def translate_blackbody_split_name(name: str) -> str:
+    if _is_english_surface():
+        mapping = {
+            "A_low_to_high": "A: low→high",
+            "B_high_to_low": "B: high→low",
+        }
+        return mapping.get(str(name), str(name))
+
     mapping = {
         "A_low_to_high": "A: 低温→高温",
         "B_high_to_low": "B: 高温→低温",
@@ -128,6 +156,9 @@ def _apply_title_replacements(text: str) -> str:
 # 関数: `translate_blackbody_holdout_title` の入出力契約と処理意図を定義する。
 
 def translate_blackbody_holdout_title(text: str) -> str:
+    if _is_english_surface():
+        return str(text).replace(" : ", ": ").strip()
+
     translated = _apply_title_replacements(str(text))
     translated = translated.replace("(負符号)", "（負符号）")
     translated = translated.replace("(ウィーン)", "（ウィーン）")
@@ -138,6 +169,9 @@ def translate_blackbody_holdout_title(text: str) -> str:
 # 関数: `translate_blackbody_holdout_ylabel` の入出力契約と処理意図を定義する。
 
 def translate_blackbody_holdout_ylabel(text: str) -> str:
+    if _is_english_surface():
+        return str(text)
+
     normalized = str(text).strip().lower()
     if normalized == "test max abs(z)":
         return "テスト側の最大 |z|"
@@ -148,6 +182,9 @@ def translate_blackbody_holdout_ylabel(text: str) -> str:
 # 関数: `translate_blackbody_holdout_legend_label` の入出力契約と処理意図を定義する。
 
 def translate_blackbody_holdout_legend_label(label: str) -> str:
+    if _is_english_surface():
+        return str(label).strip()
+
     raw = str(label).strip()
     fixed_abs_match = re.fullmatch(r"fixed exponent ([^ ]+) abs fit \((\d+)p\)", raw)
     if fixed_abs_match:
@@ -205,10 +242,15 @@ def add_blackbody_display_floor_note(ax, visible_vals: np.ndarray) -> None:
     display_values = np.abs(display_values[np.isfinite(display_values)])
     if display_values.size == 0 or float(np.max(display_values)) < 0.12:
         max_text = "n/a" if display_values.size == 0 else f"{float(np.max(display_values)):.3g}"
+        note_text = (
+            f"All splits are below display floor\nmax |z| = {max_text}"
+            if _is_english_surface()
+            else f"全分割が表示床未満\n最大 |z| = {max_text}"
+        )
         ax.text(
             0.5,
             0.82,
-            f"全分割が表示床未満\n最大 |z| = {max_text}",
+            note_text,
             transform=ax.transAxes,
             ha="center",
             va="top",

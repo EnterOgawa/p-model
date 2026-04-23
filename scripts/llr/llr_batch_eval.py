@@ -46,7 +46,9 @@ if str(_ROOT) not in sys.path:
 
 from scripts.llr import llr_pmodel_overlay_horizons_noargs as llr  # noqa: E402
 from scripts.llr import ocean_loading_harpos as ol  # noqa: E402
+from scripts.quantum.figure_japanese_localizer import get_figure_language  # noqa: E402
 from scripts.summary import worklog  # noqa: E402
+from scripts.utils.figure_locale_paths import localize_figure_output_path  # noqa: E402
 from scripts.utils.plot_style import apply_paper_style, apply_wavep_figure_layout, get_wavep_font_size  # noqa: E402
 
 LLR_SHORT_NAME = "月レーザー測距（LLR: Lunar Laser Ranging）"
@@ -55,6 +57,16 @@ LLR_SHORT_NAME = "月レーザー測距（LLR: Lunar Laser Ranging）"
 # Keep the global LLR min-points policy (default 30 in run_all) while allowing
 # NGLR-1 to be evaluated with a smaller threshold.
 _NGLR1_MIN_POINTS_CAP = 6
+
+
+# 関数: `_plot_text` の入出力契約と処理意図を定義する。
+def _plot_text(ja: str, en: str, *, lang: str) -> str:
+    return ja if lang == "ja" else en
+
+
+# 関数: `_llr_short_name` の入出力契約と処理意図を定義する。
+def _llr_short_name(*, lang: str) -> str:
+    return LLR_SHORT_NAME if lang == "ja" else "Lunar Laser Ranging (LLR)"
 
 
 # 関数: `_min_points_for_target` の入出力契約と処理意図を定義する。
@@ -84,10 +96,12 @@ def _sync_public_and_summary_artifact(src: Path, *, public_dir: Path, summary_di
     if not src.exists():
         return
 
-    public_dir.mkdir(parents=True, exist_ok=True)
-    summary_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(src, public_dir / src.name)
-    shutil.copy2(src, summary_dir / src.name)
+    public_dst = localize_figure_output_path(public_dir / src.name, root=_ROOT)
+    summary_dst = localize_figure_output_path(summary_dir / src.name, root=_ROOT)
+    public_dst.parent.mkdir(parents=True, exist_ok=True)
+    summary_dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, public_dst)
+    shutil.copy2(src, summary_dst)
 
 
 # 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
@@ -138,22 +152,24 @@ def _plot_residual_distribution_from_points_csv(points_csv: Path, out_dir: Path)
     lim = max(10.0, min(200.0, p99 * 1.2))
     bins = np.linspace(-lim, lim, num=61)
 
-    _set_japanese_font()
+    figure_lang = get_figure_language(default="ja")
+    if figure_lang == "ja":
+        _set_japanese_font()
     fig, axs = plt.subplots(2, 1, gridspec_kw={"height_ratios": [1.08, 1.00]})
     apply_wavep_figure_layout(fig, template="part2_two_panel")
     for ax in axs:
         ax.grid(True, alpha=0.25)
 
     ax = axs[0]
-    ax.hist(res_sr, bins=bins, alpha=0.35, label=f"SR（RMS={_rms(res_sr):.3f} ns）")
+    ax.hist(res_sr, bins=bins, alpha=0.35, label=_plot_text(f"SR（RMS={_rms(res_sr):.3f} ns）", f"SR (RMS={_rms(res_sr):.3f} ns)", lang=figure_lang))
     if len(res_tropo):
-        ax.hist(res_tropo, bins=bins, alpha=0.35, label=f"SR+Tropo（RMS={_rms(res_tropo):.3f} ns）")
+        ax.hist(res_tropo, bins=bins, alpha=0.35, label=_plot_text(f"SR+Tropo（RMS={_rms(res_tropo):.3f} ns）", f"SR+Tropo (RMS={_rms(res_tropo):.3f} ns)", lang=figure_lang))
 
-    ax.hist(res_final, bins=bins, alpha=0.58, label=f"SR+Tropo+Tide（RMS={_rms(res_final):.3f} ns）")
+    ax.hist(res_final, bins=bins, alpha=0.58, label=_plot_text(f"SR+Tropo+Tide（RMS={_rms(res_final):.3f} ns）", f"SR+Tropo+Tide (RMS={_rms(res_final):.3f} ns)", lang=figure_lang))
     ax.axvline(0.0, color="#333333", lw=1.2, alpha=0.7)
-    ax.set_title("残差分布（観測−モデル）", fontsize=18.0, pad=10.0)
-    ax.set_xlabel("残差 [ns]（定数オフセット整列後）", fontsize=15.0)
-    ax.set_ylabel("件数", fontsize=15.0)
+    ax.set_title(_plot_text("残差分布（観測−モデル）", "Residual distribution\n(observed - model)", lang=figure_lang), fontsize=18.0, pad=10.0)
+    ax.set_xlabel(_plot_text("残差 [ns]（定数オフセット整列後）", "Residual [ns]\n(constant-offset aligned)", lang=figure_lang), fontsize=15.0)
+    ax.set_ylabel(_plot_text("件数", "Count", lang=figure_lang), fontsize=15.0)
     ax.tick_params(axis="both", labelsize=13.5)
     ax.legend(fontsize=12.4, loc="upper right")
 
@@ -176,16 +192,16 @@ def _plot_residual_distribution_from_points_csv(points_csv: Path, out_dir: Path)
 
     ax.set_xlim(0.0, lim)
     ax.set_ylim(0.0, 1.0)
-    ax.set_title("|残差| の累積分布（小さいほど良い）", fontsize=18.0, pad=10.0)
-    ax.set_xlabel("|残差| [ns]", fontsize=15.0)
-    ax.set_ylabel("累積割合", fontsize=15.0)
+    ax.set_title(_plot_text("|残差| の累積分布（小さいほど良い）", "Cumulative distribution of |residual|", lang=figure_lang), fontsize=16.2, pad=9.0)
+    ax.set_xlabel(_plot_text("|残差| [ns]", "|Residual| [ns]", lang=figure_lang), fontsize=14.2)
+    ax.set_ylabel(_plot_text("累積割合", "Cumulative fraction", lang=figure_lang), fontsize=14.2)
     ax.tick_params(axis="both", labelsize=13.5)
     ax.legend(fontsize=12.4, loc="lower right")
 
     n_used = int(len(res_final))
     fig.suptitle(
-        f"{LLR_SHORT_NAME}：観測−P-model の差（inlierのみ, n={n_used}）",
-        fontsize=16.5,
+        _plot_text(f"{LLR_SHORT_NAME}：観測−P-model の差（inlierのみ, n={n_used}）", f"{_llr_short_name(lang=figure_lang)}:\nobserved-P-model residuals (inliers only, n={n_used})", lang=figure_lang),
+        fontsize=15.4,
         y=0.988,
     )
     fig.tight_layout(rect=[0.0, 0.02, 1.0, 0.965], h_pad=1.05)
@@ -3021,7 +3037,9 @@ def main() -> int:
                     # 条件分岐: `time_tag_cols and int(len(o)) > 0` を満たす経路を評価する。
                     if time_tag_cols and int(len(o)) > 0:
                         apply_paper_style()
-                        _set_japanese_font()
+                        figure_lang = get_figure_language(default="ja")
+                        if figure_lang == "ja":
+                            _set_japanese_font()
                         x = np.arange(len(o), dtype=float)
                         width = 0.26
                         fig, ax = plt.subplots()
@@ -3032,12 +3050,12 @@ def main() -> int:
                             ax.bar(x + (j - 1) * width, y, width=width, label=f"{mm}", color=colors.get(mm))
 
                         ax.set_yscale("log")
-                        ax.axhline(float(clip_min_ns), color="#333333", lw=1.1, alpha=0.6, linestyle="--", label=f"外れ値閾値 {clip_min_ns:.0f} ns")
+                        ax.axhline(float(clip_min_ns), color="#333333", lw=1.1, alpha=0.6, linestyle="--", label=_plot_text(f"外れ値閾値 {clip_min_ns:.0f} ns", f"Outlier threshold {clip_min_ns:.0f} ns", lang=figure_lang))
                         ax.set_xticks(x)
                         ax.set_xticklabels([str(i + 1) for i in range(len(o))])
-                        ax.set_xlabel("外れ値ID（降順）")
-                        ax.set_ylabel("|Δ| [ns]（観測-モデル, 反射器別中央値で中心化）")
-                        ax.set_title(f"{LLR_SHORT_NAME}：外れ値の time-tag 感度（tx/rx/mid）", pad=6.0)
+                        ax.set_xlabel(_plot_text("Outlier ID (descending)", "Outlier ID (descending)", lang=figure_lang))
+                        ax.set_ylabel(_plot_text("|Δ| [ns]（観測-モデル, 反射器別中央値で中心化）", "|Δ| [ns] (observed-model,\ncentered by reflector median)", lang=figure_lang))
+                        ax.set_title(_plot_text(f"{LLR_SHORT_NAME}：外れ値の time-tag 感度（tx/rx/mid）", f"{_llr_short_name(lang=figure_lang)}: outlier time-tag sensitivity (tx/rx/mid)", lang=figure_lang), pad=6.0)
                         ax.legend(ncols=2, fontsize=get_wavep_font_size("legend"))
                         ax.grid(True, axis="y", alpha=0.25)
                         with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
@@ -3054,7 +3072,9 @@ def main() -> int:
                     # 条件分岐: `"best_target_delta_raw_ns" in o.columns and "delta_best_raw_ns" in o.columns...` を満たす経路を評価する。
                     if "best_target_delta_raw_ns" in o.columns and "delta_best_raw_ns" in o.columns and int(len(o)) > 0:
                         apply_paper_style()
-                        _set_japanese_font()
+                        figure_lang = get_figure_language(default="ja")
+                        if figure_lang == "ja":
+                            _set_japanese_font()
                         x = np.arange(len(o), dtype=float)
                         width = 0.38
                         cur_abs = np.abs(pd.to_numeric(o["delta_best_raw_ns"], errors="coerce").to_numpy(dtype=float))
@@ -3062,16 +3082,16 @@ def main() -> int:
 
                         fig, ax = plt.subplots()
                         apply_wavep_figure_layout(fig, template="part2_single_panel")
-                        ax.bar(x - width / 2, cur_abs, width=width, label="現在ターゲット |Δ_raw|", color="#1f77b4", alpha=0.9)
-                        ax.bar(x + width / 2, best_abs, width=width, label="推定ターゲット |Δ_raw|", color="#ff7f0e", alpha=0.9)
+                        ax.bar(x - width / 2, cur_abs, width=width, label=_plot_text("現在ターゲット |Δ_raw|", "Current target |Δ_raw|", lang=figure_lang), color="#1f77b4", alpha=0.9)
+                        ax.bar(x + width / 2, best_abs, width=width, label=_plot_text("推定ターゲット |Δ_raw|", "Estimated target |Δ_raw|", lang=figure_lang), color="#ff7f0e", alpha=0.9)
                         ax.set_yscale("log")
-                        ax.axhline(1e5, color="#333333", lw=1.0, alpha=0.5, linestyle="--", label="混入判定: |Δ_raw|≥1e5 ns")
-                        ax.axhline(1e3, color="#666666", lw=1.0, alpha=0.35, linestyle="--", label="混入判定: best |Δ_raw|≤1e3 ns")
+                        ax.axhline(1e5, color="#333333", lw=1.0, alpha=0.5, linestyle="--", label=_plot_text("Contamination gate: |Δ_raw|≥1e5 ns", "Contamination gate: |Δ_raw|≥1e5 ns", lang=figure_lang))
+                        ax.axhline(1e3, color="#666666", lw=1.0, alpha=0.35, linestyle="--", label=_plot_text("Contamination gate: best |Δ_raw|≤1e3 ns", "Contamination gate: best |Δ_raw|≤1e3 ns", lang=figure_lang))
                         ax.set_xticks(x)
                         ax.set_xticklabels([str(i + 1) for i in range(len(o))])
-                        ax.set_xlabel("外れ値ID（降順）")
-                        ax.set_ylabel("|Δ_raw| [ns]（観測-モデル, オフセット未除去）")
-                        ax.set_title(f"{LLR_SHORT_NAME}：外れ値のターゲット混入感度（現ターゲット vs 推定ターゲット）", pad=6.0)
+                        ax.set_xlabel(_plot_text("Outlier ID (descending)", "Outlier ID (descending)", lang=figure_lang))
+                        ax.set_ylabel(_plot_text("|Δ_raw| [ns]（観測-モデル, オフセット未除去）", "|Δ_raw| [ns] (observed-model,\noffset not removed)", lang=figure_lang))
+                        ax.set_title(_plot_text(f"{LLR_SHORT_NAME}：外れ値のターゲット混入感度（現ターゲット vs 推定ターゲット）", f"{_llr_short_name(lang=figure_lang)}: outlier target-contamination sensitivity", lang=figure_lang), pad=6.0)
                         ax.legend(ncols=2, fontsize=get_wavep_font_size("legend"))
                         ax.grid(True, axis="y", alpha=0.25)
                         with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
@@ -3219,7 +3239,9 @@ def main() -> int:
                 lim = max(10.0, min(200.0, p99 * 1.2))
                 bins = np.linspace(-lim, lim, num=61)
 
-                _set_japanese_font()
+                figure_lang = get_figure_language(default="ja")
+                if figure_lang == "ja":
+                    _set_japanese_font()
                 fig, axs = plt.subplots(2, 1, gridspec_kw={"height_ratios": [1.08, 1.00]})
                 apply_wavep_figure_layout(fig, template="part2_two_panel")
                 for ax in axs:
@@ -3228,16 +3250,16 @@ def main() -> int:
                 # (1) signed residual histogram
 
                 ax = axs[0]
-                ax.hist(res_sr, bins=bins, alpha=0.35, label=f"SR（RMS={_rms(res_sr):.3f} ns）")
+                ax.hist(res_sr, bins=bins, alpha=0.35, label=_plot_text(f"SR（RMS={_rms(res_sr):.3f} ns）", f"SR (RMS={_rms(res_sr):.3f} ns)", lang=figure_lang))
                 # 条件分岐: `len(res_tropo)` を満たす経路を評価する。
                 if len(res_tropo):
-                    ax.hist(res_tropo, bins=bins, alpha=0.35, label=f"SR+Tropo（RMS={_rms(res_tropo):.3f} ns）")
+                    ax.hist(res_tropo, bins=bins, alpha=0.35, label=_plot_text(f"SR+Tropo（RMS={_rms(res_tropo):.3f} ns）", f"SR+Tropo (RMS={_rms(res_tropo):.3f} ns)", lang=figure_lang))
 
-                ax.hist(res_final, bins=bins, alpha=0.55, label=f"SR+Tropo+Tide（RMS={_rms(res_final):.3f} ns）")
+                ax.hist(res_final, bins=bins, alpha=0.55, label=_plot_text(f"SR+Tropo+Tide（RMS={_rms(res_final):.3f} ns）", f"SR+Tropo+Tide (RMS={_rms(res_final):.3f} ns)", lang=figure_lang))
                 ax.axvline(0.0, color="#333333", lw=1.2, alpha=0.7)
-                ax.set_title("残差分布（観測−モデル）")
-                ax.set_xlabel("残差 [ns]（定数オフセット整列後）")
-                ax.set_ylabel("件数")
+                ax.set_title(_plot_text("残差分布（観測−モデル）", "Residual distribution\n(observed - model)", lang=figure_lang))
+                ax.set_xlabel(_plot_text("残差 [ns]（定数オフセット整列後）", "Residual [ns]\n(constant-offset aligned)", lang=figure_lang))
+                ax.set_ylabel(_plot_text("件数", "Count", lang=figure_lang))
                 ax.legend(fontsize=9, loc="upper right")
 
                 # (2) ECDF of |residual|
@@ -3265,14 +3287,14 @@ def main() -> int:
 
                 ax.set_xlim(0.0, lim)
                 ax.set_ylim(0.0, 1.0)
-                ax.set_title("|残差| の累積分布（小さいほど良い）")
-                ax.set_xlabel("|残差| [ns]")
-                ax.set_ylabel("累積割合")
+                ax.set_title(_plot_text("|残差| の累積分布（小さいほど良い）", "Cumulative distribution of |residual|", lang=figure_lang))
+                ax.set_xlabel(_plot_text("|残差| [ns]", "|Residual| [ns]", lang=figure_lang))
+                ax.set_ylabel(_plot_text("累積割合", "Cumulative fraction", lang=figure_lang))
                 ax.legend(fontsize=9, loc="lower right")
 
                 n_used = int(len(res_final))
                 fig.suptitle(
-                    f"{LLR_SHORT_NAME}：観測−P-model の差（inlierのみ, n={n_used}）",
+                    _plot_text(f"{LLR_SHORT_NAME}：観測−P-model の差（inlierのみ, n={n_used}）", f"{_llr_short_name(lang=figure_lang)}:\nobserved-P-model residuals (inliers only, n={n_used})", lang=figure_lang),
                     fontsize=12,
                     y=0.988,
                 )

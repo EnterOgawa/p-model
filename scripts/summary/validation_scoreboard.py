@@ -24,13 +24,45 @@ _ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from scripts.quantum.figure_japanese_localizer import enable_japanese_figure_localization  # noqa: E402
+from scripts.quantum.figure_japanese_localizer import enable_japanese_figure_localization, get_figure_language  # noqa: E402
 from scripts.utils.plot_style import get_wavep_font_size  # noqa: E402
 from scripts.summary import worklog  # noqa: E402
 
 enable_japanese_figure_localization()
 
 _C_M_PER_S = 299_792_458.0
+_SCOREBOARD_EN_LABELS = {
+    "LLR（月レーザー測距）": "LLR (lunar laser ranging)",
+    "β cross-channel（VLBI+LLR+MESSENGER）": "β cross-channel",
+    "Cassini（太陽会合）": "Cassini (solar conjunction)",
+    "光偏向（太陽）": "Light deflection (Sun)",
+    "Viking（太陽会合）": "Viking (solar conjunction)",
+    "Mercury（近日点移動）": "Mercury (perihelion precession)",
+    "GP-A / Galileo（重力赤方偏移）": "GP-A / Galileo",
+    "連星パルサー（軌道減衰）": "Binary pulsar (orbital decay)",
+    "重力波（GW150914 等）": "GW (GW150914 etc.)",
+    "重力波（GW250114）": "GW (GW250114)",
+    "回転（フレームドラッグ）": "Rotation (frame dragging)",
+    "XRISM（公開一次データ）": "XRISM",
+    "銀河回転曲線（SPARC）": "Galaxy rotation curves (SPARC)",
+    "宇宙論（構造形成 fσ8）": "Cosmology (fσ8)",
+    "宇宙論（CMB音響ピーク）": "Cosmology (CMB acoustic peaks)",
+    "宇宙論（CMB偏極位相）": "Cosmology (CMB polarization phase)",
+    "宇宙論（Pantheon+ Hubble図）": "Cosmology (Pantheon+ Hubble)",
+    "BBN（初期熱史）": "BBN (early thermal history)",
+    "背景計量（caseB: 有効計量）": "Background metric (case B)",
+    "宇宙論（銀河団衝突オフセット）": "Cosmology (cluster-collision offset)",
+    "重力波偏光モード（H1/L1/V1）": "GW polarization modes",
+    "強場（高次項同時拘束）": "Strong field (joint higher-order)",
+    "EHT（ブラックホール影）": "EHT (shadow)",
+    "宇宙論（距離二重性）": "Cosmology (distance duality)",
+    "背景計量（caseA: 平坦背景）": "Background metric (case A)",
+    "純スカラー極限（回転なし）": "Pure-scalar limit (no rotation)",
+    "速度飽和 δ（理論）": "Velocity saturation δ (theory)",
+    "GPS（衛星時計）": "GPS clocks",
+}
+_SCOREBOARD_EN_TITLE = "Validation scoreboard by domain"
+_SCOREBOARD_EN_XLABEL = "Normalized score (0 ideal, 1 pass boundary, 2 watch boundary)"
 
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
@@ -63,6 +95,33 @@ def _set_japanese_font() -> None:
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         pass
+
+
+# 関数: `_scoreboard_display_label` の入出力契約と処理意図を定義する。
+
+def _scoreboard_display_label(text: str, *, lang: str) -> str:
+    if lang != "en":
+        return text
+
+    return _SCOREBOARD_EN_LABELS.get(text, text)
+
+
+# 関数: `_scoreboard_display_title` の入出力契約と処理意図を定義する。
+
+def _scoreboard_display_title(text: str, *, lang: str) -> str:
+    if lang != "en":
+        return text
+
+    return _SCOREBOARD_EN_TITLE if text.startswith("総合スコアボード") else text
+
+
+# 関数: `_scoreboard_display_xlabel` の入出力契約と処理意図を定義する。
+
+def _scoreboard_display_xlabel(text: str, *, lang: str) -> str:
+    if lang != "en":
+        return text
+
+    return _SCOREBOARD_EN_XLABEL if text.startswith("正規化スコア") else text
 
 
 # 関数: `_read_json` の入出力契約と処理意図を定義する。
@@ -3683,11 +3742,20 @@ def plot_validation_scoreboard(
     min_label_font_size: float = 6.0,
     left_margin: float = 0.43,
     right_margin: float = 0.985,
+    grouped_fig_h_in: Optional[float] = None,
+    grouped_bar_pitch: Optional[float] = None,
+    grouped_bar_height: Optional[float] = None,
+    grouped_left_margin: Optional[float] = None,
+    grouped_hspace: Optional[float] = None,
 ) -> None:
     _set_japanese_font()
     out_png.parent.mkdir(parents=True, exist_ok=True)
     if out_pdf is not None:
         out_pdf.parent.mkdir(parents=True, exist_ok=True)
+
+    figure_lang = get_figure_language(default="ja")
+    title = _scoreboard_display_title(title, lang=figure_lang)
+    xlabel = _scoreboard_display_xlabel(xlabel, lang=figure_lang)
 
     rows_raw = payload.get("rows") or []
     rows: List[Dict[str, Any]] = [r for r in rows_raw if isinstance(r, dict)]
@@ -3712,7 +3780,8 @@ def plot_validation_scoreboard(
         return (sev, s)
 
     ordered = sorted(rows, key=sort_key, reverse=True)
-    labels = [str(r.get("label") or "") for r in ordered]
+    labels = [_scoreboard_display_label(str(r.get("label") or ""), lang=figure_lang) for r in ordered]
+    is_quantum_profile = str(payload.get("profile") or "").strip() == "part3_quantum"
 
     scores: List[float] = []
     for r in ordered:
@@ -3770,6 +3839,127 @@ def plot_validation_scoreboard(
     axis_font = get_wavep_font_size("axis") * axis_scale
     tick_font = get_wavep_font_size("tick")
     label_font = max(float(min_label_font_size), tick_font * label_scale)
+
+    # 関数: `_group_id` の入出力契約と処理意図を定義する。
+    def _group_id(row: Dict[str, Any]) -> str:
+        raw_label = str(row.get("label") or "")
+        status = str(row.get("status") or "info")
+        if status == "info":
+            return "reference"
+
+        if is_quantum_profile:
+            return "quantum"
+
+        if any(token in raw_label for token in ("LLR", "β cross-channel", "Cassini", "光偏向", "Viking", "Mercury", "GP-A", "GPS（衛星時計）", "回転（フレームドラッグ）", "純スカラー極限")):
+            return "weak_field"
+
+        if any(token in raw_label for token in ("EHT", "連星パルサー", "重力波", "XRISM", "強場")):
+            return "strong_field"
+
+        return "cosmology"
+
+    group_titles = {
+        "weak_field": "Weak-field / local tests" if figure_lang == "en" else "弱場 / 局所検証",
+        "strong_field": "Strong-field / compact objects" if figure_lang == "en" else "強場 / コンパクト天体",
+        "cosmology": "Cosmology / large scale" if figure_lang == "en" else "宇宙論 / 大域スケール",
+        "quantum": "Quantum / verification set" if figure_lang == "en" else "量子 / 検証セット",
+        "reference": "Reference / auxiliary" if figure_lang == "en" else "Reference / 補助比較",
+    }
+    group_order = ["quantum", "reference"] if is_quantum_profile else ["weak_field", "strong_field", "cosmology", "reference"]
+    grouped_rows: Dict[str, List[Tuple[str, float, str]]] = {key: [] for key in group_order}
+    for row, label, score, color in zip(ordered, labels, scores_clipped, colors, strict=False):
+        grouped_rows[_group_id(row)].append((label, score, color))
+
+    active_groups = [key for key in group_order if grouped_rows[key]]
+    label_width = max(label_width, 30 if figure_lang == "en" else 24)
+    wrapped_group_labels: Dict[str, List[str]] = {
+        key: [_wrap_label(item[0], width=label_width) for item in grouped_rows[key]]
+        for key in active_groups
+    }
+    group_height_units = {
+        key: sum(max(1, label.count("\n") + 1) for label in wrapped_group_labels[key])
+        for key in active_groups
+    }
+    wrapped_line_units = sum(
+        max(1, label.count("\n") + 1)
+        for key in active_groups
+        for label in wrapped_group_labels[key]
+    )
+    grouped_fig_h_floor_default = 8.9 if (figure_lang == "en" and not is_quantum_profile) else 6.9
+    grouped_fig_h_floor = float(grouped_fig_h_in) if grouped_fig_h_in is not None else grouped_fig_h_floor_default
+    grouped_fig_h_cap = 12.2 if (figure_lang == "en" and not is_quantum_profile) else 9.6
+    fig_h_grouped = max(grouped_fig_h_floor, min(grouped_fig_h_cap, 0.19 * float(wrapped_line_units) + 2.2))
+    fig_w_grouped = 190.0 / 25.4
+    group_bar_pitch_default = 1.34 if (figure_lang == "en" and not is_quantum_profile) else (1.12 if figure_lang == "en" else bar_pitch)
+    group_bar_pitch = max(
+        group_bar_pitch_default,
+        float(grouped_bar_pitch) if grouped_bar_pitch is not None else group_bar_pitch_default,
+    )
+    group_bar_height_default = 0.76 if figure_lang == "en" else 0.82
+    group_bar_height = min(
+        group_bar_height_default,
+        float(grouped_bar_height) if grouped_bar_height is not None else group_bar_height_default,
+    )
+    fig, axes = plt.subplots(
+        len(active_groups),
+        1,
+        figsize=(fig_w_grouped, fig_h_grouped),
+        sharex=True,
+        gridspec_kw={"height_ratios": [max(1, group_height_units[key]) for key in active_groups]},
+    )
+    try:
+        axes = list(axes)
+    except TypeError:
+        axes = [axes]
+
+    for ax, group_key in zip(axes, active_groups, strict=False):
+        entries = grouped_rows[group_key]
+        sub_labels = [item[0] for item in entries]
+        sub_scores = [item[1] for item in entries]
+        sub_colors = [item[2] for item in entries]
+        sub_label_units = [max(1, label.count("\n") + 1) for label in wrapped_group_labels[group_key]]
+        y: List[float] = []
+        y_cursor = 0.0
+        line_spacing_gain = 0.70 if (figure_lang == "en" and not is_quantum_profile) else (0.42 if figure_lang == "en" else 0.30)
+        for unit in sub_label_units:
+            y.append(y_cursor)
+            y_cursor += group_bar_pitch * (1.0 + line_spacing_gain * float(unit - 1))
+        ax.barh(y, sub_scores, height=group_bar_height, color=sub_colors, alpha=0.90)
+        ax.set_yticks(y)
+        ax.set_yticklabels(
+            wrapped_group_labels[group_key],
+            fontsize=max(float(min_label_font_size), label_font - (0.2 if figure_lang == "en" else 0.0)),
+        )
+        ax.invert_yaxis()
+        ax.set_xlim(0.0, x_max)
+        ax.axvline(0.0, color="#333333", linewidth=1.0)
+        for x in (1.0, 2.0):
+            ax.axvline(x, color="#999999", linewidth=1.0, linestyle="--")
+
+        ax.tick_params(axis="x", labelsize=tick_font * tick_scale)
+        ax.grid(True, axis="x", alpha=0.18)
+        panel_title = ax.set_title(group_titles[group_key], loc="left", fontsize=axis_font * 0.88, pad=4.0)
+        panel_title.set_fontweight("bold")
+
+    for ax in axes[:-1]:
+        ax.tick_params(axis="x", labelbottom=False)
+
+    axes[-1].set_xlabel(xlabel, fontsize=axis_font)
+    fig.suptitle(title, y=0.985, fontsize=get_wavep_font_size("suptitle") * 0.90 * suptitle_scale)
+    fig.subplots_adjust(
+        left=float(grouped_left_margin) if grouped_left_margin is not None else (0.45 if figure_lang == "en" else 0.36),
+        right=0.985,
+        top=0.94,
+        bottom=0.06,
+        hspace=float(grouped_hspace) if grouped_hspace is not None else 0.24,
+    )
+    with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
+        fig.savefig(out_png, dpi=180)
+        if out_pdf is not None:
+            fig.savefig(out_pdf, format="pdf")
+
+    plt.close(fig)
+    return
 
     if n_panels == 1:
         fig, ax = plt.subplots(1, 1, figsize=(fig_w, fig_h))

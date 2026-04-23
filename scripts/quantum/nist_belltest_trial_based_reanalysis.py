@@ -14,6 +14,7 @@ import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Final
 
 import numpy as np
 
@@ -22,12 +23,23 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from figure_japanese_localizer import enable_japanese_figure_localization
-from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
+from scripts.quantum.figure_japanese_localizer import get_figure_language
+from scripts.utils.figure_locale_paths import localize_figure_output_path
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size, install_wavep_font_profile
 
 enable_japanese_figure_localization()
 
 
+_PROFILE_NAME: Final[str] = "part3b_quantum_verification"
+
+
+# 関数: `_t` の入出力契約と処理意図を定義する。
+def _t(ja: str, en: str, *, lang: str) -> str:
+    return en if lang == "en" else ja
+
+
 # クラス: `TrialCounts` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class TrialCounts:
     n_trials: np.ndarray  # (2,2) by (a_setting, b_setting)
@@ -217,8 +229,14 @@ def main() -> None:
     args = parser.parse_args()
 
     root = Path(__file__).resolve().parents[2]
+    lang = get_figure_language(default="ja")
+    install_wavep_font_profile(profile_name=_PROFILE_NAME)
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
+
+    # 関数: `_tag` の入出力契約と処理意図を定義する。
+    def _tag(stem: str, ext: str) -> Path:
+        return localize_figure_output_path(out_dir / f"{stem}.{ext}", root=root)
 
     default_hdf5 = (
         root
@@ -319,10 +337,11 @@ def main() -> None:
     # Outputs
 
     tag = args.out_tag
-    out_png = out_dir / f"nist_belltest_trial_based__{tag}.png"
-    out_pdf = out_dir / f"nist_belltest_trial_based__{tag}.pdf"
-    out_json = out_dir / f"nist_belltest_trial_based_metrics__{tag}.json"
-    out_csv = out_dir / f"nist_belltest_trial_based_counts__{tag}.csv"
+    out_png = _tag(f"nist_belltest_trial_based__{tag}", "png")
+    out_pdf = _tag(f"nist_belltest_trial_based__{tag}", "pdf")
+    out_json = _tag(f"nist_belltest_trial_based_metrics__{tag}", "json")
+    out_csv = _tag(f"nist_belltest_trial_based_counts__{tag}", "csv")
+    out_png.parent.mkdir(parents=True, exist_ok=True)
 
     # CSV summary
     lines = [
@@ -339,17 +358,21 @@ def main() -> None:
 
     fig, axes = plt.subplots(2, 1, dpi=170)
     apply_wavep_figure_layout(fig, template="part2_two_panel_quantum_spacious")
-    fig.set_size_inches(fig.get_figwidth(), 5.55, forward=True)
-    fig.subplots_adjust(left=0.155, right=0.985, top=0.895, bottom=0.115, hspace=0.36)
-    panel_title_font = get_wavep_font_size("title") * 0.88
-    axis_label_font = get_wavep_font_size("axis")
+    fig.set_size_inches(fig.get_figwidth(), 5.85, forward=True)
+    fig.subplots_adjust(left=0.145, right=0.978, top=0.905, bottom=0.120, hspace=0.40)
+    panel_title_font = get_wavep_font_size("title") * (0.76 if lang == "en" else 1.0)
+    axis_label_font = get_wavep_font_size("axis") * (0.78 if lang == "en" else 1.0)
     tick_font = get_wavep_font_size("tick")
-    legend_font = get_wavep_font_size("legend")
+    legend_font = get_wavep_font_size("legend") * (0.74 if lang == "en" else 1.0)
     note_font = get_wavep_font_size("note")
-    suptitle_font = get_wavep_font_size("suptitle") + 2.0
+    suptitle_font = get_wavep_font_size("suptitle") * (0.78 if lang == "en" else 1.0)
 
     ax0 = axes[0]
-    ax0.set_title("coincidence-base と trial-base の一致", fontsize=panel_title_font, pad=7.5)
+    ax0.set_title(
+        _t("coincidence-base と trial-base の一致", "coincidence vs trial aggregation", lang=lang),
+        fontsize=panel_title_font,
+        pad=7.5,
+    )
 
     # 条件分岐: `sweep is not None` を満たす経路を評価する。
     if sweep is not None:
@@ -358,13 +381,23 @@ def main() -> None:
             sweep["pairs_total"],
             marker="o",
             lw=1.4,
-            label="coincidence-base pairs_total",
+            label=_t("coincidence-base pairs_total", "coincidence pairs", lang=lang),
         )
 
     trial_total = int(counts.n_coinc.sum())
-    ax0.axhline(trial_total, color="0.2", ls="--", lw=1.0, label=f"trial-base coincidences={trial_total}")
+    ax0.axhline(
+        trial_total,
+        color="0.2",
+        ls="--",
+        lw=1.0,
+        label=_t(
+            f"trial-base coincidences={trial_total}",
+            f"trial coincidences = {trial_total}",
+            lang=lang,
+        ),
+    )
     ax0.set_xscale("log")
-    ax0.set_ylabel("coincidences (件数)", fontsize=axis_label_font)
+    ax0.set_ylabel(_t("coincidences (件数)", "coincidences (count)", lang=lang), fontsize=axis_label_font)
     ax0.grid(True, which="both", ls=":", lw=0.6, alpha=0.6)
     ax0.legend(frameon=True, fontsize=legend_font)
     ax0.tick_params(axis="both", labelsize=tick_font)
@@ -375,7 +408,11 @@ def main() -> None:
         tick_label.set_visible(False)
 
     ax1 = axes[1]
-    ax1.set_title("CH J_prob（A1=0,B1=0）の窓幅依存", fontsize=panel_title_font, pad=7.5)
+    ax1.set_title(
+        _t("CH J_prob（A1=0,B1=0）の窓幅依存", "CH J_prob at (A1=0, B1=0) vs window", lang=lang),
+        fontsize=panel_title_font,
+        pad=7.5,
+    )
     # Trial-based J for A1=0,B1=0.
     j_trial = float(ch["A1=0,B1=0"]["J_prob"])
     # 条件分岐: `sweep is not None and "J_prob_A1=0_B1=0" in sweep` を満たす経路を評価する。
@@ -385,29 +422,46 @@ def main() -> None:
             sweep["J_prob_A1=0_B1=0"],
             marker="o",
             lw=1.4,
-            label="coincidence-base J_prob",
+            label=_t("coincidence-base J_prob", "coincidence J_prob", lang=lang),
         )
         # closest match point
         idx = int(np.argmin(np.abs(sweep["J_prob_A1=0_B1=0"] - j_trial)))
         ax1.axvline(float(sweep["window_ns"][idx]), color="0.5", ls=":", lw=1.0)
-        ax1.text(
-            float(sweep["window_ns"][idx]) * 1.06,
-            float(sweep["J_prob_A1=0_B1=0"][idx]),
-            f"最接近\\n{float(sweep['window_ns'][idx]):g} ns",
-            fontsize=note_font,
+        ax1.annotate(
+            _t(
+                f"最接近\n{float(sweep['window_ns'][idx]):g} ns",
+                f"nearest\n{float(sweep['window_ns'][idx]):g} ns",
+                lang=lang,
+            ),
+            xy=(float(sweep["window_ns"][idx]), float(sweep["J_prob_A1=0_B1=0"][idx])),
+            xytext=(-8, 6),
+            textcoords="offset points",
+            ha="right",
             va="bottom",
+            fontsize=note_font,
+            bbox={"boxstyle": "round,pad=0.18", "facecolor": "white", "alpha": 0.82, "edgecolor": "0.8"},
         )
 
-    ax1.axhline(j_trial, color="0.2", ls="--", lw=1.0, label=f"trial-base J_prob={j_trial:.3g}")
+    ax1.axhline(
+        j_trial,
+        color="0.2",
+        ls="--",
+        lw=1.0,
+        label=_t(f"trial-base J_prob={j_trial:.3g}", f"trial J_prob = {j_trial:.3g}", lang=lang),
+    )
     ax1.axhline(0.0, color="0.4", ls="-", lw=0.8)
     ax1.set_xscale("log")
-    ax1.set_xlabel("coincidence 窓幅 (ns)", fontsize=axis_label_font)
+    ax1.set_xlabel(_t("coincidence 窓幅 (ns)", "coincidence window (ns)", lang=lang), fontsize=axis_label_font)
     ax1.set_ylabel("J_prob", fontsize=axis_label_font)
     ax1.grid(True, which="both", ls=":", lw=0.6, alpha=0.6)
     ax1.legend(frameon=True, fontsize=legend_font)
     ax1.tick_params(axis="both", labelsize=tick_font)
 
-    fig.suptitle("NIST Bell test：trial-base 集計との差分", y=0.992, fontsize=suptitle_font)
+    fig.suptitle(
+        _t("NIST Bell test：trial-base 集計との差分", "NIST Bell test: trial-based aggregation delta", lang=lang),
+        y=0.988,
+        fontsize=suptitle_font,
+    )
 
     normalize_backup = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
     os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"

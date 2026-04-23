@@ -19,6 +19,7 @@ import csv
 import hashlib
 import json
 import math
+import os
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -36,6 +37,11 @@ try:
     from scripts.summary import worklog  # type: ignore  # noqa: E402
 except Exception:  # pragma: no cover
     worklog = None
+
+
+# 関数: `WAVEP_FIGURE_LANG` から英語 surface かどうかを判定する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
 
 try:
     import matplotlib.pyplot as plt  # type: ignore
@@ -2901,10 +2907,11 @@ def _plot(
 
     ax0.set_yticks(y)
     ax0.set_yticklabels(labels)
-    ax0.set_xlabel("λ_H estimate", fontsize=15.0)
-    ax0.set_title("Channel-level λ_H constraints", fontsize=16.2)
+    font_scale = 1.18 if _is_en_figure() else 1.0
+    ax0.set_xlabel("λ_H estimate", fontsize=15.0 * font_scale)
+    ax0.set_title("Channel-level λ_H constraints", fontsize=16.2 * font_scale)
     ax0.grid(alpha=0.25)
-    ax0.legend(loc="best", fontsize=13.6)
+    ax0.legend(loc="best", fontsize=13.6 * font_scale)
 
     metrics = ["chi2/dof baseline", "chi2/dof fit", "ΔAIC (fit-baseline)"]
     vals = [
@@ -2916,13 +2923,13 @@ def _plot(
     ax1.axhline(0.0, color="#666666", linewidth=1.0)
     ax1.set_xticks(np.arange(len(metrics)))
     ax1.set_xticklabels(metrics, rotation=12, ha="right")
-    ax1.set_title("Joint fit merit", fontsize=16.2)
+    ax1.set_title("Joint fit merit", fontsize=16.2 * font_scale)
     ax1.grid(alpha=0.25, axis="y")
     for b in bars:
         h = b.get_height()
         # 条件分岐: `np.isfinite(h)` を満たす経路を評価する。
         if np.isfinite(h):
-            ax1.text(b.get_x() + b.get_width() * 0.5, h, f"{h:.3f}", ha="center", va="bottom", fontsize=13.0)
+            ax1.text(b.get_x() + b.get_width() * 0.5, h, f"{h:.3f}", ha="center", va="bottom", fontsize=13.0 * font_scale)
 
     diag_labels = ["κ ratio (compressed)", "GW primary homology", "GW multi-event homology", "GW area σ"]
     diag_vals = [kappa_ratio, gw_homology, gw_multi_homology, gw_area_sigma]
@@ -2933,14 +2940,14 @@ def _plot(
     ax2.axhline(3.0, color="#7f7f7f", linestyle=":", linewidth=1.0, label="GW area gate")
     ax2.set_xticks([0, 1, 2, 3])
     ax2.set_xticklabels(diag_labels, rotation=12, ha="right")
-    ax2.set_title("Watch diagnostics", fontsize=16.2)
+    ax2.set_title("Watch diagnostics", fontsize=16.2 * font_scale)
     ax2.grid(alpha=0.25, axis="y")
-    ax2.legend(loc="best", fontsize=13.6)
+    ax2.legend(loc="best", fontsize=13.6 * font_scale)
 
     for axis in (ax0, ax1, ax2):
-        axis.tick_params(labelsize=13.2)
+        axis.tick_params(labelsize=13.2 * font_scale)
 
-    fig.suptitle("strong-field higher-order closure audit", fontsize=17.6)
+    fig.suptitle("strong-field higher-order closure audit", fontsize=17.6 * font_scale)
     fig.savefig(path, dpi=160)
     fig.savefig(path.with_suffix(".pdf"))
     plt.close(fig)

@@ -22,6 +22,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -39,6 +40,11 @@ try:
     from scripts.summary import worklog  # type: ignore  # noqa: E402
 except Exception:  # pragma: no cover
     worklog = None
+
+
+# 関数: `WAVEP_FIGURE_LANG` から英語 surface かどうかを判定する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
 
 try:
     import matplotlib.pyplot as plt  # type: ignore
@@ -789,14 +795,15 @@ def _plot(
     sig = np.asarray([float(r["ring_diameter_obs_sigma_uas"]) for r in rows], dtype=float)
     pred = np.asarray([float(r["ring_diameter_pred_uas"]) for r in rows], dtype=float)
 
+    font_scale = 1.18 if _is_en_figure() else 1.0
     ax0.errorbar(x, obs, yerr=sig, fmt="o", capsize=4, color="#111827", label="observed ring diameter")
     ax0.scatter(x, pred, marker="s", color="#2563eb", s=60, label="P_μ-J^μ direct prediction")
     ax0.set_xticks(x)
     ax0.set_xticklabels(labels)
-    ax0.set_ylabel("diameter [μas]", fontsize=13.6)
-    ax0.set_title("Direct ring diameter audit", fontsize=14.8)
+    ax0.set_ylabel("diameter [μas]", fontsize=13.6 * font_scale)
+    ax0.set_title("Direct ring diameter audit", fontsize=14.8 * font_scale)
     ax0.grid(alpha=0.25)
-    ax0.legend(loc="best", fontsize=12.2)
+    ax0.legend(loc="best", fontsize=12.2 * font_scale)
 
     for item in grids:
         obj: ObjectInput = item["object"]
@@ -820,11 +827,11 @@ def _plot(
         ax1.scatter([float(row["r_minus_rg"])], [float(row["b_minus_rg"])], s=24, marker="x")
         ax1.axvline(float(item["horizon_rg"]), color="#6b7280", linestyle=":", linewidth=0.9)
 
-    ax1.set_xlabel("radius r [r_g]", fontsize=13.6)
-    ax1.set_ylabel("impact scale b [r_g]", fontsize=13.6)
-    ax1.set_title("Direct impact minima from P_μ axisymmetric field", fontsize=14.8)
+    ax1.set_xlabel("radius r [r_g]", fontsize=13.6 * font_scale)
+    ax1.set_ylabel("impact scale b [r_g]", fontsize=13.6 * font_scale)
+    ax1.set_title("Direct impact minima from P_μ axisymmetric field", fontsize=14.8 * font_scale)
     ax1.grid(alpha=0.25)
-    ax1.legend(loc="best", fontsize=12.0)
+    ax1.legend(loc="best", fontsize=12.0 * font_scale)
 
     y = np.arange(len(rows), dtype=float)
     asym_pred = np.asarray([float(r["ring_asymmetry_pred"]) for r in rows], dtype=float)
@@ -838,15 +845,16 @@ def _plot(
 
     ax2.set_yticks(y)
     ax2.set_yticklabels(labels)
-    ax2.set_xlabel("ring asymmetry proxy", fontsize=13.6)
-    ax2.set_title("Asymmetry range check (when available)", fontsize=14.8)
+    ax2.set_xlabel("ring asymmetry proxy", fontsize=13.6 * font_scale)
+    ax2.set_title("Asymmetry range check (when available)", fontsize=14.8 * font_scale)
     ax2.grid(alpha=0.25)
-    ax2.legend(loc="best", fontsize=12.2)
+    ax2.legend(loc="best", fontsize=12.2 * font_scale)
 
     for axis in (ax0, ax1, ax2):
-        axis.tick_params(labelsize=12.0)
+        axis.tick_params(labelsize=12.0 * font_scale)
 
     fig.savefig(path, dpi=160)
+    fig.savefig(path.with_suffix(".pdf"), dpi=160)
     plt.close(fig)
 
 

@@ -28,7 +28,11 @@ from scripts.utils.plot_style import (  # noqa: E402
     get_wavep_font_size,
     resolve_wavep_cjk_font_family,
 )
-from scripts.quantum.figure_japanese_localizer import enable_japanese_figure_localization  # noqa: E402
+from scripts.utils.figure_locale_paths import localize_figure_output_path  # noqa: E402
+from scripts.quantum.figure_japanese_localizer import (  # noqa: E402
+    enable_japanese_figure_localization,
+    get_figure_language,
+)
 
 enable_japanese_figure_localization()
 
@@ -58,11 +62,11 @@ def _save_figure_bundle(*, fig, stem: str) -> dict[str, str]:
     out_private = ROOT / "output" / "private" / "quantum"
     out_canon = ROOT / "output" / "quantum"
     outputs = {
-        "png_public": out_public / f"{stem}.png",
-        "png_private": out_private / f"{stem}.png",
+        "png_public": localize_figure_output_path(out_public / f"{stem}.png", root=ROOT),
+        "png_private": localize_figure_output_path(out_private / f"{stem}.png", root=ROOT),
         "png_canon": out_canon / f"{stem}.png",
-        "pdf_public": out_public / f"{stem}.pdf",
-        "pdf_private": out_private / f"{stem}.pdf",
+        "pdf_public": localize_figure_output_path(out_public / f"{stem}.pdf", root=ROOT),
+        "pdf_private": localize_figure_output_path(out_private / f"{stem}.pdf", root=ROOT),
         "pdf_canon": out_canon / f"{stem}.pdf",
     }
     for path in outputs.values():
@@ -110,6 +114,54 @@ def _add_arrow(ax, x0: float, y0: float, x1: float, y1: float) -> None:
     ax.add_patch(arrow)
 
 
+# 関数: `_build_text_map` の入出力契約と処理意図を定義する。
+
+def _build_text_map(*, lang: str) -> dict[str, str]:
+    if lang == "en":
+        return {
+            "suptitle": "Quantum Measurement Positioning (Born Rule and State Update)",
+            "p_field": "P field (time-wave density)\n"
+            "u = ln(P/P0),  φ = -c²u\n"
+            "(Part I mapping and local description)",
+            "bound_mode": "Bound-mode envelope\n"
+            "ψ(x,t)\n"
+            "(Schr/KG in the short-wavelength limit)",
+            "born_rate": "Detection rate / click probability\n"
+            "λ(x,t) ∝ |ψ|²\n"
+            "(Born rule: operational adoption)",
+            "record_update": "Measurement record m\n"
+            "pointer states / coarse-graining\n"
+            "ρ → ρ_m (conditional update)",
+            "selection": "Selection and analysis pipeline\n"
+            "w_ab(λ) (setting-dependent acceptance)\n"
+            "systematics entry for Bell analysis",
+            "note": "This first release fixes the boundary between derived elements and adopted elements,\n"
+            "and makes the verification entry explicit against the criticism that the model is only semi-classical.\n"
+            "A first-principles derivation of the Born rule and update rule remains future work.",
+        }
+
+    return {
+        "suptitle": "量子測定の位置づけ（Born則と状態更新）",
+        "p_field": "P場（時間波密度）\n"
+        "u = ln(P/P0),  φ = -c²u\n"
+        "（Part I の写像・局所記述）",
+        "bound_mode": "束縛モード包絡\n"
+        "ψ(x,t)\n"
+        "（短波長極限でSchr/KG）",
+        "born_rate": "検出率 / クリック確率\n"
+        "λ(x,t) ∝ |ψ|²\n"
+        "（Born則：運用上の採用）",
+        "record_update": "測定記録 m\n"
+        "ポインタ状態 / 粗視化\n"
+        "ρ → ρ_m（条件付き更新）",
+        "selection": "選別・解析パイプライン\n"
+        "w_ab(λ)（設定依存の受理）\n"
+        "Bell解析の系統入口",
+        "note": "初期版では、導出済み要素と採用要素の境界を固定し、\n"
+        "「半古典的」という批判に対する検証入口を明示する。Born則と更新則の第一原理導出は今後の課題。",
+    }
+
+
 # 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
@@ -119,16 +171,19 @@ def main() -> None:
     apply_paper_style()
     _configure_japanese_font()
     cfg = Config()
+    lang = get_figure_language(default="ja")
+    text_map = _build_text_map(lang=lang)
+    is_en = lang == "en"
 
     fig = plt.figure(dpi=cfg.dpi)
     apply_wavep_figure_layout(fig, template="paper_diagram")
-    fig.subplots_adjust(top=0.905, bottom=0.125)
+    fig.subplots_adjust(top=0.905, bottom=(0.165 if is_en else 0.125))
     ax = fig.add_subplot(111)
     ax.set_axis_off()
     ax.set_xlim(0.0, 1.0)
     ax.set_ylim(0.0, 1.0)
 
-    suptitle = fig.suptitle("量子測定の位置づけ（Born則と状態更新）", fontsize=get_wavep_font_size("suptitle"))
+    suptitle = fig.suptitle(text_map["suptitle"], fontsize=get_wavep_font_size("suptitle"))
     suptitle.set_fontsize(12.4)
 
     # Boxes
@@ -138,9 +193,7 @@ def main() -> None:
         0.74,
         0.38,
         0.18,
-        "P場（時間波密度）\n"
-        "u = ln(P/P0),  φ = -c²u\n"
-        "（Part I の写像・局所記述）",
+        text_map["p_field"],
         fc="#e8f2ff",
         ec="#2b6cb0",
     )
@@ -150,9 +203,7 @@ def main() -> None:
         0.74,
         0.38,
         0.18,
-        "束縛モード包絡\n"
-        "ψ(x,t)\n"
-        "（短波長極限でSchr/KG）",
+        text_map["bound_mode"],
         fc="#f0fff4",
         ec="#2f855a",
     )
@@ -162,21 +213,17 @@ def main() -> None:
         0.45,
         0.38,
         0.18,
-        "検出率 / クリック確率\n"
-        "λ(x,t) ∝ |ψ|²\n"
-        "（Born則：運用上の採用）",
+        text_map["born_rate"],
         fc="#fffaf0",
         ec="#b7791f",
     )
     _add_box(
         ax,
         0.57,
-        0.16,
+        (0.19 if is_en else 0.16),
         0.38,
         0.18,
-        "測定記録 m\n"
-        "ポインタ状態 / 粗視化\n"
-        "ρ → ρ_m（条件付き更新）",
+        text_map["record_update"],
         fc="#fff5f5",
         ec="#c53030",
     )
@@ -186,9 +233,7 @@ def main() -> None:
         0.38,
         0.38,
         0.20,
-        "選別・解析パイプライン\n"
-        "w_ab(λ)（設定依存の受理）\n"
-        "Bell解析の系統入口",
+        text_map["selection"],
         fc="#f7fafc",
         ec="#4a5568",
     )
@@ -196,15 +241,14 @@ def main() -> None:
     # Arrows
     _add_arrow(ax, 0.43, 0.83, 0.57, 0.83)  # P-field -> ψ
     _add_arrow(ax, 0.76, 0.74, 0.76, 0.63)  # ψ -> Born
-    _add_arrow(ax, 0.76, 0.45, 0.76, 0.34)  # Born -> update
+    _add_arrow(ax, 0.76, 0.45, 0.76, (0.37 if is_en else 0.34))  # Born -> update
     _add_arrow(ax, 0.43, 0.48, 0.57, 0.54)  # selection -> Born
 
-    ax.text(
-        0.05,
-        0.05,
-        "初期版では、導出済み要素と採用要素の境界を固定し、\n"
-        "「半古典的」という批判に対する検証入口を明示する。Born則と更新則の第一原理導出は今後の課題。",
-        fontsize=get_wavep_font_size("note"),
+    fig.text(
+        0.10,
+        (0.060 if is_en else 0.052),
+        text_map["note"],
+        fontsize=(get_wavep_font_size("note") - 0.5 if is_en else get_wavep_font_size("note")),
         ha="left",
         va="bottom",
         color="#333333",

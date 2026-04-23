@@ -146,6 +146,11 @@ def _custom_specs(py: str) -> Dict[str, Sequence[str]]:
             "-B",
             str(ROOT / "scripts" / "quantum" / "born_route_a_proxy_constraints.py"),
         ],
+        "nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei_zn_residual_map": [
+            py,
+            "-B",
+            str(ROOT / "scripts" / "quantum" / "nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei.py"),
+        ],
         "v2_trial2_theorem_support_summary": [
             py,
             "-B",
@@ -231,7 +236,12 @@ def _artifact_exists_for_stem(stem: str) -> bool:
 
 # 関数: `_run_specs` の入出力契約と処理意図を定義する。
 
-def _run_specs(specs: Sequence[CommandSpec]) -> List[dict]:
+def _run_specs(
+    specs: Sequence[CommandSpec],
+    *,
+    figure_lang: str,
+    font_profile: str,
+) -> List[dict]:
     rows: List[dict] = []
     env = os.environ.copy()
     root_str = str(ROOT)
@@ -244,7 +254,7 @@ def _run_specs(specs: Sequence[CommandSpec]) -> List[dict]:
         env["PYTHONPATH"] = root_str
 
     env["WAVEP_MPL_AUTOSAVE_VECTOR_PDF"] = "1"
-    env["WAVEP_MPL_FONT_PROFILE"] = "part2_astrophysics"
+    env["WAVEP_MPL_FONT_PROFILE"] = str(font_profile)
     env["WAVEP_MPL_FONT_SCALE"] = "1.0"
     env["WAVEP_MPL_CJK_FONT"] = "Noto Sans CJK JP"
     env["WAVEP_MPL_CJK_FONT_PATH"] = str(
@@ -252,8 +262,11 @@ def _run_specs(specs: Sequence[CommandSpec]) -> List[dict]:
     )
     env["WAVEP_MPL_TEXT_MIN_FONT"] = "7.8"
     env["WAVEP_MPL_LEGEND_NOTE_MIN_FONT"] = "7.8"
-    env["WAVEP_FIGURE_LANG"] = "ja"
-    env["WAVEP_MPL_FORCE_JA_TEXT"] = "1"
+    env["WAVEP_FIGURE_LANG"] = str(figure_lang)
+    if str(figure_lang).strip().lower().startswith("ja"):
+        env["WAVEP_MPL_FORCE_JA_TEXT"] = "1"
+    else:
+        env.pop("WAVEP_MPL_FORCE_JA_TEXT", None)
 
     for spec in specs:
         started_wall = time.time()
@@ -343,6 +356,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Strictly rerun all Part IV referenced figure producers.")
     parser.add_argument("--tex", type=Path, required=True, help="Generated Part IV TeX path.")
     parser.add_argument(
+        "--figure-lang",
+        default="ja",
+        choices=("ja", "en"),
+        help="Figure text language to emit while rerendering referenced producers.",
+    )
+    parser.add_argument(
+        "--font-profile",
+        default="part4_verification",
+        help="Matplotlib figure font profile passed through WAVEP_MPL_FONT_PROFILE.",
+    )
+    parser.add_argument(
         "--manifest-json",
         type=Path,
         default=ROOT / "output" / "private" / "summary" / "part4_strict_figure_refresh_manifest.json",
@@ -356,7 +380,11 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     stems = _parse_stems(tex_path)
     specs = _resolve_specs(stems, sys.executable or "python")
-    rows = _run_specs(specs)
+    rows = _run_specs(
+        specs,
+        figure_lang=str(args.figure_lang),
+        font_profile=str(args.font_profile),
+    )
     _write_manifest(Path(args.manifest_json), tex_path=tex_path, stems=stems, rows=rows)
     print(f"[ok] strict Part IV figure refresh complete: {len(stems)} stems / {len(rows)} commands")
     return 0

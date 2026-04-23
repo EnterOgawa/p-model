@@ -42,6 +42,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import shutil
 import sys
 from dataclasses import dataclass
@@ -101,6 +102,20 @@ def _read_json(path: Path) -> Dict[str, Any]:
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+# 関数: `_is_en_figure` の入出力契約と処理意図を定義する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
+
+
+# 関数: locale ごとの既定出力先を解決する。
+def _default_output_dir(kind: str) -> Path:
+    base = ROOT / "output" / kind / "cosmology"
+    if _is_en_figure():
+        return base / "locales" / "en"
+
+    return base
 
 
 # 関数: `_copy_to_public` の入出力契約と処理意図を定義する。
@@ -495,6 +510,12 @@ def _plot(
     delay_dlnh = delay.dlnh_dlnasorted_desc[::-1]
 
     # 図44: 横2列を廃止し、縦1列3段へ変更して全体を拡大する。
+    font_scale = 1.14 if _is_en_figure() else 1.0
+    title_font = 17.8 * font_scale
+    axis_font = 15.8 * font_scale
+    tick_font = 13.8 * font_scale
+    legend_font = 14.2 * font_scale
+    suptitle_font = 19.8 * font_scale
     fig = plt.figure(figsize=(14.4, 18.2), dpi=170)
     grid = fig.add_gridspec(3, 1, height_ratios=[1.0, 1.0, 1.08], hspace=0.34)
     ax_friction = fig.add_subplot(grid[0, 0])
@@ -520,12 +541,13 @@ def _plot(
         label="Γ_eff/H_eff (delay)",
     )
     ax_friction.axhline(0.0, color="#888", linestyle="--", linewidth=1.2)
-    ax_friction.set_title("実効摩擦項の創発（無次元）", fontsize=17.8)
-    ax_friction.set_xlabel("z", fontsize=15.8)
-    ax_friction.set_ylabel("coefficient", fontsize=15.8)
-    ax_friction.tick_params(labelsize=13.8)
+    is_en = _is_en_figure()
+    ax_friction.set_title("Emergent effective friction term (dimensionless)" if is_en else "実効摩擦項の創発（無次元）", fontsize=title_font)
+    ax_friction.set_xlabel("z", fontsize=axis_font)
+    ax_friction.set_ylabel("coefficient", fontsize=axis_font)
+    ax_friction.tick_params(labelsize=tick_font)
     ax_friction.grid(True, alpha=0.28)
-    ax_friction.legend(loc="best", fontsize=14.2)
+    ax_friction.legend(loc="best", fontsize=legend_font)
 
     ax_fs8.errorbar(
         z_obs,
@@ -555,12 +577,12 @@ def _plot(
         color="#d62728",
         label="instant branch (τ_eff=0)",
     )
-    ax_fs8.set_title("fσ8(z): 観測 vs 写像", fontsize=17.8)
-    ax_fs8.set_xlabel("z", fontsize=15.8)
-    ax_fs8.set_ylabel("fσ8", fontsize=15.8)
-    ax_fs8.tick_params(labelsize=13.8)
+    ax_fs8.set_title("fσ8(z): observed vs mapped branch" if is_en else "fσ8(z): 観測 vs 写像", fontsize=title_font)
+    ax_fs8.set_xlabel("z", fontsize=axis_font)
+    ax_fs8.set_ylabel("fσ8", fontsize=axis_font)
+    ax_fs8.tick_params(labelsize=tick_font)
     ax_fs8.grid(True, alpha=0.28)
-    ax_fs8.legend(loc="best", fontsize=14.2)
+    ax_fs8.legend(loc="best", fontsize=legend_font)
 
     ax_growth.plot(
         z_asc,
@@ -580,14 +602,18 @@ def _plot(
         color="#ff7f0e",
         label="f (instant)",
     )
-    ax_growth.set_title("成長率 f のスケーリング", fontsize=17.8)
-    ax_growth.set_xlabel("z", fontsize=15.8)
-    ax_growth.set_ylabel("f", fontsize=15.8)
-    ax_growth.tick_params(labelsize=13.8)
+    ax_growth.set_title("Growth-rate scaling of f" if is_en else "成長率 f のスケーリング", fontsize=title_font)
+    ax_growth.set_xlabel("z", fontsize=axis_font)
+    ax_growth.set_ylabel("f", fontsize=axis_font)
+    ax_growth.tick_params(labelsize=tick_font)
     ax_growth.grid(True, alpha=0.28)
-    ax_growth.legend(loc="best", fontsize=14.2)
+    ax_growth.legend(loc="best", fontsize=legend_font)
 
-    fig.suptitle("Step 8.7.18.2: fσ8 growth mapping with delayed P response", fontsize=19.8)
+    for axis in (ax_friction, ax_fs8, ax_growth):
+        for tick in [*axis.get_xticklabels(), *axis.get_yticklabels()]:
+            tick.set_fontsize(tick_font)
+
+    fig.suptitle("Step 8.7.18.2: fσ8 growth mapping with delayed P response", fontsize=suptitle_font)
     # 図下注記は論文本文側へ移し、図中の重なりを回避する。
     fig.subplots_adjust(left=0.080, right=0.985, top=0.935, bottom=0.060)
     out_png.parent.mkdir(parents=True, exist_ok=True)
@@ -679,7 +705,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             row["z_score"] = float((row["f_sigma8_pred"] - row["f_sigma8_obs"]) / max(row["f_sigma8_sigma"], 1.0e-9))
             rows.append(row)
 
-    out_dir = Path(args.out_dir).resolve()
+    requested_private = Path(args.out_dir).resolve()
+    requested_public = Path(args.public_dir).resolve()
+    default_private = (ROOT / "output" / "private" / "cosmology").resolve()
+    default_public = (ROOT / "output" / "public" / "cosmology").resolve()
+    out_dir = _default_output_dir("private") if _is_en_figure() and requested_private == default_private else requested_private
     out_dir.mkdir(parents=True, exist_ok=True)
     base = "cosmology_fsigma8_growth_mapping"
     out_png = out_dir / f"{base}.png"
@@ -799,7 +829,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     copied: Dict[str, str] = {}
     # 条件分岐: `not bool(args.skip_public_copy)` を満たす経路を評価する。
     if not bool(args.skip_public_copy):
-        copied = _copy_to_public([out_png, out_pdf, out_json, out_fals, out_csv], Path(args.public_dir).resolve())
+        public_dir = _default_output_dir("public") if _is_en_figure() and requested_public == default_public else requested_public
+        copied = _copy_to_public([out_png, out_pdf, out_json, out_fals, out_csv], public_dir)
 
     print(f"[ok] png : {out_png}")
     print(f"[ok] pdf : {out_pdf}")

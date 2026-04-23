@@ -13,10 +13,13 @@ import os
 import sys
 from pathlib import Path
 
+from figure_japanese_localizer import enable_japanese_figure_localization
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+
+enable_japanese_figure_localization()
 
 
 # 関数: `_configure_japanese_font` の入出力契約と処理意図を定義する。
@@ -76,6 +79,8 @@ def main() -> None:
     root = Path(__file__).resolve().parents[2]
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
+    figure_lang = str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower()
+    is_en = figure_lang.startswith("en")
 
     consts = _load_nist_codata_constants(root=root)
     need = ["mp", "mn", "md", "rd"]
@@ -141,7 +146,7 @@ def main() -> None:
     ax0 = fig.add_subplot(gs[0, 0])
     ax0.errorbar([0.0], [b_mev], yerr=[sigma_b_mev], fmt="o", capsize=5, lw=1.8)
     ax0.set_xticks([0.0])
-    ax0.set_xticklabels(["重水素"])
+    ax0.set_xticklabels(["Deuteron"] if is_en else ["重水素"])
     ax0.set_ylabel("束縛エネルギー B (MeV)", fontsize=axis_font)
     ax0.set_title("質量欠損ベースライン（CODATA/NIST）", fontsize=title_font, pad=5.0)
     ax0.grid(True, ls=":", lw=0.6, alpha=0.6)

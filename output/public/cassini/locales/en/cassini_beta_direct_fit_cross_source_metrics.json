@@ -1,0 +1,136 @@
+{
+  "generated_utc": "2026-04-13T02:22:59.721227+00:00",
+  "fit_model": "y_obs = a0 + delta_beta * y_unit(beta=1)",
+  "window_days": 10.0,
+  "beta_ref": 1.0,
+  "rows": [
+    {
+      "scenario": "tdf_plasma",
+      "label": "TDF processed plasma",
+      "source_effective": "pds_tdf_processed_plasma",
+      "window_days": 10.0,
+      "n_points": 190,
+      "delta_beta": 0.10564992508484262,
+      "delta_beta_sigma_proxy": 0.014110022274067109,
+      "beta_est": 1.1056499250848426,
+      "gamma_est": 1.2112998501696852,
+      "corr_obs_fit": 0.4879824757173215,
+      "rmse": 6.416485082254296e-11,
+      "weighted_rms": 2.4959204414480252e-11,
+      "metrics_json": "C:\\develop\\waveP\\output\\cassini\\cassini_tdf_delta_beta_fit_metrics.json"
+    },
+    {
+      "scenario": "tdf_raw",
+      "label": "TDF raw",
+      "source_effective": "pds_tdf_raw",
+      "window_days": 10.0,
+      "n_points": 844707,
+      "delta_beta": 0.02860349895975277,
+      "delta_beta_sigma_proxy": 0.00010799785324714675,
+      "beta_est": 1.0286034989597528,
+      "gamma_est": 1.0572069979195056,
+      "corr_obs_fit": 0.2769036354139773,
+      "rmse": 1.2496259598508995e-11,
+      "weighted_rms": 1.2496259598509011e-11,
+      "metrics_json": "C:\\develop\\waveP\\output\\cassini\\cassini_tdf_delta_beta_fit_metrics.json"
+    },
+    {
+      "scenario": "odf_raw",
+      "label": "ODF raw",
+      "source_effective": "pds_odf_raw",
+      "window_days": 10.0,
+      "n_points": 421841,
+      "delta_beta": -615.1089742666451,
+      "delta_beta_sigma_proxy": 13.638155932970045,
+      "beta_est": -614.1089742666451,
+      "gamma_est": -1229.2179485332902,
+      "corr_obs_fit": 0.06927530305470708,
+      "rmse": 1.1392700310021458e-06,
+      "weighted_rms": 1.1392700310021496e-06,
+      "metrics_json": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_beta_direct_fit_metrics.json"
+    }
+  ],
+  "spread_metrics": {
+    "delta_beta_min": -615.1089742666451,
+    "delta_beta_max": 0.10564992508484262,
+    "delta_beta_range": 615.21462419173,
+    "delta_beta_mean": -204.99157361420018,
+    "delta_beta_std": 289.9967967897536,
+    "corr_min": 0.06927530305470708,
+    "corr_max": 0.4879824757173215,
+    "corr_range": 0.4187071726626144,
+    "delta_beta_diff_tdf_plasma_minus_tdf_raw": 0.07704642612508986,
+    "delta_beta_diff_tdf_plasma_minus_odf_raw": 615.21462419173
+  },
+  "odf_if_manifest": {
+    "path": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_raw_if_manifest.json",
+    "overall_status": "watch",
+    "overall_if_ready_for_absolute_beta": false
+  },
+  "convergence_audit": {
+    "recommended_status": "watch",
+    "all_pass": false,
+    "reasons": [
+      "if_manifest_not_closed",
+      "odf_sign_terminal_gate_not_closed",
+      "odf_delta_beta_not_converged",
+      "odf_shape_corr_too_low"
+    ],
+    "gates": {
+      "if_manifest_all_pass": {
+        "status": "watch",
+        "value": false,
+        "threshold": "True",
+        "note": "ODF raw I/F 4項目（band/sign/media/time）が全てpass"
+      },
+      "external_csp_payload_gate": {
+        "status": "pass",
+        "value": true,
+        "threshold": "True",
+        "note": "IONCAL/TROPCAL/PLSMCAL payload available locally for record-level media join"
+      },
+      "odf_sign_terminal_gate": {
+        "status": "watch",
+        "value": false,
+        "threshold": "True",
+        "note": "record-level contiguous-arc sign/corr gate with minimum coverage is closed"
+      },
+      "tdf_internal_delta_beta": {
+        "status": "pass",
+        "value": 0.07704642612508986,
+        "threshold": 0.1,
+        "note": "|Δβ(tdf_plasma)-Δβ(tdf_raw)| <= 0.10"
+      },
+      "odf_vs_tdf_z_best": {
+        "status": "watch",
+        "value": 45.10416076554982,
+        "threshold": 3.0,
+        "note": "min z-score between ODF raw and TDF branches <= 3"
+      },
+      "odf_corr_floor": {
+        "status": "watch",
+        "value": 0.06927530305470708,
+        "threshold": 0.25,
+        "note": "ODF raw corr >= 0.25"
+      }
+    },
+    "diagnostics": {
+      "zscore_odf_vs_tdf_plasma": 45.10978595305367,
+      "zscore_odf_vs_tdf_raw": 45.10416076554982,
+      "delta_beta_tdf_plasma": 0.10564992508484262,
+      "delta_beta_tdf_raw": 0.02860349895975277,
+      "delta_beta_odf_raw": -615.1089742666451,
+      "corr_odf_raw": 0.06927530305470708,
+      "sign_watch_reason_codes": [
+        "sign_terminal_gate_not_closed",
+        "stable_arc_coverage_below_gate"
+      ]
+    }
+  },
+  "outputs": {
+    "summary_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_beta_direct_fit_cross_source_summary.csv",
+    "convergence_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_beta_direct_fit_cross_source_convergence.csv",
+    "plot_png": "C:\\develop\\waveP\\output\\cassini\\cassini_beta_direct_fit_cross_source.png",
+    "plot_pdf": "C:\\develop\\waveP\\output\\cassini\\cassini_beta_direct_fit_cross_source.pdf"
+  }
+}

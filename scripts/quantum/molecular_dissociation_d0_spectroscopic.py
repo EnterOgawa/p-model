@@ -1,16 +1,24 @@
 from __future__ import annotations
 
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import matplotlib.pyplot as plt
 
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.figure_locale_paths import localize_figure_output_path
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size, install_wavep_font_profile
 
 enable_japanese_figure_localization()
+
+_PROFILE_NAME = "part3b_quantum_verification"
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
@@ -42,6 +50,7 @@ def _cm_inv_to_ev(cm_inv: float) -> float:
 
 def main() -> None:
     root = _repo_root()
+    install_wavep_font_profile(profile_name=_PROFILE_NAME)
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -123,34 +132,39 @@ def main() -> None:
     plt.rcParams["pdf.fonttype"] = 42
     plt.rcParams["ps.fonttype"] = 42
 
-    fig, ax = plt.subplots(1, 1, figsize=(11.5, 6.4), dpi=190)
-    ax.set_title(
-        "Spectroscopic dissociation energy D0 (0 K; fixed primary-source baseline)", fontsize=17.0
-    )
+    fig, ax = plt.subplots(1, 1, figsize=(10.4, 4.9), dpi=190)
+    apply_wavep_figure_layout(fig, template="part2_single_panel_legend_bottom")
+    title_font = get_wavep_font_size("title") * 0.92
+    axis_label_font = get_wavep_font_size("axis") * 0.94
+    tick_font = get_wavep_font_size("tick") * 0.94
+    note_font = get_wavep_font_size("note") * 0.88
+    ax.set_title("Spectroscopic D0 baseline at 0 K", fontsize=title_font, pad=7.0)
     ax.bar(labels, y, color=["#2b6cb0", "#805ad5", "#c53030"], alpha=0.92)
     ax.errorbar(labels, y, yerr=yerr, fmt="none", ecolor="#222222", elinewidth=1.2, capsize=4)
-    ax.set_ylabel("D0 (0 K; spectroscopic) [eV per molecule]", fontsize=14.6)
+    ax.set_ylabel("D0 at 0 K [eV per molecule]", fontsize=axis_label_font)
     ax.grid(True, axis="y", alpha=0.25)
-    ax.tick_params(axis="both", labelsize=12.8)
+    ax.tick_params(axis="both", labelsize=tick_font)
 
     for i, r in enumerate(rows):
         d0_cm = float(r["d0_cm^-1"])
-        ax.text(i, y[i] + 0.01, f"{d0_cm:.5f} cm⁻¹", ha="center", va="bottom", fontsize=12.6)
+        ax.text(i, y[i] + 0.008, f"{d0_cm:.5f} cm⁻¹", ha="center", va="bottom", fontsize=note_font)
 
-    ax.text(
-        0.01,
-        0.02,
-        "D0 is a 0 K (spectroscopic) dissociation energy baseline.\n"
-        "Do not conflate with 298 K thermochemistry dissociation enthalpy.\n"
-        "H2 value here is for ortho-H2 (rotational N=1), as stated by the primary source.",
-        transform=ax.transAxes,
-        fontsize=12.2,
-        bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor="#cccccc"),
+    fig.text(
+        0.11,
+        0.015,
+        "Baseline uses spectroscopic D0 at 0 K.\n"
+        "Do not mix with 298 K dissociation enthalpy.\n"
+        "H2 value is ortho-H2 (N=1) per the primary source.",
+        fontsize=note_font,
+        ha="left",
+        va="bottom",
+        bbox=dict(boxstyle="round,pad=0.25", facecolor="white", edgecolor="#cccccc", alpha=0.92),
     )
-    fig.tight_layout()
+    fig.subplots_adjust(left=0.105, right=0.985, top=0.86, bottom=0.24)
 
-    out_pdf = out_dir / "molecular_dissociation_d0_spectroscopic.pdf"
-    out_png = out_dir / "molecular_dissociation_d0_spectroscopic.png"
+    out_pdf = localize_figure_output_path(out_dir / "molecular_dissociation_d0_spectroscopic.pdf", root=root)
+    out_png = localize_figure_output_path(out_dir / "molecular_dissociation_d0_spectroscopic.png", root=root)
+    out_pdf.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_pdf)
     fig.savefig(out_png)
     plt.close(fig)
@@ -168,7 +182,7 @@ def main() -> None:
         "rows": rows,
         "outputs": {"pdf": str(out_pdf), "png": str(out_png)},
     }
-    out_json = out_dir / "molecular_dissociation_d0_spectroscopic_metrics.json"
+    out_json = localize_figure_output_path(out_dir / "molecular_dissociation_d0_spectroscopic_metrics.json", root=root)
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"[ok] wrote: {out_pdf}")
     print(f"[ok] wrote: {out_png}")

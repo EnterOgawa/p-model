@@ -23,6 +23,7 @@ from scripts.quantum.thermo_blackbody_holdout_style import (
     apply_blackbody_holdout_axes_text,
     apply_blackbody_holdout_legend,
     create_blackbody_holdout_figure,
+    resolve_blackbody_holdout_output_dir,
 )
 
 
@@ -141,7 +142,7 @@ def _fit_fixed_exponent(x_values: np.ndarray, y_values: np.ndarray, idx: np.ndar
 
 def main() -> None:
     root = _repo_root()
-    out_dir = root / "output" / "public" / "quantum"
+    out_dir = resolve_blackbody_holdout_output_dir(root)
     out_dir.mkdir(parents=True, exist_ok=True)
 
     src_dir = root / "data" / "quantum" / "sources" / "nist_codata_2022_blackbody_constants"
@@ -328,3 +329,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

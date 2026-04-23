@@ -17,6 +17,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -33,6 +34,11 @@ try:
     from scripts.summary import worklog  # type: ignore
 except Exception:  # pragma: no cover
     worklog = None
+
+
+# 関数: `WAVEP_FIGURE_LANG` から英語 surface かどうかを判定する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
 
 try:
     import matplotlib.pyplot as plt  # type: ignore
@@ -290,6 +296,12 @@ def _plot(
     # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
         return
+    font_scale = 1.18 if _is_en_figure() else 1.0
+    suptitle_fs = 16.0 * font_scale
+    label_fs = 13.6 * font_scale
+    title_fs = 14.8 * font_scale
+    legend_fs = 12.2 * font_scale
+    tick_fs = 12.0 * font_scale
 
     # 図115: 2列構成から1列（縦3段）へ変更して可読性を優先する。
     fig = plt.figure(figsize=(12.8, 14.0), dpi=180)
@@ -299,28 +311,28 @@ def _plot(
         fig.add_subplot(grid[1, 0]),
         fig.add_subplot(grid[2, 0]),
     ]
-    fig.suptitle("explicit N0^(2) terms and strong-field solution", fontsize=16.0)
+    fig.suptitle("explicit N0^(2) terms and strong-field solution", fontsize=suptitle_fs)
 
     axes[0].plot(r, n_metric_bar, label="N_metric_bar")
     axes[0].plot(r, n_phi_bar, label="N_phi_bar")
     axes[0].plot(r, n_total_bar, label="N_total_bar", linewidth=2.0)
     axes[0].set_xscale("log")
     axes[0].set_yscale("symlog", linthresh=1.0e-8)
-    axes[0].set_xlabel("r [r_g]", fontsize=13.6)
-    axes[0].set_ylabel("source term", fontsize=13.6)
-    axes[0].set_title("Spherical average of N0^(2)", fontsize=14.8)
+    axes[0].set_xlabel("r [r_g]", fontsize=label_fs)
+    axes[0].set_ylabel("source term", fontsize=label_fs)
+    axes[0].set_title("Spherical average of N0^(2)", fontsize=title_fs)
     axes[0].grid(True, alpha=0.25)
-    axes[0].legend(loc="best", fontsize=12.2)
+    axes[0].legend(loc="best", fontsize=legend_fs)
 
     axes[1].plot(r, p0_base, label="P0 linear")
     axes[1].plot(r, p0_full, label="P0 with N0^(2)")
     axes[1].plot(r, delta_p0, label="deltaP0", linestyle="--")
     axes[1].set_xscale("log")
-    axes[1].set_xlabel("r [r_g]", fontsize=13.6)
-    axes[1].set_ylabel("P0", fontsize=13.6)
-    axes[1].set_title("Perturbative solution of P0", fontsize=14.8)
+    axes[1].set_xlabel("r [r_g]", fontsize=label_fs)
+    axes[1].set_ylabel("P0", fontsize=label_fs)
+    axes[1].set_title("Perturbative solution of P0", fontsize=title_fs)
     axes[1].grid(True, alpha=0.25)
-    axes[1].legend(loc="best", fontsize=12.2)
+    axes[1].legend(loc="best", fontsize=legend_fs)
 
     labels = ["core gap (4eβ vs ref)", "N0 contribution", "total (core+N0)"]
     vals = [
@@ -330,18 +342,19 @@ def _plot(
     ]
     axes[2].bar(labels, vals, color=["#1f77b4", "#ff7f0e", "#2ca02c"])
     axes[2].axhline(4.63, color="#444444", linestyle="--", linewidth=1.0, label="reference 4.63%")
-    axes[2].set_ylabel("relative gap [%] vs C_ref", fontsize=13.6)
-    axes[2].set_title("Gap budget", fontsize=14.8)
+    axes[2].set_ylabel("relative gap [%] vs C_ref", fontsize=label_fs)
+    axes[2].set_title("Gap budget", fontsize=title_fs)
     axes[2].tick_params(axis="x", rotation=20)
     axes[2].grid(True, axis="y", alpha=0.25)
-    axes[2].legend(loc="best", fontsize=12.2)
+    axes[2].legend(loc="best", fontsize=legend_fs)
 
     for axis in axes:
-        axis.tick_params(labelsize=12.0)
+        axis.tick_params(labelsize=tick_fs)
 
     fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.96))
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)
+    fig.savefig(out_png.with_suffix(".pdf"), dpi=200)
     plt.close(fig)
 
 

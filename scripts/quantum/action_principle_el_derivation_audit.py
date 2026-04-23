@@ -21,6 +21,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -212,11 +213,18 @@ def _write_csv(path: Path, criteria: List[Dict[str, Any]]) -> None:
 # 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, payload: Dict[str, Any]) -> None:
+    is_en = str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
+    font_scale = 1.18 if is_en else 1.0
+    y_tick_font = 12.4 * font_scale
+    x_tick_font = (14.4 if is_en else 12.4) * font_scale
+    axis_label_font = 14.0 * font_scale
+    title_font = 15.0 * font_scale
+    legend_font = 11.6 * font_scale
     display_labels = {
-        "covariant_derivative_gauge_covariance": "共変微分のゲージ共変性",
-        "kinetic_density_gauge_invariance": "運動密度のゲージ不変性",
-        "noether_current_gauge_invariance": "Noether電流のゲージ不変性",
-        "noether_current_realness": "Noether電流の実数性",
+        "covariant_derivative_gauge_covariance": "covariant-derivative gauge covariance" if is_en else "共変微分のゲージ共変性",
+        "kinetic_density_gauge_invariance": "kinetic-density gauge invariance" if is_en else "運動密度のゲージ不変性",
+        "noether_current_gauge_invariance": "Noether-current gauge invariance" if is_en else "Noether電流のゲージ不変性",
+        "noether_current_realness": "Noether-current realness" if is_en else "Noether電流の実数性",
     }
     audit = payload.get("numerical_audit") if isinstance(payload.get("numerical_audit"), dict) else {}
     criteria = audit.get("criteria") if isinstance(audit.get("criteria"), list) else []
@@ -253,19 +261,21 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     ax.axvline(1.0, linestyle="--", color="#6b7280", linewidth=1.2)
     ax.set_xscale("log")
     ax.set_xlim(score_floor, x_max)
-    ax.set_yticks(y, labels, fontsize=12.4)
-    ax.set_xlabel("正規化誤差（1以下で通過）", fontsize=14.0)
-    ax.set_title("作用原理 EL 導出監査（ゲージ共変性・不変性）", fontsize=15.0, pad=8.0)
-    ax.tick_params(axis="x", labelsize=12.4)
+    ax.set_yticks(y, labels, fontsize=y_tick_font)
+    ax.set_xlabel("normalized error (pass <= 1)" if is_en else "正規化誤差（1以下で通過）", fontsize=axis_label_font)
+    ax.set_title("action-principle EL derivation audit" if is_en else "作用原理 EL 導出監査（ゲージ共変性・不変性）", fontsize=title_font, pad=8.0)
+    ax.tick_params(axis="x", labelsize=x_tick_font)
+    for label in ax.get_xticklabels():
+        label.set_fontsize(x_tick_font)
     ax.grid(axis="x", alpha=0.25, linestyle=":")
     ax.legend(
         handles=[
-            Patch(facecolor="#2f9e44", label="通過"),
-            Patch(facecolor="#dc2626", label="監視/棄却"),
-            Line2D([0], [0], color="#6b7280", linewidth=1.2, linestyle="--", label="閾値 (=1)"),
+            Patch(facecolor="#2f9e44", label="pass" if is_en else "通過"),
+            Patch(facecolor="#dc2626", label="watch / reject" if is_en else "監視/棄却"),
+            Line2D([0], [0], color="#6b7280", linewidth=1.2, linestyle="--", label="threshold (=1)" if is_en else "閾値 (=1)"),
         ],
         loc="lower right",
-        fontsize=11.6,
+        fontsize=legend_font,
     )
     fig.tight_layout()
     path.parent.mkdir(parents=True, exist_ok=True)

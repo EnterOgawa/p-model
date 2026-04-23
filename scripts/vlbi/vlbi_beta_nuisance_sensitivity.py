@@ -26,6 +26,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import shutil
 import subprocess
 import sys
@@ -43,6 +44,20 @@ DEFAULT_MODES = ["none", "baseline_intercept", "baseline_intercept_linear"]
 
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
+
+
+# Function: Detect whether the current figure surface is English-localized.
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
+
+
+# Function: Resolve public sync destination for the active locale.
+def _public_output_dir(root: Path) -> Path:
+    base = root / "output" / "public" / "vlbi"
+    if _is_en_figure():
+        return base / "locales" / "en"
+
+    return base
 
 
 # Function: Normalize labels for stable output filenames.
@@ -131,6 +146,11 @@ def _plot_summary(
     except Exception:
         return
 
+    font_scale = 1.22 if _is_en_figure() else 1.0
+    title_font = 14.0 * font_scale
+    axis_font = 12.8 * font_scale
+    tick_font = 11.4 * font_scale
+    legend_font = 11.2 * font_scale
     x = np.arange(len(modes), dtype=np.float64)
     fig, ax0 = plt.subplots(figsize=(11.5, 6.8))
     ax0.errorbar(
@@ -146,16 +166,22 @@ def _plot_summary(
     )
     ax0.axhline(1.0, color="tab:gray", linestyle="--", linewidth=1.2, label="beta=1")
     ax0.set_xticks(x)
-    ax0.set_xticklabels(modes, rotation=0)
-    ax0.set_ylabel("beta estimate")
+    ax0.set_xticklabels(modes, rotation=0, fontsize=tick_font)
+    ax0.set_ylabel("beta estimate", fontsize=axis_font)
     ax0.grid(True, alpha=0.28)
-    ax0.set_title("VLBI beta direct-fit nuisance sensitivity")
+    ax0.set_title("VLBI beta direct-fit nuisance sensitivity", fontsize=title_font)
     ax1 = ax0.twinx()
     ax1.plot(x, wrmse_s * 1.0e12, "s-", color="tab:red", linewidth=1.5, label="weighted RMSE [ps]")
-    ax1.set_ylabel("weighted RMSE [ps]")
+    ax1.set_ylabel("weighted RMSE [ps]", fontsize=axis_font)
     h0, l0 = ax0.get_legend_handles_labels()
     h1, l1 = ax1.get_legend_handles_labels()
-    ax0.legend(h0 + h1, l0 + l1, loc="best")
+    ax0.legend(h0 + h1, l0 + l1, loc="best", fontsize=legend_font)
+    ax0.tick_params(labelsize=tick_font)
+    ax1.tick_params(labelsize=tick_font)
+    for axis in (ax0, ax1):
+        for tick in [*axis.get_xticklabels(), *axis.get_yticklabels()]:
+            tick.set_fontsize(tick_font)
+
     fig.tight_layout()
     fig.savefig(str(pdf_path))
     fig.savefig(str(png_path), dpi=170)
@@ -165,7 +191,7 @@ def _plot_summary(
 # Function: Copy generated artifacts to output/public/vlbi.
 
 def _sync_public(root: Path, outputs: Sequence[Path]) -> None:
-    dst = root / "output" / "public" / "vlbi"
+    dst = _public_output_dir(root)
     dst.mkdir(parents=True, exist_ok=True)
     for path in outputs:
         if path.exists():

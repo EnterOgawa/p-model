@@ -225,14 +225,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     env_figure_lang = os.environ.get("WAVEP_FIGURE_LANG", "").strip().lower()
     auto_locale_lang = locale if locale in {"ja", "en"} else "ja"
     auto_figure_lang = env_figure_lang if env_figure_lang in {"ja", "en"} else auto_locale_lang
-    auto_lang_profiles = {
-        profile_content.PART3_COMPAT_PROFILE,
-        profile_content.PART3A_PROFILE,
-        profile_content.PART3B_PROFILE,
-        "part4_verification",
-        "part5_future_predictions",
-    }
-    figure_lang = auto_figure_lang if (requested_figure_lang == "auto" and profile in auto_lang_profiles) else requested_figure_lang
+    figure_lang = auto_figure_lang if requested_figure_lang == "auto" else requested_figure_lang
 
     os.environ.setdefault("WAVEP_MPL_AUTOSAVE_VECTOR_PDF", "1")
     os.environ.setdefault("WAVEP_MPL_FONT_PROFILE", profile_content.resolve_font_profile(profile))
@@ -251,40 +244,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     else:
         os.environ["PYTHONPATH"] = root_str
 
-    if profile_content.is_quantum_profile(profile):
-        if requested_figure_lang == "auto":
-            os.environ.setdefault("WAVEP_FIGURE_LANG", figure_lang)
-            if figure_lang == "ja":
-                os.environ.setdefault("WAVEP_MPL_FORCE_JA_TEXT", "1")
-            else:
-                os.environ.pop("WAVEP_MPL_FORCE_JA_TEXT", None)
-        else:
-            os.environ["WAVEP_FIGURE_LANG"] = figure_lang
-            if figure_lang == "ja":
-                os.environ.setdefault("WAVEP_MPL_FORCE_JA_TEXT", "1")
-            else:
-                os.environ.pop("WAVEP_MPL_FORCE_JA_TEXT", None)
-    elif profile == "part4_verification":
-        # Part4 は図5/6基準で可読性を確保しつつ、過大な文字重なりを避ける。
-        if requested_figure_lang == "auto":
-            os.environ.setdefault("WAVEP_FIGURE_LANG", figure_lang)
-        else:
-            os.environ["WAVEP_FIGURE_LANG"] = figure_lang
-
-        if figure_lang == "ja":
-            os.environ.setdefault("WAVEP_MPL_FORCE_JA_TEXT", "1")
-        else:
-            os.environ.pop("WAVEP_MPL_FORCE_JA_TEXT", None)
-    elif profile == "part5_future_predictions":
-        if requested_figure_lang == "auto":
-            os.environ.setdefault("WAVEP_FIGURE_LANG", figure_lang)
-        else:
-            os.environ["WAVEP_FIGURE_LANG"] = figure_lang
-
-        if figure_lang == "ja":
-            os.environ.setdefault("WAVEP_MPL_FORCE_JA_TEXT", "1")
-        else:
-            os.environ.pop("WAVEP_MPL_FORCE_JA_TEXT", None)
+    os.environ["WAVEP_FIGURE_LANG"] = figure_lang
+    if figure_lang == "ja":
+        os.environ.setdefault("WAVEP_MPL_FORCE_JA_TEXT", "1")
+    else:
+        os.environ.pop("WAVEP_MPL_FORCE_JA_TEXT", None)
 
     # sitecustomize（フォント床上げ/PNG保存時のPDF sidecar）を現プロセスでも有効化する。
     # 既に読み込まれている可能性があるため、環境変数設定後に再読込して反映する。
@@ -695,6 +659,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         gw_multi_event_summary.main([])
     except Exception:
         pass
+
+    if locale and locale != "ja" and profile in {"paper", "part2_astrophysics"}:
+        part2_locale_refresh_cmd = [
+            py,
+            "-B",
+            str(root / "scripts" / "summary" / "part2_rebuild_source_figures.py"),
+            "--strict",
+        ]
+        try:
+            subprocess.run(part2_locale_refresh_cmd, cwd=str(root), check=True, env=os.environ.copy())
+        except Exception as exc:
+            cmd_text = " ".join(str(item) for item in part2_locale_refresh_cmd)
+            print(f"[err] localized Part II figure rebuild failed: {cmd_text}\n  {exc}")
+            return 2
 
     # 条件分岐: `profile == "part2_astrophysics"` を満たす経路を評価する。
 

@@ -19,6 +19,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -38,6 +39,20 @@ try:
     import matplotlib.pyplot as plt  # type: ignore
 except Exception:  # pragma: no cover
     plt = None
+
+
+# 関数: `WAVEP_FIGURE_LANG` から英語 surface かどうかを判定する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
+
+
+# 関数: locale ごとの既定公開出力先を解決する。
+def _default_public_dir() -> Path:
+    base = ROOT / "output" / "public" / "cosmology"
+    if _is_en_figure():
+        return base / "locales" / "en"
+
+    return base
 
 
 # 関数: `_utc_now` の入出力契約と処理意図を定義する。
@@ -117,15 +132,22 @@ def _render_png(
         path.write_bytes(b"")
         return
 
+    font_scale = 1.16 if _is_en_figure() else 1.0
+    axis_font = 13.2 * font_scale
+    title_font = 14.2 * font_scale
+    tick_font = 11.6 * font_scale
+    legend_font = 12.0 * font_scale
+    suptitle_font = 15.4 * font_scale
+    note_font = 12.0 * font_scale
     fig, axes = plt.subplots(1, 2, figsize=(12.8, 5.2), dpi=150)
 
     labels = ["tau_free", "tau_int", "tau_damp", "tau_eff", "tau_eff_harm", "tau_from_kernel"]
     values = [tau_free, tau_int, tau_damp, tau_eff, tau_eff_harm, tau_from_kernel]
     axes[0].bar(labels, values, color=["#4c78a8", "#f58518", "#54a24b", "#e45756", "#72b7b2", "#b279a2"])
-    axes[0].set_ylabel("timescale [Gyr]", fontsize=13.2)
-    axes[0].set_title("tau derivation chain", fontsize=14.2)
-    axes[0].tick_params(axis="x", rotation=20, labelsize=11.6)
-    axes[0].tick_params(axis="y", labelsize=11.6)
+    axes[0].set_ylabel("timescale [Gyr]", fontsize=axis_font)
+    axes[0].set_title("tau derivation chain", fontsize=title_font)
+    axes[0].tick_params(axis="x", rotation=20, labelsize=tick_font)
+    axes[0].tick_params(axis="y", labelsize=tick_font)
     axes[0].grid(True, axis="y", alpha=0.25)
 
     rel_errs = [
@@ -136,17 +158,22 @@ def _render_png(
     err_labels = ["rel(tau_eff_harm,tau_eff)", "rel(tau_kernel_chain,tau_eff)", "rel(xi_chain,xi_derived)"]
     axes[1].bar(err_labels, rel_errs, color=["#2ca02c", "#2ca02c", "#2ca02c"])
     axes[1].axhline(0.20, color="#d62728", linestyle="--", linewidth=1.0, label="tau reconstruction gate")
-    axes[1].set_ylabel("relative error", fontsize=13.2)
-    axes[1].set_title("closure residuals", fontsize=14.2)
-    axes[1].tick_params(axis="x", rotation=20, labelsize=11.6)
-    axes[1].tick_params(axis="y", labelsize=11.6)
+    axes[1].set_ylabel("relative error", fontsize=axis_font)
+    axes[1].set_title("closure residuals", fontsize=title_font)
+    axes[1].tick_params(axis="x", rotation=20, labelsize=tick_font)
+    axes[1].tick_params(axis="y", labelsize=tick_font)
     axes[1].grid(True, axis="y", alpha=0.25)
-    axes[1].legend(loc="upper right", fontsize=12.0)
+    axes[1].legend(loc="upper right", fontsize=legend_font)
 
-    fig.suptitle("Bullet tau/xi derivation-chain audit", fontsize=15.4)
-    fig.text(0.01, -0.02, "\n".join(summary_lines), fontsize=12.0, va="top")
+    for axis in axes:
+        for tick in [*axis.get_xticklabels(), *axis.get_yticklabels()]:
+            tick.set_fontsize(tick_font)
+
+    fig.suptitle("Bullet tau/xi derivation-chain audit", fontsize=suptitle_font)
+    fig.text(0.01, -0.02, "\n".join(summary_lines), fontsize=note_font, va="top")
     fig.tight_layout()
     fig.savefig(path, bbox_inches="tight")
+    fig.savefig(path.with_suffix(".pdf"), bbox_inches="tight")
     plt.close(fig)
 
 
@@ -183,6 +210,19 @@ def main() -> int:
     parser.add_argument("--chain-rel-threshold", type=float, default=0.02)
     parser.add_argument("--epsilon-slow-threshold", type=float, default=0.25)
     args = parser.parse_args()
+
+    default_public_dir = (ROOT / "output" / "public" / "cosmology").resolve()
+    localized_public_dir = _default_public_dir()
+    default_out_json = (default_public_dir / "cosmology_tau_derivation_chain_audit.json").resolve()
+    default_out_csv = (default_public_dir / "cosmology_tau_derivation_chain_audit.csv").resolve()
+    default_out_png = (default_public_dir / "cosmology_tau_derivation_chain_audit.png").resolve()
+    if _is_en_figure():
+        if args.out_json.resolve() == default_out_json:
+            args.out_json = localized_public_dir / default_out_json.name
+        if args.out_csv.resolve() == default_out_csv:
+            args.out_csv = localized_public_dir / default_out_csv.name
+        if args.out_png.resolve() == default_out_png:
+            args.out_png = localized_public_dir / default_out_png.name
 
     # 条件分岐: `not args.input_json.exists()` を満たす経路を評価する。
     if not args.input_json.exists():
@@ -448,6 +488,7 @@ def main() -> int:
             "audit_json": _rel(args.out_json),
             "audit_csv": _rel(args.out_csv),
             "audit_png": _rel(args.out_png),
+            "audit_pdf": _rel(args.out_png.with_suffix(".pdf")),
         },
         "falsification_gate": {
             "reject_if": [
@@ -482,6 +523,7 @@ def main() -> int:
                         "json": _rel(args.out_json),
                         "csv": _rel(args.out_csv),
                         "png": _rel(args.out_png),
+                        "pdf": _rel(args.out_png.with_suffix(".pdf")),
                     },
                 }
             )

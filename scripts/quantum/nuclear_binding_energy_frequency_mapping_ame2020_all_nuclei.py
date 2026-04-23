@@ -12,13 +12,20 @@ import csv
 import json
 import math
 import os
+import sys
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from figure_japanese_localizer import enable_japanese_figure_localization
-from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
+from scripts.utils.figure_locale_paths import localize_figure_output_path
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size, install_wavep_font_profile
 
 enable_japanese_figure_localization()
+
+_PROFILE_NAME = "part3b_quantum_verification"
 
 # 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
@@ -211,6 +218,7 @@ def main(argv: list[str] | None = None) -> int:
     subset = str(args.subset)
 
     root = Path(__file__).resolve().parents[2]
+    install_wavep_font_profile(profile_name=_PROFILE_NAME)
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -595,7 +603,7 @@ def main(argv: list[str] | None = None) -> int:
 
     # CSV
 
-    out_csv = out_dir / f"{out_stem}.csv"
+    out_csv = localize_figure_output_path(out_dir / f"{out_stem}.csv", root=root)
     with out_csv.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(list(out_rows[0].keys()) if out_rows else [])
@@ -660,7 +668,7 @@ def main(argv: list[str] | None = None) -> int:
     ax0.set_yscale("log")
     ax0.set_xlabel("A", fontsize=axis_label_font)
     ax0.set_ylabel("B_pred/B_obs (baseline; log)", fontsize=axis_label_font)
-    ax0.set_title("Baseline residuals vs A (color=parity; ee/eo/oe/oo)", fontsize=panel_title_font, pad=6.0)
+    ax0.set_title("Baseline residuals vs A\n(color=parity; ee/eo/oe/oo)", fontsize=panel_title_font, pad=6.0)
     ax0.grid(True, which="both", axis="y", ls=":", lw=0.6, alpha=0.6)
     ax0.legend(loc="upper right", fontsize=legend_font)
     ax0.tick_params(axis="both", labelsize=tick_font)
@@ -678,7 +686,7 @@ def main(argv: list[str] | None = None) -> int:
     ax1.set_yscale("log")
     ax1.set_xlabel("A", fontsize=axis_label_font)
     ax1.set_ylabel("C_required/(A-1) (log)", fontsize=axis_label_font)
-    ax1.set_title("Implied coherence factor vs A (needs >1 for extra binding)", fontsize=panel_title_font, pad=6.0)
+    ax1.set_title("Implied coherence factor vs A\n(needs >1 for extra binding)", fontsize=panel_title_font, pad=6.0)
     ax1.grid(True, which="both", axis="y", ls=":", lw=0.6, alpha=0.6)
     ax1.tick_params(axis="both", labelsize=tick_font)
 
@@ -724,8 +732,9 @@ def main(argv: list[str] | None = None) -> int:
     fig.suptitle(suptitle, y=0.992, fontsize=suptitle_font)
     fig.subplots_adjust(left=0.085, right=0.985, top=0.905, bottom=0.110, wspace=0.24, hspace=0.64)
 
-    out_pdf = out_dir / f"{out_stem}.pdf"
-    out_png = out_dir / f"{out_stem}.png"
+    out_pdf = localize_figure_output_path(out_dir / f"{out_stem}.pdf", root=root)
+    out_png = localize_figure_output_path(out_dir / f"{out_stem}.png", root=root)
+    out_pdf.parent.mkdir(parents=True, exist_ok=True)
     prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
     os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
     try:
@@ -821,7 +830,7 @@ def main(argv: list[str] | None = None) -> int:
     # Metrics JSON (freeze)
     ame_path = root / "data" / "quantum" / "sources" / ame_src_dirname / "extracted_values.json"
     radii_path = root / "data" / "quantum" / "sources" / radii_src_dirname / "charge_radii.csv"
-    out_json = out_dir / f"{out_stem}_metrics.json"
+    out_json = localize_figure_output_path(out_dir / f"{out_stem}_metrics.json", root=root)
     notes = [
         "This step freezes an all-nuclei residual distribution under the minimal Δω mapping I/F. It is expected to fail in detail; the goal is to identify systematic failure regions (A-scaling, magic/pairing signals) before introducing additional physics.",
         "AME2020 σ(B/A) is extremely small; error bars here are dominated by model systematics and radius proxies, so the main diagnostics are ratio distributions and grouped medians.",

@@ -1,10 +1,19 @@
 {
-  "generated_utc": "2026-04-08T07:58:00.647567+00:00",
+  "generated_utc": "2026-04-13T02:22:56.854920+00:00",
   "argv": [
-    "scripts/cassini/cassini_fig2_overlay.py"
+    "scripts/cassini/cassini_fig2_overlay.py",
+    "--source",
+    "pds_odf_raw",
+    "--odf-direct-beta-fit",
+    "--odf-direct-beta-ref",
+    "1.0",
+    "--odf-direct-beta-window-days",
+    "10",
+    "--no-sweep",
+    "--no-plots"
   ],
-  "requested_source": "pds_tdf",
-  "effective_source": "pds_tdf_processed_plasma",
+  "requested_source": "pds_odf_raw",
+  "effective_source": "pds_odf_raw",
   "fallback_reason": null,
   "params": {
     "beta": 1.0000105000000001,
@@ -16,25 +25,17 @@
     "odf_downlink_band": "ka",
     "tdf_downlink_band": "ka",
     "tdf_plasma_correct": true,
-    "tdf_plasma_used": true,
+    "tdf_plasma_used": false,
     "tdf_plasma_fallback_reason": null,
-    "tdf_effective_downlink_bands": [
-      2,
-      3
-    ],
-    "tdf_plasma_common_bins": 142,
-    "tdf_plasma_common_station_ids": [
-      25
-    ],
+    "tdf_effective_downlink_bands": [],
+    "tdf_plasma_common_bins": null,
+    "tdf_plasma_common_station_ids": [],
     "tdf_sample_type": "high",
     "tdf_ground_mode": -1,
     "tdf_doppler_channel_count": -1,
-    "tdf_effective_ground_mode": 2,
+    "tdf_effective_ground_mode": null,
     "tdf_effective_doppler_channel_count": null,
-    "tdf_effective_doppler_channel_count_by_band": {
-      "3": 1,
-      "2": 2
-    },
+    "tdf_effective_doppler_channel_count_by_band": {},
     "tdf_fixed_frac_bits": 0,
     "tdf_y_sign": 1,
     "tdf_max_abs_pr_hz": 10.0,
@@ -55,7 +56,7 @@
     "tdf_direct_beta_ref": 1.0,
     "tdf_direct_beta_window_days": 10.0,
     "tdf_direct_beta_use_bin_count_weights": true,
-    "odf_direct_beta_fit": false,
+    "odf_direct_beta_fit": true,
     "odf_direct_beta_ref": 1.0,
     "odf_direct_beta_window_days": 10.0
   },
@@ -69,26 +70,26 @@
   "outputs": {
     "points_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_fig2_matched_points.csv",
     "metrics_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_fig2_metrics.csv",
-    "best_beta_by_rmse10": 1.000015000000004,
+    "best_beta_by_rmse10": null,
     "pds_extracted_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_sce1_tdf_extracted.csv",
     "pds_processed_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_sce1_tdf_paperlike.csv",
-    "pds_dual_binned_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_sce1_tdf_dual_binned.csv",
-    "pds_binned_merged_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_sce1_tdf_binned_merged.csv",
+    "pds_dual_binned_csv": null,
+    "pds_binned_merged_csv": null,
     "pds_vs_digitized_metrics_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_pds_vs_digitized_metrics.csv",
     "tdf_direct_fit_points_csv": null,
     "tdf_direct_fit_metrics_json": null,
     "tdf_direct_fit_plot_png": "C:\\develop\\waveP\\output\\cassini\\cassini_tdf_delta_beta_fit.png",
     "tdf_direct_fit_plot_pdf": "C:\\develop\\waveP\\output\\cassini\\cassini_tdf_delta_beta_fit.pdf",
-    "odf_direct_fit_points_csv": null,
-    "odf_direct_fit_metrics_json": null,
+    "odf_direct_fit_points_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_beta_direct_fit_points.csv",
+    "odf_direct_fit_metrics_json": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_beta_direct_fit_metrics.json",
     "odf_direct_fit_plot_png": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_beta_direct_fit.png",
     "odf_direct_fit_plot_pdf": "C:\\develop\\waveP\\output\\cassini\\cassini_odf_beta_direct_fit.pdf"
   },
   "counts": {
-    "n_observed_points": 193,
-    "n_matched_points": 193
+    "n_observed_points": 421841,
+    "n_matched_points": 421841
   },
   "labels": {
-    "obs_label": "観測（一次データ: PDS TDF（Ka+Xプラズマ補正、欠測は単独バンド（疑似残差+参照Shapiro復元））→ 平滑化＋デトレンド）"
+    "obs_label": "観測（一次データ: PDS ODF, raw Doppler）"
   }
 }

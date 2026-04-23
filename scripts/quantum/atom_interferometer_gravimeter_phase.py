@@ -2,13 +2,20 @@ from __future__ import annotations
 
 import json
 import math
+import os
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
 
 
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.figure_locale_paths import localize_figure_output_path
 
 enable_japanese_figure_localization()
 
@@ -92,10 +99,12 @@ def main() -> None:
     import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots(figsize=(10.8, 5.4), dpi=150)
-    panel_title_font = 14.8
-    axis_label_font = 13.6
-    tick_font = 12.4
-    legend_font = 11.8
+    figure_lang = str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower()
+    is_en = figure_lang.startswith("en")
+    panel_title_font = 14.8 * (0.72 if is_en else 1.0)
+    axis_label_font = 13.6 * (0.68 if is_en else 1.0)
+    tick_font = 12.4 * (0.70 if is_en else 1.0)
+    legend_font = 11.8 * (0.72 if is_en else 1.0)
     ax.plot(T_grid, phi_grid / (2.0 * math.pi), lw=2.0, label="k_eff g T² / 2π (cycles)")
     ax.axvline(cfg.T_s, color="#ff7f0e", ls="-.", lw=1.2, label=f"T={cfg.T_s*1e3:.0f} ms (example)")
     ax.set_xlabel("pulse separation T (s)", fontsize=axis_label_font)
@@ -105,12 +114,20 @@ def main() -> None:
     ax.legend(frameon=True, fontsize=legend_font, loc="upper left")
     ax.tick_params(axis="both", labelsize=tick_font)
 
-    fig.tight_layout()
+    if is_en:
+        fig.subplots_adjust(left=0.13, right=0.965, top=0.85, bottom=0.18)
+    else:
+        fig.tight_layout()
 
-    out_png = out_dir / "atom_interferometer_gravimeter_phase.png"
-    out_pdf = out_dir / "atom_interferometer_gravimeter_phase.pdf"
-    fig.savefig(out_png, bbox_inches="tight")
-    fig.savefig(out_pdf, bbox_inches="tight")
+    out_png = localize_figure_output_path(out_dir / "atom_interferometer_gravimeter_phase.png", root=root)
+    out_pdf = localize_figure_output_path(out_dir / "atom_interferometer_gravimeter_phase.pdf", root=root)
+    out_png.parent.mkdir(parents=True, exist_ok=True)
+    if is_en:
+        fig.savefig(out_png)
+        fig.savefig(out_pdf)
+    else:
+        fig.savefig(out_png, bbox_inches="tight")
+        fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
 
     beta_frozen = _try_load_beta_frozen(root)
@@ -217,7 +234,7 @@ def main() -> None:
             "This script focuses on the magnitude/scaling of the gravity-dependent phase term.",
         ],
     }
-    out_json = out_dir / "atom_interferometer_gravimeter_phase_metrics.json"
+    out_json = localize_figure_output_path(out_dir / "atom_interferometer_gravimeter_phase_metrics.json", root=root)
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(f"[ok] png : {out_png}")

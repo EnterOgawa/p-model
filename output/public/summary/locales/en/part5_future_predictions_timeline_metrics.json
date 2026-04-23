@@ -1,0 +1,80 @@
+{
+  "generated_utc": "2026-04-10T17:12:04.316368+00:00",
+  "figure_profile": {
+    "template": "part2_single_panel_tall",
+    "font_profile": "part5_future_predictions",
+    "figure_size_inches": {
+      "width": 6.6929,
+      "height": 7.55
+    }
+  },
+  "rows": [
+    {
+      "label": "Galaxy rotation curves\n(independent sample)",
+      "start": 2026.0,
+      "end": 2032.0,
+      "span": "2026-2032",
+      "score": "Pass"
+    },
+    {
+      "label": "Quantum-computing\ndecoherence\n(platform benchmarks)",
+      "start": 2026.0,
+      "end": 2032.0,
+      "span": "2026-2032",
+      "score": "Reference"
+    },
+    {
+      "label": "Gravitational-wave\npolarization\n(LIGO/Virgo/KAGRA)",
+      "start": 2027.0,
+      "end": 2030.0,
+      "span": "2027-2030",
+      "score": "Watch"
+    },
+    {
+      "label": "Distance-indicator\npremises\n(sirens / JWST)",
+      "start": 2027.0,
+      "end": 2030.0,
+      "span": "2027-2030",
+      "score": "Watch"
+    },
+    {
+      "label": "Weak-field\ngravity-quantum\n(atom IFs / clocks)",
+      "start": 2026.0,
+      "end": 2035.6,
+      "span": "2026-2035+",
+      "score": "Watch"
+    },
+    {
+      "label": "ln(1+z) term\n(DESI/Euclid/Roman)",
+      "start": 2027.0,
+      "end": 2035.0,
+      "span": "2027-2035",
+      "score": "Watch"
+    },
+    {
+      "label": "Black-hole shadows\n(ngEHT / BHEX)",
+      "start": 2030.0,
+      "end": 2031.0,
+      "span": "2030-2031",
+      "score": "Watch"
+    },
+    {
+      "label": "Macroscopic\ninterference\n(MAQRO / OTIMA)",
+      "start": 2035.0,
+      "end": 2037.2,
+      "span": "2035+",
+      "score": "Reference"
+    }
+  ],
+  "notes": [
+    "Part V future-predictions timeline figure (vector PDF canonical output).",
+    "The values are a reader-facing roadmap assembled from the frozen outputs of Part II, Part III-A, Part III-B, and Part IV.",
+    "Rebuilt from source with the shared fixed-template route."
+  ],
+  "canonical_public": true,
+  "outputs": {
+    "public_pdf": "output/public/summary/locales/en/part5_future_predictions_timeline.pdf",
+    "public_png": "output/public/summary/locales/en/part5_future_predictions_timeline.png",
+    "public_metrics": "output/public/summary/locales/en/part5_future_predictions_timeline_metrics.json"
+  }
+}

@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import math
 import os
+import shutil
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -22,11 +23,19 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
+from scripts.quantum.figure_japanese_localizer import get_figure_language
+from scripts.utils.figure_locale_paths import localize_figure_output_path
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size, install_wavep_font_profile
 
 enable_japanese_figure_localization()
 
+
+# 関数: `_t` の入出力契約と処理意図を定義する。
+def _t(ja: str, en: str, *, is_en: bool) -> str:
+    return en if is_en else ja
+
 # クラス: `Config` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class Config:
     # Constants
@@ -84,10 +93,16 @@ def required_sigma_y_for_visibility(*, vis: float, omega0_rad_s: float, t_s: np.
 
 def main() -> None:
     root = ROOT
-    out_dir = root / "output" / "public" / "quantum"
-    out_dir.mkdir(parents=True, exist_ok=True)
+    out_public_dir = root / "output" / "public" / "quantum"
+    out_private_dir = root / "output" / "private" / "quantum"
+    out_public_dir.mkdir(parents=True, exist_ok=True)
+    out_private_dir.mkdir(parents=True, exist_ok=True)
 
     cfg = Config()
+    lang = get_figure_language(default="ja")
+    is_en = lang == "en"
+    profile_name = "part3b_quantum_verification"
+    install_wavep_font_profile(profile_name=profile_name)
 
     omega_sr = 2.0 * math.pi * cfg.f_sr_hz
     omega_cs = 2.0 * math.pi * cfg.f_cs_hz
@@ -137,11 +152,11 @@ def main() -> None:
     apply_wavep_figure_layout(fig, template="part2_two_panel_spacious")
     fig.set_size_inches(fig.get_figwidth(), 5.95, forward=True)
     fig.subplots_adjust(left=0.145, right=0.985, top=0.915, bottom=0.105, hspace=0.44)
-    panel_title_font = get_wavep_font_size("title") * 0.88
-    axis_label_font = get_wavep_font_size("axis")
-    tick_font = get_wavep_font_size("tick")
-    legend_font = get_wavep_font_size("legend")
-    suptitle_font = get_wavep_font_size("suptitle") + 2.0
+    panel_title_font = get_wavep_font_size("title", name=profile_name) * 0.88
+    axis_label_font = get_wavep_font_size("axis", name=profile_name)
+    tick_font = get_wavep_font_size("tick", name=profile_name)
+    legend_font = get_wavep_font_size("legend", name=profile_name)
+    suptitle_font = get_wavep_font_size("suptitle", name=profile_name) + 1.6
 
     ax = axes[0]
     for c in curves:
@@ -157,10 +172,13 @@ def main() -> None:
 
     ax.set_xscale("log")
     ax.set_ylim(-0.02, 1.02)
-    ax.set_xlabel("観測時間 T (s)", fontsize=axis_label_font)
-    ax.set_ylabel("可視度 V（Ramsey コントラスト；モデル）", fontsize=axis_label_font)
+    ax.set_xlabel(_t("観測時間 T (s)", "interrogation time T (s)", is_en=is_en), fontsize=axis_label_font)
+    ax.set_ylabel(
+        _t("可視度 V（Ramsey コントラスト；モデル）", "visibility V (Ramsey contrast; model)", is_en=is_en),
+        fontsize=axis_label_font,
+    )
     ax.set_title(
-        "重力誘起位相緩和（光格子時計 ensemble；Gaussian 高さ分布）",
+        _t("重力誘起位相緩和（光格子時計 ensemble；Gaussian 高さ分布）", "gravity-induced dephasing (optical clock ensemble; Gaussian height distribution)", is_en=is_en),
         fontsize=panel_title_font,
         pad=5.0,
     )
@@ -178,10 +196,10 @@ def main() -> None:
 
     ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.set_xlabel("観測時間 T (s)", fontsize=axis_label_font)
-    ax.set_ylabel("必要な σ_y（RMS相対周波数雑音）", fontsize=axis_label_font)
+    ax.set_xlabel(_t("観測時間 T (s)", "interrogation time T (s)", is_en=is_en), fontsize=axis_label_font)
+    ax.set_ylabel(_t("必要な σ_y（RMS相対周波数雑音）", "required σ_y (RMS fractional frequency noise)", is_en=is_en), fontsize=axis_label_font)
     ax.set_title(
-        "P-model 時間構造：decoherence を模擬する σ_y",
+        _t("P-model 時間構造：decoherence を模擬する σ_y", "P-model time structure: σ_y that mimics decoherence", is_en=is_en),
         fontsize=panel_title_font,
         pad=5.0,
     )
@@ -189,10 +207,15 @@ def main() -> None:
     ax.legend(fontsize=legend_font, frameon=True, loc="upper right")
     ax.tick_params(axis="both", labelsize=tick_font)
 
-    fig.suptitle("重力誘起デコヒーレンス：観測量とノイズ予算", y=0.992, fontsize=suptitle_font)
+    fig.suptitle(_t("重力誘起デコヒーレンス：観測量とノイズ予算", "gravity-induced decoherence: observed quantity and noise budget", is_en=is_en), y=0.992, fontsize=suptitle_font)
 
-    out_png = out_dir / "gravity_induced_decoherence.png"
-    out_pdf = out_dir / "gravity_induced_decoherence.pdf"
+    out_png = localize_figure_output_path(out_public_dir / "gravity_induced_decoherence.png", root=root)
+    out_pdf = localize_figure_output_path(out_public_dir / "gravity_induced_decoherence.pdf", root=root)
+    out_png_private = localize_figure_output_path(out_private_dir / "gravity_induced_decoherence.png", root=root)
+    out_pdf_private = localize_figure_output_path(out_private_dir / "gravity_induced_decoherence.pdf", root=root)
+    for path in (out_png, out_pdf, out_png_private, out_pdf_private):
+        path.parent.mkdir(parents=True, exist_ok=True)
+
     prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
     os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
     try:
@@ -206,6 +229,8 @@ def main() -> None:
             os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = prev_disable_normalize
 
     plt.close(fig)
+    shutil.copy2(out_png, out_png_private)
+    shutil.copy2(out_pdf, out_pdf_private)
 
     metrics = {
         "generated_utc": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
@@ -272,8 +297,12 @@ def main() -> None:
             "The σ_y model is a minimal parametrization of extra time-structure noise (P-model-specific); real experiments may have correlated noise between arms.",
         ],
     }
-    out_json = out_dir / "gravity_induced_decoherence_metrics.json"
+    out_json = localize_figure_output_path(out_public_dir / "gravity_induced_decoherence_metrics.json", root=root)
+    out_json_private = localize_figure_output_path(out_private_dir / "gravity_induced_decoherence_metrics.json", root=root)
+    out_json.parent.mkdir(parents=True, exist_ok=True)
+    out_json_private.parent.mkdir(parents=True, exist_ok=True)
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
+    shutil.copy2(out_json, out_json_private)
 
     print(f"[ok] png : {out_png}")
     print(f"[ok] pdf : {out_pdf}")

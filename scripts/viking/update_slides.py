@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from pptx import Presentation
 from pptx.util import Inches
+import shutil
 import sys
 from pathlib import Path
 
@@ -38,6 +39,15 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from scripts.quantum.figure_japanese_localizer import get_figure_language
+from scripts.utils.figure_locale_paths import localize_figure_output_path
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
+
+
+# 関数: `_plot_text` の入出力契約と処理意図を定義する。
+def _plot_text(ja: str, en: str, *, lang: str) -> str:
+    return ja if lang == "ja" else en
+
 from scripts.summary import worklog  # noqa: E402
 
 OUT_DIR = ROOT / "output" / "private" / "viking"
@@ -51,7 +61,18 @@ INPUT_CSV = OUT_DIR / 'viking_shapiro_result.csv'
 IMG_FILENAME = OUT_DIR / 'viking_p_model_vs_measured_no_arrow.png'
 PDF_FILENAME = OUT_DIR / 'viking_p_model_vs_measured_no_arrow.pdf'
 
+
+# 関数: `_resolve_plot_output_paths` の入出力契約と処理意図を定義する。
+def _resolve_plot_output_paths(lang: str) -> tuple[Path, Path, Path, Path]:
+    private_png = localize_figure_output_path(IMG_FILENAME, root=ROOT, locale=lang)
+    private_pdf = localize_figure_output_path(PDF_FILENAME, root=ROOT, locale=lang)
+    public_dir = ROOT / "output" / "public" / "viking"
+    public_png = localize_figure_output_path(public_dir / IMG_FILENAME.name, root=ROOT, locale=lang)
+    public_pdf = localize_figure_output_path(public_dir / PDF_FILENAME.name, root=ROOT, locale=lang)
+    return private_png, private_pdf, public_png, public_pdf
+
 # 関数: `create_viking_plot` の入出力契約と処理意図を定義する。
+
 def create_viking_plot():
     """CSVからバイキングの検証グラフ（矢印なし）を生成する"""
     # 条件分岐: `not INPUT_CSV.exists()` を満たす経路を評価する。
@@ -62,10 +83,27 @@ def create_viking_plot():
     df = pd.read_csv(INPUT_CSV)
     df['time_utc'] = pd.to_datetime(df['time_utc'])
 
-    _set_japanese_font()
-    fig, ax = plt.subplots(figsize=(13.6, 8.2), dpi=200)
+    figure_lang = get_figure_language(default="ja")
+    if figure_lang == "ja":
+        _set_japanese_font()
+
+    plot_png, plot_pdf, public_png, public_pdf = _resolve_plot_output_paths(figure_lang)
+    plot_png.parent.mkdir(parents=True, exist_ok=True)
+    plot_pdf.parent.mkdir(parents=True, exist_ok=True)
+    public_png.parent.mkdir(parents=True, exist_ok=True)
+    public_pdf.parent.mkdir(parents=True, exist_ok=True)
+
+    title_fs = get_wavep_font_size("title", name="part2_astrophysics") * (0.96 if figure_lang == "en" else 1.0)
+    label_fs = get_wavep_font_size("axis", name="part2_astrophysics") * (0.98 if figure_lang == "en" else 1.0)
+    tick_fs = get_wavep_font_size("tick", name="part2_astrophysics")
+    legend_fs = get_wavep_font_size("legend", name="part2_astrophysics")
+    marker_size = 108 if figure_lang == "ja" else 96
+
+    fig, ax = plt.subplots(dpi=200)
+    apply_wavep_figure_layout(fig, template="part2_single_panel_tall")
+    fig.subplots_adjust(top=0.86, bottom=0.19, left=0.12, right=0.98)
     # P-model理論値（青線）
-    ax.plot(df['time_utc'], df['shapiro_delay_us'], label='P-model シミュレーション', color='blue', linewidth=2.4)
+    ax.plot(df['time_utc'], df['shapiro_delay_us'], label=_plot_text('P-model シミュレーション', 'P-model simulation', lang=figure_lang), color='blue', linewidth=2.4)
     
     # 実測値（赤点）
     measured_peak_date = pd.Timestamp('1976-11-25')
@@ -74,29 +112,30 @@ def create_viking_plot():
         [measured_peak_date],
         [measured_peak_value],
         color='red',
-        s=132,
-        label='文献代表値（約250マイクロ秒）',
+        s=marker_size,
+        label=_plot_text('文献代表値（約250マイクロ秒）', 'Reference value (~250 microseconds)', lang=figure_lang),
         zorder=5,
     )
 
-    ax.set_title('バイキング 太陽合（1976）: P-model シミュレーション vs 文献代表値', fontsize=18.8)
-    ax.set_xlabel('日付', fontsize=15.6)
-    ax.set_ylabel('往復遅延時間 [マイクロ秒]', fontsize=15.6)
+    ax.set_title(_plot_text('バイキング 太陽合（1976）: P-model シミュレーション vs 文献代表値', 'Viking solar conjunction (1976):\nP-model simulation vs reference value', lang=figure_lang), fontsize=title_fs)
+    ax.set_xlabel(_plot_text('日付', 'Date', lang=figure_lang), fontsize=label_fs)
+    ax.set_ylabel(_plot_text('往復遅延時間 [マイクロ秒]', 'Round-trip delay [microseconds]', lang=figure_lang), fontsize=label_fs)
     ax.grid(True, linestyle='--', linewidth=0.5, alpha=0.6)
-    ax.tick_params(axis='both', labelsize=14.4)
-    ax.legend(loc="upper right", fontsize=14.0, frameon=True)
+    ax.tick_params(axis='both', labelsize=tick_fs)
+    ax.legend(loc="upper right", fontsize=legend_fs, frameon=True)
     
     # 日付フォーマット
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
     fig.autofmt_xdate()
     
-    fig.tight_layout()
-    fig.savefig(IMG_FILENAME, dpi=220, bbox_inches="tight")
-    fig.savefig(PDF_FILENAME, bbox_inches="tight")
+    fig.savefig(plot_png, dpi=220)
+    fig.savefig(plot_pdf)
     plt.close(fig)
-    print(f"Graph generated: {IMG_FILENAME}")
-    print(f"Graph generated: {PDF_FILENAME}")
-    return IMG_FILENAME
+    shutil.copy2(plot_png, public_png)
+    shutil.copy2(plot_pdf, public_pdf)
+    print(f"Graph generated: {plot_png}")
+    print(f"Graph generated: {plot_pdf}")
+    return plot_png
 
 # 関数: `add_slide_safe` の入出力契約と処理意図を定義する。
 
@@ -140,6 +179,8 @@ def add_slide_safe(prs, title_text, body_text):
 # 関数: `main` の入出力契約と処理意図を定義する。
 
 def main():
+    figure_lang = get_figure_language(default="ja")
+    plot_png, plot_pdf, _, _ = _resolve_plot_output_paths(figure_lang)
     # 1. グラフ画像の生成
     img_path = create_viking_plot()
 
@@ -226,8 +267,8 @@ def main():
                 "event_type": "viking_update_slides",
                 "argv": sys.argv,
                 "outputs": {
-                    "viking_png": IMG_FILENAME if IMG_FILENAME.exists() else None,
-                    "viking_pdf": PDF_FILENAME if PDF_FILENAME.exists() else None,
+                    "viking_png": plot_png if plot_png.exists() else None,
+                    "viking_pdf": plot_pdf if plot_pdf.exists() else None,
                     "verification_pptx": OUTPUT_PPTX if OUTPUT_PPTX.exists() else None,
                 },
             }

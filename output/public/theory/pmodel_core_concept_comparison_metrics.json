@@ -1,16 +1,29 @@
 {
-  "generated_utc": "2026-02-11T10:04:19.434238+00:00",
+  "generated_utc": "2026-04-12T05:28:30.008724+00:00",
+  "locale": "ja",
   "script": "scripts/theory/pmodel_core_concept_comparison.py",
   "outputs": {
-    "png": "C:\\develop\\waveP\\output\\theory\\pmodel_core_concept_comparison.png",
-    "metrics_json": "C:\\develop\\waveP\\output\\theory\\pmodel_core_concept_comparison_metrics.json"
+    "png_private": "C:/develop/waveP/output/private/theory/pmodel_core_concept_comparison.png",
+    "png_public": "C:/develop/waveP/output/public/theory/pmodel_core_concept_comparison.png",
+    "pdf_private": "C:/develop/waveP/output/private/theory/pmodel_core_concept_comparison.pdf",
+    "pdf_public": "C:/develop/waveP/output/public/theory/pmodel_core_concept_comparison.pdf",
+    "json_private": "C:/develop/waveP/output/private/theory/pmodel_core_concept_comparison_metrics.json",
+    "json_public": "C:/develop/waveP/output/public/theory/pmodel_core_concept_comparison_metrics.json",
+    "png_canon": "C:/develop/waveP/output/theory/pmodel_core_concept_comparison.png",
+    "pdf_canon": "C:/develop/waveP/output/theory/pmodel_core_concept_comparison.pdf",
+    "json_canon": "C:/develop/waveP/output/theory/pmodel_core_concept_comparison_metrics.json"
   },
-  "figure_index_path": "output/theory/pmodel_core_concept_comparison.png",
   "diag": {
-    "font_family": "Yu Gothic"
+    "locale": "ja",
+    "columns": [
+      "観点",
+      "参照枠（GR）",
+      "P-model"
+    ],
+    "n_rows": 5
   },
   "notes": [
-    "This is a conceptual comparison diagram (not a numerical result).",
-    "GR is used as a reference frame only; the Part I text defines the mapping on the P-model side."
+    "This is a conceptual comparison diagram rather than a numerical fit.",
+    "The English locale is emitted under output/public/theory/locales/en and output/private/theory/locales/en."
   ]
 }

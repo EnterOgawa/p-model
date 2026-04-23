@@ -18,6 +18,7 @@ import zipfile
 import zlib
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Final
 
 import numpy as np
 
@@ -27,8 +28,19 @@ if str(ROOT) not in sys.path:
 
 from figure_japanese_localizer import enable_japanese_figure_localization
 from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
+from scripts.quantum.figure_japanese_localizer import get_figure_language
+from scripts.utils.figure_locale_paths import localize_figure_output_path
+from scripts.utils.plot_style import install_wavep_font_profile
 
 enable_japanese_figure_localization()
+
+
+_PROFILE_NAME: Final[str] = "part3b_quantum_verification"
+
+
+# 関数: `_t` の入出力契約と処理意図を定義する。
+def _t(ja: str, en: str, *, lang: str) -> str:
+    return en if lang == "en" else ja
 
 
 _REC_DTYPE = np.dtype([("ch", "u1"), ("t", "<u8"), ("sec", "<u2")], align=False)  # 11 bytes/rec
@@ -830,6 +842,8 @@ def main() -> None:
     args = parser.parse_args()
 
     root = Path(__file__).resolve().parents[2]
+    lang = get_figure_language(default="ja")
+    install_wavep_font_profile(profile_name=_PROFILE_NAME)
     src_dir = root / "data" / "quantum" / "sources" / "nist_belltestdata"
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -839,7 +853,7 @@ def main() -> None:
     # 関数: `_tag` の入出力契約と処理意図を定義する。
     def _tag(name: str, *, ext: str) -> Path:
         stem = name if not args.out_tag else f"{name}__{args.out_tag}"
-        return out_dir / f"{stem}.{ext}"
+        return localize_figure_output_path(out_dir / f"{stem}.{ext}", root=root)
 
     alice_zip = args.alice_zip or (
         src_dir
@@ -919,11 +933,11 @@ def main() -> None:
     apply_wavep_figure_layout(fig, template="part2_three_panel_quantum_spacious")
     fig.set_size_inches(fig.get_figwidth(), 6.35, forward=True)
     fig.subplots_adjust(left=0.145, right=0.985, top=0.915, bottom=0.105)
-    panel_title_font = get_wavep_font_size("title") * 0.88
-    axis_label_font = get_wavep_font_size("axis")
+    panel_title_font = get_wavep_font_size("title") * (0.76 if lang == "en" else 1.0)
+    axis_label_font = get_wavep_font_size("axis") * (0.78 if lang == "en" else 1.0)
     tick_font = get_wavep_font_size("tick")
-    legend_font = get_wavep_font_size("legend")
-    suptitle_font = get_wavep_font_size("suptitle") + 2.0
+    legend_font = get_wavep_font_size("legend") * (0.74 if lang == "en" else 1.0)
+    suptitle_font = get_wavep_font_size("suptitle") * (0.78 if lang == "en" else 1.0)
     gs = fig.add_gridspec(2, 2, height_ratios=[0.96, 1.05], wspace=0.28, hspace=0.42)
 
     # 関数: `_delay_panel` の入出力契約と処理意図を定義する。
@@ -932,7 +946,7 @@ def main() -> None:
         allv = np.concatenate([d0, d1]) if d0.size and d1.size else (d0 if d0.size else d1)
         # 条件分岐: `allv.size == 0` を満たす経路を評価する。
         if allv.size == 0:
-            ax.set_title(title + "（データなし）", fontsize=panel_title_font, pad=7.5)
+            ax.set_title(title + _t("（データなし）", " (no data)", lang=lang), fontsize=panel_title_font, pad=7.5)
             return
 
         hi = float(np.percentile(allv, 99.5))
@@ -941,17 +955,17 @@ def main() -> None:
         ax.hist(d0, bins=bins, alpha=0.55, label="setting=0", color="#1f77b4")
         ax.hist(d1, bins=bins, alpha=0.55, label="setting=1", color="#ff7f0e")
         ax.set_title(title, fontsize=panel_title_font, pad=7.5)
-        ax.set_xlabel("sync からの click delay (ns)", fontsize=axis_label_font)
-        ax.set_ylabel("件数", fontsize=axis_label_font)
+        ax.set_xlabel(_t("sync からの click delay (ns)", "click delay from sync (ns)", lang=lang), fontsize=axis_label_font)
+        ax.set_ylabel(_t("件数", "count", lang=lang), fontsize=axis_label_font)
         ax.grid(True, ls=":", lw=0.6, alpha=0.6)
         ax.legend(frameon=True, fontsize=legend_font, loc="upper right")
         ax.tick_params(axis="both", labelsize=tick_font)
 
     ax0 = fig.add_subplot(gs[0, 0])
-    _delay_panel(ax0, "Alice：click delay と setting", a0, a1)
+    _delay_panel(ax0, _t("Alice：click delay と setting", "Alice: delay vs setting", lang=lang), a0, a1)
 
     ax1 = fig.add_subplot(gs[0, 1])
-    _delay_panel(ax1, "Bob：click delay と setting", b0, b1)
+    _delay_panel(ax1, _t("Bob：click delay と setting", "Bob: delay vs setting", lang=lang), b0, b1)
 
     ax2 = fig.add_subplot(gs[1, :])
     w = np.asarray(cfg.windows_ns, dtype=float)
@@ -961,14 +975,22 @@ def main() -> None:
     ax2.plot(w, counts[:, 1, 0], marker="o", lw=1.2, label="c10")
     ax2.plot(w, counts[:, 1, 1], marker="o", lw=1.2, label="c11")
     ax2.set_xscale("log")
-    ax2.set_xlabel("coincidence 窓幅 (ns)", fontsize=axis_label_font)
-    ax2.set_ylabel("greedy pair 数", fontsize=axis_label_font)
-    ax2.set_title("窓幅依存（GPS PPS 整列）", fontsize=panel_title_font, pad=7.5)
+    ax2.set_xlabel(_t("coincidence 窓幅 (ns)", "coincidence window (ns)", lang=lang), fontsize=axis_label_font)
+    ax2.set_ylabel(_t("greedy pair 数", "greedy pair count", lang=lang), fontsize=axis_label_font)
+    ax2.set_title(_t("窓幅依存（GPS PPS 整列）", "window dependence (GPS PPS alignment)", lang=lang), fontsize=panel_title_font, pad=7.5)
     ax2.grid(True, which="both", ls=":", lw=0.6, alpha=0.6)
     ax2.legend(frameon=True, fontsize=legend_font, ncol=2)
     ax2.tick_params(axis="both", labelsize=tick_font)
 
-    fig.suptitle("NIST Bell test（time-tag）：setting 依存遅延と coincidence 窓感度", y=0.992, fontsize=suptitle_font)
+    fig.suptitle(
+        _t(
+            "NIST Bell test（time-tag）：setting 依存遅延と coincidence 窓感度",
+            "NIST Bell test (time-tag): delay vs setting and window sensitivity",
+            lang=lang,
+        ),
+        y=0.988,
+        fontsize=suptitle_font,
+    )
 
     out_png = _tag("nist_belltest_time_tag_bias", ext="png")
     out_pdf = _tag("nist_belltest_time_tag_bias", ext="pdf")

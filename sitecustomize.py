@@ -9,6 +9,7 @@ sitecustomize.py
 - `WAVEP_MPL_CJK_FONT_PATH`: 図用 font file path の明示 override
 - `WAVEP_MPL_LEGEND_NOTE_MIN_FONT`: 凡例・注記の後方互換 floor
 - `WAVEP_MPL_TEXT_MIN_FONT`: 文字全体の後方互換 floor
+- `WAVEP_FIGURE_LANG`: 図中テキストの表示言語（ja/en）
 """
 
 from __future__ import annotations
@@ -23,6 +24,7 @@ _PMODEL_TEXTWIDTH_MM = 170.0
 _PMODEL_MM_PER_INCH = 25.4
 _PMODEL_TEXTWIDTH_IN = _PMODEL_TEXTWIDTH_MM / _PMODEL_MM_PER_INCH
 _WAVEP_PART2_CANVAS_HEIGHT_SENTINEL_IN = 10_000.0
+_JAPANESE_CHAR_RE = re.compile(r"[ぁ-ゖァ-ヺ一-龯々〆〤]")
 
 
 # 関数: `_apply_wavep_font_profile_if_enabled` の入出力契約と処理意図を定義する。
@@ -166,6 +168,7 @@ _apply_wavep_font_floor_if_enabled()
 
 
 _GLOBAL_TEXT_FLOOR_PATCHED = False
+_WAVEP_COPY2_PATCHED = False
 
 
 # 関数: `_coerce_fontsize_number` の入出力契約と処理意図を定義する。
@@ -239,6 +242,419 @@ _apply_wavep_global_text_floor_if_enabled()
 
 _VECTOR_PDF_AUTOSAVE_PATCHED = False
 _VECTOR_PDF_AUTOSAVE_IN_PROGRESS = False
+
+
+# 関数: `_translate_wavep_text_to_english` の入出力契約と処理意図を定義する。
+def _translate_wavep_text_to_english(text: str, *, stem: str | None = None) -> str:
+    """
+    非 ja locale の図で、日本語ラベルを英語中心へ戻す。
+
+    方針:
+    - 数式は触らない。
+    - Part II の reader-facing 図で頻出する phrase を優先して変換する。
+    - 完全翻訳ではなく、論文図として読める英語へ寄せる。
+    """
+    if not text:
+        return text
+
+    stripped = text.strip()
+    if stripped.startswith("$") and stripped.endswith("$"):
+        return text
+
+    if not _JAPANESE_CHAR_RE.search(text):
+        return text
+
+    out = text
+    phrase_map: list[tuple[str, str]] = [
+        ("検証スコアボード", "Validation scoreboard"),
+        ("検証サマリ表", "verification summary table"),
+        ("月レーザー測距（LLR: Lunar Laser Ranging）", "Lunar Laser Ranging (LLR)"),
+        ("月レーザー測距", "Lunar Laser Ranging"),
+        ("観測 TOF（平均除去）", "Observed TOF (mean removed)"),
+        ("月中心モデル", "Moon-center model"),
+        ("反射器モデル", "Reflector model"),
+        ("定数オフセット整列後の残差", "Residual after constant-offset alignment"),
+        ("定数オフセット整列", "constant-offset aligned"),
+        ("平均除去", "mean removed"),
+        ("太陽Shapiro含む", "including solar Shapiro"),
+        ("往復TOF偏差 [ns]", "Round-trip TOF deviation [ns]"),
+        ("UTC時刻", "UTC time"),
+        ("観測 vs モデル", "Observed vs model"),
+        ("残差（観測 - モデル）[ns]", "Residual (observed - model) [ns]"),
+        ("残差 [ns]（定数オフセット整列後）", "Residual [ns] (after constant-offset alignment)"),
+        ("モデル改善（地球中心 → 観測局 → 反射器）", "Model improvement (geocenter → station → reflector)"),
+        ("地球中心→月中心", "Geocenter → moon center"),
+        ("観測局→月中心", "Station → moon center"),
+        ("観測局→反射器", "Station → reflector"),
+        ("重み付き RMSE [ps]", "Weighted RMSE [ps]"),
+        ("重み付き RMSE", "Weighted RMSE"),
+        ("観測（PDS TDF 処理後）", "Observed (processed PDS TDF)"),
+        ("観測（リング直径 θ_ring）", "Observed (ring diameter θ_ring)"),
+        ("参考（推定影直径 d_sh；リングからの推定）", "Reference (estimated shadow diameter d_sh; inferred from ring)"),
+        ("角直径 [µas]", "Angular diameter [µas]"),
+        ("差（P-model − GR）[μas]", "Difference (P-model − GR) [μas]"),
+        ("必要な観測誤差（1σ）[μas]", "Required observational error (1σ) [μas]"),
+        ("3σで判別するための必要精度", "Required precision for 3σ discrimination"),
+        ("係数の比較（βとスピン依存）", "Coefficient comparison (β and spin dependence)"),
+        ("リング≒シャドウ近似の系統誤差（κ）", "Systematic uncertainty of the ring≈shadow approximation (κ)"),
+        ("リングの幅（fractional width）", "Ring width (fractional width)"),
+        ("リングの非対称性（brightness asymmetry）", "Ring asymmetry (brightness asymmetry)"),
+        ("直径スケール：観測リングと散乱blur（参考）", "Diameter scale: observed ring and scattering blur (reference)"),
+        ("形状スケール：リング幅（W/d→µas）と散乱blur（参考）", "Shape scale: ring width (W/d→µas) and scattering blur (reference)"),
+        ("EHT：屈折散乱のゆらぎスケール（κ系統の一要因）と必要精度（参考）", "EHT: refractive-scattering fluctuation scales and required precision (reference)"),
+        ("EHT：観測とモデルのずれ（zスコア, κ=1）", "EHT: observed-model offsets (z score, κ=1)"),
+        ("EHT：κ（リング/シャドウ）— κ_fit（モデル）と κ_ref(d_sh)", "EHT: κ (ring/shadow) — κ_fit (model) and κ_ref(d_sh)"),
+        ("EHT：κ（リング/シャドウ変換）を何%まで詰める必要があるか（3σ判別の入口）", "EHT: required κ precision (ring/shadow conversion) for 3σ discrimination"),
+        ("EHT：δ（Schwarzschild shadow deviation）の必要精度（参考; δはモデル依存）", "EHT: required precision for δ (Schwarzschild shadow deviation; reference)"),
+        ("GPS 時計残差: G01（観測 IGS に対する比較）", "GPS clock residuals: G01 (comparison against observed IGS)"),
+        ("残差 [ns]（バイアス＋ドリフト除去後）", "Residual [ns] (after bias+drift removal)"),
+        ("GPS: 観測 IGS に対する残差 RMS（全衛星）", "GPS: residual RMS against observed IGS (all satellites)"),
+        ("RMS [ns]（バイアス＋ドリフト除去後）", "RMS [ns] (after bias+drift removal)"),
+        ("衛星PRN", "Satellite PRN"),
+        ("GPS: 相対補正（近日点効果）", "GPS: relativistic correction (perigee effect)"),
+        ("時間補正 [ns]（バイアス＋ドリフト除去後）", "Time correction [ns] (after bias+drift removal)"),
+        ("放送暦（BRDC）- IGS", "Broadcast ephemeris (BRDC) - IGS"),
+        ("P-model（dt_rel除去）- IGS", "P-model (with dt_rel removed) - IGS"),
+        ("標準式 δt_rel（-2 r·v / c^2）", "Standard formula δt_rel (-2 r·v / c^2)"),
+        ("太陽光偏向", "Solar light deflection"),
+        ("重力赤方偏移", "Gravitational redshift"),
+        ("連星パルサー", "Binary pulsar"),
+        ("軌道減衰", "Orbital decay"),
+        ("重力波（GW150914 等）", "Gravitational waves (GW150914 etc.)"),
+        ("重力波偏光モード（H1/L1/V1）", "GW polarization modes (H1/L1/V1)"),
+        ("ブラックホール影", "Black-hole shadow"),
+        ("銀河回転曲線（SPARC）", "Galaxy rotation curves (SPARC)"),
+        ("XRISM（公開一次データ）", "XRISM (public primary data)"),
+        ("背景計量（caseB: 有効計量）", "Background metric (case B: effective metric)"),
+        ("背景計量（caseA: 平坦背景）", "Background metric (case A: flat background)"),
+        ("純スカラー極限（回転なし）", "Pure-scalar limit (no rotation)"),
+        ("速度飽和 δ（理論）", "Velocity saturation δ (theory)"),
+        ("回転（フレームドラッグ）", "Rotation (frame dragging)"),
+        ("観測", "Observed"),
+        ("予測", "Predicted"),
+        ("参照", "Reference"),
+        ("理論", "Theory"),
+        ("比較", "Comparison"),
+        ("残差分布", "Residual distribution"),
+        ("残差", "Residual"),
+        ("分布", "Distribution"),
+        ("要約", "Summary"),
+        ("監査", "Audit"),
+        ("感度", "Sensitivity"),
+        ("精度", "Precision"),
+        ("必要", "Required"),
+        ("誤差", "Error"),
+        ("相対不確かさ", "Relative uncertainty"),
+        ("角スケール", "Angular scale"),
+        ("ターゲット", "Target"),
+        ("相対補正", "Relativistic correction"),
+        ("観測リング直径の統計誤差 σ_obs", "Statistical error σ_obs of the observed ring diameter"),
+        ("3σ判別に必要なσ_obs（理想）", "Required σ_obs for 3σ discrimination (ideal)"),
+        ("散乱カーネル係数の不確かさ（1σ, 長軸/短軸）", "Scattering-kernel coefficient uncertainty (1σ, major/minor axes)"),
+        ("屈折散乱 wander（min–max, Zhu 2018; 230 GHz）", "Refractive-scattering wander (min–max, Zhu 2018; 230 GHz)"),
+        ("屈折散乱 distortion（min–max, Zhu 2018; 230 GHz）", "Refractive-scattering distortion (min–max, Zhu 2018; 230 GHz)"),
+        ("屈折散乱 asymmetry（min–max, Zhu 2018; 230 GHz）", "Refractive-scattering asymmetry (min–max, Zhu 2018; 230 GHz)"),
+        ("相対不確かさ（%）", "Relative uncertainty (%)"),
+        ("観測リングと散乱blur", "observed ring and scattering blur"),
+        ("散乱blur", "scattering blur"),
+        ("リング直径の相対誤差（1σ, %）", "Relative ring-diameter error (1σ, %)"),
+        ("許容 κ の相対誤差（1σ, %）", "Allowed relative κ error (1σ, %)"),
+        ("現状 ring σ/diameter", "Current ring σ/diameter"),
+        ("参考: Kerr κ系統（constrained）", "Reference: Kerr κ systematics (constrained)"),
+        ("参考: Kerr κ系統（full）", "Reference: Kerr κ systematics (full)"),
+        ("光偏向（太陽）", "Light deflection (Sun)"),
+        ("GPS（衛星時計）", "GPS (satellite clocks)"),
+        ("Cassini（太陽会合）", "Cassini (solar conjunction)"),
+        ("Viking（太陽会合）", "Viking (solar conjunction)"),
+        ("Mercury（近日点移動）", "Mercury (perihelion precession)"),
+        ("GP-A / Galileo（重力赤方偏移）", "GP-A / Galileo (gravitational redshift)"),
+    ]
+
+    phrase_map.extend(
+        [
+            ("正規化スコア（0=理想, 1=OK境界, 2=要改善境界）", "Normalized score (0=ideal, 1=pass boundary, 2=improvement boundary)"),
+            ("宇宙論（距離二重性）", "Cosmology (distance duality)"),
+            ("宇宙論（銀河団衝突オフセット）", "Cosmology (cluster-collision offset)"),
+            ("宇宙論（Pantheon+", "Cosmology (Pantheon+"),
+            ("Hubble図）", "Hubble diagram)"),
+            ("強場（高次項同時拘束）", "Strong field (simultaneous higher-order constraints)"),
+            ("太陽会合", "solar conjunction"),
+            ("ブラックホール影", "black-hole shadow"),
+            ("連星パルサー", "binary pulsar"),
+            ("時刻", "Time"),
+            ("往復TOF偏差", "Round-trip TOF deviation"),
+            ("観測 IGS に対する比較", "comparison against observed IGS"),
+            ("時計Residual", "Clock residual"),
+            ("時計残差", "Clock residual"),
+            ("Observedのずれ", "observed deviation"),
+            ("一次ソース", "primary source"),
+            ("公表値", "published value"),
+            ("インパクトパラメータ", "Impact parameter"),
+            ("偏向角", "Deflection angle"),
+            ("太陽重力による光の偏向(弱場)", "Light deflection by solar gravity (weak field)"),
+            ("代表: VLBI", "Representative: VLBI"),
+            ("光偏向パラメータ", "Light-deflection parameter"),
+            ("値", "value"),
+            ("シミュレーション", "simulation"),
+            ("文献代表値", "literature reference"),
+            ("マイクロ秒", "microseconds"),
+            ("バイキング 太陽合", "Viking solar conjunction"),
+            ("リングと, 影直径", "ring and shadow diameter"),
+            ("モデル；", "model; "),
+            ("リング", "ring"),
+            ("影直径", "shadow diameter"),
+            ("標準Theory", "Standard theory"),
+            ("多時期", "multi-epoch"),
+            ("整合", "consistency"),
+            ("リング直径", "ring diameter"),
+            ("シャドウ直径", "shadow diameter"),
+            ("目安", "guide"),
+            ("系統誤差", "systematic error"),
+            ("参考レンジ", "reference range"),
+            ("係数レンジ", "coefficient range"),
+            ("目標", "target"),
+            ("線重心からの", "from line centroids"),
+            ("銀河団", "cluster"),
+            ("X線", "X-ray"),
+            ("内縁半径拘束", "inner-edge radius constraint"),
+            ("全点", "All points"),
+            ("適合度", "Goodness of fit"),
+            ("単一", "single"),
+            ("周波数トラック", "Frequency track"),
+            ("除外点", "Excluded points"),
+            ("抽出", "Extracted"),
+            ("直線化", "Linearized"),
+            ("採用点", "Retained points"),
+            ("一致度", "Agreement"),
+            ("複数イベント", "multi-event"),
+            ("外れ値ID", "Outlier ID"),
+            ("外れ値の", "Outlier"),
+            ("閾値", "threshold"),
+            ("混入判定", "mixing criterion"),
+            ("現在Target", "Current target"),
+            ("推定Target", "Estimated target"),
+            ("感度", "sensitivity"),
+            ("複数イベント):", "multi-event):"),
+            ("複数イベント", "multiple events"),
+            ("速度飽和", "velocity saturation"),
+            ("反証条件パック", "falsification pack"),
+            ("判別", "discrimination"),
+            ("必要精度", "required precision"),
+            ("現在の精度", "current precision"),
+            ("将来の精度", "future precision"),
+            ("銀河回転曲線", "galaxy rotation curves"),
+            ("観測配置", "observational configuration"),
+            ("後付け調整", "post-hoc fitting"),
+            ("比較基準", "comparison baseline"),
+            ("比較", "comparison"),
+            ("図", "diagram"),
+        ]
+    )
+
+    for src, dst in phrase_map:
+        out = out.replace(src, dst)
+
+    generic_word_map: list[tuple[str, str]] = [
+        ("局あり", "with station"),
+        ("局+月回転", "station + lunar rotation"),
+        ("月回転", "lunar rotation"),
+        ("モデル", "model"),
+        ("公開一次データ", "public primary data"),
+        ("有効計量", "effective metric"),
+        ("平坦背景", "flat background"),
+        ("背景計量", "background metric"),
+        ("純スカラー極限", "pure-scalar limit"),
+        ("回転なし", "no rotation"),
+        ("横断-チャネル", "cross-channel"),
+        ("初期熱史", "early thermal history"),
+        ("構造形成", "structure formation"),
+        ("音響ピーク", "acoustic peaks"),
+        ("衛星時計", "satellite clocks"),
+        ("フレームドラッグ", "frame dragging"),
+        ("太陽会合", "solar conjunction"),
+        ("銀河回転曲線", "galaxy rotation curves"),
+        ("銀河団衝突オフセット", "cluster-collision offset"),
+        ("距離二重性", "distance duality"),
+        ("高次項同時拘束", "simultaneous higher-order constraints"),
+        ("回転", "rotation"),
+        ("公開", "public"),
+        ("現在", "current"),
+        ("推定", "estimated"),
+        ("由来", "induced"),
+        ("観測局", "station"),
+        ("反射器", "reflector"),
+        ("月中心", "moon center"),
+        ("光学", "optical"),
+        ("published value", "published value"),
+        ("時刻", "Time"),
+        ("往復", "Round-trip"),
+        ("偏差", "deviation"),
+        ("周波数比", "frequency ratio"),
+        ("ドップラー", "Doppler"),
+        ("全区間", "full interval"),
+        ("最適", "best-fit"),
+        ("日付", "date"),
+        ("残差", "Residual"),
+        ("累積割合", "Cumulative fraction"),
+        ("件数", "Count"),
+        ("差", "difference"),
+        ("小さいほど良い", "smaller is better"),
+        ("後期", "late-time"),
+        ("処理後", "processed"),
+        ("一次データ", "primary data"),
+        ("論文図", "paper figure"),
+        ("デジタイズ", "digitized"),
+        ("太陽重力による光の偏向", "Light deflection by solar gravity"),
+        ("太陽縁", "solar limb"),
+        ("角秒", "arcsec"),
+        ("偏向角", "deflection angle"),
+        ("近日点効果", "perigee effect"),
+        ("衛星", "satellite"),
+        ("時計", "clock"),
+        ("比較", "comparison"),
+        ("リング直径", "ring diameter"),
+        ("リング", "ring"),
+        ("シャドウ", "shadow"),
+        ("影直径", "shadow diameter"),
+        ("係数", "coefficient"),
+        ("系統", "systematic"),
+        ("誤差", "error"),
+        ("許容域", "allowed region"),
+        ("下側", "lower side"),
+        ("判別", "discrimination"),
+        ("現状", "current"),
+        ("将来", "future"),
+        ("最良ケース", "best case"),
+        ("散乱", "scattering"),
+        ("屈折", "refractive"),
+        ("幅", "width"),
+        ("非対称性", "asymmetry"),
+        ("多時期", "multi-epoch"),
+        ("整合", "consistency"),
+        ("線重心", "line centroid"),
+        ("銀河団", "cluster"),
+        ("内縁半径拘束", "inner-edge radius constraint"),
+        ("全点", "All points"),
+        ("適合度", "Goodness of fit"),
+        ("周波数トラック", "Frequency track"),
+        ("除外点", "Excluded points"),
+        ("抽出", "Extracted"),
+        ("直線化", "Linearized"),
+        ("採用点", "Retained points"),
+        ("一致度", "Agreement"),
+        ("複数イベント", "multi-event"),
+        ("外れ値", "Outlier"),
+        ("閾値", "threshold"),
+        ("混入", "mixing"),
+        ("現在Target", "Current target"),
+        ("推定Target", "Estimated target"),
+        ("反証条件パック", "falsification pack"),
+        ("速度飽和", "velocity saturation"),
+        ("必要精度", "required precision"),
+        ("観測配置", "observational configuration"),
+        ("ための", "for"),
+        ("での", "at"),
+        ("による", "from"),
+        ("のみ", "only"),
+        ("からの", "from"),
+        ("を", " "),
+        ("が", " "),
+        ("と", " and "),
+        ("の", " "),
+        ("図", "diagram"),
+    ]
+    for src, dst in generic_word_map:
+        out = out.replace(src, dst)
+
+    char_map = {
+        "（": "(",
+        "）": ")",
+        "：": ": ",
+        "、": ", ",
+        "　": " ",
+        "〜": "~",
+    }
+    for src, dst in char_map.items():
+        out = out.replace(src, dst)
+
+    out = re.sub(r"\s+", " ", out).strip()
+    return out
+
+
+# 関数: `_localize_wavep_figure_texts_for_locale` の入出力契約と処理意図を定義する。
+def _localize_wavep_figure_texts_for_locale(figure: Any, *, stem: str | None, target_lang: str) -> None:
+    """
+    保存直前の Matplotlib figure を locale 別に正規化する。
+    現在は en だけを追加サポートし、ja は source/canonical を維持する。
+    """
+    if target_lang != "en":
+        return
+
+    try:
+        texts = list(figure.findobj(lambda artist: hasattr(artist, "get_text") and hasattr(artist, "set_text")))
+    except Exception:
+        return
+
+    for artist in texts:
+        try:
+            raw = artist.get_text()
+        except Exception:
+            continue
+
+        if not isinstance(raw, str) or not raw.strip():
+            continue
+
+        translated = _translate_wavep_text_to_english(raw, stem=stem)
+        if translated == raw:
+            continue
+
+        try:
+            artist.set_text(translated)
+        except Exception:
+            continue
+
+
+# 関数: `_patch_wavep_copy2_for_localized_figures` の入出力契約と処理意図を定義する。
+def _patch_wavep_copy2_for_localized_figures() -> None:
+    global _WAVEP_COPY2_PATCHED
+    if _WAVEP_COPY2_PATCHED:
+        return
+
+    try:
+        import shutil
+        from scripts.utils.figure_locale_paths import localize_figure_output_path, is_default_figure_locale
+    except Exception:
+        return
+
+    if is_default_figure_locale():
+        return
+
+    original_copy2 = shutil.copy2
+    figure_suffixes = {".pdf", ".png", ".jpg", ".jpeg"}
+
+    # 関数: `patched_copy2` の入出力契約と処理意図を定義する。
+    def patched_copy2(src, dst, *args, **kwargs):
+        try:
+            src_path = Path(src)
+            dst_path = Path(dst)
+        except Exception:
+            return original_copy2(src, dst, *args, **kwargs)
+
+        if src_path.suffix.lower() not in figure_suffixes and dst_path.suffix.lower() not in figure_suffixes:
+            return original_copy2(src, dst, *args, **kwargs)
+
+        localized_src = localize_figure_output_path(src_path)
+        localized_dst = localize_figure_output_path(dst_path)
+        actual_src = localized_src if localized_src.exists() else src_path
+        try:
+            localized_dst.parent.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
+
+        return original_copy2(actual_src, localized_dst, *args, **kwargs)
+
+    shutil.copy2 = patched_copy2
+    _WAVEP_COPY2_PATCHED = True
 
 
 # 関数: `_resolve_wavep_canonical_canvas_box` の入出力契約と処理意図を定義する。
@@ -370,6 +786,15 @@ def _enable_vector_pdf_sidecar_if_enabled() -> None:
     def patched_savefig(self, *args, **kwargs):
         global _VECTOR_PDF_AUTOSAVE_IN_PROGRESS
         save_args, save_kwargs, resolved_fname = _rewrite_save_target(args, kwargs)
+        target_lang = str(os.getenv("WAVEP_FIGURE_LANG", "")).strip().lower()
+        stem = None
+        if resolved_fname:
+            try:
+                stem = Path(resolved_fname).stem
+            except Exception:
+                stem = None
+
+        _localize_wavep_figure_texts_for_locale(self, stem=stem, target_lang=target_lang)
         original_size = _normalize_wavep_figure_canvas_for_profile(self)
         try:
             result = original_savefig(self, *save_args, **save_kwargs)
@@ -425,6 +850,7 @@ def _enable_vector_pdf_sidecar_if_enabled() -> None:
 
 
 _enable_vector_pdf_sidecar_if_enabled()
+_patch_wavep_copy2_for_localized_figures()
 
 
 _JA_TEXT_PATCHED = False

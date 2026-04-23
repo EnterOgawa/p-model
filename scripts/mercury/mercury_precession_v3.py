@@ -5,14 +5,16 @@
 前提: 論文本文と README はこの script が出力する公開成果物を正として参照する。
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.integrate import solve_ivp
 import json
-import sys
+import os
 import shutil
+import sys
 from pathlib import Path
 from datetime import datetime, timezone
+
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.integrate import solve_ivp
 
 _ROOT = Path(__file__).resolve().parents[2]
 # 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
@@ -20,12 +22,15 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog
+from scripts.utils.figure_locale_paths import localize_figure_output_path, resolve_figure_output_locale
 from scripts.utils.plot_style import (
     apply_paper_style,
     apply_wavep_figure_layout,
     get_wavep_font_size,
     resolve_wavep_cjk_font_family,
 )
+
+FIGURE_LOCALE = resolve_figure_output_locale()
 
 # Constants
 G = 6.67430e-11
@@ -37,6 +42,16 @@ AU = 1.496e11
 a = 0.387098 * AU
 e = 0.205630
 T_orb = 87.969 * 24 * 3600 # seconds
+
+
+# 関数: `_is_en_figure_locale` の入出力契約と処理意図を定義する。
+def _is_en_figure_locale() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", FIGURE_LOCALE)).strip().lower().startswith("en")
+
+
+# 関数: `_plot_text` の入出力契約と処理意図を定義する。
+def _plot_text(ja_text: str, en_text: str) -> str:
+    return en_text if _is_en_figure_locale() else ja_text
 
 # 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
@@ -251,11 +266,20 @@ def main():
     fig.align_ylabels((ax1, ax2))
 
     # Left: Orbit
-    ax1.plot(0, 0, 'yo', markersize=14, label='太陽', zorder=10)
-    ax1.plot(x_nw, y_nw, 'k--', linewidth=1.2, alpha=0.55, label='ニュートン')
-    ax1.plot(x_gr, y_gr, 'b-', linewidth=1.9, label='P-model 軌道')
+    ax1.plot(0, 0, 'yo', markersize=10, label=_plot_text('太陽', 'Sun'), zorder=10)
+    ax1.plot(
+        x_nw,
+        y_nw,
+        color='0.45',
+        linestyle='-',
+        linewidth=1.6,
+        alpha=0.8,
+        zorder=1.5,
+        label=_plot_text('ニュートン', 'Newton'),
+    )
+    ax1.plot(x_gr, y_gr, 'b-', linewidth=1.9, zorder=2.5, label=_plot_text('P-model 軌道', 'P-model orbit'))
 
-    ax1.set_title("水星の近日点移動（俯瞰; 誇張表示）", pad=6.0)
+    ax1.set_title(_plot_text("水星の近日点移動（俯瞰; 誇張表示）", "Mercury perihelion precession (overview; exaggerated)"), pad=6.0)
 
     ax1.axis('equal')
     ax1.grid(True, linestyle='--')
@@ -267,7 +291,7 @@ def main():
         p_ph["shift_arcsec"],
         "r-",
         linewidth=2.3,
-        label="P-model（実C）",
+        label=_plot_text("P-model（実C）", "P-model (physical c)"),
     )
     ax2.plot(
         n_ph["orbit_nums"],
@@ -275,7 +299,7 @@ def main():
         "k--",
         linewidth=1.35,
         alpha=0.6,
-        label="ニュートン（誤差目安）",
+        label=_plot_text("ニュートン（誤差目安）", "Newton (error baseline)"),
     )
     ax2.plot(
         p_ph["orbit_nums"],
@@ -283,7 +307,7 @@ def main():
         "b--",
         linewidth=1.8,
         alpha=0.7,
-        label="線形フィット（一定性）",
+        label=_plot_text("線形フィット（一定性）", "Linear fit (constancy)"),
     )
     ax2.scatter(
         p_ph["orbit_nums"],
@@ -292,36 +316,50 @@ def main():
         color="tab:purple",
         alpha=0.75,
         edgecolors="none",
-        label=f"観測（代表値: {reference_arcsec_century:.2f} 角秒/世紀）",
+        label=_plot_text(
+            f"観測（代表値: {reference_arcsec_century:.2f} 角秒/世紀）",
+            f"Observed representative ({reference_arcsec_century:.2f} arcsec/century)",
+        ),
         zorder=3,
     )
 
-    ax2.set_title("近日点移動の累積（実C）", pad=6.0)
-    ax2.set_xlabel("周回数")
-    ax2.set_ylabel("移動角 [角秒]")
+    ax2.set_title(_plot_text("近日点移動の累積（実C）", "Accumulated perihelion shift (physical c)"), pad=6.0)
+    ax2.set_xlabel(_plot_text("周回数", "Orbit count"))
+    ax2.set_ylabel(_plot_text("移動角 [角秒]", "Shift angle [arcsec]"))
     ax2.grid(True, linestyle='--')
     ax2.legend(loc='lower right', framealpha=0.95)
 
     ax2.text(
         0.05,
         0.94,
-        f"推定: {p_arcsec_century:.2f} 角秒/世紀\n"
-        f"Einstein近似: {einstein_arcsec_century:.2f} 角秒/世紀\n"
-        f"観測代表: {reference_arcsec_century:.2f} 角秒/世紀",
+        _plot_text(
+            f"推定: {p_arcsec_century:.2f} 角秒/世紀\n"
+            f"Einstein近似: {einstein_arcsec_century:.2f} 角秒/世紀\n"
+            f"観測代表: {reference_arcsec_century:.2f} 角秒/世紀",
+            f"Estimate: {p_arcsec_century:.2f} arcsec/century\n"
+            f"Einstein approximation: {einstein_arcsec_century:.2f} arcsec/century\n"
+            f"Observed representative: {reference_arcsec_century:.2f} arcsec/century",
+        ),
         transform=ax2.transAxes,
         fontsize=get_wavep_font_size("note"),
         va="top",
         bbox=dict(facecolor="white", alpha=0.85, edgecolor="gray"),
     )
 
-    out_file = out_dir / "mercury_orbit.png"
-    out_pdf = out_dir / "mercury_orbit.pdf"
+    out_file = localize_figure_output_path(out_dir / "mercury_orbit.png", root=_ROOT, locale=FIGURE_LOCALE)
+    out_pdf = localize_figure_output_path(out_dir / "mercury_orbit.pdf", root=_ROOT, locale=FIGURE_LOCALE)
+    public_png = localize_figure_output_path(public_dir / out_file.name, root=_ROOT, locale=FIGURE_LOCALE)
+    public_pdf = localize_figure_output_path(public_dir / out_pdf.name, root=_ROOT, locale=FIGURE_LOCALE)
+    out_file.parent.mkdir(parents=True, exist_ok=True)
+    out_pdf.parent.mkdir(parents=True, exist_ok=True)
+    public_png.parent.mkdir(parents=True, exist_ok=True)
+    public_pdf.parent.mkdir(parents=True, exist_ok=True)
     with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
         plt.savefig(out_file, dpi=300)
         plt.savefig(out_pdf)
 
-    shutil.copy2(out_file, public_dir / out_file.name)
-    shutil.copy2(out_pdf, public_dir / out_pdf.name)
+    shutil.copy2(out_file, public_png)
+    shutil.copy2(out_pdf, public_pdf)
     print(f"Graph saved to {out_file}")
     print(f"Graph saved to {out_pdf}")
 

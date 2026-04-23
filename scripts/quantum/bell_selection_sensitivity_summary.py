@@ -21,9 +21,16 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from figure_japanese_localizer import enable_japanese_figure_localization
-from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
+from scripts.quantum.figure_japanese_localizer import get_figure_language
+from scripts.utils.figure_locale_paths import localize_figure_output_path
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size, install_wavep_font_profile
 
 enable_japanese_figure_localization()
+
+
+# 関数: `_t` の入出力契約と処理意図を定義する。
+def _t(ja: str, en: str, *, lang: str) -> str:
+    return en if lang == "en" else ja
 
 # 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
@@ -133,9 +140,13 @@ def main() -> None:
     args = ap.parse_args()
 
     root = ROOT
-    out_dir = root / "output" / "public" / "quantum"
-    out_dir.mkdir(parents=True, exist_ok=True)
-    bell_dir = out_dir / "bell"
+    lang = get_figure_language(default="ja")
+    install_wavep_font_profile(profile_name="part3b_quantum_verification")
+    out_public_dir = root / "output" / "public" / "quantum"
+    out_private_dir = root / "output" / "private" / "quantum"
+    out_public_dir.mkdir(parents=True, exist_ok=True)
+    out_private_dir.mkdir(parents=True, exist_ok=True)
+    bell_dir = out_public_dir / "bell"
 
     # Source manifests (best-effort; used for reproducibility context).
     nist_src_manifest = _manifest_brief(root / "data" / "quantum" / "sources" / "nist_belltestdata" / "manifest.json")
@@ -364,31 +375,46 @@ def main() -> None:
     fig, axes = plt.subplots(3, 1, dpi=170)
     apply_wavep_figure_layout(fig, template="part2_three_panel_tall")
     # 図2は 3段図を1ページ内へ寄せるため、Part II baseline から高さと段間だけ詰める。
-    fig.set_size_inches(fig.get_figwidth(), 6.20, forward=True)
-    fig.subplots_adjust(left=0.155, right=0.985, top=0.920, bottom=0.100, hspace=0.30)
+    fig_height = 6.70 if lang == "en" else 6.20
+    fig_bottom = 0.190 if lang == "en" else 0.100
+    fig.set_size_inches(fig.get_figwidth(), fig_height, forward=True)
+    fig.subplots_adjust(left=0.155, right=0.985, top=0.920, bottom=fig_bottom, hspace=0.30)
     panel_title_font = get_wavep_font_size("title") * 0.82
     top_panel_title_font = get_wavep_font_size("title") * 0.86
     axis_label_font = get_wavep_font_size("axis")
     tick_font = get_wavep_font_size("tick")
     legend_font = get_wavep_font_size("legend")
-    summary_box_font = get_wavep_font_size("note")
+    summary_box_font = get_wavep_font_size("note") * (0.88 if lang == "en" else 1.0)
     suptitle_font = get_wavep_font_size("suptitle") + 2.0
 
     # Weihs
     ax = axes[0]
-    ax.plot(weihs_x, weihs_y, marker="o", lw=1.8, label="原系列")
+    ax.plot(weihs_x, weihs_y, marker="o", lw=1.8, label=_t("原系列", "raw series", lang=lang))
     # 条件分岐: `any(math.isfinite(v) for v in weihs_y_sub)` を満たす経路を評価する。
     if any(math.isfinite(v) for v in weihs_y_sub):
-        ax.plot(weihs_x, weihs_y_sub, marker="s", lw=1.6, color="tab:orange", label="accidental 補正後")
+        ax.plot(
+            weihs_x,
+            weihs_y_sub,
+            marker="s",
+            lw=1.6,
+            color="tab:orange",
+            label=_t("accidental 補正後", "accidental corrected", lang=lang),
+        )
 
-    ax.axhline(2.0, color="0.25", ls="--", lw=1.0, label="局所 bound |S|=2")
+    ax.axhline(2.0, color="0.25", ls="--", lw=1.0, label=_t("局所 bound |S|=2", "local bound |S|=2", lang=lang))
     # 条件分岐: `weihs_rec_w is not None and weihs_rec_w > 0` を満たす経路を評価する。
     if weihs_rec_w is not None and weihs_rec_w > 0:
-        ax.axvline(weihs_rec_w, color="tab:orange", ls=":", lw=1.6, label=f"推奨窓 ≈ {weihs_rec_w:.3g} ns")
+        ax.axvline(
+            weihs_rec_w,
+            color="tab:orange",
+            ls=":",
+            lw=1.6,
+            label=_t(f"推奨窓 ≈ {weihs_rec_w:.3g} ns", f"recommended window ≈ {weihs_rec_w:.3g} ns", lang=lang),
+        )
 
     ax.set_xscale("log")
-    ax.set_title("Weihs 1998：|S| と窓幅", fontsize=top_panel_title_font, pad=5.0)
-    ax.set_ylabel("|S|（固定 variant）", fontsize=axis_label_font)
+    ax.set_title(_t("Weihs 1998：|S| と窓幅", "Weihs 1998: |S| and window", lang=lang), fontsize=top_panel_title_font, pad=5.0)
+    ax.set_ylabel(_t("|S|（固定 variant）", "|S| (fixed variant)", lang=lang), fontsize=axis_label_font)
     ax.grid(True, alpha=0.3)
     ax.legend(fontsize=legend_font, frameon=True)
     ax.tick_params(axis="both", labelsize=tick_font)
@@ -401,15 +427,28 @@ def main() -> None:
     # NIST
 
     ax = axes[1]
-    ax.plot(nist_windows_ns, nist_j_sweep, marker="o", lw=1.8, label="coincidence-base J_prob")
+    ax.plot(nist_windows_ns, nist_j_sweep, marker="o", lw=1.8, label=_t("coincidence-base J_prob", "coincidence-based J_prob", lang=lang))
     # 条件分岐: `any(math.isfinite(v) for v in nist_j_sweep_sub)` を満たす経路を評価する。
     if any(math.isfinite(v) for v in nist_j_sweep_sub):
-        ax.plot(nist_windows_ns, nist_j_sweep_sub, marker="s", lw=1.6, color="tab:green", label="accidental 補正後")
+        ax.plot(
+            nist_windows_ns,
+            nist_j_sweep_sub,
+            marker="s",
+            lw=1.6,
+            color="tab:green",
+            label=_t("accidental 補正後", "accidental corrected", lang=lang),
+        )
 
     # 条件分岐: `nist_trial_best is not None` を満たす経路を評価する。
 
     if nist_trial_best is not None:
-        ax.axhline(nist_trial_best, color="tab:orange", ls=":", lw=1.6, label="trial-base J_prob")
+        ax.axhline(
+            nist_trial_best,
+            color="tab:orange",
+            ls=":",
+            lw=1.6,
+            label=_t("trial-base J_prob", "trial-based J_prob", lang=lang),
+        )
 
     # 条件分岐: `nist_rec_w is not None and nist_rec_w > 0` を満たす経路を評価する。
 
@@ -419,10 +458,17 @@ def main() -> None:
     # 条件分岐: `kwiat_windows_ns and kwiat_j_sweep and (len(kwiat_windows_ns) == len(kwiat_j_...` を満たす経路を評価する。
 
     if kwiat_windows_ns and kwiat_j_sweep and (len(kwiat_windows_ns) == len(kwiat_j_sweep)):
-        ax.plot(kwiat_windows_ns, kwiat_j_sweep, marker="s", lw=1.8, label="Kwiat2013 sweep")
+        ax.plot(kwiat_windows_ns, kwiat_j_sweep, marker="s", lw=1.8, label=_t("Kwiat2013 sweep", "Kwiat2013 sweep", lang=lang))
         # 条件分岐: `kwiat_trial_best is not None` を満たす経路を評価する。
         if kwiat_trial_best is not None:
-            ax.axhline(kwiat_trial_best, color="tab:green", ls=":", lw=1.4, alpha=0.9, label="Kwiat2013 baseline")
+            ax.axhline(
+                kwiat_trial_best,
+                color="tab:green",
+                ls=":",
+                lw=1.4,
+                alpha=0.9,
+                label=_t("Kwiat2013 baseline", "Kwiat2013 baseline", lang=lang),
+            )
 
         # 条件分岐: `kwiat_rec_w is not None and kwiat_rec_w > 0` を満たす経路を評価する。
 
@@ -430,9 +476,9 @@ def main() -> None:
             ax.axvline(kwiat_rec_w, color="tab:green", ls=":", lw=1.0, alpha=0.5)
 
     ax.axhline(0.0, color="0.25", ls="--", lw=1.0)
-    ax.set_title("NIST：CH J_prob と窓幅", fontsize=panel_title_font, pad=5.0)
+    ax.set_title(_t("NIST：CH J_prob と窓幅", "NIST: CH J_prob and window", lang=lang), fontsize=panel_title_font, pad=5.0)
     ax.set_xscale("log")
-    ax.set_ylabel("CH J_prob（A1=0,B1=0）", fontsize=axis_label_font)
+    ax.set_ylabel(_t("CH J_prob（A1=0,B1=0）", "CH J_prob (A1=0, B1=0)", lang=lang), fontsize=axis_label_font)
     ax.grid(True, alpha=0.3)
     ax.legend(fontsize=legend_font, frameon=True)
     ax.text(
@@ -471,7 +517,7 @@ def main() -> None:
                 delft15_s_base - delft15_se_base, delft15_s_base + delft15_se_base, color="tab:orange", alpha=0.10
             )
 
-        ax.axhline(delft15_s_base, color="tab:orange", lw=1.2, label="2015 baseline")
+        ax.axhline(delft15_s_base, color="tab:orange", lw=1.2, label=_t("2015 baseline", "2015 baseline", lang=lang))
 
     # 条件分岐: `delft16_offsets_ps` を満たす経路を評価する。
 
@@ -486,42 +532,62 @@ def main() -> None:
                     delft16_s_base - delft16_se_base, delft16_s_base + delft16_se_base, color="tab:green", alpha=0.08
                 )
 
-            ax.axhline(delft16_s_base, color="tab:green", lw=1.2, label="2016 baseline (combined)")
+            ax.axhline(
+                delft16_s_base,
+                color="tab:green",
+                lw=1.2,
+                label=_t("2016 baseline (combined)", "2016 baseline (combined)", lang=lang),
+            )
 
     ax.axvline(float(delft15_rec_off_ps) / 1000.0, color="0.25", ls=":", lw=1.0)
-    ax.axhline(2.0, color="0.25", ls="--", lw=1.0, label="local bound S=2")
-    ax.set_title("Delft：CHSH S と開始オフセット", fontsize=panel_title_font, pad=5.0)
-    ax.set_xlabel("開始オフセット (ns)", fontsize=axis_label_font)
+    ax.axhline(2.0, color="0.25", ls="--", lw=1.0, label=_t("local bound S=2", "local bound S=2", lang=lang))
+    ax.set_title(_t("Delft：CHSH S と開始オフセット", "Delft: CHSH S and start offset", lang=lang), fontsize=panel_title_font, pad=5.0)
+    ax.set_xlabel(_t("開始オフセット (ns)", "start offset (ns)", lang=lang), fontsize=axis_label_font)
     ax.set_ylabel("CHSH S", fontsize=axis_label_font)
     ax.grid(True, alpha=0.3)
     ax.legend(fontsize=legend_font, frameon=True, loc="lower right")
     ax.tick_params(axis="both", labelsize=tick_font)
 
-    # Summary annotation inside the Delft panel (avoid extra bottom panel).
+    summary_head = _t("選別感度の要約", "Selection sensitivity summary", lang=lang)
     summary_lines = [
-        "選別感度の要約",
         f"Weihs Δ|S|={weihs_s_min:.3g}→{weihs_s_max:.3g}",
         f"NIST ΔJ={nist_j_min:.3g}→{nist_j_max:.3g}",
         f"Delft2015 ΔS={delft15_s_min:.3g}→{delft15_s_max:.3g}",
         f"Delft2016 ΔS={delft16_s_min:.3g}→{delft16_s_max:.3g}" if delft16_s_min is not None and delft16_s_max is not None else "Delft2016: n/a",
     ]
-    ax.text(
-        0.02,
-        0.96,
-        "\n".join(summary_lines),
-        transform=ax.transAxes,
-        va="top",
-        ha="left",
-        fontsize=summary_box_font,
-        bbox={"boxstyle": "round,pad=0.35", "facecolor": "white", "alpha": 0.9, "edgecolor": "0.8"},
-    )
+    summary_join = "  ".join(summary_lines[:2]) + "\n" + "  ".join(summary_lines[2:])
+    if lang == "en":
+        fig.text(
+            0.155,
+            0.026,
+            summary_head + "\n" + summary_join,
+            va="bottom",
+            ha="left",
+            fontsize=summary_box_font,
+            linespacing=1.15,
+            color="0.25",
+        )
+    else:
+        ax.text(
+            0.02,
+            0.96,
+            summary_head + "\n" + "\n".join(summary_lines),
+            transform=ax.transAxes,
+            va="top",
+            ha="left",
+            fontsize=summary_box_font,
+            bbox={"boxstyle": "round,pad=0.35", "facecolor": "white", "alpha": 0.9, "edgecolor": "0.8"},
+        )
 
-    fig.suptitle("Bell 選別感度要約", fontsize=suptitle_font, fontweight="bold", y=0.992)
+    fig.suptitle(_t("Bell 選別感度要約", "Bell selection sensitivity summary", lang=lang), fontsize=suptitle_font, fontweight="bold", y=0.992)
 
     out_tag = str(args.out_tag)
-    out_png = out_dir / f"{out_tag}.png"
-    out_pdf = out_dir / f"{out_tag}.pdf"
-    out_json = out_dir / f"{out_tag}.json"
+    out_png = localize_figure_output_path(out_public_dir / f"{out_tag}.png", root=root)
+    out_pdf = localize_figure_output_path(out_public_dir / f"{out_tag}.pdf", root=root)
+    out_json = localize_figure_output_path(out_public_dir / f"{out_tag}.json", root=root)
+    out_png_private = localize_figure_output_path(out_private_dir / f"{out_tag}.png", root=root)
+    out_pdf_private = localize_figure_output_path(out_private_dir / f"{out_tag}.pdf", root=root)
+    out_json_private = localize_figure_output_path(out_private_dir / f"{out_tag}.json", root=root)
     normalize_backup = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
     os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
     try:
@@ -529,6 +595,8 @@ def main() -> None:
         with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
             fig.savefig(out_png)
             fig.savefig(out_pdf)
+            fig.savefig(out_png_private)
+            fig.savefig(out_pdf_private)
     finally:
         if normalize_backup is None:
             os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
@@ -596,7 +664,14 @@ def main() -> None:
             "recommended_start_offset_ps": delft16_rec_off_ps,
         },
         "giustina2015": giustina_block_info,
-        "outputs": {"png": str(out_png), "pdf": str(out_pdf), "json": str(out_json)},
+        "outputs": {
+            "png": str(out_png),
+            "pdf": str(out_pdf),
+            "json": str(out_json),
+            "private_png": str(out_png_private),
+            "private_pdf": str(out_pdf_private),
+            "private_json": str(out_json_private),
+        },
         "repro": {
             "script": "python -B scripts/quantum/bell_selection_sensitivity_summary.py",
             "inputs": [
@@ -619,6 +694,7 @@ def main() -> None:
     }
 
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
+    out_json_private.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"[ok] png : {out_png}")
     print(f"[ok] pdf : {out_pdf}")
     print(f"[ok] json: {out_json}")

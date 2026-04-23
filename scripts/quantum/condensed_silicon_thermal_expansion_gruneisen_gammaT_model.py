@@ -4,6 +4,8 @@ import csv
 import hashlib
 import json
 import math
+import os
+import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -11,10 +13,17 @@ from typing import Any, Optional
 
 import matplotlib.pyplot as plt
 
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.figure_locale_paths import localize_figure_output_path
+from scripts.utils.plot_style import get_wavep_font_size, install_wavep_font_profile
 
 enable_japanese_figure_localization()
+
+_PROFILE_NAME = "part3b_quantum_verification"
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
@@ -338,6 +347,7 @@ def _logspace(*, lo: float, hi: float, n: int) -> list[float]:
 
 def main() -> None:
     root = _repo_root()
+    install_wavep_font_profile(profile_name=_PROFILE_NAME)
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -551,7 +561,9 @@ def main() -> None:
 
     # Figure
 
-    legend_font = 11.8
+    figure_lang = os.getenv("WAVEP_FIGURE_LANG", "ja").strip().lower()
+    is_en = figure_lang.startswith("en")
+    legend_font = get_wavep_font_size("legend") * (0.80 if is_en else 1.0)
 
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10.5, 6.8), sharex=True, gridspec_kw={"height_ratios": [2, 1]})
 
@@ -565,21 +577,37 @@ def main() -> None:
     ax1.grid(True, alpha=0.25)
     ax1.legend(loc="best", fontsize=legend_font)
 
-    ax2.plot(temps, a_eff_obs, color="#000000", lw=1.2, alpha=0.9, label="A_eff(T)=α/Cv (obs)")
-    ax2.plot(temps, a_eff_model, color="#1f77b4", lw=2.0, alpha=0.9, label="A_eff(T)=A_inf·tanh((T-T0)/ΔT)")
+    a_eff_scale = 1.0e-7
+    a_eff_obs_scaled = [float("nan") if not math.isfinite(float(v)) else float(v) / a_eff_scale for v in a_eff_obs]
+    a_eff_model_scaled = [float(v) / a_eff_scale for v in a_eff_model]
+    ax2.plot(temps, a_eff_obs_scaled, color="#000000", lw=1.2, alpha=0.9, label="Aeff(T)=α/Cv (obs)")
+    ax2.plot(temps, a_eff_model_scaled, color="#1f77b4", lw=2.0, alpha=0.9, label="Aeff(T)=Ainf·tanh((T-T0)/ΔT)")
     ax2.axhline(0.0, color="#666666", lw=1.0, alpha=0.5)
-    ax2.axhline(a_inf_best, color="#1f77b4", lw=1.2, ls=":", alpha=0.7, label=f"A_inf≈{a_inf_best:.2e} mol/J")
+    ax2.axhline(
+        a_inf_best / a_eff_scale,
+        color="#1f77b4",
+        lw=1.2,
+        ls=":",
+        alpha=0.7,
+        label=f"Ainf≈{a_inf_best / a_eff_scale:.2f} × 10⁻⁷ mol/J",
+    )
     ax2.set_xlabel("Temperature T (K)")
-    ax2.set_ylabel("A_eff (mol/J)")
+    ax2.set_ylabel("Aeff(T) [10⁻⁷ mol/J]")
     ax2.grid(True, alpha=0.25)
     ax2.legend(loc="best", fontsize=legend_font)
 
     fig.tight_layout()
-    out_png = out_dir / "condensed_silicon_thermal_expansion_gruneisen_gammaT_model.png"
+    out_pdf = localize_figure_output_path(out_dir / "condensed_silicon_thermal_expansion_gruneisen_gammaT_model.pdf", root=root)
+    out_png = localize_figure_output_path(out_dir / "condensed_silicon_thermal_expansion_gruneisen_gammaT_model.png", root=root)
+    out_png.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_pdf)
     fig.savefig(out_png, dpi=180)
     plt.close(fig)
 
-    out_metrics = out_dir / "condensed_silicon_thermal_expansion_gruneisen_gammaT_model_metrics.json"
+    out_metrics = localize_figure_output_path(
+        out_dir / "condensed_silicon_thermal_expansion_gruneisen_gammaT_model_metrics.json",
+        root=root,
+    )
     out_metrics.write_text(
         json.dumps(
             {
@@ -629,7 +657,7 @@ def main() -> None:
                         "Even if sign reversal is reproduced, proportionality accuracy is evaluated via the fit-range relative RMSE and treated as a falsification criterion for this ansatz class.",
                     ],
                 },
-                "outputs": {"csv": str(out_csv), "png": str(out_png)},
+                "outputs": {"csv": str(out_csv), "pdf": str(out_pdf), "png": str(out_png)},
             },
             ensure_ascii=False,
             indent=2,

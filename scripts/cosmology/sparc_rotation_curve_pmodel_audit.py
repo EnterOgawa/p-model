@@ -52,6 +52,8 @@ try:
 except Exception:  # pragma: no cover
     worklog = None
 
+from scripts.quantum.figure_japanese_localizer import get_figure_language  # noqa: E402
+
 from scripts.utils.plot_style import (  # noqa: E402
     apply_paper_style,
     apply_wavep_figure_layout,
@@ -72,7 +74,13 @@ DEFAULT_PBG_KAPPA = 1.0 / (2.0 * math.pi)
 DISTANCE_RE = re.compile(r"^#\s*Distance\s*=\s*(?P<d>[0-9.+-Ee]+)\s*Mpc\s*$")
 
 
+# 関数: `_plot_text` の入出力契約と処理意図を定義する。
+def _plot_text(ja: str, en: str, *, lang: str) -> str:
+    return ja if lang == "ja" else en
+
+
 # クラス: `RotmodPoint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class RotmodPoint:
     galaxy: str
@@ -563,7 +571,9 @@ def _plot_summary(
         return
 
     apply_paper_style()
-    _set_japanese_font()
+    figure_lang = get_figure_language(default="ja")
+    if figure_lang == "ja":
+        _set_japanese_font()
 
     velocity_obs_km_s = np.asarray([point.velocity_obs_km_s for point in points], dtype=float)
     sigma_obs_km_s = np.asarray([point.velocity_obs_sigma_km_s for point in points], dtype=float)
@@ -589,7 +599,7 @@ def _plot_summary(
     axes[0].plot([0.0, vmax], [0.0, vmax], "k--", lw=1.0, alpha=0.7)
     axes[0].set_xlabel("")
     axes[0].set_ylabel("")
-    axes[0].set_title("全点比較", fontsize=get_wavep_font_size("title"), pad=5.0)
+    axes[0].set_title(_plot_text("全点比較", "All-point comparison", lang=figure_lang), fontsize=get_wavep_font_size("title"), pad=5.0)
     axes[0].grid(True, alpha=0.25)
     axes[0].legend(loc="upper left", fontsize=get_wavep_font_size("legend"))
     axes[0].tick_params()
@@ -598,9 +608,9 @@ def _plot_summary(
     axes[1].hist(residual_pull_baryon, bins=bins, alpha=0.55, color="#d62728", label="baryon-only")
     axes[1].hist(residual_pull_pmodel, bins=bins, alpha=0.55, color="#1f77b4", label="P-model corrected")
     axes[1].axvline(0.0, color="k", ls="--", lw=1.0)
-    axes[1].set_xlabel("(Vobs - Vmodel) / sigma")
-    axes[1].set_ylabel("count")
-    axes[1].set_title("正規化残差分布", fontsize=get_wavep_font_size("title"), pad=5.0)
+    axes[1].set_xlabel(_plot_text("(Vobs - Vmodel) / sigma", "(Vobs - Vmodel) / sigma", lang=figure_lang))
+    axes[1].set_ylabel(_plot_text("count", "count", lang=figure_lang))
+    axes[1].set_title(_plot_text("正規化残差分布", "Normalized residual distribution", lang=figure_lang), fontsize=get_wavep_font_size("title"), pad=5.0)
     axes[1].grid(True, alpha=0.25)
     axes[1].legend(loc="upper right", fontsize=get_wavep_font_size("legend"))
     axes[1].tick_params()
@@ -613,23 +623,13 @@ def _plot_summary(
     model_values = [chi2_dof_baryon, chi2_dof_pmodel]
     model_colors = ["#d62728", "#1f77b4"]
     axes[2].bar(model_labels, model_values, color=model_colors, alpha=0.85)
-    axes[2].set_ylabel("global chi2/dof")
-    axes[2].set_title("適合度（single-Υ）", fontsize=get_wavep_font_size("title"), pad=5.0)
+    axes[2].set_ylabel(_plot_text("global chi2/dof", "global chi2/dof", lang=figure_lang))
+    axes[2].set_title(_plot_text("適合度（single-Υ）", "Goodness of fit (single-Υ)", lang=figure_lang), fontsize=get_wavep_font_size("title"), pad=5.0)
     axes[2].grid(axis="y", alpha=0.25)
     axes[2].tick_params()
-    axes[2].text(
-        0.02,
-        0.965,
-        f"median |pull|: baryon={abs_pull_b50:.3f}, P-model={abs_pull_p50:.3f}",
-        transform=axes[2].transAxes,
-        ha="left",
-        va="top",
-        fontsize=get_wavep_font_size("note"),
-    )
-
-    fig.subplots_adjust(top=0.900, bottom=0.095, hspace=0.60)
+    fig.subplots_adjust(top=0.900, bottom=0.095, hspace=0.64)
     fig.suptitle(
-        "SPARC 監査（single-Υ fit）",
+        _plot_text("SPARC 監査（single-Υ fit）", "SPARC audit (single-Υ fit)", lang=figure_lang),
         fontsize=get_wavep_font_size("suptitle"),
         y=0.978,
     )

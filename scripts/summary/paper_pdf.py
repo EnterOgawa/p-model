@@ -26,7 +26,7 @@ _ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from scripts.summary import paper_profile_content as profile_content, worklog
+from scripts.summary import paper_locale_registry as locale_registry, paper_profile_content as profile_content, worklog
 
 _FATAL_PATTERNS: List[re.Pattern[str]] = [
     re.compile(r"Undefined control sequence"),
@@ -121,8 +121,7 @@ def _pick_engine(choice: str) -> Tuple[str | None, str]:
 
 def _prepare_tex_cache_env(base_dir: Path) -> Dict[str, str]:
     env = os.environ.copy()
-    temp_root = Path(tempfile.gettempdir()).resolve()
-    cache_root = temp_root / "wavep_tex_cache"
+    cache_root = (base_dir.resolve() / "_tex_cache").resolve()
     luaotfload_cache = cache_root / "luaotfload"
 
     for path in (cache_root, luaotfload_cache):
@@ -134,8 +133,8 @@ def _prepare_tex_cache_env(base_dir: Path) -> Dict[str, str]:
     env["LUAOTFLOAD_CACHE"] = str(luaotfload_cache)
     env["TEMP"] = str(cache_root)
     env["TMP"] = str(cache_root)
-    env.setdefault("HOME", str(temp_root))
-    env.setdefault("USERPROFILE", str(temp_root))
+    env["HOME"] = str(cache_root)
+    env["USERPROFILE"] = str(cache_root)
     return env
 
 
@@ -403,6 +402,9 @@ def _prune_papers_dir(*, papers_dir: Path, locale: str | None = None) -> List[st
     papers_dir.mkdir(parents=True, exist_ok=True)
     removed: List[str] = []
     for entry in list(papers_dir.iterdir()):
+        if entry.is_dir() and entry.name == "locales":
+            continue
+
         if entry.is_file() and _is_allowed_papers_pdf_name(entry.name):
             continue
 
@@ -424,6 +426,7 @@ def _sync_to_papers(*, pdf_src: Path, papers_dir: Path, profile: str, locale: st
     papers_dir.mkdir(parents=True, exist_ok=True)
     out_name = profile_content.resolve_pdf_name(profile, locale=locale)
     out_path = papers_dir / out_name
+    out_path.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(str(pdf_src), str(out_path))
     return out_path
 
@@ -447,6 +450,7 @@ def _build_profile_pdf(
     pdf_name = profile_content.resolve_pdf_name(profile, locale=locale)
     tex_path = outdir / tex_name
     pdf_out = outdir / pdf_name
+    pdf_out.parent.mkdir(parents=True, exist_ok=True)
     build_dir = (outdir / "_tex_pdf_tmp" / profile).resolve()
     build_dir.mkdir(parents=True, exist_ok=True)
     result: Dict[str, Any] = {
@@ -578,7 +582,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             "engine_request": str(args.engine),
             "profiles": profiles,
         }
-        default_json_name = "paper_pdf_build.json" if not locale else f"paper_pdf_build_{locale}.json"
+        default_json_name = locale_registry.localized_output_name("paper_pdf_build.json", locale=locale)
         json_out = Path(str(args.json_out)) if args.json_out else (outdir / default_json_name)
         json_out.parent.mkdir(parents=True, exist_ok=True)
         json_out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -624,7 +628,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             "removed_papers_entries": removed_papers_entries,
         },
     }
-    default_json_name = "paper_pdf_build.json" if not locale else f"paper_pdf_build_{locale}.json"
+    default_json_name = locale_registry.localized_output_name("paper_pdf_build.json", locale=locale)
     json_out = Path(str(args.json_out)) if args.json_out else (outdir / default_json_name)
     json_out.parent.mkdir(parents=True, exist_ok=True)
     json_out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

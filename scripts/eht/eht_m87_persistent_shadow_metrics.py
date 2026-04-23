@@ -23,6 +23,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.quantum.figure_japanese_localizer import get_figure_language  # noqa: E402
 from scripts.utils.plot_style import (  # noqa: E402
     apply_paper_style,
     apply_wavep_figure_layout,
@@ -61,6 +62,11 @@ def _set_japanese_font() -> None:
             mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         pass
+
+
+# 関数: `_plot_text` の入出力契約と処理意図を定義する。
+def _plot_text(ja: str, en: str, *, lang: str) -> str:
+    return ja if lang == "ja" else en
 
 
 # 関数: `_read_json` の入出力契約と処理意図を定義する。
@@ -282,7 +288,9 @@ def main() -> int:
         import numpy as np
 
         apply_paper_style()
-        _set_japanese_font()
+        figure_lang = get_figure_language(default="ja")
+        if figure_lang == "ja":
+            _set_japanese_font()
 
         epochs = [m2017.epoch, m2018.epoch]
         labels = [
@@ -305,15 +313,15 @@ def main() -> int:
             ecolor="#d62728",
             elinewidth=2.0,
             capsize=5,
-            label="観測リング直径 θ_ring（M87*）",
+            label=_plot_text("観測リング直径 θ_ring（M87*）", "Observed ring diameter θ_ring (M87*)", lang=figure_lang),
             zorder=3,
         )
         ax.plot(x, y, color="#d62728", alpha=0.35, lw=2.0, zorder=2)
 
         ax.set_xticks(x)
         ax.set_xticklabels(labels)
-        ax.set_ylabel("角直径 [µas]")
-        ax.set_title("EHT M87*: リング直径の multi-epoch 整合（2017 vs 2018）", pad=6.0)
+        ax.set_ylabel(_plot_text("角直径 [µas]", "Angular diameter [µas]", lang=figure_lang))
+        ax.set_title(_plot_text("EHT M87*: リング直径の multi-epoch 整合（2017 vs 2018）", "EHT M87*: ring diameter\nmulti-epoch consistency (2017 vs 2018)", lang=figure_lang), pad=6.0)
         ax.tick_params(axis="x", pad=6)
         ax.grid(True, axis="y", alpha=0.25)
         ax.set_xlim(-0.18, 1.18)

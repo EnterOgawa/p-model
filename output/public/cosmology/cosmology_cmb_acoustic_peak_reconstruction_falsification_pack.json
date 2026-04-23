@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-04-06T11:08:26.061107+00:00",
+  "generated_utc": "2026-04-12T10:42:27.313888+00:00",
   "kind": "cmb_acoustic_peak_reconstruction_pmodel_modal",
   "decision_rule": {
     "first3": "max(|Δell_n|) <= 15 and max(|ΔA_n/A_n|) <= 0.15",

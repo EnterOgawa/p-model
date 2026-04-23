@@ -4,6 +4,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import shutil
 import subprocess
 import sys
@@ -24,6 +25,11 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+
+
+# 関数: `WAVEP_FIGURE_LANG` から英語 surface かどうかを判定する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
 
 
 # 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
@@ -252,10 +258,12 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
 
 def _plot(rows: List[Dict[str, Any]], out_png: Path) -> None:
     _set_japanese_font()
+    is_en = _is_en_figure()
+    font_scale = 1.18 if is_en else 1.0
     # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         fig, ax = plt.subplots(1, 1, figsize=(10.0, 5.0))
-        ax.text(0.5, 0.5, "No tuning rows", ha="center", va="center", fontsize=15.2)
+        ax.text(0.5, 0.5, "No tuning rows", ha="center", va="center", fontsize=15.2 * font_scale)
         ax.axis("off")
         fig.tight_layout()
         out_png.parent.mkdir(parents=True, exist_ok=True)
@@ -273,23 +281,23 @@ def _plot(rows: List[Dict[str, Any]], out_png: Path) -> None:
     fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(13.2, 9.0))
     ax0.scatter(x + 0.02 * prune, y, c=colors, s=36, alpha=0.85, edgecolor="none")
     ax0.axhline(0.0, color="#666666", ls="--", lw=1.0, alpha=0.8)
-    ax0.set_xlabel("n usable events", fontsize=14.2)
-    ax0.set_ylabel("scalar overlap proxy (max)", fontsize=14.2)
-    ax0.set_title("Network gate tuning space", fontsize=15.4)
+    ax0.set_xlabel("n usable events", fontsize=14.2 * font_scale)
+    ax0.set_ylabel("scalar overlap proxy (max)", fontsize=14.2 * font_scale)
+    ax0.set_title("Network gate tuning space", fontsize=15.4 * font_scale)
     ax0.grid(True, alpha=0.25)
-    ax0.tick_params(labelsize=12.4)
+    ax0.tick_params(labelsize=12.4 * font_scale)
 
     status_order = ["pass", "watch", "reject", "inconclusive", "other"]
     counts = [sum(1 for s in status if _status_bucket(s) == k) for k in status_order]
     ax1.bar(np.arange(len(status_order)), counts, color=["#2ca02c", "#f2c744", "#d62728", "#9aa0a6", "#555555"], alpha=0.9)
     ax1.set_xticks(np.arange(len(status_order)))
     ax1.set_xticklabels(status_order)
-    ax1.set_ylabel("trial count", fontsize=14.2)
-    ax1.set_title("Trial status counts", fontsize=15.4)
+    ax1.set_ylabel("trial count", fontsize=14.2 * font_scale)
+    ax1.set_title("Trial status counts", fontsize=15.4 * font_scale)
     ax1.grid(True, axis="y", alpha=0.25)
-    ax1.tick_params(labelsize=12.4)
+    ax1.tick_params(labelsize=12.4 * font_scale)
 
-    fig.suptitle("GW polarization network tuning audit", fontsize=16.8)
+    fig.suptitle("GW polarization network tuning audit", fontsize=16.8 * font_scale)
     fig.tight_layout(rect=[0.02, 0.02, 0.98, 0.96])
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200, bbox_inches="tight")

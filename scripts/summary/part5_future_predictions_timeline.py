@@ -33,17 +33,25 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.utils.plot_style import apply_wavep_figure_layout, install_wavep_font_profile  # noqa: E402
+from scripts.utils.figure_locale_paths import localize_figure_output_path, resolve_figure_output_locale  # noqa: E402
 
 
 _STEM = "part5_future_predictions_timeline"
 _PRIVATE_SUMMARY_DIR = ROOT / "output" / "private" / "summary"
 _PRIVATE_FIGURES_DIR = _PRIVATE_SUMMARY_DIR / "figures"
 _PUBLIC_SUMMARY_DIR = ROOT / "output" / "public" / "summary"
+_FIGURE_LOCALE = resolve_figure_output_locale()
 
 
 # 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+# 関数: `_t` の入出力契約と処理意図を定義する。
+
+def _t(ja: str, en: str) -> str:
+    return en if _FIGURE_LOCALE == "en" else ja
 
 
 # 関数: `_safe_rel` の入出力契約と処理意図を定義する。
@@ -60,56 +68,56 @@ def _safe_rel(path: Path) -> str:
 def _timeline_rows() -> List[Dict[str, Any]]:
     return [
         {
-            "label": "銀河回転曲線\n(独立 sample)",
+            "label": _t("銀河回転曲線\n(独立 sample)", "Galaxy rotation curves\n(independent sample)"),
             "start": 2026.0,
             "end": 2032.0,
             "span": "2026-2032",
             "score": "Pass",
         },
         {
-            "label": "量子計算デコヒーレンス\n(platform benchmark)",
+            "label": _t("量子計算デコヒーレンス\n(platform benchmark)", "Quantum-computing\ndecoherence\n(platform benchmarks)"),
             "start": 2026.0,
             "end": 2032.0,
             "span": "2026-2032",
             "score": "Reference",
         },
         {
-            "label": "重力波偏光\n(LIGO/Virgo/KAGRA)",
+            "label": _t("重力波偏光\n(LIGO/Virgo/KAGRA)", "Gravitational-wave\npolarization\n(LIGO/Virgo/KAGRA)"),
             "start": 2027.0,
             "end": 2030.0,
             "span": "2027-2030",
             "score": "Watch",
         },
         {
-            "label": "距離指標前提検証\n(標準サイレン/JWST)",
+            "label": _t("距離指標前提検証\n(標準サイレン/JWST)", "Distance-indicator\npremises\n(sirens / JWST)"),
             "start": 2027.0,
             "end": 2030.0,
             "span": "2027-2030",
             "score": "Watch",
         },
         {
-            "label": "弱場重力量子\n(原子干渉計/時計)",
+            "label": _t("弱場重力量子\n(原子干渉計/時計)", "Weak-field\ngravity-quantum\n(atom IFs / clocks)"),
             "start": 2026.0,
             "end": 2035.6,
             "span": "2026-2035+",
             "score": "Watch",
         },
         {
-            "label": "宇宙論 ln(1+z)\n(DESI/Euclid/Roman)",
+            "label": _t("宇宙論 ln(1+z)\n(DESI/Euclid/Roman)", "ln(1+z) term\n(DESI/Euclid/Roman)"),
             "start": 2027.0,
             "end": 2035.0,
             "span": "2027-2035",
             "score": "Watch",
         },
         {
-            "label": "ブラックホール影\n(ngEHT/BHEX)",
+            "label": _t("ブラックホール影\n(ngEHT/BHEX)", "Black-hole shadows\n(ngEHT / BHEX)"),
             "start": 2030.0,
             "end": 2031.0,
             "span": "2030-2031",
             "score": "Watch",
         },
         {
-            "label": "マクロ量子干渉\n(MAQRO/OTIMA)",
+            "label": _t("マクロ量子干渉\n(MAQRO/OTIMA)", "Macroscopic\ninterference\n(MAQRO / OTIMA)"),
             "start": 2035.0,
             "end": 2037.2,
             "span": "2035+",
@@ -122,13 +130,13 @@ def _timeline_rows() -> List[Dict[str, Any]]:
 
 def _output_paths() -> Dict[str, Path]:
     return {
-        "private_pdf": _PRIVATE_FIGURES_DIR / f"{_STEM}.pdf",
-        "private_png": _PRIVATE_FIGURES_DIR / f"{_STEM}.png",
-        "private_metrics": _PRIVATE_SUMMARY_DIR / f"{_STEM}_metrics.json",
-        "compat_pdf": _PRIVATE_SUMMARY_DIR / f"{_STEM}.pdf",
-        "public_pdf": _PUBLIC_SUMMARY_DIR / f"{_STEM}.pdf",
-        "public_png": _PUBLIC_SUMMARY_DIR / f"{_STEM}.png",
-        "public_metrics": _PUBLIC_SUMMARY_DIR / f"{_STEM}_metrics.json",
+        "private_pdf": localize_figure_output_path(_PRIVATE_FIGURES_DIR / f"{_STEM}.pdf", root=ROOT),
+        "private_png": localize_figure_output_path(_PRIVATE_FIGURES_DIR / f"{_STEM}.png", root=ROOT),
+        "private_metrics": localize_figure_output_path(_PRIVATE_SUMMARY_DIR / f"{_STEM}_metrics.json", root=ROOT),
+        "compat_pdf": localize_figure_output_path(_PRIVATE_SUMMARY_DIR / f"{_STEM}.pdf", root=ROOT),
+        "public_pdf": localize_figure_output_path(_PUBLIC_SUMMARY_DIR / f"{_STEM}.pdf", root=ROOT),
+        "public_png": localize_figure_output_path(_PUBLIC_SUMMARY_DIR / f"{_STEM}.png", root=ROOT),
+        "public_metrics": localize_figure_output_path(_PUBLIC_SUMMARY_DIR / f"{_STEM}_metrics.json", root=ROOT),
     }
 
 
@@ -147,7 +155,7 @@ def _render_timeline(*, rows: List[Dict[str, Any]], out_pdf: Path, out_png: Path
     fig, ax = plt.subplots()
     apply_wavep_figure_layout(fig, template="part2_single_panel_tall")
     fig.set_size_inches(6.6929, 7.55, forward=True)
-    fig.subplots_adjust(left=0.07, right=0.97, top=0.89, bottom=0.18)
+    fig.subplots_adjust(left=0.18, right=0.97, top=0.89, bottom=0.18)
 
     score_style = {
         "Pass": {"facecolor": "#DCEFD8", "edgecolor": "#5F8F55"},
@@ -185,7 +193,7 @@ def _render_timeline(*, rows: List[Dict[str, Any]], out_pdf: Path, out_png: Path
             zorder=3,
         )
 
-        ax.text(2025.72, y, label, va="center", ha="right")
+        ax.text(2025.72, y, label, va="center", ha="right", fontsize=8.4, linespacing=1.02)
         ax.text(end + 0.12, y, span, va="center", ha="left", color="#3A3A3A")
 
         if span.endswith("+"):
@@ -197,8 +205,8 @@ def _render_timeline(*, rows: List[Dict[str, Any]], out_pdf: Path, out_png: Path
                 zorder=4,
             )
 
-    ax.set_title("Part V: 将来観測による決着タイムライン", pad=8.0)
-    ax.set_xlabel("年（UTC）")
+    ax.set_title(_t("Part V: 将来観測による決着タイムライン", "Part V: decision windows for future observations"), pad=8.0)
+    ax.set_xlabel(_t("年（UTC）", "Year (UTC)"))
     ax.set_yticks([])
     ax.set_xticks([2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035, 2036, 2037])
     ax.tick_params(axis="x")
@@ -248,9 +256,12 @@ def _write_payloads(*, rows: List[Dict[str, Any]], render_meta: Dict[str, Any], 
         "figure_profile": render_meta,
         "rows": rows,
         "notes": [
-            "Part V の未来予測タイムライン図（PDFベクター正本）。",
-            "数値は Part II / Part III-A / Part III-B / Part IV の frozen value を reader-facing roadmap へ再整理した目安。",
-            "Part II baseline の fixed-template route で source-level 再生成した。",
+            _t("Part V の未来予測タイムライン図（PDFベクター正本）。", "Part V future-predictions timeline figure (vector PDF canonical output)."),
+            _t(
+                "数値は Part II / Part III-A / Part III-B / Part IV の frozen value を reader-facing roadmap へ再整理した目安。",
+                "The values are a reader-facing roadmap assembled from the frozen outputs of Part II, Part III-A, Part III-B, and Part IV.",
+            ),
+            _t("Part II baseline の fixed-template route で source-level 再生成した。", "Rebuilt from source with the shared fixed-template route."),
         ],
     }
     private_payload = dict(common_payload)

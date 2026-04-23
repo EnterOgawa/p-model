@@ -31,7 +31,7 @@ _ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from scripts.summary import paper_profile_content as profile_content, worklog
+from scripts.summary import paper_locale_registry as locale_registry, paper_profile_content as profile_content, worklog
 
 _COMPILE_FATAL_PATTERNS = [
     re.compile(r"Undefined control sequence"),
@@ -163,8 +163,7 @@ def _pick_engine(choice: str) -> Tuple[str | None, str]:
 # 関数: `_prepare_tex_cache_env` の入出力契約と処理意図を定義する。
 def _prepare_tex_cache_env(base_dir: Path) -> Dict[str, str]:
     env = os.environ.copy()
-    temp_root = Path(tempfile.gettempdir()).resolve()
-    cache_root = temp_root / "wavep_tex_cache"
+    cache_root = (base_dir.resolve() / "_tex_cache").resolve()
     luaotfload_cache = cache_root / "luaotfload"
 
     for path in (cache_root, luaotfload_cache):
@@ -176,8 +175,8 @@ def _prepare_tex_cache_env(base_dir: Path) -> Dict[str, str]:
     env["LUAOTFLOAD_CACHE"] = str(luaotfload_cache)
     env["TEMP"] = str(cache_root)
     env["TMP"] = str(cache_root)
-    env.setdefault("HOME", str(temp_root))
-    env.setdefault("USERPROFILE", str(temp_root))
+    env["HOME"] = str(cache_root)
+    env["USERPROFILE"] = str(cache_root)
     return env
 
 
@@ -554,8 +553,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     outdir = Path(args.outdir)
     logs_dir = Path(args.logs_dir)
     logs_dir.mkdir(parents=True, exist_ok=True)
-    default_json_name = "paper_tex_audit.json" if not locale else f"paper_tex_audit_{locale}.json"
+    default_json_name = locale_registry.localized_output_name("paper_tex_audit.json", locale=locale)
     json_out = Path(args.json_out) if args.json_out else (outdir / default_json_name)
+    json_out.parent.mkdir(parents=True, exist_ok=True)
 
     per_profile: Dict[str, Any] = {}
     all_ok = True

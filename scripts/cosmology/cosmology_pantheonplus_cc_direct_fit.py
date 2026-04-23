@@ -27,6 +27,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import shutil
 import sys
 from dataclasses import dataclass
@@ -122,6 +123,20 @@ def _set_japanese_font() -> None:
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         pass
+
+
+# 関数: `_is_en_figure` の入出力契約と処理意図を定義する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
+
+
+# 関数: locale ごとの既定出力先を解決する。
+def _default_output_dir(kind: str) -> Path:
+    base = _ROOT / "output" / kind / "cosmology"
+    if _is_en_figure():
+        return base / "locales" / "en"
+
+    return base
 
 
 # 関数: `_cumtrapz` の入出力契約と処理意図を定義する。
@@ -733,6 +748,13 @@ def _build_figure(
         alpha_lambda=alpha_lambda,
     )
 
+    is_en = _is_en_figure()
+    font_scale = 1.16 if is_en else 1.0
+    axis_font = 15.8 * font_scale
+    legend_font = 14.2 * font_scale
+    tick_font = 13.8 * font_scale
+    title_font = 17.4 * font_scale
+    note_font = 14.0 * font_scale
     fig, (ax_mu, ax_h) = plt.subplots(2, 1, figsize=(12.8, 9.8))
 
     ax_mu.scatter(
@@ -742,14 +764,14 @@ def _build_figure(
         color="#4f6d7a",
         alpha=0.26,
         linewidths=0.0,
-        label=f"Pantheon+（n={sn.z.size}）",
+        label=(f"Pantheon+ (n={sn.z.size})" if is_en else f"Pantheon+（n={sn.z.size}）"),
     )
     ax_mu.plot(
         z_mu,
         mu_lcdm,
         color="#d62828",
         linewidth=2.4,
-        label=f"flat ΛCDM best（Ωm={om:.3f}）",
+        label=(f"flat ΛCDM best (Ωm={om:.3f})" if is_en else f"flat ΛCDM best（Ωm={om:.3f}）"),
     )
     ax_mu.plot(
         z_mu,
@@ -757,13 +779,17 @@ def _build_figure(
         color="#1d3557",
         linewidth=2.4,
         linestyle="--",
-        label=f"P-model complete best（αm={alpha_m:.3f}, αΛ={alpha_lambda:.3f}）",
+        label=(
+            f"P-model complete best (αm={alpha_m:.3f}, αΛ={alpha_lambda:.3f})"
+            if is_en
+            else f"P-model complete best（αm={alpha_m:.3f}, αΛ={alpha_lambda:.3f}）"
+        ),
     )
-    ax_mu.set_xlabel("z", fontsize=15.8)
-    ax_mu.set_ylabel("距離モジュラス μ(z) [mag]", fontsize=15.8)
+    ax_mu.set_xlabel("z", fontsize=axis_font)
+    ax_mu.set_ylabel("distance modulus μ(z) [mag]" if is_en else "距離モジュラス μ(z) [mag]", fontsize=axis_font)
     ax_mu.grid(True, linestyle="--", alpha=0.35)
-    ax_mu.legend(fontsize=14.2, loc="lower right")
-    ax_mu.tick_params(labelsize=13.8)
+    ax_mu.legend(fontsize=legend_font, loc="lower right")
+    ax_mu.tick_params(labelsize=tick_font)
 
     ax_h.errorbar(
         cc.z,
@@ -776,14 +802,14 @@ def _build_figure(
         elinewidth=1.0,
         capsize=2.5,
         alpha=0.9,
-        label=f"Cosmic Chronometers（n={cc.z.size}）",
+        label=(f"Cosmic Chronometers (n={cc.z.size})" if is_en else f"Cosmic Chronometers（n={cc.z.size}）"),
     )
     ax_h.plot(
         z_h,
         hz_lcdm,
         color="#d62828",
         linewidth=2.4,
-        label=f"flat ΛCDM best（H0={fit_lcdm.h0_best:.2f}）",
+        label=(f"flat ΛCDM best (H0={fit_lcdm.h0_best:.2f})" if is_en else f"flat ΛCDM best（H0={fit_lcdm.h0_best:.2f}）"),
     )
     ax_h.plot(
         z_h,
@@ -791,27 +817,36 @@ def _build_figure(
         color="#1d3557",
         linewidth=2.4,
         linestyle="--",
-        label=f"P-model best（H0={fit_pmodel.h0_best:.2f}）",
+        label=(f"P-model best (H0={fit_pmodel.h0_best:.2f})" if is_en else f"P-model best（H0={fit_pmodel.h0_best:.2f}）"),
     )
-    ax_h.set_xlabel("z", fontsize=15.8)
-    ax_h.set_ylabel("H(z) [km s$^{-1}$ Mpc$^{-1}$]", fontsize=15.8)
+    ax_h.set_xlabel("z", fontsize=axis_font)
+    ax_h.set_ylabel("H(z) [km s$^{-1}$ Mpc$^{-1}$]", fontsize=axis_font)
     ax_h.grid(True, linestyle="--", alpha=0.35)
-    ax_h.legend(fontsize=14.2, loc="upper left")
-    ax_h.tick_params(labelsize=13.8)
+    ax_h.legend(fontsize=legend_font, loc="upper left")
+    ax_h.tick_params(labelsize=tick_font)
 
     fig.suptitle(
-        "Pantheon+ μ(z) と Cosmic Chronometers H(z) の直接比較（同一I/F）",
-        fontsize=17.4,
+        "Pantheon+ μ(z) and Cosmic Chronometers H(z) direct comparison (same I/F)"
+        if is_en
+        else "Pantheon+ μ(z) と Cosmic Chronometers H(z) の直接比較（同一I/F）",
+        fontsize=title_font,
     )
     fig.text(
         0.5,
         0.014,
         (
-            f"χ²_total: ΛCDM={fit_lcdm.chi2_total:.2f}, P-model={fit_pmodel.chi2_total:.2f}; "
-            f"ΔAIC = AIC_baseline - AIC_P = {delta_aic:+.2f}（正値でP-model優位）"
+            (
+                f"χ²_total: ΛCDM={fit_lcdm.chi2_total:.2f}, P-model={fit_pmodel.chi2_total:.2f}; "
+                f"ΔAIC = AIC_baseline - AIC_P = {delta_aic:+.2f} (positive favors P-model)"
+            )
+            if is_en
+            else (
+                f"χ²_total: ΛCDM={fit_lcdm.chi2_total:.2f}, P-model={fit_pmodel.chi2_total:.2f}; "
+                f"ΔAIC = AIC_baseline - AIC_P = {delta_aic:+.2f}（正値でP-model優位）"
+            )
         ),
         ha="center",
-        fontsize=14.0,
+        fontsize=note_font,
     )
     plt.tight_layout(rect=(0.0, 0.085, 1.0, 0.95), h_pad=2.4)
 
@@ -870,8 +905,8 @@ def main(argv: list[str] | None = None) -> int:
     delta_aic = float(fit_lcdm.aic - fit_pmodel.aic)
     winner = "pmodel" if delta_aic > 0.0 else "baseline_lcdm"
 
-    out_private = _ROOT / "output" / "private" / "cosmology"
-    out_public = _ROOT / "output" / "public" / "cosmology"
+    out_private = _default_output_dir("private")
+    out_public = _default_output_dir("public")
     out_private.mkdir(parents=True, exist_ok=True)
     out_public.mkdir(parents=True, exist_ok=True)
 

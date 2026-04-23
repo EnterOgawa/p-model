@@ -61,13 +61,21 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.summary import worklog  # noqa: E402
-from scripts.utils.plot_style import apply_paper_style, apply_wavep_figure_layout, resolve_wavep_cjk_font_family  # noqa: E402
+from scripts.utils.figure_locale_paths import localize_figure_output_path  # noqa: E402
+from scripts.utils.plot_style import apply_paper_style, apply_wavep_figure_layout, get_wavep_font_size, resolve_wavep_cjk_font_family  # noqa: E402
+from scripts.quantum.figure_japanese_localizer import get_figure_language  # noqa: E402
 
 OUT_DIR = ROOT / "output" / "private" / "gps"
 OUT_PUBLIC_DIR = ROOT / "output" / "public" / "gps"
 
 
+# 関数: `_plot_text` の入出力契約と処理意図を定義する。
+def _plot_text(ja: str, en: str, *, lang: str) -> str:
+    return ja if lang == "ja" else en
+
+
 # 関数: `_to_ns_from_m` の入出力契約と処理意図を定義する。
+
 def _to_ns_from_m(rms_m: float) -> float:
     return (rms_m / C) * 1e9
 
@@ -77,15 +85,22 @@ def _to_ns_from_m(rms_m: float) -> float:
 def _save_dual_figure(fig: plt.Figure, *, stem: str, dpi_png: int) -> tuple[Path, Path]:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     OUT_PUBLIC_DIR.mkdir(parents=True, exist_ok=True)
-    out_png = OUT_DIR / f"{stem}.png"
-    out_pdf = OUT_DIR / f"{stem}.pdf"
+    figure_lang = get_figure_language(default="ja")
+    out_png = localize_figure_output_path(OUT_DIR / f"{stem}.png", root=ROOT, locale=figure_lang)
+    out_pdf = localize_figure_output_path(OUT_DIR / f"{stem}.pdf", root=ROOT, locale=figure_lang)
+    public_png = localize_figure_output_path(OUT_PUBLIC_DIR / out_png.name, root=ROOT, locale=figure_lang)
+    public_pdf = localize_figure_output_path(OUT_PUBLIC_DIR / out_pdf.name, root=ROOT, locale=figure_lang)
+    out_png.parent.mkdir(parents=True, exist_ok=True)
+    out_pdf.parent.mkdir(parents=True, exist_ok=True)
+    public_png.parent.mkdir(parents=True, exist_ok=True)
+    public_pdf.parent.mkdir(parents=True, exist_ok=True)
 
     with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
         fig.savefig(out_png, dpi=int(dpi_png))
         fig.savefig(out_pdf)
 
-    shutil.copy2(out_png, OUT_PUBLIC_DIR / out_png.name)
-    shutil.copy2(out_pdf, OUT_PUBLIC_DIR / out_pdf.name)
+    shutil.copy2(out_png, public_png)
+    shutil.copy2(out_pdf, public_pdf)
     return (out_png, out_pdf)
 
 
@@ -100,8 +115,18 @@ def load_summary(summary_csv: Path) -> List[Dict[str, str]]:
 # 関数: `plot_all_residuals_brdc` の入出力契約と処理意図を定義する。
 
 def plot_all_residuals_brdc(sats: List[str]) -> Path:
-    _set_japanese_font()
-    plt.figure(figsize=(14.2, 8.2))
+    figure_lang = get_figure_language(default="ja")
+    if figure_lang == "ja":
+        _set_japanese_font()
+
+    apply_paper_style()
+    fig, ax = plt.subplots()
+    layout_template = "part2_single_panel_legend_bottom" if figure_lang == "en" else "part2_single_panel_tall"
+    apply_wavep_figure_layout(fig, template=layout_template)
+    title_font = get_wavep_font_size("title", name="part2_astrophysics") * (0.98 if figure_lang == "en" else 1.0)
+    axis_font = get_wavep_font_size("axis", name="part2_astrophysics")
+    tick_font = get_wavep_font_size("tick", name="part2_astrophysics")
+    legend_font = get_wavep_font_size("legend", name="part2_astrophysics")
 
     count = 0
     for sat in sats:
@@ -113,43 +138,52 @@ def plot_all_residuals_brdc(sats: List[str]) -> Path:
         try:
             df = pd.read_csv(filename)
             df["time_utc"] = pd.to_datetime(df["time_utc"])
-            plt.plot(df["time_utc"], df["res_brdc_s"] * 1e9, label=sat, linewidth=1.05, alpha=0.68)
+            ax.plot(df["time_utc"], df["res_brdc_s"] * 1e9, label=sat, linewidth=1.00, alpha=0.68)
             count += 1
         except Exception as e:
             print(f"[warn] failed to read {filename}: {e}")
 
-    plt.title("GPS 放送暦 時計残差（BRDC - IGS, 全衛星）", fontsize=20.6)
-    plt.xlabel("UTC時刻", fontsize=16.2, rotation=0, labelpad=10)
-    plt.ylabel("時計残差 [ns]", fontsize=16.2)
-    plt.axhline(0, color="black", linestyle="-", linewidth=0.8)
-    plt.grid(True, linestyle="--", alpha=0.5)
-    plt.tick_params(axis="both", labelsize=14.4)
-    plt.legend(
-        bbox_to_anchor=(1.005, 1.0),
-        loc="upper left",
-        fontsize=12.8,
-        ncol=2,
-        borderaxespad=0.0,
-        labelspacing=0.36,
-        handlelength=1.7,
-        columnspacing=0.82,
-        frameon=True,
-        borderpad=0.48,
+    ax.set_title(
+        _plot_text(
+            "GPS 放送暦時計残差（BRDC - IGS, 全衛星）",
+            "GPS broadcast-clock residuals\n(BRDC - IGS, all satellites)",
+            lang=figure_lang,
+        ),
+        fontsize=title_font,
+        pad=10.0,
     )
-    ax = plt.gca()
+    ax.set_ylabel(_plot_text("時計残差 [ns]", "Clock residual [ns]", lang=figure_lang), fontsize=axis_font)
+    ax.axhline(0, color="black", linestyle="-", linewidth=0.8)
+    ax.grid(True, linestyle="--", alpha=0.5)
+    ax.tick_params(axis="both", labelsize=tick_font)
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
     for tick_label in ax.get_xticklabels():
-        tick_label.set_rotation(28)
+        tick_label.set_rotation(20)
         tick_label.set_ha("right")
 
-    plt.tight_layout()
+    if figure_lang == "en":
+        handles, labels = ax.get_legend_handles_labels()
+        ax.legend(
+            handles,
+            labels,
+            loc="upper center",
+            bbox_to_anchor=(0.5, -0.16),
+            ncol=8,
+            frameon=True,
+            framealpha=0.95,
+            fontsize=legend_font,
+            columnspacing=0.9,
+            handlelength=1.4,
+            handletextpad=0.4,
+            borderaxespad=0.0,
+            labelspacing=0.35,
+        )
 
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    out_png = OUT_DIR / "gps_clock_residuals_all_31.png"
-    out_pdf = OUT_DIR / "gps_clock_residuals_all_31.pdf"
-    plt.savefig(out_png, dpi=300)
-    plt.savefig(out_pdf)
-    plt.close()
+    fig.subplots_adjust(left=0.115, right=0.985, top=0.88, bottom=(0.285 if figure_lang == "en" else 0.13))
+
+    out_png, out_pdf = _save_dual_figure(fig, stem="gps_clock_residuals_all_31", dpi_png=300)
+
+    plt.close(fig)
     print(f"[ok] {out_png} (plotted {count} sats)")
     print(f"[ok] {out_pdf} (plotted {count} sats)")
     return out_png
@@ -391,14 +425,17 @@ def plot_relativistic_correction_example(prn: str = "G02") -> Tuple[Optional[Pat
     }
 
     apply_paper_style()
-    _set_japanese_font()
+    figure_lang = get_figure_language(default="ja")
+    if figure_lang == "ja":
+        _set_japanese_font()
+
     fig, ax = plt.subplots()
     apply_wavep_figure_layout(fig, template="part2_single_panel")
-    ax.plot(df["time_utc"], rel_det * 1e9, label="標準式 δt_rel（-2 r·v / c^2）", linewidth=2.0)
-    ax.plot(df["time_utc"], p_det * 1e9, label="P-model（dτ/dt を積分, バイアス＋ドリフト除去）", linewidth=2.0)
-    ax.set_title(f"GPS: 相対補正（近日点効果） {prn}", pad=6.0)
-    ax.set_xlabel("UTC時刻")
-    ax.set_ylabel("時間補正 [ns]（バイアス＋ドリフト除去後）")
+    ax.plot(df["time_utc"], rel_det * 1e9, label=_plot_text("標準式 δt_rel（-2 r·v / c^2）", "Standard formula δt_rel (-2 r·v / c^2)", lang=figure_lang), linewidth=2.0)
+    ax.plot(df["time_utc"], p_det * 1e9, label=_plot_text("P-model（dτ/dt を積分, バイアス＋ドリフト除去）", "P-model (integrated dτ/dt,\nbias+drift removed)", lang=figure_lang), linewidth=2.0)
+    ax.set_title(_plot_text(f"GPS: 相対補正（近日点効果） {prn}", f"GPS: relativistic correction\n(perigee effect) {prn}", lang=figure_lang), pad=6.0)
+    ax.set_xlabel(_plot_text("UTC時刻", "UTC time", lang=figure_lang))
+    ax.set_ylabel(_plot_text("時間補正 [ns]（バイアス＋ドリフト除去後）", "Time correction [ns]\n(after bias+drift removal)", lang=figure_lang))
     ax.grid(True, alpha=0.3)
     ax.legend(loc="upper right", framealpha=0.95)
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))

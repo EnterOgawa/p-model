@@ -23,6 +23,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 import shutil
 import sys
 from datetime import datetime, timezone
@@ -38,6 +39,20 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+
+
+# 関数: 英語 localized surface かどうかを判定する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
+
+
+# 関数: locale ごとの既定出力先を解決する。
+def _default_output_dir(kind: str) -> Path:
+    base = ROOT / "output" / kind / "cosmology"
+    if _is_en_figure():
+        return base / "locales" / "en"
+
+    return base
 
 
 # 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
@@ -181,12 +196,14 @@ def _plot_fit(
 ) -> None:
     _set_japanese_font()
     import matplotlib.pyplot as plt
-    title_fs = 18.8
-    label_fs = 16.4
-    residual_label_fs = 15.6
-    legend_fs = 14.0
-    note_fs = 14.0
-    tick_fs = 13.6
+    font_scale = 1.15 if _is_en_figure() else 1.0
+    title_fs = 18.8 * font_scale
+    label_fs = 16.4 * font_scale
+    residual_label_fs = 15.6 * font_scale
+    legend_fs = 14.0 * font_scale
+    note_fs = 14.0 * font_scale
+    tick_fs = 13.6 * font_scale
+    is_en = _is_en_figure()
 
     fig, (ax0, ax1) = plt.subplots(
         2,
@@ -203,10 +220,10 @@ def _plot_fit(
         fmt=".",
         color="#7f7f7f",
         alpha=0.55,
-        label="Planck 2018 TT（binned）",
+        label="Planck 2018 TT (binned)" if is_en else "Planck 2018 TT（binned）",
     )
-    ax0.plot(ell, dl_baseline, color="#1f77b4", linewidth=1.8, label="baseline（Planck best-fit）")
-    ax0.plot(ell, dl_pmodel, color="#d62728", linewidth=1.8, label="P-model（template remap）")
+    ax0.plot(ell, dl_baseline, color="#1f77b4", linewidth=1.8, label="baseline (Planck best-fit)" if is_en else "baseline（Planck best-fit）")
+    ax0.plot(ell, dl_pmodel, color="#d62728", linewidth=1.8, label="P-model (template remap)" if is_en else "P-model（template remap）")
     ax0.set_ylabel(r"$D_\ell^{TT}$ [$\mu$K$^2$]", fontsize=label_fs)
     ax0.set_title(r"CMB TT full-range fit audit ($\ell \leq 2500$)", fontsize=title_fs)
     ax0.grid(True, linestyle="--", alpha=0.45)
@@ -327,8 +344,12 @@ def main() -> int:
     chi2_dof_baseline = float(chi2_baseline / dof_baseline)
     chi2_dof_p = float(chi2_p / dof_p)
 
-    out_private = Path(args.out_private_dir).resolve()
-    out_public = Path(args.out_public_dir).resolve()
+    default_private = (ROOT / "output" / "private" / "cosmology").resolve()
+    default_public = (ROOT / "output" / "public" / "cosmology").resolve()
+    requested_private = Path(args.out_private_dir).resolve()
+    requested_public = Path(args.out_public_dir).resolve()
+    out_private = _default_output_dir("private") if _is_en_figure() and requested_private == default_private else requested_private
+    out_public = _default_output_dir("public") if _is_en_figure() and requested_public == default_public else requested_public
     out_png = out_private / "cosmology_cmb_tt_full_cl_fit.png"
     out_pdf = out_private / "cosmology_cmb_tt_full_cl_fit.pdf"
     out_json = out_private / "cosmology_cmb_tt_full_cl_fit_metrics.json"

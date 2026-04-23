@@ -1,0 +1,46 @@
+{
+  "generated_utc": "2026-04-21T09:27:11.962050+00:00",
+  "schema": "wavep.summary.table1_part4_label_parity.v1",
+  "phase": 8,
+  "step": "8.2.35.1",
+  "inputs": {
+    "table1_json": "C:/develop/waveP/output/private/summary/paper_table1_results.json",
+    "part4_markdown": "doc/paper/locales/en/13_part4_verification.md",
+    "sync_part4": false,
+    "sync_mode": "skipped"
+  },
+  "summary": {
+    "overall_status": "pass",
+    "decision": "table1_part4_label_parity_pass",
+    "next_action": "parity_locked_keep_table1_and_part4_in_sync",
+    "n_table1_rows": 51,
+    "n_part4_label_rows": 51,
+    "n_matched_rows": 51,
+    "n_missing_rows": 0,
+    "n_extra_rows": 0
+  },
+  "missing_pairs": [],
+  "extra_pairs": [],
+  "outputs": {
+    "audit_json": "output/private/summary/locales/en/table1_part4_label_parity_audit.json",
+    "audit_csv": "output/private/summary/locales/en/table1_part4_label_parity_audit.csv",
+    "audit_png": "output/private/summary/locales/en/table1_part4_label_parity_audit.png",
+    "audit_pdf": "output/private/summary/locales/en/table1_part4_label_parity_audit.pdf",
+    "public_copies": [
+      "output/public/summary/locales/en/table1_part4_label_parity_audit.json",
+      "output/public/summary/locales/en/table1_part4_label_parity_audit.csv",
+      "output/public/summary/locales/en/table1_part4_label_parity_audit.png",
+      "output/public/summary/locales/en/table1_part4_label_parity_audit.pdf"
+    ]
+  },
+  "falsification": {
+    "hard_pass_if": [
+      "all 検証サマリ表 (topic, observable) pairs appear in Part IV label block with exact text equality",
+      "no extra (topic, observable) pair exists in Part IV label block"
+    ],
+    "reject_if": [
+      "any missing pair exists",
+      "any extra pair exists"
+    ]
+  }
+}

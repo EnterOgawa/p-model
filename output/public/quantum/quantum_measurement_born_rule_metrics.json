@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-03-14T07:37:07.719477+00:00",
+  "generated_utc": "2026-04-10T13:09:32.111985+00:00",
   "phase": 7,
   "step": "7.10",
   "title": "Quantum measurement (Born rule & state update) positioning",
@@ -52,7 +52,7 @@
     "Spin/charge/EM/strong interactions (Step 7.11+)"
   ],
   "outputs": {
-    "figure_png": "output/public/quantum/quantum_measurement_born_rule_flow.png",
-    "figure_pdf": "output/public/quantum/quantum_measurement_born_rule_flow.pdf"
+    "figure_png": "output/public/quantum/locales/en/quantum_measurement_born_rule_flow.png",
+    "figure_pdf": "output/public/quantum/locales/en/quantum_measurement_born_rule_flow.pdf"
   }
 }

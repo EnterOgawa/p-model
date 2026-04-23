@@ -1,0 +1,138 @@
+{
+  "generated_utc": "2026-04-13T07:10:43.660024+00:00",
+  "phase": {
+    "phase": 7,
+    "step": "7.21.4",
+    "name": "quantum cross-channel block covariance"
+  },
+  "intent": "Integrate Bell covariance with interference/condensed summaries and identify dominant eigen-mode within public data scope.",
+  "inputs": {
+    "bell_cross_dataset_covariance_json": "output/public/quantum/bell/cross_dataset_covariance.json",
+    "born_ab_gate_json": "output/public/quantum/quantum_connection_born_ab_gate.json",
+    "condensed_holdout_audit_summary_json": "output/public/quantum/condensed_holdout_audit_summary.json",
+    "quantum_connection_shared_kpi_json": "output/public/quantum/quantum_connection_shared_kpi.json"
+  },
+  "method": {
+    "transform": "log1p on non-negative normalized proxies",
+    "alignment": "linear interpolation to common grid (n=81)",
+    "covariance": "sample covariance across aligned channel series",
+    "note": "Operational block covariance for cross-channel auditing (not a universal physical covariance)."
+  },
+  "channels": [
+    {
+      "channel": "bell",
+      "status_from_shared_kpi": "reject",
+      "raw_points_n": 5,
+      "raw_min": 2.908182253590652e-05,
+      "raw_max": 0.4302364153624373,
+      "raw_median": 0.07031309270131196,
+      "transformed_median": 0.06795121567308383,
+      "aligned_mean": 0.14468546193737725,
+      "aligned_std": 0.11643945628117314
+    },
+    {
+      "channel": "interference",
+      "status_from_shared_kpi": "pass",
+      "raw_points_n": 10,
+      "raw_min": 0.0,
+      "raw_max": 1.1896333754740827,
+      "raw_median": 0.22824655596661414,
+      "transformed_median": 0.20524521708907617,
+      "aligned_mean": 0.28982572724379874,
+      "aligned_std": 0.19477821257728073
+    },
+    {
+      "channel": "condensed",
+      "status_from_shared_kpi": "pass",
+      "raw_points_n": 132,
+      "raw_min": 0.0,
+      "raw_max": 15.10093910343342,
+      "raw_median": 7.49301404249192e-11,
+      "transformed_median": 7.493014042211144e-11,
+      "aligned_mean": 0.048728745769906365,
+      "aligned_std": 0.3206278435115036
+    }
+  ],
+  "matrices": {
+    "channel_order": [
+      "bell",
+      "interference",
+      "condensed"
+    ],
+    "channel_covariance": [
+      [
+        0.013558146979055236,
+        0.0014845848712978723,
+        -0.0036166003763020388
+      ],
+      [
+        0.0014845848712978723,
+        0.03793855209480036,
+        -0.004078053653003789
+      ],
+      [
+        -0.0036166003763020388,
+        -0.004078053653003789,
+        0.10280221403483719
+      ]
+    ],
+    "channel_correlation": [
+      [
+        1.0,
+        0.06545826434474974,
+        -0.09687219051299423
+      ],
+      [
+        0.06545826434474974,
+        1.0,
+        -0.06529972091087398
+      ],
+      [
+        -0.09687219051299423,
+        -0.06529972091087398,
+        1.0
+      ]
+    ],
+    "channel_covariance_eigen": {
+      "supported": true,
+      "eigenvalues_desc": [
+        0.1032105338879401,
+        0.03774778269032888,
+        0.013340596530423753
+      ],
+      "dominant_mode": {
+        "eigenvalue": 0.1032105338879401,
+        "dominant_channel": "condensed",
+        "dominant_loading": 0.9971446899483916,
+        "channel_loadings": {
+          "bell": -0.041272256572536185,
+          "interference": -0.06323818581471485,
+          "condensed": 0.9971446899483916
+        }
+      }
+    },
+    "channel_correlation_eigen": {
+      "supported": true,
+      "eigenvalues_desc": [
+        1.1528146538479074,
+        0.9440577749291823,
+        0.9031275712229104
+      ],
+      "dominant_mode": {
+        "eigenvalue": 1.1528146538479074,
+        "dominant_channel": "bell",
+        "dominant_loading": -0.6051524436417418,
+        "channel_loadings": {
+          "bell": -0.6051524436417418,
+          "interference": -0.517666651335501,
+          "condensed": 0.6048237413077611
+        }
+      }
+    },
+    "bell_profile_covariance_top_eigenvalue": 0.22274533847333117
+  },
+  "diagnostics": {
+    "dominant_mode_reason": "condensed holdout block",
+    "aligned_grid_points": 81
+  }
+}

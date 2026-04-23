@@ -1,0 +1,4 @@
+requirement_id,metric,value,expected,status,required_action
+polarization::usable_subsets_with_min_coverage,n_subsets_with_usable_min,4,>=1,pass,none
+polarization::coverage_gate_hits,n_gate_hits,0,>=1,watch,need_additional_high_quality_three_detector_events_to_raise_gate_hits
+polarization::best_u2_below_watch_boundary,best_u2_scalar_overlap_proxy,0.5,<0.5 (usable>=2),watch,need_best_u2_reduction_with_usable_events_kept_at_least_2

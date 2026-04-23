@@ -8,36 +8,53 @@
 from __future__ import annotations
 
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.utils.figure_locale_paths import localize_figure_output_path, resolve_figure_output_locale
 from scripts.utils.plot_style import (
     apply_paper_style,
     apply_wavep_figure_layout,
     resolve_wavep_cjk_font_family,
 )
-
-
-ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR_CANON = ROOT / "output" / "theory"
 OUT_DIR_PUBLIC = ROOT / "output" / "public" / "theory"
 OUT_DIR_PRIVATE = ROOT / "output" / "private" / "theory"
+FIGURE_LOCALE = resolve_figure_output_locale()
+IS_EN = FIGURE_LOCALE == "en"
+
+
+# 関数: `_t` の入出力契約と処理意図を定義する。
+def _t(ja: str, en: str) -> str:
+    return en if IS_EN else ja
 
 
 # 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
+# 関数: `_configure_font` の入出力契約と処理意図を定義する。
 
-def _set_japanese_font() -> None:
+def _configure_font() -> None:
     try:
         import matplotlib as mpl
         import matplotlib.font_manager as fm
+
+        if IS_EN:
+            mpl.rcParams["font.family"] = ["DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = ["DejaVu Sans"]
+            mpl.rcParams["axes.unicode_minus"] = False
+            return
 
         preferred = resolve_wavep_cjk_font_family(preferred_name="Noto Sans CJK JP")
         if preferred:
@@ -69,18 +86,23 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 def _save_figure_bundle(*, fig: Any, stem: str) -> Dict[str, str]:
     outputs = {
-        "png_canon": OUT_DIR_CANON / f"{stem}.png",
-        "png_public": OUT_DIR_PUBLIC / f"{stem}.png",
-        "png_private": OUT_DIR_PRIVATE / f"{stem}.png",
-        "pdf_canon": OUT_DIR_CANON / f"{stem}.pdf",
-        "pdf_public": OUT_DIR_PUBLIC / f"{stem}.pdf",
-        "pdf_private": OUT_DIR_PRIVATE / f"{stem}.pdf",
+        "png_canon": OUT_DIR_CANON / f"{stem}.png" if not IS_EN else localize_figure_output_path(OUT_DIR_PRIVATE / f"{stem}.png", root=ROOT, locale=FIGURE_LOCALE),
+        "png_public": localize_figure_output_path(OUT_DIR_PUBLIC / f"{stem}.png", root=ROOT, locale=FIGURE_LOCALE),
+        "png_private": localize_figure_output_path(OUT_DIR_PRIVATE / f"{stem}.png", root=ROOT, locale=FIGURE_LOCALE),
+        "pdf_canon": OUT_DIR_CANON / f"{stem}.pdf" if not IS_EN else localize_figure_output_path(OUT_DIR_PRIVATE / f"{stem}.pdf", root=ROOT, locale=FIGURE_LOCALE),
+        "pdf_public": localize_figure_output_path(OUT_DIR_PUBLIC / f"{stem}.pdf", root=ROOT, locale=FIGURE_LOCALE),
+        "pdf_private": localize_figure_output_path(OUT_DIR_PRIVATE / f"{stem}.pdf", root=ROOT, locale=FIGURE_LOCALE),
     }
-    for path in outputs.values():
+    save_targets = dict(outputs)
+    if IS_EN:
+        save_targets.pop("png_canon", None)
+        save_targets.pop("pdf_canon", None)
+
+    for path in save_targets.values():
         path.parent.mkdir(parents=True, exist_ok=True)
 
     with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
-        for path in outputs.values():
+        for path in save_targets.values():
             if path.suffix.lower() == ".png":
                 fig.savefig(path, dpi=220)
             else:
@@ -169,20 +191,21 @@ def _draw_arrow(
 
 def main() -> int:
     apply_paper_style()
-    _set_japanese_font()
+    _configure_font()
 
-    out_json_private = OUT_DIR_PRIVATE / "pmodel_rejection_protocol_flowchart_metrics.json"
+    out_json_private = localize_figure_output_path(OUT_DIR_PRIVATE / "pmodel_rejection_protocol_flowchart_metrics.json", root=ROOT, locale=FIGURE_LOCALE)
 
     figure, axis = plt.subplots(dpi=220)
     apply_wavep_figure_layout(figure, template="paper_flowchart")
+    figure.subplots_adjust(left=0.035, right=0.985, top=0.965, bottom=0.16)
     axis.set_axis_off()
 
     steps: List[Dict[str, str]] = [
-        {"title": "入力", "body": "一次データ\n依存前提\n取得元", "color": "#eef3ff"},
-        {"title": "凍結", "body": "凍結パラメータ\n凍結根拠\n固定時点", "color": "#f2edff"},
-        {"title": "統計", "body": "RMS, χ², z\nΔAIC, 傾き\n誤差伝播", "color": "#fff7ec"},
-        {"title": "判定", "body": "閾値判定\n(3σ, ΔAIC)\n判定分岐へ", "color": "#ffe8e8"},
-        {"title": "出力", "body": "固定ファイル名\n再現コマンド\n監査ログ", "color": "#eaf8ea"},
+        {"title": _t("入力", "Inputs"), "body": _t("一次データ\n依存前提\n取得元", "Primary data\nassumed priors\nsource"), "color": "#eef3ff"},
+        {"title": _t("凍結", "Freeze"), "body": _t("凍結パラメータ\n凍結根拠\n固定時点", "Frozen parameters\nfreeze rationale\nfreeze point"), "color": "#f2edff"},
+        {"title": _t("統計", "Statistics"), "body": _t("RMS, χ², z\nΔAIC, 傾き\n誤差伝播", "RMS, χ², z\nΔAIC, slope\nerror propagation"), "color": "#fff7ec"},
+        {"title": _t("判定", "Decision"), "body": _t("閾値判定\n(3σ, ΔAIC)\n判定分岐へ", "Threshold gate\n(3σ, ΔAIC)\nto branch decision"), "color": "#ffe8e8"},
+        {"title": _t("出力", "Outputs"), "body": _t("固定ファイル名\n再現コマンド\n監査ログ", "Stable filenames\nrepro command\naudit log"), "color": "#eaf8ea"},
     ]
 
     box_width = 0.148
@@ -243,9 +266,9 @@ def main() -> int:
         zorder=7.8,
     )
     branch_labels = [
-        ("採用", "#2ca02c", x_output + 0.026 - branch_shift_left),
-        ("監視", "#f59e0b", x_output + 0.118 - branch_shift_left),
-        ("棄却", "#d62728", x_output + 0.212 - branch_shift_left),
+        (_t("採用", "Pass"), "#2ca02c", x_output + 0.026 - branch_shift_left),
+        (_t("監視", "Watch"), "#f59e0b", x_output + 0.118 - branch_shift_left),
+        (_t("棄却", "Reject"), "#d62728", x_output + 0.212 - branch_shift_left),
     ]
     for label, color, xb in branch_labels:
         axis.scatter([xb], [y_branch], transform=axis.transAxes, s=56, color=color, zorder=9.0)
@@ -267,7 +290,7 @@ def main() -> int:
     branch_label = axis.text(
         x_branch - branch_shift_left,
         y_branch + 0.033,
-        "判定分岐",
+        _t("判定分岐", "Decision branch"),
         transform=axis.transAxes,
         ha="center",
         va="bottom",
@@ -278,15 +301,19 @@ def main() -> int:
 
     footer_text = axis.text(
         0.5,
-        0.07,
-        "Part I 基準：入力→凍結→統計→判定→出力 を同一I/Fで固定し、再現可能な棄却手順として運用する。",
+        0.06,
+        _t(
+            "Part I 基準：入力→凍結→統計→判定→出力 を同一I/Fで固定し、\n再現可能な棄却手順として運用する。",
+            "Part I fixes input → freeze → statistics → decision → output\nas one common I/F and runs it as a reproducible rejection protocol.",
+        ),
         transform=axis.transAxes,
         ha="center",
         va="center",
         fontsize=9.8,
         color="0.25",
+        linespacing=1.20,
     )
-    footer_text.set_fontsize(8.8)
+    footer_text.set_fontsize(7.8)
 
     outputs = _save_figure_bundle(fig=figure, stem="pmodel_rejection_protocol_flowchart")
     plt.close(figure)
@@ -300,8 +327,8 @@ def main() -> int:
         },
         "flow_steps": [step["title"] for step in steps],
         "notes": [
-            "Part I Method 3.0 の共通棄却手順をフローチャート化した図。",
-            "式の追加ではなく、運用I/F（再現と棄却）を可視化する監査図。",
+            _t("Part I Method 3.0 の共通棄却手順をフローチャート化した図。", "Flowchart of the common rejection protocol in Part I Method 3.0."),
+            _t("式の追加ではなく、運用I/F（再現と棄却）を可視化する監査図。", "An audit figure that visualizes the operational I/F for reproducibility and rejection, not an added equation."),
         ],
     }
     _write_json(out_json_private, payload)

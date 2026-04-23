@@ -45,6 +45,7 @@ import re
 import hashlib
 import json
 import time
+import shutil
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
@@ -55,6 +56,7 @@ from typing import Optional, List, Dict, Any
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from scripts.utils.figure_locale_paths import localize_figure_output_path
 
 # -------------------------
 # Defaults (no-args mode)
@@ -82,6 +84,30 @@ POS_EOP_SNX_DIR_REL = Path("data") / "llr" / "pos_eop" / "snx"
 # Horizons prints epochs with 4 decimal digits in seconds (0.0001s).
 # For stable merging/caching, we round inputs to this resolution.
 HORIZONS_TIME_QUANTUM_US = 100
+
+
+# 関数: `_figure_lang` の入出力契約と処理意図を定義する。
+def _figure_lang() -> str:
+    return str(os.environ.get("WAVEP_FIGURE_LANG") or os.environ.get("WAVEP_MPL_FIGURE_LANG") or "ja").strip().lower() or "ja"
+
+
+# 関数: `_plot_text` の入出力契約と処理意図を定義する。
+def _plot_text(ja: str, en: str, *, lang: str) -> str:
+    return ja if lang == "ja" else en
+
+
+# 関数: `_sync_public_and_summary_artifact` の入出力契約と処理意図を定義する。
+def _sync_public_and_summary_artifact(src: Path, *, public_dir: Path, summary_dir: Path) -> None:
+    if not src.exists():
+        return
+
+    repo_root = Path(__file__).resolve().parents[2]
+    public_dst = localize_figure_output_path(public_dir / src.name, root=repo_root)
+    summary_dst = localize_figure_output_path(summary_dir / src.name, root=repo_root)
+    public_dst.parent.mkdir(parents=True, exist_ok=True)
+    summary_dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, public_dst)
+    shutil.copy2(src, summary_dst)
 
 
 # ============================================================
@@ -2101,37 +2127,43 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
         else None
     )
 
-    _set_japanese_font()
+    figure_lang = _figure_lang()
+    if figure_lang == "ja":
+        _set_japanese_font()
     plt.figure(figsize=(10, 4.8))
-    plt.plot(t, y_obs, marker="o", label="観測 TOF（平均除去）")
-    plt.plot(t, y_moon, marker="o", label=f"月中心モデル（局あり, β={beta:g}, 定数オフセット整列, 平均除去）")
+    plt.plot(t, y_obs, marker="o", label=_plot_text("観測 TOF（平均除去）", "Observed TOF\n(mean removed)", lang=figure_lang))
+    plt.plot(t, y_moon, marker="o", label=_plot_text(f"月中心モデル（局あり, β={beta:g}, 定数オフセット整列, 平均除去）", f"Moon-center model\n(station, β={beta:g}, offset aligned)", lang=figure_lang))
     # 条件分岐: `use_reflector and y_refl is not None` を満たす経路を評価する。
     if use_reflector and y_refl is not None:
-        plt.plot(t, y_refl, marker="o", label=f"反射器モデル（局+月回転, β={beta:g}, 定数オフセット整列, 平均除去）")
+        plt.plot(t, y_refl, marker="o", label=_plot_text(f"反射器モデル（局+月回転, β={beta:g}, 定数オフセット整列, 平均除去）", f"Reflector model\n(station+lunar rotation, β={beta:g}, offset aligned)", lang=figure_lang))
 
-    plt.xlabel("UTC時刻")
-    plt.ylabel("往復TOF偏差 [ns]")
-    plt.title(f"{LLR_SHORT_NAME}（CRD Normal Point）：観測 vs モデル（太陽Shapiro含む）")
+    plt.xlabel(_plot_text("UTC時刻", "UTC time", lang=figure_lang))
+    plt.ylabel(_plot_text("往復TOF偏差 [ns]", "Round-trip TOF deviation [ns]", lang=figure_lang))
+    plt.title(_plot_text(f"{LLR_SHORT_NAME}（CRD Normal Point）：観測 vs モデル（太陽Shapiro含む）", "LLR (CRD Normal Point):\nobserved vs model (with solar Shapiro)", lang=figure_lang))
     plt.grid(True, alpha=0.3)
-    plt.legend()
+    plt.legend(fontsize=9.6)
     plt.tight_layout()
     overlay_path = outdir / f"{stem}_overlay_tof.png"
+    overlay_pdf_path = overlay_path.with_suffix(".pdf")
     plt.savefig(overlay_path, dpi=200)
+    plt.savefig(overlay_pdf_path)
     plt.close()
 
     # Residual plot (ns) for the currently selected model (moon-center or reflector)
     res_ns = (out["tof_obs_s"] - out["tof_model_s"]) * 1e9
-    model_label = "反射器" if use_reflector else "月中心"
+    model_label = _plot_text("反射器", "reflector", lang=figure_lang) if use_reflector else _plot_text("月中心", "moon-center", lang=figure_lang)
     plt.figure(figsize=(10, 4.5))
     plt.plot(t, res_ns, marker="o")
     plt.axhline(0, linewidth=1)
-    plt.xlabel("UTC時刻")
-    plt.ylabel("残差（観測 - モデル）[ns]")
-    plt.title(f"定数オフセット整列後の残差（{model_label}モデル, 太陽Shapiro含む）")
+    plt.xlabel(_plot_text("UTC時刻", "UTC time", lang=figure_lang))
+    plt.ylabel(_plot_text("残差（観測 - モデル）[ns]", "Residual (observed - model) [ns]", lang=figure_lang))
+    plt.title(_plot_text(f"定数オフセット整列後の残差（{model_label}モデル, 太陽Shapiro含む）", f"Residual after constant-offset alignment\n({model_label} model, with solar Shapiro)", lang=figure_lang))
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     res_path = outdir / f"{stem}_residual.png"
+    res_pdf_path = res_path.with_suffix(".pdf")
     plt.savefig(res_path, dpi=200)
+    plt.savefig(res_pdf_path)
     plt.close()
 
     # 関数: `_rms_ns` の入出力契約と処理意図を定義する。
@@ -2159,22 +2191,33 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
         rms_sr = _rms_ns(res_sr_ns)
 
     plt.figure(figsize=(10, 4.8))
-    plt.plot(t, res_gc_ns, marker="o", label=f"地球中心→月中心（RMS={rms_gc:.3g} ns）")
-    plt.plot(t, res_sm_ns, marker="o", label=f"観測局→月中心（RMS={rms_sm:.3g} ns）")
+    plt.plot(t, res_gc_ns, marker="o", label=_plot_text(f"地球中心→月中心（RMS={rms_gc:.3g} ns）", f"Geocenter→moon center\n(RMS={rms_gc:.3g} ns)", lang=figure_lang))
+    plt.plot(t, res_sm_ns, marker="o", label=_plot_text(f"観測局→月中心（RMS={rms_sm:.3g} ns）", f"Station→moon center\n(RMS={rms_sm:.3g} ns)", lang=figure_lang))
     # 条件分岐: `use_reflector and res_sr_ns is not None` を満たす経路を評価する。
     if use_reflector and res_sr_ns is not None:
-        plt.plot(t, res_sr_ns, marker="o", label=f"観測局→反射器（RMS={rms_sr:.3g} ns）")
+        plt.plot(t, res_sr_ns, marker="o", label=_plot_text(f"観測局→反射器（RMS={rms_sr:.3g} ns）", f"Station→reflector\n(RMS={rms_sr:.3g} ns)", lang=figure_lang))
 
     plt.axhline(0, linewidth=1)
-    plt.xlabel("UTC時刻")
-    plt.ylabel("残差 [ns]（定数オフセット整列後）")
-    plt.title(f"{LLR_SHORT_NAME}：モデル改善（地球中心 → 観測局 → 反射器）")
+    plt.xlabel(_plot_text("UTC時刻", "UTC time", lang=figure_lang))
+    plt.ylabel(_plot_text("残差 [ns]（定数オフセット整列後）", "Residual [ns]\n(constant-offset aligned)", lang=figure_lang))
+    plt.title(_plot_text(f"{LLR_SHORT_NAME}：モデル改善（地球中心 → 観測局 → 反射器）", "LLR: model improvement\n(geocenter → station → reflector)", lang=figure_lang))
     plt.grid(True, alpha=0.3)
-    plt.legend()
+    plt.legend(fontsize=9.4)
     plt.tight_layout()
     cmp_path = outdir / f"{stem}_residual_compare.png"
+    cmp_pdf_path = cmp_path.with_suffix(".pdf")
     plt.savefig(cmp_path, dpi=200)
+    plt.savefig(cmp_pdf_path)
     plt.close()
+
+    public_llr_out_dir = Path(__file__).resolve().parents[2] / "output" / "public" / "llr" / DEFAULT_OUTDIR
+    summary_figures_dir = Path(__file__).resolve().parents[2] / "output" / "private" / "summary" / "figures"
+    for artifact in (overlay_path, overlay_pdf_path, res_path, res_pdf_path, cmp_path, cmp_pdf_path):
+        _sync_public_and_summary_artifact(
+            artifact,
+            public_dir=public_llr_out_dir,
+            summary_dir=summary_figures_dir,
+        )
 
     metrics = {
         "input": str(crd_path),
@@ -2209,8 +2252,11 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
         "input": crd_path,
         "table": table_path,
         "overlay": overlay_path,
+        "overlay_pdf": overlay_pdf_path,
         "residual": res_path,
+        "residual_pdf": res_pdf_path,
         "residual_compare": cmp_path,
+        "residual_compare_pdf": cmp_pdf_path,
         "metrics": metrics_path,
     }
 

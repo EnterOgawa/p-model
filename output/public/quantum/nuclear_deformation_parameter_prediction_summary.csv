@@ -1,0 +1,8 @@
+group_type,group,n_rows,median_abs_resid,rms_resid,pearson_obs_pred,median_abs_z,n_abs_z_gt3
+overall,beta2,428,0.05148937836817824,0.19902901357936034,0.1840748172183825,8.464785707970755,318
+overall,beta4_proxy,428,0.006666574169341766,0.028820431940518976,0.6731952736958217,nan,nan
+overall,r42_from_beta2,414,0.3732841546353274,0.6635229945746505,0.24386515854534532,nan,nan
+parity,ee,428,,,,,
+magic_flag,magic_any,70,,,,,
+magic_flag,nonmagic,358,,,,,
+correlation,beta2_vs_be_residual,428,,,,,

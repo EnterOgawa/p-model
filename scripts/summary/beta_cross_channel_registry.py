@@ -35,6 +35,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import shutil
 import textwrap
 from datetime import datetime, timezone
@@ -46,6 +47,20 @@ import numpy as np
 
 
 _ROOT = Path(__file__).resolve().parents[2]
+
+
+# 関数: 英語 localized surface かどうかを判定する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
+
+
+# 関数: public summary 出力先を locale ごとに解決する。
+def _public_summary_dir() -> Path:
+    base = _ROOT / "output" / "public" / "summary"
+    if _is_en_figure():
+        return base / "locales" / "en"
+
+    return base
 
 
 # 関数: `_safe_rel` の入出力契約と処理意図を定義する。
@@ -1698,6 +1713,11 @@ def _write_plot(payload: Dict[str, Any], out_pdf: Path, out_png: Path) -> None:
     scores = [_status_to_score(s) for s in statuses]
     colors = [_status_color(s) for s in statuses]
 
+    font_scale = 1.38 if _is_en_figure() else 1.0
+    title_font = 14.0 * font_scale
+    axis_font = 12.8 * font_scale
+    tick_font = 11.4 * font_scale
+    note_font = 10.0 * font_scale
     fig = plt.figure(figsize=(11.5, 5.3))
     grid = fig.add_gridspec(1, 2, width_ratios=[1.02, 1.28], wspace=0.18)
     ax = fig.add_subplot(grid[0, 0])
@@ -1710,9 +1730,14 @@ def _write_plot(payload: Dict[str, Any], out_pdf: Path, out_png: Path) -> None:
     ax.set_xlim(0.0, 3.0)
     ax.axvline(1.0, color="#999999", linestyle="--", linewidth=1.0)
     ax.axvline(2.0, color="#999999", linestyle="--", linewidth=1.0)
-    ax.set_xlabel("status score (pass=0.5, watch=1.5, reject=2.8)")
-    ax.set_title("Beta Cross-Channel Terminal Decision")
+    ax.set_xlabel("status score (pass=0.5, watch=1.5, reject=2.8)", fontsize=axis_font)
+    ax.set_title("Beta Cross-Channel Terminal Decision", fontsize=title_font)
+    ax.xaxis.label.set_fontsize(axis_font)
+    ax.title.set_fontsize(title_font)
     ax.grid(axis="x", alpha=0.22)
+    ax.tick_params(labelsize=tick_font)
+    for tick in [*ax.get_xticklabels(), *ax.get_yticklabels()]:
+        tick.set_fontsize(tick_font)
 
     abs_z = _to_float(cross.get("beta_consistency_abs_z"))
     abs_z_1 = _to_float(beta_terminal.get("beta_combined_abs_z_minus_1"))
@@ -1778,17 +1803,18 @@ def _write_plot(payload: Dict[str, Any], out_pdf: Path, out_png: Path) -> None:
         note_lines.append("|z|=NA")
 
     ax_note.axis("off")
-    ax_note.text(
+    note_text = ax_note.text(
         0.02,
         0.98,
         "\n".join(note_lines),
         transform=ax_note.transAxes,
         ha="left",
         va="top",
-        fontsize=10.0,
+        fontsize=note_font,
         linespacing=1.28,
         bbox={"boxstyle": "round,pad=0.28", "facecolor": "white", "edgecolor": "#999999", "alpha": 0.92},
     )
+    note_text.set_fontsize(note_font)
 
     fig.subplots_adjust(left=0.12, right=0.97, top=0.90, bottom=0.12)
     out_pdf.parent.mkdir(parents=True, exist_ok=True)
@@ -1842,6 +1868,11 @@ def main() -> int:
 
     if not public_dir.is_absolute():
         public_dir = (_ROOT / public_dir).resolve()
+
+    if _is_en_figure():
+        default_public_dir = (_ROOT / "output" / "public" / "summary").resolve()
+        if public_dir == default_public_dir:
+            public_dir = _public_summary_dir().resolve()
 
     out_dir.mkdir(parents=True, exist_ok=True)
 

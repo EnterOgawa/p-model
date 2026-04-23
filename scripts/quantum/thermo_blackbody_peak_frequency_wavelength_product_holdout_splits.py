@@ -11,6 +11,7 @@ import csv
 import hashlib
 import json
 import math
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -22,6 +23,7 @@ from scripts.quantum.thermo_blackbody_holdout_style import (
     apply_blackbody_holdout_axes_text,
     apply_blackbody_holdout_legend,
     create_blackbody_holdout_figure,
+    resolve_blackbody_holdout_output_dir,
 )
 
 
@@ -31,6 +33,11 @@ from scripts.utils.plot_style import (
     get_wavep_font_size,
     resolve_wavep_cjk_font_family,
 )
+
+
+# 関数: `WAVEP_FIGURE_LANG` から英語 surface かどうかを判定する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
 
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
@@ -197,7 +204,7 @@ def _wien_peak_x_frequency() -> float:
 
 def main() -> None:
     root = _repo_root()
-    out_dir = root / "output" / "public" / "quantum"
+    out_dir = resolve_blackbody_holdout_output_dir(root)
     out_dir.mkdir(parents=True, exist_ok=True)
 
     src_dir = root / "data" / "quantum" / "sources" / "nist_codata_2022_blackbody_constants"
@@ -360,7 +367,7 @@ def main() -> None:
         ax,
         categories=categories,
         ylabel="test max abs(z)",
-        title="黒体ピーク ν_max λ_max の温度帯分割監査",
+        title="Blackbody peak ν_max λ_max holdout audit" if _is_en_figure() else "黒体ピーク ν_max λ_max の温度帯分割監査",
     )
     ax.grid(axis="y", linestyle=":", alpha=0.35)
     apply_blackbody_holdout_legend(ax)
@@ -425,3 +432,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

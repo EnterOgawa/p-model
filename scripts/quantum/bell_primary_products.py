@@ -1879,16 +1879,16 @@ def _write_systematics_decomposition_15items(
         # 条件分岐: `base_sigma is None` を満たす経路を評価する。
 
         if base_sigma is None:
-            os = []
+            offset_sigmas = []
             for row in o_rows:
                 # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
                 if not isinstance(row, dict):
                     continue
 
-                os.append(_safe_float(row.get("S_err")))
-                os.append(_safe_float(row.get("S_combined_err")))
+                offset_sigmas.append(_safe_float(row.get("S_err")))
+                offset_sigmas.append(_safe_float(row.get("S_combined_err")))
 
-            osf = _finite(os)
+            osf = _finite(offset_sigmas)
             # 条件分岐: `osf` を満たす経路を評価する。
             if osf:
                 base_sigma = float(np.median(np.asarray(osf, dtype=float)))
@@ -2366,41 +2366,49 @@ def _write_systematics_decomposition_15items(
     sys_over_plot = [float(v) if _safe_float(v) is not None else 0.0 for v in sys_over]
 
     # 論文紙面では「上段2枚 + 下段1枚」の構成にして、heatmap 側の縦幅を優先確保する。
+    figure_lang = os.getenv("WAVEP_FIGURE_LANG", "ja").strip().lower()
+    is_en = figure_lang.startswith("en")
     fig = plt.figure(figsize=(11.2, 17.0), dpi=190)
     gs = fig.add_gridspec(
         2,
         2,
         height_ratios=[2.45, 2.30],
         width_ratios=[0.98, 1.16],
-        hspace=0.68,
-        wspace=0.26,
+        hspace=0.44 if is_en else 0.68,
+        wspace=0.34 if is_en else 0.26,
     )
 
     y = np.arange(len(labels_sorted))
     ax0 = fig.add_subplot(gs[0, 0])
     ax0.barh(y, vals_sorted, color="tab:blue", alpha=0.82)
-    ax0.set_yticks(y, labels_sorted, fontsize=9.8)
+    ax0.set_yticks(y, labels_sorted, fontsize=9.2 if is_en else 9.8)
     ax0.invert_yaxis()
-    ax0.set_xlabel("median |Δstat| / σ_stat", fontsize=13.6, labelpad=8)
-    ax0.set_title("15-item systematics budget (median)", fontsize=14.6, pad=8)
+    ax0.set_xlabel("median |Δstat| / σ_stat", fontsize=13.0 if is_en else 13.6, labelpad=8)
+    ax0.set_title("15-item budget\n(median)" if is_en else "15-item systematics budget (median)", fontsize=12.2 if is_en else 14.6, pad=6 if is_en else 8)
     ax0.grid(True, axis="x", alpha=0.3, ls=":")
-    ax0.tick_params(axis="x", labelsize=13.6)
+    ax0.tick_params(axis="x", labelsize=12.8 if is_en else 13.6)
 
     ax1 = fig.add_subplot(gs[0, 1])
+    ds_labels_plot = (
+        ["Weihs 1998", "Hensen 2015", "Hensen 2016", "NIST", "Christensen 2013"]
+        if is_en
+        else ds_labels
+    )
     ax1.bar(np.arange(len(ds_labels)), sys_over_plot, color="tab:orange", alpha=0.85)
     ax1.set_xticks(
         np.arange(len(ds_labels)),
-        ds_labels,
-        rotation=90,
-        ha="center",
+        ds_labels_plot,
+        rotation=35 if is_en else 90,
+        ha="right" if is_en else "center",
         va="top",
-        fontsize=13.8,
+        fontsize=8.6 if is_en else 13.8,
+        rotation_mode="anchor" if is_en else None,
     )
-    ax1.set_ylabel("sys/stat (L2)", fontsize=12.4)
-    ax1.set_title("Per-dataset total systematics", fontsize=14.6, pad=10)
+    ax1.set_ylabel("sys/stat (L2)", fontsize=11.4 if is_en else 12.4, labelpad=4 if is_en else None)
+    ax1.set_title("Per-dataset total\nsystematics" if is_en else "Per-dataset total systematics", fontsize=12.2 if is_en else 14.6, pad=6 if is_en else 10)
     ax1.grid(True, axis="y", alpha=0.3, ls=":")
-    ax1.tick_params(axis="x", labelsize=13.6)
-    ax1.tick_params(axis="y", labelsize=10.8)
+    ax1.tick_params(axis="x", labelsize=8.6 if is_en else 13.6, pad=1 if is_en else None)
+    ax1.tick_params(axis="y", labelsize=10.0 if is_en else 10.8)
 
     ax2 = fig.add_subplot(gs[1, :])
     # Heatmap は imshow ではなく pcolormesh を使い、PDF出力時のラスタ混在を避ける。
@@ -2421,15 +2429,16 @@ def _write_systematics_decomposition_15items(
     ax2.set_xticks(
         np.arange(len(item_ids)),
         [item_ids[i] for i in range(len(item_ids))],
-        rotation=62,
-        fontsize=10.8,
+        rotation=58 if is_en else 62,
+        fontsize=9.4 if is_en else 10.8,
         ha="right",
         rotation_mode="anchor",
     )
-    ax2.set_yticks(np.arange(len(item_ids)), [item_ids[i] for i in range(len(item_ids))], fontsize=10.6)
-    ax2.set_title("Item correlation (across datasets)", fontsize=15.4, pad=10)
+    ax2.set_yticks(np.arange(len(item_ids)), [item_ids[i] for i in range(len(item_ids))], fontsize=9.8 if is_en else 10.6)
+    ax2.set_title("Item correlation (across datasets)", fontsize=13.8 if is_en else 15.4, pad=4 if is_en else 10)
+    ax2.tick_params(axis="x", pad=0 if is_en else 2)
     # colorbar を画像化せず、矩形パッチでベクター描画する。
-    cax = ax2.inset_axes([1.01, 0.0, 0.028, 1.0])
+    cax = ax2.inset_axes([1.07 if is_en else 1.01, 0.0, 0.024 if is_en else 0.028, 1.0])
     c_norm = mcolors.Normalize(vmin=-1.0, vmax=1.0)
     c_vals = np.linspace(-1.0, 1.0, 129)
     c_map = plt.get_cmap("coolwarm")
@@ -2451,11 +2460,18 @@ def _write_systematics_decomposition_15items(
     cax.set_ylim(-1.0, 1.0)
     cax.set_xticks([])
     cax.set_yticks(np.linspace(-1.0, 1.0, 5))
-    cax.tick_params(labelsize=12.8)
+    cax.tick_params(labelsize=11.2 if is_en else 12.8)
     cax.yaxis.tick_right()
 
-    fig.suptitle("Bell systematics decomposition (15 items; operational)", y=0.974, fontsize=18.8)
-    fig.subplots_adjust(left=0.205, right=0.965, top=0.93, bottom=0.108, hspace=0.68, wspace=0.26)
+    fig.suptitle("Bell systematics decomposition (15 items; operational)", y=0.974, fontsize=17.2 if is_en else 18.8)
+    fig.subplots_adjust(
+        left=0.255 if is_en else 0.205,
+        right=0.952 if is_en else 0.965,
+        top=0.93,
+        bottom=0.172 if is_en else 0.108,
+        hspace=0.40 if is_en else 0.68,
+        wspace=0.34 if is_en else 0.26,
+    )
     fig.savefig(out_png)
     plt.close(fig)
 
@@ -6505,32 +6521,40 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
             zvals.append(float(z))
             zcolors.append("tab:orange")
 
+    figure_lang = os.getenv("WAVEP_FIGURE_LANG", "ja").strip().lower()
+    is_en = figure_lang.startswith("en")
+    title_font = get_wavep_font_size("title")
+    axis_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    note_font = get_wavep_font_size("note")
+    suptitle_font = get_wavep_font_size("suptitle")
+
     fig, ax = plt.subplots(2, 1, figsize=(11.8, 8.7), dpi=170)
     x = np.arange(len(labels))
     ax[0].bar(x, ratios, color="tab:blue", alpha=0.85)
     ax[0].axhline(ratio_th, color="0.2", ls="--", lw=1.0)
     ax[0].set_xticks(x, labels, rotation=0, ha="center")
-    ax[0].set_ylabel("Δ(stat) / σ_stat (median)")
-    ax[0].set_title("Selection sensitivity (ratio)")
+    ax[0].set_ylabel("Δ(stat) / σ_stat (median)", fontsize=axis_font)
+    ax[0].set_title("Selection sensitivity (ratio)", fontsize=title_font)
     ax[0].grid(True, axis="y", alpha=0.3, ls=":")
-    ax[0].tick_params(axis="both", labelsize=11.5)
+    ax[0].tick_params(axis="both", labelsize=tick_font)
     ax[0].tick_params(axis="x", labelbottom=False)
     ax[0].set_xticklabels([])
 
     ax[1].bar(x, zvals, color=zcolors, alpha=0.9)
     ax[1].axhline(delay_z_th, color="0.2", ls="--", lw=1.0)
-    ax[1].set_xticks(x, labels, rotation=0, ha="center")
-    ax[1].set_ylabel("z = ∣Δmedian∣ / σ(Δmedian)")
-    ax[1].set_title("Delay setting-dependence (Δmedian; z)")
+    ax[1].set_xticks(x, labels, rotation=8 if is_en else 0, ha="right" if is_en else "center")
+    ax[1].set_ylabel("z = ∣Δmedian∣ / σ(Δmedian)", fontsize=axis_font)
+    ax[1].set_title("Delay setting-dependence (Δmedian; z)", fontsize=title_font)
     ax[1].grid(True, axis="y", alpha=0.3, ls=":")
-    ax[1].tick_params(axis="both", labelsize=11.5)
+    ax[1].tick_params(axis="both", labelsize=tick_font)
 
     for i, d in enumerate(datasets_longterm):
         # 条件分岐: `d.get("delay_z_max") is None` を満たす経路を評価する。
         if d.get("delay_z_max") is None:
-            ax[1].text(float(i), 0.15, "n/a", ha="center", va="bottom", fontsize=11, color="0.35")
+            ax[1].text(float(i), 0.15, "n/a", ha="center", va="bottom", fontsize=note_font, color="0.35")
 
-    fig.suptitle("Bell longterm consistency (cross-dataset)", y=0.968, fontsize=15)
+    fig.suptitle("Bell longterm consistency (cross-dataset)", y=0.968, fontsize=suptitle_font)
     fig.subplots_adjust(left=0.115, right=0.985, top=0.90, bottom=0.09, hspace=0.26)
     fig.savefig(OUT_BASE / "longterm_consistency.png")
     plt.close(fig)
@@ -7960,10 +7984,11 @@ def main() -> None:
         apply_wavep_figure_layout(fig, template="part2_two_panel_quantum_spacious")
         fig.set_size_inches(fig.get_figwidth(), 5.85, forward=True)
         fig.subplots_adjust(left=0.155, right=0.985, top=0.905, bottom=0.115, hspace=0.38)
-        title_font = get_wavep_font_size("title") * 0.90
-        axis_font = get_wavep_font_size("axis")
+        figure_lang = os.getenv("WAVEP_FIGURE_LANG", "ja").strip().lower()
+        title_font = get_wavep_font_size("title") * (0.76 if figure_lang == "en" else 1.0)
+        axis_font = get_wavep_font_size("axis") * (0.78 if figure_lang == "en" else 1.0)
         tick_font = get_wavep_font_size("tick")
-        suptitle_font = get_wavep_font_size("suptitle") + 1.6
+        suptitle_font = get_wavep_font_size("suptitle") * (0.78 if figure_lang == "en" else 1.0)
         x = np.arange(len(labels))
         ax[0].bar(x, ratios, color="tab:blue", alpha=0.85)
         ax[0].axhline(ratio_th, color="0.2", ls="--", lw=1.0)

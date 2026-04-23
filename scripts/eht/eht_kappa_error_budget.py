@@ -14,6 +14,7 @@ import math
 import os
 import shutil
 import sys
+import textwrap
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional, Sequence
@@ -26,6 +27,8 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.quantum.figure_japanese_localizer import get_figure_language  # noqa: E402
+from scripts.utils.figure_locale_paths import localize_figure_output_path  # noqa: E402
 from scripts.utils.plot_style import (  # noqa: E402
     apply_paper_style,
     get_wavep_font_size,
@@ -115,42 +118,74 @@ def _plot_budget(*, title: str, items: Dict[str, float], required: Optional[floa
         raise RuntimeError(f"matplotlib not available: {e}") from e
 
     apply_paper_style()
-    _set_japanese_font()
+    figure_lang = get_figure_language(default="ja")
+    if figure_lang == "ja":
+        _set_japanese_font()
 
     # 関数: `_short_label` の入出力契約と処理意図を定義する。
+
     def _short_label(s: str) -> str:
         s = str(s)
-        s = s.replace("σ(κ) proxy: ", "proxy: ")
-        s = s.replace("σ(κ) from ", "from ")
+        s = s.replace("σ(κ) proxy: ", "")
+        s = s.replace("proxy: ", "")
+        s = s.replace("σ(κ) from ", "")
+        s = s.replace("from ", "")
         s = s.replace("tab:", "")
+        s = s.replace("scan-to-scan std", "scan std")
+        s = s.replace("analysis table", "analysis tbl")
+        s = s.replace("quadrature", "quad.")
+        s = s.replace("refractive", "refrac.")
+        s = s.replace("synthetic gains max", "gain max")
+        s = s.replace("pipeline scatter", "pipe scatter")
+        s = s.replace("decattered", "de-scattered")
+        s = s.replace("published", "pub.")
+        s = s.replace("variability noise", "var. noise")
+        s = s.replace("morphology (HOPS imaging)", "morphology (HOPS)")
+        s = s.replace("imaging d_hat", "imaging d-hat")
+        s = s.replace("non-closing vis amp", "non-closing amp")
+        s = s.replace("Paper II", "P-II")
+        s = s.replace("Paper IV", "P-IV")
+        s = s.replace("Paper VI", "P-VI")
+        s = s.replace("emission model", "emission")
+        s = s.replace("scattering kernel", "scatt. kernel")
         return s
 
+    # 関数: `_wrap_label` の入出力契約と処理意図を定義する。
+
+    def _wrap_label(s: str, *, width: int = 21) -> str:
+        return "\n".join(textwrap.wrap(_short_label(s), width=width, break_long_words=False, break_on_hyphens=False))
+
     pairs = sorted(((str(k), float(v)) for k, v in items.items()), key=lambda kv: kv[1], reverse=True)
-    labels = [_short_label(k) for k, _ in pairs]
+    labels = [_wrap_label(k) for k, _ in pairs]
     vals = [v for _, v in pairs]
     y = np.arange(len(labels), dtype=float)
 
-    # Long y-label bar chart: keep fixed paper width and reserve a large left margin.
-    fig_h = max(7.35, min(7.85, 0.235 * len(labels) + 1.60))
+    # Long y-label bar chart: compress left label footprint to recover x-axis width on paper.
+    fig_h = max(8.90, min(9.70, 0.292 * len(labels) + 1.95))
     fig = plt.figure(figsize=(170.0 / 25.4, fig_h))
     ax = fig.add_subplot(1, 1, 1)
-    fig.subplots_adjust(left=0.43, right=0.985, top=0.948, bottom=0.080)
+    fig.subplots_adjust(left=0.40, right=0.974, top=0.930, bottom=0.080)
     ax.barh(y, vals, color="#1f77b4", alpha=0.82)
     ax.set_yticks(y)
-    ax.set_yticklabels(labels, fontsize=get_wavep_font_size("axis"))
+    ytick_fs = max(7.1, get_wavep_font_size("tick") - 1.35)
+    ytick_texts = ax.set_yticklabels(labels, fontsize=ytick_fs)
+    for tick_text in ytick_texts:
+        tick_text.set_linespacing(0.90)
+
     ax.invert_yaxis()
-    ax.set_xlabel("σ(κ) [1σ]")
-    ax.set_title(title, pad=6.0)
+    ax.set_xlabel("σ(κ) [1σ]", fontsize=get_wavep_font_size("axis"))
+    ax.set_title(title, fontsize=get_wavep_font_size("title"), pad=6.0)
     ax.tick_params(axis="x", labelsize=get_wavep_font_size("tick"))
-    ax.tick_params(axis="y", labelsize=get_wavep_font_size("axis"))
+    ax.tick_params(axis="y", labelsize=ytick_fs, pad=1.0)
     ax.grid(True, axis="x", alpha=0.25)
     # 条件分岐: `required is not None and math.isfinite(required) and required > 0` を満たす経路を評価する。
     if required is not None and math.isfinite(required) and required > 0:
-        ax.axvline(required, color="#d62728", linewidth=2.0, label=f"target σ(κ) ≈ {required:.4f}")
+        target_label = f"目標 σ(κ) ≈ {required:.4f}" if figure_lang == "ja" else f"target σ(κ) ≈ {required:.4f}"
+        ax.axvline(required, color="#d62728", linewidth=2.0, label=target_label)
         ax.legend(
             handles=[
                 Patch(facecolor="#1f77b4", alpha=0.82, label="proxy σ(κ)"),
-                Line2D([0], [0], color="#d62728", linewidth=2.0, label=f"目標 σ(κ) ≈ {required:.4f}"),
+                Line2D([0], [0], color="#d62728", linewidth=2.0, label=target_label),
             ],
             loc="upper right",
             frameon=True,
@@ -253,11 +288,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     outdir.mkdir(parents=True, exist_ok=True)
     public_dir.mkdir(parents=True, exist_ok=True)
 
-    out_json = outdir / "eht_kappa_error_budget.json"
-    out_png = outdir / "eht_kappa_error_budget.png"
-    out_pdf = outdir / "eht_kappa_error_budget.pdf"
-    public_png = public_dir / out_png.name
-    public_pdf = public_dir / out_pdf.name
+    figure_lang = get_figure_language(default="ja")
+    out_json = localize_figure_output_path(outdir / "eht_kappa_error_budget.json", root=root, locale=figure_lang)
+    out_png = localize_figure_output_path(outdir / "eht_kappa_error_budget.png", root=root, locale=figure_lang)
+    out_pdf = localize_figure_output_path(outdir / "eht_kappa_error_budget.pdf", root=root, locale=figure_lang)
+    public_png = localize_figure_output_path(public_dir / out_png.name, root=root, locale=figure_lang)
+    public_pdf = localize_figure_output_path(public_dir / out_pdf.name, root=root, locale=figure_lang)
+    out_json.parent.mkdir(parents=True, exist_ok=True)
+    out_png.parent.mkdir(parents=True, exist_ok=True)
+    out_pdf.parent.mkdir(parents=True, exist_ok=True)
+    public_png.parent.mkdir(parents=True, exist_ok=True)
+    public_pdf.parent.mkdir(parents=True, exist_ok=True)
 
     payload: Dict[str, Any] = {
         "generated_utc": datetime.now(timezone.utc).isoformat(),

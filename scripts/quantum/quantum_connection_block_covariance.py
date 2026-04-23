@@ -19,6 +19,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -26,6 +27,11 @@ from typing import Any, Dict, List, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
+
+
+# 関数: `WAVEP_FIGURE_LANG` から英語 surface かどうかを判定する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
 
 ROOT = Path(__file__).resolve().parents[2]
 # 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
@@ -36,7 +42,7 @@ from scripts.summary import worklog  # noqa: E402
 
 try:
     import matplotlib as mpl
-    from scripts.utils.plot_style import install_wavep_cjk_font_override, resolve_wavep_cjk_font_family  # noqa: E402
+    from scripts.utils.plot_style import get_wavep_font_size, install_wavep_cjk_font_override, resolve_wavep_cjk_font_family  # noqa: E402
 
     install_wavep_cjk_font_override(preferred_name="Noto Sans CJK JP")
     preferred_cjk = resolve_wavep_cjk_font_family(preferred_name="Noto Sans CJK JP")
@@ -46,7 +52,14 @@ try:
 
     mpl.rcParams["axes.unicode_minus"] = False
 except Exception:
-    pass
+    def get_wavep_font_size(kind: str) -> float:
+        fallback = {
+            "title": 16.0,
+            "axis": 13.0,
+            "tick": 12.0,
+            "suptitle": 17.0,
+        }
+        return float(fallback.get(kind, 12.0))
 
 
 # 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
@@ -375,10 +388,11 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     import matplotlib.patches as mpatches
     from matplotlib import colors as mcolors
 
+    is_en = _is_en_figure()
     channel_display = {
-        "bell": "ベル",
-        "interference": "干渉",
-        "condensed": "物性",
+        "bell": "Bell" if is_en else "ベル",
+        "interference": "interference" if is_en else "干渉",
+        "condensed": "condensed" if is_en else "物性",
     }
 
     matrices = payload.get("matrices") if isinstance(payload.get("matrices"), dict) else {}
@@ -397,6 +411,16 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
         else []
     )
 
+    title_scale = 1.18 if is_en else 1.0
+    axis_scale = 1.16 if is_en else 1.0
+    tick_scale = 1.14 if is_en else 1.0
+    suptitle_scale = 1.18 if is_en else 1.0
+    title_size = max(get_wavep_font_size("title"), 15.5) * title_scale
+    axis_size = max(get_wavep_font_size("axis"), 13.5) * axis_scale
+    tick_size = max(get_wavep_font_size("tick"), 12.5) * tick_scale
+    colorbar_tick_size = max(tick_size - 0.6, 11.6 if is_en else tick_size - 0.4)
+    suptitle_size = max(get_wavep_font_size("suptitle"), 16.5) * suptitle_scale
+
     fig, axes = plt.subplots(2, 2, figsize=(11.5, 8.0), dpi=180)
 
     n_ch = len(labels)
@@ -413,9 +437,10 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     )
     axes[0, 0].set_xlim(-0.5, n_ch - 0.5)
     axes[0, 0].set_ylim(n_ch - 0.5, -0.5)
-    axes[0, 0].set_title("Channel covariance")
+    axes[0, 0].set_title("Channel covariance", fontsize=title_size)
     axes[0, 0].set_xticks(range(len(labels)), display_labels, rotation=25, ha="right")
     axes[0, 0].set_yticks(range(len(labels)), display_labels)
+    axes[0, 0].tick_params(axis="both", labelsize=tick_size)
     cax0 = axes[0, 0].inset_axes([1.02, 0.0, 0.03, 1.0])
     c_norm0 = mcolors.Normalize(vmin=float(np.nanmin(cov)), vmax=float(np.nanmax(cov)))
     c_vals0 = np.linspace(float(np.nanmin(cov)), float(np.nanmax(cov)), 129)
@@ -438,7 +463,7 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     cax0.set_ylim(float(c_vals0[0]), float(c_vals0[-1]))
     cax0.set_xticks([])
     cax0.yaxis.tick_right()
-    cax0.tick_params(labelsize=9.5)
+    cax0.tick_params(labelsize=colorbar_tick_size)
 
     im1 = axes[0, 1].pcolormesh(
         x_edges,
@@ -451,9 +476,10 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     )
     axes[0, 1].set_xlim(-0.5, n_ch - 0.5)
     axes[0, 1].set_ylim(n_ch - 0.5, -0.5)
-    axes[0, 1].set_title("Channel correlation")
+    axes[0, 1].set_title("Channel correlation", fontsize=title_size)
     axes[0, 1].set_xticks(range(len(labels)), display_labels, rotation=25, ha="right")
     axes[0, 1].set_yticks(range(len(labels)), display_labels)
+    axes[0, 1].tick_params(axis="both", labelsize=tick_size)
     cax1 = axes[0, 1].inset_axes([1.02, 0.0, 0.03, 1.0])
     c_norm1 = mcolors.Normalize(vmin=-1.0, vmax=1.0)
     c_vals1 = np.linspace(-1.0, 1.0, 129)
@@ -477,12 +503,13 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     cax1.set_xticks([])
     cax1.set_yticks(np.linspace(-1.0, 1.0, 5))
     cax1.yaxis.tick_right()
-    cax1.tick_params(labelsize=9.5)
+    cax1.tick_params(labelsize=colorbar_tick_size)
 
     axes[1, 0].bar(range(len(eig_vals)), eig_vals, color="#4c6ef5")
-    axes[1, 0].set_title("Covariance eigenvalues")
-    axes[1, 0].set_xlabel("mode index")
-    axes[1, 0].set_ylabel("固有値")
+    axes[1, 0].set_title("Covariance eigenvalues", fontsize=title_size)
+    axes[1, 0].set_xlabel("mode index", fontsize=axis_size)
+    axes[1, 0].set_ylabel("eigenvalue" if is_en else "固有値", fontsize=axis_size)
+    axes[1, 0].tick_params(axis="both", labelsize=tick_size)
     axes[1, 0].grid(axis="y", alpha=0.25, linestyle=":")
 
     channel_info = payload.get("channels") if isinstance(payload.get("channels"), list) else []
@@ -492,11 +519,12 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     labels2 = [channel_display.get(str(item.get("channel") or ""), str(item.get("channel") or "")) for item in channel_info if isinstance(item, dict)]
     axes[1, 1].bar(x, means, yerr=stds, capsize=4, color="#51cf66")
     axes[1, 1].set_xticks(x, labels2, rotation=20, ha="right")
-    axes[1, 1].set_title("Aligned channel mean ± std")
-    axes[1, 1].set_ylabel("log1p 正規化スケール")
+    axes[1, 1].set_title("Aligned channel mean ± std", fontsize=title_size)
+    axes[1, 1].set_ylabel("log1p normalized scale" if is_en else "log1p 正規化スケール", fontsize=axis_size)
+    axes[1, 1].tick_params(axis="both", labelsize=tick_size)
     axes[1, 1].grid(axis="y", alpha=0.25, linestyle=":")
 
-    fig.suptitle("Quantum connection block covariance (Step 7.21.4)", y=0.99)
+    fig.suptitle("Quantum connection block covariance", y=0.99, fontsize=suptitle_size)
     fig.tight_layout()
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, bbox_inches="tight")
@@ -567,6 +595,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     out_json = _resolve(args.out_json)
     out_csv = _resolve(args.out_csv)
     out_png = _resolve(args.out_png)
+    out_pdf = out_png.with_suffix(".pdf")
 
     payload = build_payload(
         bell_cross_cov_json=input_paths["bell_cross_cov"],
@@ -579,10 +608,12 @@ def main(argv: Optional[List[str]] = None) -> int:
     out_json.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     _write_csv(out_csv, payload)
     _plot(out_png, payload)
+    _plot(out_pdf, payload)
 
     print(f"[ok] wrote: {_rel(out_json)}")
     print(f"[ok] wrote: {_rel(out_csv)}")
     print(f"[ok] wrote: {_rel(out_png)}")
+    print(f"[ok] wrote: {_rel(out_pdf)}")
 
     try:
         worklog.append_event(

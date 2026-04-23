@@ -36,7 +36,8 @@ _PMODEL_VERSION_STYLE_DEFAULT = r"""\NeedsTeXFormat{LaTeX2e}
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from scripts.summary import paper_profile_content as profile_content, worklog
+from scripts.summary import paper_locale_registry as locale_registry, paper_profile_content as profile_content, worklog
+from scripts.utils.figure_locale_paths import localize_figure_output_path, resolve_figure_output_locale
 
 try:
     from sitecustomize import _translate_wavep_text_to_japanese as _translate_wavep_figure_text_to_japanese
@@ -45,11 +46,13 @@ except Exception:
 
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
+
 def _repo_root() -> Path:
     return _ROOT
 
 
 # 関数: `_ensure_pmodel_version_style` の入出力契約と処理意図を定義する。
+
 def _ensure_pmodel_version_style(*, root: Path, outdir: Path) -> Path:
     src = root / "pmodel_version.sty"
     dst = outdir / "pmodel_version.sty"
@@ -64,6 +67,7 @@ def _ensure_pmodel_version_style(*, root: Path, outdir: Path) -> Path:
 
 
 # 関数: `_escape_tex` の入出力契約と処理意図を定義する。
+
 def _escape_tex(text: str) -> str:
     replacements = {
         "\\": r"\textbackslash{}",
@@ -81,6 +85,7 @@ def _escape_tex(text: str) -> str:
 
 
 # 関数: `_safe_label` の入出力契約と処理意図を定義する。
+
 def _safe_label(text: str) -> str:
     t = text.lower()
     t = re.sub(r"[^a-z0-9]+", "-", t).strip("-")
@@ -88,6 +93,7 @@ def _safe_label(text: str) -> str:
 
 
 # 関数: `_compact_label` の入出力契約と処理意図を定義する。
+
 def _compact_label(label: str, *, max_len: int = 64) -> str:
     # 条件分岐: `len(label) <= max_len` を満たす経路を評価する。
     if len(label) <= max_len:
@@ -111,6 +117,7 @@ def _extract_heading_number(raw_title: str) -> str:
 
 
 # 関数: `_section_label_hint` の入出力契約と処理意図を定義する。
+
 def _section_label_hint(raw_title: str, stripped_title: str) -> str:
     raw_lower = raw_title.lower()
     stripped_lower = stripped_title.lower()
@@ -188,6 +195,7 @@ def _section_label_hint(raw_title: str, stripped_title: str) -> str:
 
 
 # 関数: `_build_section_label` の入出力契約と処理意図を定義する。
+
 def _build_section_label(
     raw_title: str,
     stripped_title: str,
@@ -247,6 +255,7 @@ def _strip_heading_prefix(title: str) -> str:
 
 
 # 関数: `_is_abstract_heading` の入出力契約と処理意図を定義する。
+
 def _is_abstract_heading(title: str) -> bool:
     compact = re.sub(r"[\s\u3000\(\)（）\[\]【】<>＜＞:：._\-–—・,，、/]", "", title).lower()
     return compact in {"abstract", "要旨", "要旨abstract", "abstract要旨"}
@@ -278,6 +287,7 @@ def _heading_math_to_pdftext(payload: str) -> str:
 
 
 # 関数: `_heading_pdf_text` の入出力契約と処理意図を定義する。
+
 def _heading_pdf_text(title: str) -> str:
     text = _HEADING_INLINE_MATH_RE.sub(lambda m: _heading_math_to_pdftext(m.group(1)), title)
     greek_plain = {
@@ -316,11 +326,13 @@ def _heading_pdf_text(title: str) -> str:
 
 
 # 関数: `_restore_literal_refs` の入出力契約と処理意図を定義する。
+
 def _restore_literal_refs(tex_body: str) -> str:
     return _LITERAL_REF_RE.sub(r"\\ref{\1}", tex_body)
 
 
 # 関数: `_normalize_tex_path` の入出力契約と処理意図を定義する。
+
 def _normalize_tex_path(path_text: str) -> str:
     return path_text.replace("\\", "/")
 
@@ -336,6 +348,7 @@ def _is_image_path(path_text: str) -> bool:
 
 
 # 関数: `_match_leading_image_line` の入出力契約と処理意図を定義する。
+
 def _match_leading_image_line(line_text: str) -> Optional[tuple[str, str]]:
     s = line_text.strip()
     m = re.match(
@@ -357,6 +370,7 @@ def _match_leading_image_line(line_text: str) -> Optional[tuple[str, str]]:
 
 
 # 関数: `_fallback_caption_from_path` の入出力契約と処理意図を定義する。
+
 def _should_localize_figure_caption_to_japanese() -> bool:
     figure_lang = os.environ.get("WAVEP_FIGURE_LANG", "").strip().lower()
     if figure_lang == "en":
@@ -370,6 +384,7 @@ def _should_localize_figure_caption_to_japanese() -> bool:
 
 
 # 関数: `_fallback_caption_from_path` の入出力契約と処理意図を定義する。
+
 def _fallback_caption_from_path(raw_path: str) -> str:
     stem = Path(raw_path).stem
     normalized = stem.replace("__", " ").replace("_", " ").replace("-", " ")
@@ -384,52 +399,101 @@ def _fallback_caption_from_path(raw_path: str) -> str:
     # 条件分岐: `normalized.lower() == "xrism resolve summary"` を満たす経路を評価する。
 
     if normalized.lower() == "xrism resolve summary":
-        return "XRISM Resolve 要約。"
+        if _should_localize_figure_caption_to_japanese():
+            return "XRISM Resolve 要約。"
 
-    token_map = {
-        "llr": "LLR",
-        "eht": "EHT",
-        "gw": "重力波",
-        "cosmology": "宇宙論",
-        "quantum": "量子",
-        "thermo": "熱力学",
-        "blackbody": "黒体",
-        "nuclear": "核",
-        "xrism": "XRISM",
-        "gps": "GPS",
-        "cassini": "Cassini",
-        "viking": "Viking",
-        "mercury": "Mercury",
-        "pulsar": "連星パルサー",
-        "photon": "光子",
-        "energy": "エネルギー",
-        "free": "自由",
-        "enthalpy": "エンタルピー",
-        "entropy": "エントロピー",
-        "momentum": "運動量",
-        "pressure": "圧力",
-        "flux": "流束",
-        "density": "密度",
-        "ratio": "比",
-        "peak": "ピーク",
-        "frequency": "周波数",
-        "wavelength": "波長",
-        "product": "積",
-        "heat": "熱",
-        "capacity": "容量",
-        "helmholtz": "ヘルムホルツ",
-        "per": "当たり",
-        "splits": "分割",
-        "holdout": "ホールドアウト",
-        "scoreboard": "総合スコア",
-        "residual": "残差",
-        "constraints": "制約",
-        "summary": "要約",
-        "audit": "監査",
-        "mapping": "写像",
-        "phase": "位相",
-        "interference": "干渉",
-    }
+        return "XRISM Resolve summary."
+
+    if _should_localize_figure_caption_to_japanese():
+        token_map = {
+            "llr": "LLR",
+            "eht": "EHT",
+            "gw": "重力波",
+            "cosmology": "宇宙論",
+            "quantum": "量子",
+            "thermo": "熱力学",
+            "blackbody": "黒体",
+            "nuclear": "核",
+            "xrism": "XRISM",
+            "gps": "GPS",
+            "cassini": "Cassini",
+            "viking": "Viking",
+            "mercury": "Mercury",
+            "pulsar": "連星パルサー",
+            "photon": "光子",
+            "energy": "エネルギー",
+            "free": "自由",
+            "enthalpy": "エンタルピー",
+            "entropy": "エントロピー",
+            "momentum": "運動量",
+            "pressure": "圧力",
+            "flux": "流束",
+            "density": "密度",
+            "ratio": "比",
+            "peak": "ピーク",
+            "frequency": "周波数",
+            "wavelength": "波長",
+            "product": "積",
+            "heat": "熱",
+            "capacity": "容量",
+            "helmholtz": "ヘルムホルツ",
+            "per": "当たり",
+            "splits": "分割",
+            "holdout": "ホールドアウト",
+            "scoreboard": "総合スコア",
+            "residual": "残差",
+            "constraints": "制約",
+            "summary": "要約",
+            "audit": "監査",
+            "mapping": "写像",
+            "phase": "位相",
+            "interference": "干渉",
+        }
+    else:
+        token_map = {
+            "llr": "LLR",
+            "eht": "EHT",
+            "gw": "GW",
+            "cosmology": "cosmology",
+            "quantum": "quantum",
+            "thermo": "thermodynamics",
+            "blackbody": "blackbody",
+            "nuclear": "nuclear",
+            "xrism": "XRISM",
+            "gps": "GPS",
+            "cassini": "Cassini",
+            "viking": "Viking",
+            "mercury": "Mercury",
+            "pulsar": "binary pulsar",
+            "photon": "photon",
+            "energy": "energy",
+            "free": "free",
+            "enthalpy": "enthalpy",
+            "entropy": "entropy",
+            "momentum": "momentum",
+            "pressure": "pressure",
+            "flux": "flux",
+            "density": "density",
+            "ratio": "ratio",
+            "peak": "peak",
+            "frequency": "frequency",
+            "wavelength": "wavelength",
+            "product": "product",
+            "heat": "heat",
+            "capacity": "capacity",
+            "helmholtz": "Helmholtz",
+            "per": "per",
+            "splits": "splits",
+            "holdout": "holdout",
+            "scoreboard": "scoreboard",
+            "residual": "residual",
+            "constraints": "constraints",
+            "summary": "summary",
+            "audit": "audit",
+            "mapping": "mapping",
+            "phase": "phase",
+            "interference": "interference",
+        }
 
     words = []
     for token in normalized.split(" "):
@@ -447,6 +511,7 @@ def _fallback_caption_from_path(raw_path: str) -> str:
 
 
 # 関数: `_normalize_figure_caption` の入出力契約と処理意図を定義する。
+
 def _normalize_figure_caption(caption: str, raw_path: str) -> str:
     text = (caption or "").strip()
     text = re.sub(r"[:：]\s*$", "", text).strip()
@@ -462,6 +527,7 @@ def _normalize_figure_caption(caption: str, raw_path: str) -> str:
 
 
 # 関数: `_is_image_markdown_line` の入出力契約と処理意図を定義する。
+
 def _is_image_markdown_line(stripped: str) -> bool:
     # 条件分岐: `_match_leading_image_line(stripped)` を満たす経路を評価する。
     if _match_leading_image_line(stripped):
@@ -471,6 +537,7 @@ def _is_image_markdown_line(stripped: str) -> bool:
 
 
 # 関数: `_count_prose_lines_between_headings` の入出力契約と処理意図を定義する。
+
 def _count_prose_lines_between_headings(lines: list[str], start_index: int, end_index: int) -> int:
     """
     Count prose-like markdown lines between headings.
@@ -581,6 +648,7 @@ def _count_prose_lines_between_headings(lines: list[str], start_index: int, end_
 
 
 # 関数: `_extract_following_caption` の入出力契約と処理意図を定義する。
+
 def _extract_following_caption(lines: list[str], start_index: int) -> tuple[str, int]:
     j = start_index
     while j < len(lines):
@@ -683,6 +751,7 @@ def _copy_private_asset_to_public_if_needed(
 
 
 # 関数: `_sync_public_mirror_for_output_reference` の入出力契約と処理意図を定義する。
+
 def _sync_public_mirror_for_output_reference(raw_path: str, *, root: Path) -> None:
     normalized = _normalize_tex_path(raw_path.strip())
     # 条件分岐: `not normalized.startswith("output/")` を満たす経路を評価する。
@@ -736,8 +805,12 @@ def _sync_public_mirror_for_output_reference(raw_path: str, *, root: Path) -> No
 
 
 # 関数: `_resolve_image_path` の入出力契約と処理意図を定義する。
+
 def _resolve_image_path(raw_path: str, *, root: Path) -> tuple[str, bool]:
     normalized = _normalize_tex_path(raw_path.strip())
+    active_figure_locale = resolve_figure_output_locale(
+        os.environ.get("WAVEP_FIGURE_LOCALE") or os.environ.get("WAVEP_PAPER_LOCALE") or os.environ.get("WAVEP_FIGURE_LANG")
+    )
     # 条件分岐: `normalized.startswith("http://") or normalized.startswith("https://")` を満たす経路を評価する。
     if normalized.startswith("http://") or normalized.startswith("https://"):
         return normalized, False
@@ -792,11 +865,45 @@ def _resolve_image_path(raw_path: str, *, root: Path) -> tuple[str, bool]:
             tail = normalized[len("output/") :]
             # Canonical precedence for paper builds: public (published mirror) -> private (local fallback).
             # Extension priority is evaluated across both roots so PDF wins even if PNG exists in another root.
-            add_candidate_variants_across_roots(
-                [root / "output" / "public" / Path(tail), root / "output" / "private" / Path(tail)]
-            )
+            public_candidate = root / "output" / "public" / Path(tail)
+            private_candidate = root / "output" / "private" / Path(tail)
+            candidates = []
+            if active_figure_locale != "ja":
+                candidates.extend(
+                    [
+                        localize_figure_output_path(public_candidate, root=root, locale=active_figure_locale),
+                        localize_figure_output_path(private_candidate, root=root, locale=active_figure_locale),
+                    ]
+                )
+
+            candidates.extend([public_candidate, private_candidate])
+            add_candidate_variants_across_roots(candidates)
         else:
-            add_candidate_variants(root / path_obj)
+            direct_candidate = root / path_obj
+            if active_figure_locale != "ja" and (
+                normalized.startswith("output/public/") or normalized.startswith("output/private/")
+            ):
+                counterpart_candidate = None
+                if normalized.startswith("output/public/"):
+                    counterpart_candidate = root / "output" / "private" / normalized[len("output/public/") :]
+                elif normalized.startswith("output/private/"):
+                    counterpart_candidate = root / "output" / "public" / normalized[len("output/private/") :]
+
+                locale_candidates = [
+                    localize_figure_output_path(direct_candidate, root=root, locale=active_figure_locale),
+                ]
+                if counterpart_candidate is not None:
+                    locale_candidates.append(
+                        localize_figure_output_path(counterpart_candidate, root=root, locale=active_figure_locale)
+                    )
+
+                locale_candidates.append(direct_candidate)
+                if counterpart_candidate is not None:
+                    locale_candidates.append(counterpart_candidate)
+
+                add_candidate_variants_across_roots(locale_candidates)
+            else:
+                add_candidate_variants(direct_candidate)
 
     resolved_existing = next((candidate for candidate in candidate_paths if candidate.exists()), None)
     # 条件分岐: `resolved_existing is not None` を満たす経路を評価する。
@@ -861,7 +968,8 @@ def _load_reference_entries(references_md: Path) -> tuple[list[str], dict[str, s
 
 
 # 関数: `_render_bibliography_section` の入出力契約と処理意図を定義する。
-def _render_bibliography_section(profile: str = "") -> str:
+
+def _render_bibliography_section(profile: str = "", locale: str | None = None) -> str:
     # 条件分岐: `not _USED_REFERENCE_KEYS` を満たす経路を評価する。
     if not _USED_REFERENCE_KEYS:
         return ""
@@ -889,13 +997,15 @@ def _render_bibliography_section(profile: str = "") -> str:
         lines.append(r"\bibitem{" + key + "} " + rendered)
 
     lines += [r"\end{thebibliography}", ""]
-    post_bibliography_tex = profile_content.resolve_post_bibliography_tex(profile)
+    post_bibliography_tex = profile_content.resolve_post_bibliography_tex(profile, locale=locale)
     if post_bibliography_tex:
         lines += [post_bibliography_tex, ""]
+
     return "\n".join(lines)
 
 
 # 関数: `_convert_raster_image_to_pdf` の入出力契約と処理意図を定義する。
+
 def _convert_raster_image_to_pdf(src_image: Path, dst_pdf: Path) -> bool:
     """
     Convert a raster image to PDF for TeX inclusion.
@@ -951,6 +1061,7 @@ def _convert_raster_image_to_pdf(src_image: Path, dst_pdf: Path) -> bool:
 
 
 # 関数: `_render_figure_block` の入出力契約と処理意図を定義する。
+
 def _render_figure_block(
     *,
     raw_path: str,
@@ -1032,8 +1143,8 @@ def _render_figure_block(
                         if not dst.exists():
                             raise
 
-            tex_path = candidate
-            staged_assets[source_key] = candidate
+            tex_path = _normalize_tex_path(str(Path("figures") / candidate))
+            staged_assets[source_key] = tex_path
 
     normalized_caption = _normalize_figure_caption(caption, raw_path)
 
@@ -1048,7 +1159,11 @@ def _render_figure_block(
     # Part4 の検証サマリ表ラベル整合監査図は、本文要件に合わせてキャプション/ラベルを固定する。
     custom_label_base = ""
     if profile == "part4_verification" and image_stem == "table1_part4_label_parity_audit":
-        caption_text = _convert_inline("検証サマリ表 Part IV ラベル整合監査。")
+        fixed_caption = "Part IV label-parity audit for the verification summary table."
+        if _should_localize_figure_caption_to_japanese():
+            fixed_caption = "検証サマリ表 Part IV ラベル整合監査。"
+
+        caption_text = _convert_inline(fixed_caption)
         custom_label_base = "fig:p4:scoreboard-part4-label-parity-audit"
 
     if profile == "part2_astrophysics" and image_stem == "delta_saturation_constraints":
@@ -1143,6 +1258,16 @@ def _render_figure_block(
     # Backward compatibility for non-eq split filenames.
     elif image_stem in tall_part3_figures:
         includegraphics_opts = r"width=\linewidth"
+
+    part3b_size_overrides = {
+        # Part III-B Figure 9-11: page 22-23 で single-panel 3 図が紙面に対して少し大きいため、
+        # 英語面では配置幅を軽く下げて overflow を抑える。
+        "cow_phase_shift": r"width=0.94\linewidth",
+        "atom_interferometer_gravimeter_phase": r"width=0.94\linewidth",
+        "optical_clock_chronometric_leveling": r"width=0.94\linewidth",
+    }
+    if profile == profile_content.PART3B_PROFILE and image_stem in part3b_size_overrides:
+        includegraphics_opts = part3b_size_overrides[image_stem]
 
     # Keep strict in-text ordering for figure-adjacent explanations/supplements.
 
@@ -1451,6 +1576,7 @@ def _looks_like_artifact_code(s: str) -> bool:
 
 
 # 関数: `_looks_like_wrappable_code_literal` の入出力契約と処理意図を定義する。
+
 def _looks_like_wrappable_code_literal(s: str) -> bool:
     candidate = s.strip()
     if not candidate:
@@ -1472,6 +1598,7 @@ def _looks_like_wrappable_code_literal(s: str) -> bool:
 
 
 # 関数: `_render_code_literal` の入出力契約と処理意図を定義する。
+
 def _render_code_literal(payload: str) -> str:
     code = payload.strip()
     if not code:
@@ -1490,6 +1617,7 @@ def _render_code_literal(payload: str) -> str:
 
 
 # 関数: `_looks_like_math_code` の入出力契約と処理意図を定義する。
+
 def _looks_like_math_code(s: str) -> bool:
     candidate = s.strip()
     # 条件分岐: `not candidate` を満たす経路を評価する。
@@ -1560,6 +1688,7 @@ def _looks_like_math_code(s: str) -> bool:
 
 
 # 関数: `_format_subscript_token` の入出力契約と処理意図を定義する。
+
 def _format_subscript_token(sub: str) -> str:
     # 条件分岐: `re.fullmatch(r"[A-Za-z0-9]", sub)` を満たす経路を評価する。
     if re.fullmatch(r"[A-Za-z0-9]", sub):
@@ -1574,6 +1703,7 @@ def _format_subscript_token(sub: str) -> str:
 
 
 # 関数: `_normalize_word_subscripts` の入出力契約と処理意図を定義する。
+
 def _normalize_word_subscripts(text: str) -> str:
     normalized = text
     normalized = _GREEK_CMD_SUBSCRIPT_RE.sub(
@@ -1588,6 +1718,7 @@ def _normalize_word_subscripts(text: str) -> str:
 
 
 # 関数: `_looks_like_physics_equation_code` の入出力契約と処理意図を定義する。
+
 def _looks_like_physics_equation_code(s: str) -> bool:
     candidate = s.strip()
     # 条件分岐: `not candidate` を満たす経路を評価する。
@@ -1685,6 +1816,7 @@ def _looks_like_physics_equation_code(s: str) -> bool:
 
 
 # 関数: `_looks_like_physics_symbol_code` の入出力契約と処理意図を定義する。
+
 def _looks_like_physics_symbol_code(s: str) -> bool:
     candidate = s.strip().replace(r"\_", "_")
     # 条件分岐: `not candidate` を満たす経路を評価する。
@@ -1715,6 +1847,7 @@ def _looks_like_physics_symbol_code(s: str) -> bool:
 
 
 # 関数: `_replace_plain_symbolic_tokens` の入出力契約と処理意図を定義する。
+
 def _replace_plain_symbolic_tokens(text: str, make_token) -> str:
     # 関数: `repl_unicode_greek_sub` の入出力契約と処理意図を定義する。
     def repl_unicode_greek_sub(match: re.Match[str]) -> str:
@@ -1746,6 +1879,7 @@ def _replace_plain_symbolic_tokens(text: str, make_token) -> str:
 
 
 # 関数: `_normalize_inline_math_payload` の入出力契約と処理意図を定義する。
+
 def _normalize_inline_math_payload(code_text: str) -> str:
     normalized = code_text.strip()
     normalized = re.sub(r"\\\\(?=[A-Za-z])", r"\\", normalized)
@@ -1798,6 +1932,7 @@ def _normalize_inline_math_payload(code_text: str) -> str:
 
 
 # 関数: `_normalize_math_command_spacing` の入出力契約と処理意図を定義する。
+
 def _normalize_math_command_spacing(text: str) -> str:
     normalized = text
     normalized = _GREEK_CMD_GLUE_RE.sub(r"\\\1 ", normalized)
@@ -1813,6 +1948,7 @@ def _normalize_math_command_spacing(text: str) -> str:
 
 
 # 関数: `_compact_display_math` の入出力契約と処理意図を定義する。
+
 def _compact_display_math(math_body: str) -> str:
     compact = re.sub(r"\s+", "", math_body)
     compact = compact.replace(r"\,", "")
@@ -1902,7 +2038,207 @@ def _apply_part2_selective_equation_numbering(tex_body: str) -> str:
 
         return match.group(0)
 
-    return _DISPLAY_MATH_BLOCK_RE.sub(repl, tex_body)
+    normalized = _DISPLAY_MATH_BLOCK_RE.sub(repl, tex_body)
+    return _apply_part2_en_strict_parity_adjustments(normalized)
+
+
+# 関数: `_apply_part2_en_strict_parity_adjustments` の入出力契約と処理意図を定義する。
+def _apply_part2_en_strict_parity_adjustments(tex_body: str) -> str:
+    normalized = tex_body
+    process_item_block = (
+        r"\item Under the same published constraints, use the P-model-specific indicator"
+        "\n"
+        r"\["
+        "\n"
+        r"\eta^{(P)}(z)\equiv \frac{D_{L}}{(1+z)\,D_{A}}"
+        "\n"
+        r"\]"
+        "\n"
+        r"i.e. the quantity that divides out only the flux-side factor $(1+z)$ from $\eta$, and evaluate it on the reference scale $z_{\mathrm{ref}}=1$."
+    )
+    process_item_replacement = (
+        r"\item Under the same published constraints, use the P-model-specific indicator"
+        "\n"
+        r"\begin{equation}\label{eq:part2-h_eta_p_def}"
+        "\n"
+        r"\eta^{(P)}(z)\equiv \frac{D_{L}}{(1+z)\,D_{A}}"
+        "\n"
+        r"\end{equation}"
+        "\n"
+        r"i.e. the quantity that divides out only the flux-side factor $(1+z)$ from $\eta$, and evaluate it on the reference scale $z_{\mathrm{ref}}=1$."
+    )
+    normalized = normalized.replace(process_item_block, process_item_replacement, 1)
+
+    normalized = normalized.replace(
+        "For the P-model-specific indicator used in this section,\n\n"
+        r"\begin{equation}\label{eq:part2-h_eta_p_def}"
+        "\n"
+        r"\eta^{(P)}(z) \equiv \frac{D_{L}}{(1+z)\,D_{A}}"
+        "\n"
+        r"\end{equation}"
+        "\n\n"
+        r"evaluate errors on the reference scale $z_{\mathrm{ref}}=1$ after dividing out only the flux-side $(1+z)$ factor.",
+        r"For the P-model-specific indicator $\eta^{(P)}(z)\equiv D_{L}/[(1+z)\,D_{A}]$ used in this section, evaluate errors on the reference scale $z_{\mathrm{ref}}=1$ after dividing out only the flux-side $(1+z)$ factor.",
+        1,
+    )
+
+    normalized = normalized.replace(
+        "For the P-model-specific indicator used in this section,\n\n"
+        r"\["
+        "\n"
+        r"\eta^{(P)}(z) \equiv \frac{D_{L}}{(1+z)\,D_{A}}"
+        "\n"
+        r"\]"
+        "\n\n"
+        r"evaluate errors on the reference scale $z_{\mathrm{ref}}=1$ after dividing out only the flux-side $(1+z)$ factor.",
+        r"For the P-model-specific indicator $\eta^{(P)}(z)\equiv D_{L}/[(1+z)\,D_{A}]$ used in this section, evaluate errors on the reference scale $z_{\mathrm{ref}}=1$ after dividing out only the flux-side $(1+z)$ factor.",
+        1,
+    )
+
+    normalized = normalized.replace(
+        r"\item Publication-constraint format on the same P-model-specific indicator:"
+        "\n"
+        r"\begin{equation}\label{eq:part2-h_eta_p_def}"
+        "\n"
+        r"\eta^{(P)}(z)\equiv \frac{D_{L}}{(1+z)\,D_{A}}=(1+z)\eta(z)=(1+z)^{1+\epsilon_0}"
+        "\n"
+        r"\end{equation}",
+        r"\item Publication-constraint format on the same P-model-specific indicator:"
+        "\n"
+        r"\begin{equation}\label{eq:part2-h_eta_p_eps}"
+        "\n"
+        r"\eta^{(P)}(z)\equiv \frac{D_{L}}{(1+z)\,D_{A}}=(1+z)\eta(z)=(1+z)^{1+\epsilon_0}"
+        "\n"
+        r"\end{equation}",
+        1,
+    )
+
+    normalized = normalized.replace(
+        r"\item Publication-constraint format on the same P-model-specific indicator:"
+        "\n"
+        r"\["
+        "\n"
+        r"\eta^{(P)}(z)\equiv \frac{D_{L}}{(1+z)\,D_{A}}=(1+z)\eta(z)=(1+z)^{1+\epsilon_0}"
+        "\n"
+        r"\]",
+        r"\item Publication-constraint format on the same P-model-specific indicator:"
+        "\n"
+        r"\begin{equation}\label{eq:part2-h_eta_p_eps}"
+        "\n"
+        r"\eta^{(P)}(z)\equiv \frac{D_{L}}{(1+z)\,D_{A}}=(1+z)\eta(z)=(1+z)^{1+\epsilon_0}"
+        "\n"
+        r"\end{equation}",
+        1,
+    )
+    return normalized
+
+
+_PART4_EN_ITEMIZE_SPLIT_MARKERS: tuple[str, ...] = (
+    r"\item Shapiro's contribution",
+    r"\item \texttt{4 ns} Excess contribution audit",
+    r"\item Station coordinate difference",
+    r"\item Preprocessing dependency of Cassini direct fit",
+    r"\item Cassini ODF raw normalization I/F manifest",
+    r"\item VLBI Session Identification Audit",
+    r"\item VLBI source-filter sensitivity audit",
+    r"\item Viking:",
+    r"\item SN time dilation:",
+    r"\item CMB temperature scaling:",
+    r"\item CMB TT full $C_\ell$ fit",
+    r"\item CMB TT/TE/EE simultaneous full $C_\ell$ fit",
+    r"\item CMB polarization phase",
+    r"\item Galaxy cluster collision offset (Bullet system):",
+    r"\item Galaxy cluster collision $\tau$/$\xi$ Derived chain audit (assignment B):",
+    r"\item Galaxy cluster collision $L_{\mathrm{path}}$ Scaling law prediction (task 2):",
+    r"\item Galaxy cluster collision transfer template",
+    r"\item \nolinkurl{output/public/cosmology/locales/en/cosmology_cluster_collision_lpath_transfer_template.json}",
+    r"\item JWST/NIRSpec primary spectrum update monitoring",
+    r"\item Fixed references for the 4 strong fields will be released as release assets of v0.1.3.",
+    r"\item Principle of action → EL derivation audit",
+    r"\item Non-relativistic limit (2.6→2.5) audit",
+    r"\item Derivation-derived parameter falsification condition pack",
+    r"\item Derivation → observation chain lock audit (consistency judgment",
+    r"\item Derivation → observation chain lock audit (Part IV judgment after watch policy)",
+    r"\item Drift audit of derived extension of action reference framework + Part III-A",
+    r"\item Working principle closure audit of rotational coupling",
+    r"\item Cross-cutting update of quantum covariance",
+    r"\item Quantum closeout boundary audit",
+    r"\item Summary of theoretical criteria with coupled-localization conditions",
+    r"\item Note: The \nolinkurl{v11_plus} stem",
+    r"\item Pikovski structural comparison:",
+)
+
+_PART4_EN_ITEMIZE_MERGE_SPECS: tuple[tuple[str, str], ...] = (
+    (
+        r"(Fix $\kappa_{\mathrm{fp}}(center)=1$",
+        r"\item Fixed artifact: \nolinkurl{output/public/eht/eht_kappa_first_principles_transfer.json}",
+    ),
+    (
+        r"Minimum \nolinkurl{scalar_overlap_proxy=0.500}",
+        r"\item Fixed artifact: \nolinkurl{output/public/gw/locales/en/gw_polarization_h1_l1_v1_network_tuning_audit_refine_step87198.json}",
+    ),
+    (
+        r"Supplement: ($\lambda_{\mathrm{joint}}=-4.97\times10^{-5}\pm6.63\times10^{-5}$",
+        r"\item Fixed artifact: \nolinkurl{output/public/theory/locales/en/pmodel_strong_field_higher_order_audit.json}",
+    ),
+    (
+        r"Supplement: (The PDE and separation solution of $\partial_\mu F^{\mu\nu}=0$ expanded with $J^\mu=0, m_{P}\to0$",
+        r"\item Fixed artifact: \nolinkurl{output/public/theory/locales/en/pmodel_rotating_bh_photon_ring_direct_audit.json}",
+    ),
+    (
+        r"Supplement: (Audit of the same notation for Part I \texttt{2.7.4} / Part II \texttt{4.16} / Part IV \ref{sec:p4:eht-s9}",
+        r"\item Fixed artifact: \nolinkurl{output/public/theory/locales/en/pmodel_effective_metric_nonlinear_pde_derivation_audit.json}",
+    ),
+    (
+        r"Supplement: $P_{t}$ here refers to the time component of $P_\mu$",
+        r"\item Fixed artifact: \nolinkurl{output/public/theory/locales/en/pmodel_effective_metric_n0_source_solution_audit.json}",
+    ),
+    (
+        r"Supplement: Bullet reevaluation is fixed as pass",
+        r"\item AP(",
+    ),
+)
+
+
+# 関数: `_split_itemize_before_marker` の入出力契約と処理意図を定義する。
+def _split_itemize_before_marker(tex_body: str, marker: str) -> str:
+    target = "\n" + marker
+    replacement = (
+        "\n"
+        r"\end{itemize}"
+        "\n\n"
+        r"\begin{itemize}[leftmargin=2em]"
+        "\n"
+        + marker
+    )
+    return tex_body.replace(target, replacement, 1)
+
+
+# 関数: `_merge_itemize_with_bridge_line` の入出力契約と処理意図を定義する。
+def _merge_itemize_with_bridge_line(tex_body: str, bridge_prefix: str, item_prefix: str) -> str:
+    pattern = re.compile(
+        re.escape(r"\end{itemize}")
+        + r"\n\n(?P<bridge>"
+        + re.escape(bridge_prefix)
+        + r"[^\n]*)"
+        + re.escape("\n\n" + r"\begin{itemize}[leftmargin=2em]" + "\n")
+        + r"(?P<item>"
+        + re.escape(item_prefix)
+        + r"[^\n]*)"
+    )
+    return pattern.sub("\n\n" + r"\g<bridge>" + "\n\n" + r"\g<item>", tex_body, count=1)
+
+
+# 関数: `_apply_part4_en_strict_itemize_adjustments` の入出力契約と処理意図を定義する。
+def _apply_part4_en_strict_itemize_adjustments(tex_body: str) -> str:
+    normalized = tex_body
+    for marker in _PART4_EN_ITEMIZE_SPLIT_MARKERS:
+        normalized = _split_itemize_before_marker(normalized, marker)
+
+    for bridge_prefix, item_prefix in _PART4_EN_ITEMIZE_MERGE_SPECS:
+        normalized = _merge_itemize_with_bridge_line(normalized, bridge_prefix, item_prefix)
+
+    return normalized
 
 
 _PART3_REQUIRED_EQUATION_RULES: tuple[tuple[str, tuple[str, ...], bool], ...] = (
@@ -1983,6 +2319,7 @@ def _apply_part3_selective_equation_numbering(tex_body: str) -> str:
 
 
 # 関数: `_postprocess_latex_body` の入出力契約と処理意図を定義する。
+
 def _postprocess_latex_body(body: str) -> str:
     # 本文全体へ数式コマンド補正をかけると \multicolumn などの
     # 構造コマンドまで壊すため、ここでは生テキストを起点にする。
@@ -2092,6 +2429,7 @@ def _postprocess_latex_body(body: str) -> str:
 
 
 # 関数: `_protect_verbatim_tex_commands` の入出力契約と処理意図を定義する。
+
 def _protect_verbatim_tex_commands(text: str, *, commands: tuple[str, ...]) -> tuple[str, dict[str, str]]:
     token_map: dict[str, str] = {}
     protected = text
@@ -2113,6 +2451,7 @@ def _protect_verbatim_tex_commands(text: str, *, commands: tuple[str, ...]) -> t
 
 
 # 関数: `_convert_inline` の入出力契約と処理意図を定義する。
+
 def _convert_inline(text: str) -> str:
     token_map: dict[str, str] = {}
     token_index = 0
@@ -2249,6 +2588,7 @@ def _convert_inline(text: str) -> str:
 
 
 # 関数: `_is_table_separator` の入出力契約と処理意図を定義する。
+
 def _is_table_separator(line: str) -> bool:
     s = line.strip()
     # 条件分岐: `"|" not in s` を満たす経路を評価する。
@@ -2260,6 +2600,7 @@ def _is_table_separator(line: str) -> bool:
 
 
 # 関数: `_parse_table_row` の入出力契約と処理意図を定義する。
+
 def _parse_table_row(line: str) -> list[str]:
     s = line.strip()
     # 条件分岐: `s.startswith("|")` を満たす経路を評価する。
@@ -2319,6 +2660,7 @@ def _parse_table_row(line: str) -> list[str]:
 
 
 # 関数: `_render_table` の入出力契約と処理意図を定義する。
+
 def _render_table(
     block_lines: list[str],
     *,
@@ -2521,7 +2863,9 @@ def _render_table(
         r"\midrule",
         r"\endhead",
         r"\midrule",
-        r"\multicolumn{" + str(ncols) + r"}{r}{\footnotesize 続きは次ページ} \\",
+        r"\multicolumn{" + str(ncols) + r"}{r}{\footnotesize "
+        + ("Continued on next page" if locale_registry.resolve_active_locale(os.environ.get("WAVEP_PAPER_LOCALE")) == "en" else "続きは次ページ")
+        + r"} \\",
         r"\endfoot",
         r"\bottomrule",
         r"\endlastfoot",
@@ -2540,6 +2884,7 @@ def _render_table(
 
 
 # 関数: `_split_protocol_triplet` の入出力契約と処理意図を定義する。
+
 def _split_protocol_triplet(text: str) -> Optional[tuple[str, str, str]]:
     compact = " ".join(text.strip().split())
     m = re.match(
@@ -2554,6 +2899,7 @@ def _split_protocol_triplet(text: str) -> Optional[tuple[str, str, str]]:
 
 
 # 関数: `_markdown_to_latex` の入出力契約と処理意図を定義する。
+
 def _markdown_to_latex(
     md_text: str,
     *,
@@ -2730,6 +3076,13 @@ def _markdown_to_latex(
             if marker_body:
                 out.append("% " + marker_body)
 
+            i += 1
+            continue
+
+        if re.fullmatch(r"\\label\{[^}]+\}", stripped):
+            flush_paragraph()
+            close_list()
+            out.append(stripped)
             i += 1
             continue
 
@@ -2978,11 +3331,6 @@ def _markdown_to_latex(
             # 条件分岐: `effective_level == 1` を満たす経路を評価する。
 
             if effective_level == 1:
-                # Part4/Part5 固定: 「この文書の目的」の直前にのみ区切り線を入れる。
-                if profile in {"part4_verification", "part5_future_predictions"}:
-                    compact_title = re.sub(r"[\s\u3000\(\)（）\[\]【】<>＜＞:：._\-–—・,，、/]", "", title)
-                    if compact_title in {"この文書の目的", "この文書目的"}:
-                        out += [r"\medskip", r"\hrule", r"\medskip", ""]
                 # 条件分岐: `_is_abstract_heading(title)` を満たす経路を評価する。
 
                 if _is_abstract_heading(title):
@@ -3207,6 +3555,7 @@ def _markdown_to_latex(
 
 
 # 関数: `main` の入出力契約と処理意図を定義する。
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     global _REFERENCE_KEYS, _REFERENCE_ORDER, _REFERENCE_TEXT, _USED_REFERENCE_KEYS
 
@@ -3260,8 +3609,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         outdir = root / "output" / "private" / "summary"
 
     outdir.mkdir(parents=True, exist_ok=True)
-    figures_dir = outdir / "figures"
-    figures_dir.mkdir(parents=True, exist_ok=True)
     _ensure_pmodel_version_style(root=root, outdir=outdir)
 
     # 条件分岐: `args.out_name` を満たす経路を評価する。
@@ -3269,6 +3616,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         out_name = str(args.out_name)
     else:
         out_name = profile_content.resolve_tex_name(profile, locale=locale)
+
+    out_tex = outdir / out_name
+    out_tex.parent.mkdir(parents=True, exist_ok=True)
+    figures_dir = out_tex.parent / "figures"
+    figures_dir.mkdir(parents=True, exist_ok=True)
+    style_src = outdir / "pmodel_version.sty"
+    style_dst = out_tex.parent / "pmodel_version.sty"
+    if style_dst.resolve() != style_src.resolve():
+        shutil.copy2(style_src, style_dst)
+
+    graphics_rel = Path(os.path.relpath(figures_dir, out_tex.parent)).as_posix().rstrip("/") + "/"
 
     body = _markdown_to_latex(
         md_text,
@@ -3286,10 +3644,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         profile_content.PART3B_PROFILE,
     }:
         body = _apply_part3_selective_equation_numbering(body)
+    if locale == "en" and profile in {"paper", "part4_verification"}:
+        body = _apply_part4_en_strict_itemize_adjustments(body)
 
-    bibliography_section = _render_bibliography_section(profile=profile)
+    bibliography_section = _render_bibliography_section(profile=profile, locale=locale)
 
-    title_tex = profile_content.resolve_tex_title(profile)
+    title_tex = profile_content.resolve_tex_title(profile, locale=locale)
     author_tex = (
         r"\author{" "\n"
         r"  Shunji Ogawa \\" "\n"
@@ -3298,7 +3658,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         r"}"
     )
     figure_locale_tex = ""
-    if profile == "paper":
+    active_locale = locale_registry.resolve_active_locale(locale)
+    if active_locale == "en":
+        if profile == "part2_astrophysics":
+            figure_locale_tex = (
+                r"\renewcommand{\figurename}{Figure}" "\n"
+                r"\renewcommand{\tablename}{Table}" "\n"
+            )
+        else:
+            figure_locale_tex = r"\renewcommand{\figurename}{Figure}" "\n"
+    elif profile == "paper":
         figure_locale_tex = r"\renewcommand{\figurename}{図}" "\n"
     elif profile == "part2_astrophysics":
         figure_locale_tex = (
@@ -3321,10 +3690,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         r"\usepackage{luatexja}" "\n"
         r"% avoid lltjp-microtype warning under LuaTeX-ja" "\n"
     )
+    tex_program_hint = "lualatex"
 
     cjk_wrap_begin = ""
     cjk_wrap_end = ""
-    if profile != "paper":
+    if profile != "paper" or active_locale != "ja":
         engine_tex = (
             r"\usepackage{iftex}" "\n"
             r"\ifPDFTeX" "\n"
@@ -3348,6 +3718,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
         cjk_wrap_begin = r"\ifPDFTeX\begin{CJK}{UTF8}{min}\fi" + "\n"
         cjk_wrap_end = r"\ifPDFTeX\end{CJK}\fi" + "\n"
+        tex_program_hint = "xelatex" if active_locale != "ja" else "lualatex"
 
     lstset_tex = ""
     if profile != "paper":
@@ -3356,9 +3727,47 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "\n"
         )
 
+    titlepage_rule = ""
+    if profile in {"part4_verification", "part5_future_predictions"}:
+        titlepage_rule = r"\medskip" + "\n" + r"\hrule" + "\n" + r"\medskip" + "\n\n"
+
+    unicode_math_char_tex = (
+        r"\ifPDFTeX" "\n"
+        r"\else" "\n"
+        r"  \usepackage{newunicodechar}" "\n"
+        r"  \newunicodechar{α}{\ensuremath{\alpha}}" "\n"
+        r"  \newunicodechar{β}{\ensuremath{\beta}}" "\n"
+        r"  \newunicodechar{γ}{\ensuremath{\gamma}}" "\n"
+        r"  \newunicodechar{δ}{\ensuremath{\delta}}" "\n"
+        r"  \newunicodechar{ε}{\ensuremath{\epsilon}}" "\n"
+        r"  \newunicodechar{η}{\ensuremath{\eta}}" "\n"
+        r"  \newunicodechar{κ}{\ensuremath{\kappa}}" "\n"
+        r"  \newunicodechar{λ}{\ensuremath{\lambda}}" "\n"
+        r"  \newunicodechar{μ}{\ensuremath{\mu}}" "\n"
+        r"  \newunicodechar{ν}{\ensuremath{\nu}}" "\n"
+        r"  \newunicodechar{ρ}{\ensuremath{\rho}}" "\n"
+        r"  \newunicodechar{σ}{\ensuremath{\sigma}}" "\n"
+        r"  \newunicodechar{τ}{\ensuremath{\tau}}" "\n"
+        r"  \newunicodechar{φ}{\ensuremath{\phi}}" "\n"
+        r"  \newunicodechar{χ}{\ensuremath{\chi}}" "\n"
+        r"  \newunicodechar{ψ}{\ensuremath{\psi}}" "\n"
+        r"  \newunicodechar{ω}{\ensuremath{\omega}}" "\n"
+        r"  \newunicodechar{Δ}{\ensuremath{\Delta}}" "\n"
+        r"  \newunicodechar{ℓ}{\ensuremath{\ell}}" "\n"
+        r"  \newunicodechar{′}{\ensuremath{^\prime}}" "\n"
+        r"  \newunicodechar{↔}{\ensuremath{\leftrightarrow}}" "\n"
+        r"  \newunicodechar{∈}{\ensuremath{\in}}" "\n"
+        r"  \newunicodechar{∝}{\ensuremath{\propto}}" "\n"
+        r"  \newunicodechar{≈}{\ensuremath{\approx}}" "\n"
+        r"  \newunicodechar{≤}{\ensuremath{\leq}}" "\n"
+        r"  \newunicodechar{≥}{\ensuremath{\geq}}" "\n"
+        r"  \newunicodechar{≲}{\ensuremath{\lesssim}}" "\n"
+        r"\fi" "\n"
+    )
+
     tex = (
-        r"% !TeX program = lualatex" "\n"
-        r"\documentclass[11pt,a4paper]{article}" "\n"
+        rf"% !TeX program = {tex_program_hint}" + "\n"
+        + r"\documentclass[11pt,a4paper]{article}" "\n"
         + engine_tex
         + r"\usepackage{geometry}" "\n"
         + r"\geometry{margin=20mm}" "\n"
@@ -3370,6 +3779,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         + r"\usepackage{array}" "\n"
         + r"\usepackage{enumitem}" "\n"
         + r"\usepackage{amsmath,amssymb}" "\n"
+        + unicode_math_char_tex
         + r"\usepackage{float}" "\n"
         + r"\usepackage{xcolor}" "\n"
         + r"\usepackage{listings}" "\n"
@@ -3387,7 +3797,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         + r"\setlength{\LTright}{0pt}" "\n"
         + r"\setlength{\emergencystretch}{4em}" "\n"
         + "\n"
-        + r"\graphicspath{{figures/}}" "\n\n"
+        + rf"\graphicspath{{{{{graphics_rel}}}}}" "\n\n"
         + r"\DeclareGraphicsExtensions{.pdf,.png,.jpg,.jpeg}" "\n\n"
         + r"% --- convenience macros (avoid undefined control sequences) ---" "\n"
         + r"\newcommand{\sigmaV}{\sigma_V}" "\n"
@@ -3403,6 +3813,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         + r"\begin{document}" + "\n"
         + cjk_wrap_begin
         + r"\maketitle" + "\n\n"
+        + titlepage_rule
         + body
         + bibliography_section
         + "\n"
@@ -3410,7 +3821,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         + r"\end{document}" + "\n"
     )
 
-    out_tex = outdir / out_name
     out_tex.write_text(tex, encoding="utf-8")
     print(f"[ok] wrote: {out_tex}")
 

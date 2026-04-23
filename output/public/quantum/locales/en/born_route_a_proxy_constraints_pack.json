@@ -1,0 +1,250 @@
+{
+  "generated_utc": "2026-04-13T04:01:55.614948+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.49.5",
+    "name": "Born route-A statistical bridge + proxy constraints packaging"
+  },
+  "lineage": {
+    "origin_step": "8.7.2"
+  },
+  "intent": "Freeze the conditional statistical bridge for Born rule plus the operational machine gate using phase/visibility/selection proxies.",
+  "inputs": {
+    "matter_wave_interference_precision_audit_metrics_json": "output/public/quantum/matter_wave_interference_precision_audit_metrics.json",
+    "bell_falsification_pack_json": "output/public/quantum/bell/falsification_pack.json",
+    "bell_selection_sensitivity_summary_json": "output/public/quantum/bell_selection_sensitivity_summary.json"
+  },
+  "criteria": [
+    {
+      "id": "phase_alpha_consistency",
+      "proxy": "phase",
+      "metric": "atom_recoil_alpha_abs_z",
+      "value": 0.5883354744951784,
+      "threshold": 3.0,
+      "operator": "<=",
+      "pass": true,
+      "gate": true,
+      "note": "位相整合の最小ゲート（abs_z<=3）。"
+    },
+    {
+      "id": "phase_molecular_scaling",
+      "proxy": "phase",
+      "metric": "molecular_isotopic_scaling_zmax",
+      "value": 2.6385399704973964,
+      "threshold": 3.0,
+      "operator": "<=",
+      "pass": true,
+      "gate": true,
+      "note": "分子スケーリング整合の最小ゲート（z<=3）。"
+    },
+    {
+      "id": "selection_delay_signature_fast",
+      "proxy": "selection",
+      "metric": "min_fast_switching_delay_zmax",
+      "value": 5.53541064134177,
+      "threshold": 3.0,
+      "operator": ">=",
+      "pass": true,
+      "gate": true,
+      "note": "fast-switch/time-tag 系で setting依存遅延 z が 3以上。"
+    },
+    {
+      "id": "selection_sweep_sensitivity_fast",
+      "proxy": "selection",
+      "metric": "min_fast_switching_selection_ratio",
+      "value": 19.316744077961687,
+      "threshold": 1.0,
+      "operator": ">=",
+      "pass": true,
+      "gate": true,
+      "note": "selection sweep の変動幅が統計幅1σ以上（ratio>=1）。"
+    },
+    {
+      "id": "visibility_atom_precision_gap",
+      "proxy": "visibility",
+      "metric": "log10_atom_interferometer_current_over_required_ratio",
+      "value": 0.3338887327706417,
+      "threshold": 1.0,
+      "operator": "<=",
+      "pass": true,
+      "gate": false,
+      "note": "可視度差分の決着力監視（log10正規化；1桁以内をwatch閾値）。未達でも即棄却には使わない。"
+    },
+    {
+      "id": "statistical_bridge_mc_max_abs_frequency_error",
+      "proxy": "born_bridge",
+      "metric": "phase_randomized_frequency_max_abs_error",
+      "value": 0.005207625742030042,
+      "threshold": 0.02,
+      "operator": "<=",
+      "pass": true,
+      "gate": false,
+      "note": "位相ランダム化 + 線形検出応答の toy Monte Carlo が target frequency を 2e-2 以内で再現することを確認する。"
+    }
+  ],
+  "decision": {
+    "route_a_gate": "A_continue",
+    "hard_fail_ids": [],
+    "hard_unknown_ids": [],
+    "watchlist": [],
+    "rule": "A_to_B if any hard gate fails/unknown; otherwise A_continue.",
+    "born_statistical_bridge": {
+      "born_route": "partial_bridge_only",
+      "full_first_principles_derivation": false,
+      "operational_born_rule_retained": true
+    }
+  },
+  "diagnostics": {
+    "fast_switching_datasets": [
+      {
+        "dataset_id": "weihs1998_longdist_longdist1",
+        "ratio": 19.316744077961687,
+        "delay_z_alice": 5.53541064134177,
+        "delay_z_bob": 5.5344547303315474,
+        "delay_z_max": 5.53541064134177
+      },
+      {
+        "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
+        "ratio": 187.4790336851017,
+        "delay_z_alice": 34.795228665969034,
+        "delay_z_bob": 43.90965148631052,
+        "delay_z_max": 43.90965148631052
+      }
+    ],
+    "bell_selection_summary_available": true,
+    "matter_rows_n": 3,
+    "visibility_reference": {
+      "channel": "atom_gravimeter",
+      "ratio_raw": 2.157191660961336,
+      "ratio_log10": 0.3338887327706417,
+      "threshold_log10": 1.0
+    },
+    "statistical_bridge": {
+      "status": "partial_bridge_fixed_operational_rule_retained",
+      "assumptions": [
+        "psi is the normalized positive-frequency envelope fluctuation fixed in 8.7.49.2.",
+        "Micro-phases are sufficiently mixed across sub-events so ensemble cross-terms average out.",
+        "Single-shot detector response is linear in the transported local energy density.",
+        "Single-shot backreaction on the P-field is negligible in the same regime where the operational Born rule was adopted."
+      ],
+      "what_is_fixed": [
+        "|psi|^2 can be read as normalized envelope-energy density in the frequentist limit under the assumptions above.",
+        "The bridge explains why count frequencies track |psi|^2 without claiming a full microscopic derivation."
+      ],
+      "what_remains_open": [
+        "Why phase mixing follows generically from P dynamics rather than from an external ergodic assumption.",
+        "Why detector linearity should emerge microscopically for arbitrary measurement devices.",
+        "Why conditioning/state update reduces to the Lueders/Kraus form."
+      ],
+      "monte_carlo": {
+        "tolerance_max_abs_frequency_error": 0.02,
+        "max_abs_frequency_error": 0.005207625742030042,
+        "max_abs_cross_term_residual": 0.009634363693499903,
+        "pass": true,
+        "cases": [
+          {
+            "case_id": "two_path_balanced",
+            "shots": 8192,
+            "seed": 2026031301,
+            "target_frequency": [
+              0.5,
+              0.5
+            ],
+            "submode_counts": [
+              8,
+              8
+            ],
+            "mean_intensity": [
+              0.49912785153428507,
+              0.5096343636934999
+            ],
+            "predicted_frequency": [
+              0.49479237425797007,
+              0.50520762574203
+            ],
+            "max_abs_frequency_error": 0.005207625742030042,
+            "l1_frequency_error": 0.010415251484059973,
+            "max_abs_cross_term_residual": 0.009634363693499903
+          },
+          {
+            "case_id": "three_bin_skewed",
+            "shots": 12288,
+            "seed": 2026031302,
+            "target_frequency": [
+              0.15,
+              0.35,
+              0.5
+            ],
+            "submode_counts": [
+              3,
+              5,
+              7
+            ],
+            "mean_intensity": [
+              0.1506317394961523,
+              0.34957150814763605,
+              0.5013330139550766
+            ],
+            "predicted_frequency": [
+              0.150400684699805,
+              0.3490352986217151,
+              0.5005640166784798
+            ],
+            "max_abs_frequency_error": 0.0009647013782848601,
+            "l1_frequency_error": 0.0019294027565696925,
+            "max_abs_cross_term_residual": 0.0013330139550765674
+          },
+          {
+            "case_id": "gaussian_profile_7bin",
+            "shots": 16384,
+            "seed": 2026031303,
+            "target_frequency": [
+              0.009172,
+              0.069913,
+              0.239062,
+              0.363706,
+              0.239062,
+              0.069913,
+              0.009172
+            ],
+            "submode_counts": [
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4
+            ],
+            "mean_intensity": [
+              0.00914815080442061,
+              0.06872933144647561,
+              0.24032357810297406,
+              0.363540864861568,
+              0.23792665682509176,
+              0.07000407942754498,
+              0.009074959910426074
+            ],
+            "predicted_frequency": [
+              0.009159622119343886,
+              0.06881551452569504,
+              0.24062493162313853,
+              0.3639967265802327,
+              0.23822500472811975,
+              0.07009186097577212,
+              0.009086339447698053
+            ],
+            "max_abs_frequency_error": 0.0015629316231385304,
+            "l1_frequency_error": 0.0040650383582866365,
+            "max_abs_cross_term_residual": 0.0012615781029740591
+          }
+        ]
+      },
+      "decision": {
+        "born_route": "partial_bridge_only",
+        "full_first_principles_derivation": false,
+        "operational_born_rule_retained": true
+      }
+    }
+  }
+}

@@ -4,6 +4,7 @@ import csv
 import hashlib
 import json
 import math
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -321,7 +322,10 @@ def _fit_shomate_coeffs(
 # 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
+    is_en = str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
     out_dir = _ROOT / "output" / "public" / "quantum"
+    if is_en:
+        out_dir = out_dir / "locales" / "en"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     src_dir = _ROOT / "data" / "quantum" / "sources" / "nist_janaf_silicon_si"
@@ -572,20 +576,27 @@ def main() -> None:
 
     x = np.arange(len(categories), dtype=float)
     w_bar = 0.26
+    title_font = 16.4 if is_en else 13.8
+    axis_font = 14.2 if is_en else 12.8
+    tick_font = 13.6 if is_en else 11.8
+    legend_font = 12.8 if is_en else 9.0
     fig, ax = plt.subplots(1, 1, figsize=(10.8, 4.2), dpi=170)
     ax.bar(x - w_bar, y_hybrid, width=w_bar, color="#2ca02c", alpha=0.85, label="Hybrid (frozen)")
     ax.bar(x, y_debye, width=w_bar, color="#1f77b4", alpha=0.85, label="Debye (1p fit)")
     ax.bar(x + w_bar, y_shomate, width=w_bar, color="#ff7f0e", alpha=0.85, label="Shomate fit (5p)")
     ax.axhline(3.0, color="black", linewidth=1.0, linestyle="--", alpha=0.7)
     ax.set_xticks(x)
-    ax.set_xticklabels(categories)
-    ax.set_ylabel("test max abs(z)")
-    ax.set_title("Si Cp(T): temperature-split holdout (JANAF solid points)")
+    ax.set_xticklabels(categories, fontsize=tick_font)
+    ax.set_ylabel("test max abs(z)", fontsize=axis_font)
+    ax.set_title("Si Cp(T): temperature-split holdout (JANAF solid points)", fontsize=title_font)
+    ax.tick_params(axis="y", labelsize=tick_font)
     ax.grid(axis="y", linestyle=":", alpha=0.35)
-    ax.legend(loc="upper left", fontsize=9)
+    ax.legend(loc="upper left", fontsize=legend_font)
     fig.tight_layout()
     out_png = out_dir / "condensed_silicon_heat_capacity_holdout_splits.png"
+    out_pdf = out_png.with_suffix(".pdf")
     fig.savefig(out_png, bbox_inches="tight")
+    fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
 
     out_metrics = out_dir / "condensed_silicon_heat_capacity_holdout_splits_metrics.json"
@@ -627,7 +638,7 @@ def main() -> None:
                 },
                 "data_range_T_K": [float(np.min(temps_k)), float(np.max(temps_k))],
                 "splits": split_results,
-                "outputs": {"csv": str(out_csv), "png": str(out_png)},
+                "outputs": {"csv": str(out_csv), "png": str(out_png), "pdf": str(out_pdf)},
                 "notes": [
                     "This audit treats JANAF solid-phase Cp° points as the operational reference for holdout.",
                     "Debye model is expected to degrade outside the low-temperature fit band; Shomate fit is a flexible empirical proxy.",
@@ -643,6 +654,7 @@ def main() -> None:
 
     print(f"[ok] wrote: {out_csv}")
     print(f"[ok] wrote: {out_png}")
+    print(f"[ok] wrote: {out_pdf}")
     print(f"[ok] wrote: {out_metrics}")
 
 

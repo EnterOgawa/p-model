@@ -17,6 +17,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import re
 import sys
 from datetime import datetime, timezone
@@ -34,6 +35,11 @@ try:
     from scripts.summary import worklog  # type: ignore
 except Exception:  # pragma: no cover
     worklog = None
+
+
+# 関数: `WAVEP_FIGURE_LANG` から英語 surface かどうかを判定する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
 
 try:
     import matplotlib.pyplot as plt  # type: ignore
@@ -133,37 +139,45 @@ def _plot(doc_ratios: Dict[str, float], flux_caseb: float, flux_direct: float, o
     # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
         return
+    font_scale = 1.18 if _is_en_figure() else 1.0
+    title_fs = 14.8 * font_scale
+    label_fs = 13.0 * font_scale
+    tick_fs = 12.0 * font_scale
+    legend_fs = 11.8 * font_scale
 
     labels = list(doc_ratios.keys())
     values = [float(doc_ratios[k]) for k in labels]
 
     fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(10.5, 8.0))
-    fig.suptitle("Step 8.7.32.10: effective-metric nonlinear PDE derivation audit")
+    fig.suptitle("Step 8.7.32.10: effective-metric nonlinear PDE derivation audit", fontsize=15.8 * font_scale)
 
     x = np.arange(len(labels), dtype=float)
     ax0.bar(x, values, color="#1f77b4", alpha=0.9)
     ax0.axhline(1.0, color="#333333", linestyle="--", linewidth=1.0)
     ax0.set_ylim(0.0, 1.08)
-    ax0.set_ylabel("section completeness")
-    ax0.set_title("Required derivation blocks present")
+    ax0.set_ylabel("section completeness", fontsize=label_fs)
+    ax0.set_title("Required derivation blocks present", fontsize=title_fs)
     ax0.set_xticks(x)
     ax0.set_xticklabels(labels)
     ax0.grid(True, axis="y", alpha=0.25)
+    ax0.tick_params(labelsize=tick_fs)
 
     fx = np.array([max(float(flux_caseb), 1.0e-30), max(float(flux_direct), 1.0e-30)], dtype=float)
     ax1.bar(np.arange(2), fx, color=["#2ca02c", "#ff7f0e"], alpha=0.9)
     ax1.axhline(1.0e-3, color="#333333", linestyle="--", linewidth=1.0, label="closure threshold")
     ax1.set_yscale("log")
-    ax1.set_ylabel("max_flux_rel_std")
-    ax1.set_title("Flux-closure consistency (caseB vs direct audit)")
+    ax1.set_ylabel("max_flux_rel_std", fontsize=label_fs)
+    ax1.set_title("Flux-closure consistency (caseB vs direct audit)", fontsize=title_fs)
     ax1.set_xticks(np.arange(2))
     ax1.set_xticklabels(["caseB_effective", "direct_ring"])
     ax1.grid(True, axis="y", alpha=0.25)
-    ax1.legend(loc="best")
+    ax1.legend(loc="best", fontsize=legend_fs)
+    ax1.tick_params(labelsize=tick_fs)
 
     fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.96))
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)
+    fig.savefig(out_png.with_suffix(".pdf"), dpi=200)
     plt.close(fig)
 
 

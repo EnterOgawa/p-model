@@ -11,13 +11,20 @@ import csv
 import json
 import math
 import os
+import sys
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from figure_japanese_localizer import enable_japanese_figure_localization
-from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
+from scripts.utils.figure_locale_paths import localize_figure_output_path
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size, install_wavep_font_profile
 
 enable_japanese_figure_localization()
+
+_PROFILE_NAME = "part3b_quantum_verification"
 
 # 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
@@ -149,6 +156,7 @@ def _load_iaea_charge_radii_csv(*, root: Path, src_dirname: str) -> dict[tuple[i
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
+    install_wavep_font_profile(profile_name=_PROFILE_NAME)
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -471,8 +479,9 @@ def main() -> None:
     fig.suptitle("representative nuclei (A=2,4,12,16) — A-dependence preview", y=0.986, fontsize=suptitle_font)
     fig.subplots_adjust(left=0.095, right=0.985, top=0.880, bottom=0.200, wspace=0.28)
 
-    out_pdf = out_dir / "nuclear_binding_energy_frequency_mapping_representative_nuclei.pdf"
-    out_png = out_dir / "nuclear_binding_energy_frequency_mapping_representative_nuclei.png"
+    out_pdf = localize_figure_output_path(out_dir / "nuclear_binding_energy_frequency_mapping_representative_nuclei.pdf", root=root)
+    out_png = localize_figure_output_path(out_dir / "nuclear_binding_energy_frequency_mapping_representative_nuclei.png", root=root)
+    out_pdf.parent.mkdir(parents=True, exist_ok=True)
     prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
     os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
     try:
@@ -488,7 +497,10 @@ def main() -> None:
     plt.close(fig)
 
     # Metrics JSON
-    out_json = out_dir / "nuclear_binding_energy_frequency_mapping_representative_nuclei_metrics.json"
+    out_json = localize_figure_output_path(
+        out_dir / "nuclear_binding_energy_frequency_mapping_representative_nuclei_metrics.json",
+        root=root,
+    )
     out_json.write_text(
         json.dumps(
             {

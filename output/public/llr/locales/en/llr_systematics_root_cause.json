@@ -1,0 +1,424 @@
+{
+  "ablation_median_ns": {
+    "station_reflector": 7.6253440157400565,
+    "station_reflector_tropo": 4.682557536364783,
+    "station_reflector_tropo_tide": 4.42527814361425,
+    "station_reflector_tropo_no_shapiro": 5.696630109949697,
+    "station_reflector_tropo_earth_shapiro": 4.681572734141427,
+    "station_reflector_tropo_tide_no_ocean": 4.430929652105897
+  },
+  "ablation_weighted_ns": {
+    "station_reflector": 10.388186266754532,
+    "station_reflector_tropo": 7.126934137004437,
+    "station_reflector_tropo_tide": 7.0026565031916155,
+    "station_reflector_tropo_no_shapiro": 7.827415786299077,
+    "station_reflector_tropo_earth_shapiro": 7.1265929647414215,
+    "station_reflector_tropo_tide_no_ocean": 7.005030141735241
+  },
+  "incremental_gain_median_ns": {
+    "tropo_from_sr": 2.9427864793752736,
+    "tide_from_tropo": 0.257279392750533,
+    "shapiro_from_tropo_no_shapiro": 1.0140725735849143,
+    "earth_shapiro_from_tropo": 0.0009848022233560627,
+    "ocean_loading_from_tide_no_ocean": 0.005651508491647306
+  },
+  "incremental_gain_weighted_ns": {
+    "tropo_from_sr": 3.261252129750096,
+    "tide_from_tropo": 0.12427763381282109,
+    "shapiro_from_tropo_no_shapiro": 0.7004816492946402,
+    "earth_shapiro_from_tropo": 0.0003411722630151104,
+    "ocean_loading_from_tide_no_ocean": 0.002373638543625489
+  },
+  "total_gain_median_ns": 3.2000658721258066,
+  "total_gain_weighted_ns": 3.385529763562917,
+  "gain_share_median": {
+    "tropo_from_sr": 0.9196018447646448,
+    "tide_from_tropo": 0.08039815523535523
+  },
+  "gain_share_weighted": {
+    "tropo_from_sr": 0.9632915252583596,
+    "tide_from_tropo": 0.036708474741640386
+  },
+  "station_breakdown": [
+    {
+      "station": "MATM",
+      "n_groups": 5,
+      "n_points": 399,
+      "weighted_rms_ns": 31.152502371667,
+      "median_group_rms_ns": 3.79841732774353,
+      "sse_share": 0.6008577413712519,
+      "sse_excess_share_over4ns": 0.8479530719557454
+    },
+    {
+      "station": "GRSM",
+      "n_groups": 5,
+      "n_points": 10887,
+      "weighted_rms_ns": 4.185571142228706,
+      "median_group_rms_ns": 4.294917440730688,
+      "sse_share": 0.295958330456162,
+      "sse_excess_share_over4ns": 0.060928623278745264
+    },
+    {
+      "station": "APOL",
+      "n_groups": 6,
+      "n_points": 1431,
+      "weighted_rms_ns": 6.499845715551322,
+      "median_group_rms_ns": 5.278969202176865,
+      "sse_share": 0.09381204855192672,
+      "sse_excess_share_over4ns": 0.08329516825075114
+    },
+    {
+      "station": "MDOL",
+      "n_groups": 1,
+      "n_points": 31,
+      "weighted_rms_ns": 11.392898651182891,
+      "median_group_rms_ns": 11.392898651182891,
+      "sse_share": 0.006243714719730575,
+      "sse_excess_share_over4ns": 0.00782313651475813
+    },
+    {
+      "station": "WETL",
+      "n_groups": 3,
+      "n_points": 394,
+      "weighted_rms_ns": 2.261987827995877,
+      "median_group_rms_ns": 2.104664998613157,
+      "sse_share": 0.0031281649009288373,
+      "sse_excess_share_over4ns": 0.0
+    }
+  ],
+  "target_breakdown": [
+    {
+      "target": "luna17",
+      "n_groups": 4,
+      "n_points": 1918,
+      "weighted_rms_ns": 14.575293252509406,
+      "median_group_rms_ns": 4.229858542675018,
+      "sse_share": 0.6322605655732312,
+      "sse_excess_share_over4ns": 0.8502387704436696
+    },
+    {
+      "target": "apollo15",
+      "n_groups": 5,
+      "n_points": 5610,
+      "weighted_rms_ns": 4.5651534865539265,
+      "median_group_rms_ns": 4.496386275455791,
+      "sse_share": 0.18142056634148773,
+      "sse_excess_share_over4ns": 0.06574795134681166
+    },
+    {
+      "target": "apollo11",
+      "n_groups": 3,
+      "n_points": 2026,
+      "weighted_rms_ns": 4.383255769509842,
+      "median_group_rms_ns": 4.294917440730688,
+      "sse_share": 0.06040125425612794,
+      "sse_excess_share_over4ns": 0.01617178088761132
+    },
+    {
+      "target": "apollo14",
+      "n_groups": 3,
+      "n_points": 1755,
+      "weighted_rms_ns": 4.539072845360311,
+      "median_group_rms_ns": 5.1597585645753306,
+      "sse_share": 0.05610793894087555,
+      "sse_excess_share_over4ns": 0.01791510457144698
+    },
+    {
+      "target": "luna21",
+      "n_groups": 4,
+      "n_points": 1795,
+      "weighted_rms_ns": 3.559283437057747,
+      "median_group_rms_ns": 2.6022503980038794,
+      "sse_share": 0.03528600488569587,
+      "sse_excess_share_over4ns": 0.0019359487611694483
+    },
+    {
+      "target": "nglr1",
+      "n_groups": 1,
+      "n_points": 38,
+      "weighted_rms_ns": 24.196928165677654,
+      "median_group_rms_ns": 24.196928165677654,
+      "sse_share": 0.03452367000258173,
+      "sse_excess_share_over4ns": 0.04799044398929101
+    }
+  ],
+  "top_group_sse_contributors": [
+    {
+      "station": "MATM",
+      "target": "luna17",
+      "n_points": 11,
+      "rms_ns": 186.42955607468065,
+      "sse_share": 0.5932463922185327
+    },
+    {
+      "station": "GRSM",
+      "target": "apollo15",
+      "n_points": 4476,
+      "rms_ns": 4.496386275455791,
+      "sse_share": 0.14042039638504572
+    },
+    {
+      "station": "GRSM",
+      "target": "apollo11",
+      "n_points": 1722,
+      "rms_ns": 4.294917440730688,
+      "sse_share": 0.04928964348161361
+    },
+    {
+      "station": "GRSM",
+      "target": "apollo14",
+      "n_points": 1482,
+      "rms_ns": 4.35417001177271,
+      "sse_share": 0.04359853116726444
+    },
+    {
+      "station": "APOL",
+      "target": "nglr1",
+      "n_points": 38,
+      "rms_ns": 24.196928165677654,
+      "sse_share": 0.03452367000258173
+    },
+    {
+      "station": "GRSM",
+      "target": "luna17",
+      "n_points": 1687,
+      "rms_ns": 3.499731221722897,
+      "sse_share": 0.03206249806365552
+    },
+    {
+      "station": "GRSM",
+      "target": "luna21",
+      "n_points": 1520,
+      "rms_ns": 3.6011570199011707,
+      "sse_share": 0.030587261358582706
+    },
+    {
+      "station": "APOL",
+      "target": "apollo15",
+      "n_points": 637,
+      "rms_ns": 5.231675599224521,
+      "sse_share": 0.027054152624049213
+    }
+  ],
+  "bottleneck_scenarios": {
+    "current_group_weighted_rms_ns": 7.0026565031916155,
+    "exclude_nglr1_group_weighted_rms_ns": 6.89068549656728,
+    "exclude_nglr1_gain_ns": 0.11197100662433535,
+    "apol_cap_to_grsm_median_rms_ns": 6.81509295412662,
+    "apol_cap_to_grsm_median_gain_ns": 0.18756354906499517,
+    "grsm_median_reference_ns": 4.294917440730688,
+    "bias_corrected_global_est_rms_ns": 6.7565942584394065,
+    "bias_corrected_global_est_gain_ns": 0.2460622447522085
+  },
+  "bottleneck_ranking": [
+    {
+      "id": "global_station_target_bias_correction",
+      "estimated_gain_ns": 0.2460622447522085,
+      "note": "station+targetバイアス補正での改善見積。"
+    },
+    {
+      "id": "apol_profile_gap_cap_to_grsm_median",
+      "estimated_gain_ns": 0.18756354906499517,
+      "note": "APOL群をGRSM中央値レベルに抑えた場合の上限改善見積。"
+    },
+    {
+      "id": "nglr1_group_exclusion_proxy",
+      "estimated_gain_ns": 0.11197100662433535,
+      "note": "nglr1群の高残差寄与を除いた場合の改善見積。"
+    }
+  ],
+  "excess_over_4ns": {
+    "threshold_ns": 4.0,
+    "current_group_weighted_rms_ns": 7.0026565031916155,
+    "current_group_weighted_excess_ns": 3.0026565031916155,
+    "ablation_median_excess_ns": {
+      "station_reflector": 3.6253440157400565,
+      "station_reflector_tropo": 0.6825575363647829,
+      "station_reflector_tropo_tide": 0.42527814361424987,
+      "station_reflector_tropo_no_shapiro": 1.6966301099496972
+    },
+    "ablation_weighted_excess_ns": {
+      "station_reflector": 6.388186266754532,
+      "station_reflector_tropo": 3.1269341370044366,
+      "station_reflector_tropo_tide": 3.0026565031916155,
+      "station_reflector_tropo_no_shapiro": 3.8274157862990767
+    },
+    "station_excess_share": [
+      {
+        "station": "MATM",
+        "n_points": 399,
+        "weighted_rms_ns": 31.152502371667,
+        "excess_share_over4ns": 0.8479530719557454
+      },
+      {
+        "station": "APOL",
+        "n_points": 1431,
+        "weighted_rms_ns": 6.499845715551322,
+        "excess_share_over4ns": 0.08329516825075114
+      },
+      {
+        "station": "GRSM",
+        "n_points": 10887,
+        "weighted_rms_ns": 4.185571142228706,
+        "excess_share_over4ns": 0.060928623278745264
+      },
+      {
+        "station": "MDOL",
+        "n_points": 31,
+        "weighted_rms_ns": 11.392898651182891,
+        "excess_share_over4ns": 0.00782313651475813
+      },
+      {
+        "station": "WETL",
+        "n_points": 394,
+        "weighted_rms_ns": 2.261987827995877,
+        "excess_share_over4ns": 0.0
+      }
+    ],
+    "target_excess_share": [
+      {
+        "target": "luna17",
+        "n_points": 1918,
+        "weighted_rms_ns": 14.575293252509406,
+        "excess_share_over4ns": 0.8502387704436696
+      },
+      {
+        "target": "apollo15",
+        "n_points": 5610,
+        "weighted_rms_ns": 4.5651534865539265,
+        "excess_share_over4ns": 0.06574795134681166
+      },
+      {
+        "target": "nglr1",
+        "n_points": 38,
+        "weighted_rms_ns": 24.196928165677654,
+        "excess_share_over4ns": 0.04799044398929101
+      },
+      {
+        "target": "apollo14",
+        "n_points": 1755,
+        "weighted_rms_ns": 4.539072845360311,
+        "excess_share_over4ns": 0.01791510457144698
+      },
+      {
+        "target": "apollo11",
+        "n_points": 2026,
+        "weighted_rms_ns": 4.383255769509842,
+        "excess_share_over4ns": 0.01617178088761132
+      },
+      {
+        "target": "luna21",
+        "n_points": 1795,
+        "weighted_rms_ns": 3.559283437057747,
+        "excess_share_over4ns": 0.0019359487611694483
+      }
+    ],
+    "top_group_excess_contributors": [
+      {
+        "station": "MATM",
+        "target": "luna17",
+        "n_points": 11,
+        "rms_ns": 186.42955607468065,
+        "excess_share_over4ns": 0.8474347992374969
+      },
+      {
+        "station": "APOL",
+        "target": "nglr1",
+        "n_points": 38,
+        "rms_ns": 24.196928165677654,
+        "excess_share_over4ns": 0.04799044398929101
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "n_points": 4476,
+        "rms_ns": 4.496386275455791,
+        "excess_share_over4ns": 0.04186278761343867
+      },
+      {
+        "station": "APOL",
+        "target": "apollo15",
+        "n_points": 637,
+        "rms_ns": 5.231675599224521,
+        "excess_share_over4ns": 0.01606202721861485
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo14",
+        "n_points": 1482,
+        "rms_ns": 4.35417001177271,
+        "excess_share_over4ns": 0.009724053760002443
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo11",
+        "n_points": 1722,
+        "rms_ns": 4.294917440730688,
+        "excess_share_over4ns": 0.00934178190530415
+      },
+      {
+        "station": "MDOL",
+        "target": "apollo15",
+        "n_points": 31,
+        "rms_ns": 11.392898651182891,
+        "excess_share_over4ns": 0.00782313651475813
+      },
+      {
+        "station": "APOL",
+        "target": "apollo14",
+        "n_points": 251,
+        "rms_ns": 5.457528935490647,
+        "excess_share_over4ns": 0.007672778093195996
+      }
+    ]
+  },
+  "likely_root_causes": [
+    {
+      "id": "tropo_model_mismatch",
+      "priority": 1,
+      "evidence": {
+        "gain_share_median": 0.9196018447646448,
+        "gain_ns_median": 2.9427864793752736
+      },
+      "note": "残差改善の大半を対流圏補正が占めるため、主因候補は対流圏モデル差。"
+    },
+    {
+      "id": "coord_if_incomplete",
+      "priority": 2,
+      "evidence": {
+        "stations_without_pos_eop": [
+          "APOL"
+        ]
+      },
+      "note": "全局で pos+eop 統一になっておらず、局座標I/F差が残差に寄与しうる。"
+    },
+    {
+      "id": "station_imbalance",
+      "priority": 2,
+      "evidence": {
+        "dominant_station": "GRSM",
+        "dominant_ratio": 0.8291380625476735
+      },
+      "note": "局偏在が強く、残差評価が特定局の系統へ引き寄せられる。"
+    },
+    {
+      "id": "station_target_bias",
+      "priority": 2,
+      "evidence": {
+        "global_bias_weighted_gain_ns": 0.2460622447522085,
+        "modern_apol_target_bias_weighted_gain_ns": 0.9824594186115787
+      },
+      "note": "局/ターゲット依存バイアス補正で weighted RMS が改善しており、運用系統が残っている。"
+    },
+    {
+      "id": "nglr1_sparse_high_residual",
+      "priority": 3,
+      "evidence": {
+        "nglr1_n_points": 38,
+        "nglr1_weighted_rms_ns": 24.196928165677654,
+        "nglr1_sse_share": 0.03452367000258173
+      },
+      "note": "nglr1 は点数が少ない一方で残差が高く、外れ群として全体評価を押し上げる。"
+    }
+  ]
+}

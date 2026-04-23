@@ -268,7 +268,420 @@ _STEM_SPECIFIC_GLOSSARY: dict[str, list[tuple[str, str]]] = {
         (r"required depth V0 \(MeV\)", "必要深さ V0 (MeV)"),
         (r"deuteron Δω mapping via 2-body boundary condition", "二体境界条件による重水素 Δω 写像"),
     ],
+    "quantum_scoreboard": [
+        (r"Quantum scoreboard \(green=OK / yellow=needs work / red=mismatch\)", "総合スコアボード（量子：緑=OK / 黄=要改善 / 赤=不一致）"),
+        (r"Bell \(public primary\)", "ベル（公開一次）"),
+        (r"Gravity×quantum interference: COW", "重力×量子干渉：COW"),
+        (r"Nuclear \(wave interference \+ deuteron \+ np scattering\)", "原子核（波動干渉＋deuteron+np散乱）"),
+        (r"Gravity-induced decoherence", "重力誘起デコヒーレンス"),
+        (r"Photon quantum interference", "光の量子干渉"),
+        (r"Atomic/molecular baselines", "原子・分子（基準値）"),
+    ],
+    "bell_selection_sensitivity_summary": [
+        (r"\|S\| \(fixed variant\)", "|S|（固定 variant）"),
+        (r"\|S\| \(fixed variant\)", "|S|(固定 variant)"),
+        (r"raw series", "原系列"),
+        (r"accidental corrected", "accidental 補正後"),
+        (r"recommended window ≈ 22.3 ns", "推奨窓 ≈ 22.3 ns"),
+        (r"coincidence-based J_prob", "coincidence-base J_prob"),
+        (r"trial-based J_prob", "trial-base J_prob"),
+    ],
+    "falsification_pack": [
+        (r"delay setting dependence \(Δmedian; z\)", "遅延の setting 依存（Δmedian; z）"),
+        (r"delay setting dependence \(Δmedian; z\)", "delay setting 依存(Δmedian; z)"),
+    ],
+    "nist_belltest_time_tag_bias__03_43_afterfixingModeLocking_s3600": [
+        (
+            r"NIST Bell test \(time-tag\): setting-dependent delay and coincidence-window sensitivity",
+            "NIST Bell test（time-tag）：setting 依存遅延と coincidence 窓感度",
+        ),
+        (r"window dependence \(GPS PPS alignment\)", "窓幅依存（GPS PPS 整列）"),
+        (r"NIST Bell test \(time-tag\): setting-dependent delay and coincidence-window sensitivity", "NIST Bell test(time-tag): setting 依存delay and coincidence 窓sensitivity"),
+        (r"window dependence \(GPS PPS alignment\)", "window依存(GPS PPS 整列)"),
+        (r"greedy pair count", "greedy pair 数"),
+    ],
+    "nist_belltest_trial_based__03_43_afterfixingModeLocking_s3600": [
+        (r"NIST Bell test: trial-based aggregation and differential", "NIST Bell test：trial-base 集計との差分"),
+        (r"coincidence-based and trial-based consistency", "coincidence-base と trial-base の一致"),
+        (r"CH J_prob\(A1=0,B1=0\) window dependence", "CH J_prob（A1=0,B1=0）の窓幅依存"),
+        (r"NIST Bell test: trial-based aggregation and differential", "NIST Bell test: trial-base 集計 and differential"),
+        (r"coincidence-based and trial-based consistency", "coincidence-base and trial-base 一致"),
+        (r"CH J_prob\(A1=0,B1=0\) window dependence", "CH J_prob(A1=0,B1=0) window依存"),
+        (r"nearest", "最接近"),
+    ],
+    "electron_double_slit_interference": [
+        (r"electron double-slit diffraction \(600 eV; 50 nm slit, 280 nm sep\.\)", "電子二重スリット回折（600 eV；50 nm slit，280 nm sep.）"),
+        (r"P12 \(double slit; coherent\)", "P12（二重スリット；coherent）"),
+        (r"P1\+P2 \(sum of single slits\)", "P1+P2（単スリット和）"),
+        (r"P1 \(single-slit envelope\)", "P1（単スリット包絡）"),
+        (r"electron double-slit diffraction \(600 eV; 50 nm slit, 280 nm sep\.\)", "電子二重スリット回折(600 eV；50 nm slit, 280 nm sep.)"),
+        (r"P12 \(double slit; coherent\)", "P12(二重スリット；coherent)"),
+        (r"P1\+P2 \(sum of single slits\)", "P1+P2(単スリット和)"),
+        (r"P1 \(single-slit envelope\)", "P1(単スリット包絡)"),
+        (r"normalized intensity \(arb\.\)", "規格化強度 (arb.)"),
+        (r"diffraction angle θ \(mrad\)", "回折角 θ (mrad)"),
+    ],
+    "matter_wave_interference_precision_audit": [
+        (r"matter-wave interference precision audit", "物質波干渉の精度監査"),
+        (r"electron double-slit angular scale", "電子二重スリットの角スケール"),
+        (r"cross-channel consistency \(\|z\|\)", "クロスチャネル整合（|z|）"),
+        (r"atomic α consistency", "原子 α 整合"),
+        (r"atom interferometer precision gap", "原子干渉計の精度ギャップ"),
+        (r"molecular isotopic scaling residual", "分子の同位体スケーリング残差"),
+        (r"electron double-slit angular scale", "電子二重スリット Angular scale"),
+        (r"cross-channel consistency \(\|z\|\)", "クロスチャネルconsistency(|z|)"),
+        (r"atomic α consistency", "原子 α 整合"),
+        (r"Atoms", "原子"),
+        (r"atom interferometer precision gap", "atom interferometer precisionギャップ"),
+        (r"molecular isotopic scaling residual", "分子 同位体scalingresidual"),
+        (r"Molecules", "分子"),
+    ],
+    "gravity_induced_decoherence": [
+        (r"gravity-induced decoherence: observed quantity and noise budget", "重力誘起デコヒーレンス：観測量とノイズ予算"),
+        (
+            r"gravity-induced dephasing \(optical clock ensemble; Gaussian height distribution\)",
+            "重力誘起位相緩和（光格子時計 ensemble；Gaussian 高さ分布）",
+        ),
+        (r"required σ_y \(RMS fractional frequency noise\)", "必要な σ_y（RMS相対周波数雑音）"),
+        (r"P-model time-structure: σ_y that mimics decoherence", "P-model 時間構造：decoherence を模擬する σ_y"),
+        (r"gravity-induced decoherence: observed quantity and noise budget", "gravity-induceddecoherence: observed量 and noise budget"),
+        (r"gravity-induced dephasing \(optical clock ensemble; Gaussian height distribution\)", "gravity-induced dephasing(optical clock ensemble；Gaussian 高さdistribution)"),
+        (r"required σ_y \(RMS fractional frequency noise\)", "requiredな σ_y(RMS相対周波数雑音)"),
+        (r"P-model time-structure: σ_y that mimics decoherence", "P-model time-structure: decoherence 模擬する σ_y"),
+    ],
+    "photon_quantum_interference": [
+        (r"visibility V", "可視度 V"),
+        (r"equivalent path-length noise σL \(nm\)", "等価な経路長ノイズ σL (nm)"),
+        (r"single-photon interference: V → σL", "単一光子干渉：V → σL"),
+        (r"reported \(QD2; corrected\)", "reported（QD2; corrected）"),
+        (r"separation time D \(ns\)", "分離時間 D (ns)"),
+        (r"HOM visibility \(%\)", "HOM 可視度 (%)"),
+        (r"HOM: visibility vs separation time", "HOM：分離時間に対する可視度"),
+        (
+            r"definition: V=1−\(C∥/C⊥\) at zero delay \(Methods, arXiv:2106\.03871v2\)",
+            "定義: V=1−(C∥/C⊥) at zero delay\n（Methods, arXiv:2106.03871v2）",
+        ),
+        (r"Zenodo 6371310 \(ExData Fig\.3b\)", "Zenodo 6371310（ExData Fig.3b）"),
+        (r"low-frequency noise PSD \(indistinguishability proxy\)", "低周波ノイズ PSD（識別不能性の proxy）"),
+        (
+            r"squeezing: 10\.0 dB → variance ratio=0\.100 loss-only bound: η ≥ 0\.900",
+            "スクイージング: 10.0 dB → 分散比=0.100\nloss-only bound: η ≥ 0.900",
+        ),
+        (r"photon interference observables \(visibility, HOM, squeezing/noise\)", "光子干渉の観測量（可視度・HOM・スクイージング/ノイズ）"),
+        (r"equivalent path-length noise σL \(nm\)", "等価な経路長noise σL (nm)"),
+        (r"photon interference observables \(visibility, HOM, squeezing/noise\)", "光子interference observed量(visibility・HOM・スクイージング/noise)"),
+        (r"HOM: visibility vs separation time", "HOM: 分離時間に対するvisibility"),
+        (r"definition: V=1−\(C∥/C⊥\) at zero delay \(Methods, arXiv:2106\.03871v2\)", "定義: V=1−(C∥/C⊥) at zero delay (Methods, arXiv:2106.03871v2)"),
+        (r"separation time D \(ns\)", "分離時間 D (ns)"),
+        (r"low-frequency noise PSD \(indistinguishability proxy\)", "低周波noise PSD(識別不能性 proxy)"),
+        (r"squeezing: 10\.0 dB → variance ratio=0\.100 loss-only bound: η ≥ 0\.900", "スクイージング: 10.0 dB → 分散比=0.100 loss-only bound: η ≥ 0.900"),
+        (r"frequency \(Hz\)", "周波数 (Hz)"),
+    ],
+    "hom_squeezed_light_unified_audit": [
+        (r"HOM \+ squeezed-light unified audit", "HOM + スクイーズド光の統合監査"),
+        (r"HOM visibility \(50% baseline included\)", "HOM 可視度（50% 基準付き）"),
+        (r"HOM significance", "HOM の有意性"),
+        (r"squeezing scale", "スクイージング規模"),
+        (r"noise PSD scale indicator", "ノイズ PSD の規模指標"),
+        (r"HOM \+ squeezed-light unified audit", "HOM + スクイーズド光 unifiedaudit"),
+        (r"HOM visibility \(50% baseline included\)", "HOM visibility(50% baseline付き)"),
+        (r"HOM significance", "HOM 有意性"),
+        (r"squeezing scale", "スクイージング規模"),
+        (r"variance ratio", "分散比"),
+        (r"noise PSD scale indicator", "noise PSD 規模指標"),
+    ],
+    "qed_vacuum_precision": [
+        (r"Vacuum \+ QED precision observables", "真空 + QED 精密観測量"),
+        (r"Casimir: sphere-plane scale", "Casimir：球-平板スケール"),
+        (r"ideal conductor \(PFA\)", "理想導体（PFA）"),
+        (r"separation a \(nm\)", "間隔 a (nm)"),
+        (r"Lamb shift: Z-dependent scale", "Lamb シフト：Z 依存スケール"),
+        (r"relative scale \(Z=1 → 1\)", "相対スケール（Z=1 → 1）"),
+        (r"source: physics/0009069v1 \(scaling discussion\)", "出典: physics/0009069v1（スケーリング記述）"),
+        (r"nuclear-size term \(example; Table 4\)", "核サイズ項（例; Table 4）"),
+        (r"non-QED systematic \(radius\) example", "非QED系統（半径）の例"),
+        (r"atomic-gravity order of magnitude", "原子重力のオーダー"),
+        (r"recoil \(Rb; 0812\.3139\)", "反跳（Rb; 0812.3139）"),
+        (r"required epsilon", "必要な epsilon（recoil）"),
+        (r"Casimir: sphere-plane scale", "Casimir: 球-平板スケール"),
+        (r"reported precision ≈ 1% \(smallest a\)", "報告精度 ≈ 1%（最小 a）"),
+        (r"ideal conductor \(PFA\)", "理想導体（PFA）"),
+        (r"separation a \(nm\)", "間隔 a (nm)"),
+        (r"Lamb shift: Z-dependent scale", "Lamb シフト：Z 依存スケール"),
+        (r"unknown 2-loop ∝ Z\^6", "未知 2-loop ∝ Z^6"),
+        (r"source: physics/0009069v1 \(scaling discussion\)", "出典: physics/0009069v1(scaling記述)"),
+        (r"non-QED systematic \(radius\) example", "非QEDsystematic(半径) 例"),
+        (r"atomic-gravity order of magnitude", "原子重力 オーダー"),
+        (r"required epsilon", "requiredな epsilon"),
+    ],
+    "nuclear_binding_deuteron": [
+        (r"deuteron nuclear baseline \(observed quantities fixed\)", "重水素の核ベースライン（観測量固定）"),
+        (r"mass-defect baseline \(CODATA/NIST\)", "質量欠損ベースライン（CODATA/NIST）"),
+        (r"ledger value", "記帳値"),
+        (r"size constraints \(radius and binding tail\)", "サイズ制約（半径と束縛テール）"),
+        (r"1/κ from B \(tail scale\)", "Bから得る 1/κ（テール尺度）"),
+        (r"r_d \(charge rms radius\)", "r_d（電荷rms半径）"),
+        (r"deuteron nuclear baseline \(observed quantities fixed\)", "重水素 核ベースライン(Observed量固定)"),
+        (r"mass-defect baseline \(CODATA/NIST\)", "質量欠損ベースライン(CODATA/NIST)"),
+        (r"ledger value", "記帳value"),
+        (r"size constraints \(radius and binding tail\)", "サイズ制約(半径 and 束縛テール)"),
+        (r"1/κ from B \(tail scale\)", "Bから得る 1/κ(テール尺度)"),
+        (r"r_d \(charge rms radius\)", "r_d(電荷rms半径)"),
+        (r"length scale \(fm\)", "長さスケール (fm)"),
+    ],
+    "nuclear_np_scattering_baseline": [
+        (r"np scattering baseline \(observed quantities fixed\)", "np scattering baseline（観測量固定）"),
+        (r"np scattering baseline \(observed quantities fixed\)", "np scattering baseline(observed量固定)"),
+    ],
+    "nuclear_effective_potential_two_range_fit_as_rs_eq18": [
+        (r"two-range hypothesis: fit triplet\(B,a_t,r_t,v2t\) and singlet\(a_s,r_s\), then predict v2s", "2レンジ仮説: 三重項(B,a_t,r_t,v2t)と一重項(a_s,r_s)をフィットし、v2sを予測"),
+        (r"eq18 \(GWU/SAID\) two-range well \(shared geometry\)", "eq18（GWU/SAID）\n2レンジ井戸（幾何共有）"),
+        (r"Potential V\(r\) \(MeV\)", "ポテンシャル V(r)（MeV）"),
+        (r"triplet \(fit B, a_t, r_t, v2t\)", "三重項（B, a_t, r_t, v2t をフィット）"),
+        (r"singlet \(fit V1, V2 by a_s, r_s\)", "一重項（a_s, r_sで V1, V2 をフィット）"),
+        (r"triplet: ERE fit \(v2 targets\)", "三重項: EREフィット（v2を目標）"),
+        (r"k grid", "kグリッド"),
+        (r"ERE fit", "EREフィット"),
+        (r"fit/predictions − observed \(units: fm³, fm, fm³\)", "フィット/予測 − 観測（単位: fm³, fm, fm³）"),
+        (r"effective-range function kcot δ \(fm−1\)", "有効レンジ関数 kcot δ（fm−1）"),
+        (r"two-range hypothesis: fit triplet\(B,a_t,r_t,v2t\) and singlet\(a_s,r_s\), then predict v2s", "2レンジ仮説: triplet(B,a_t,r_t,v2t) and singlet(a_s,r_s) フィットし, v2s predictions"),
+        (r"eq18 \(GWU/SAID\) two-range well \(shared geometry\)", "eq18 (GWU/SAID) 2レンジ井戸(幾何共有)"),
+        (r"Potential V\(r\) \(MeV\)", "ポテンシャル V(r)(MeV)"),
+        (r"triplet\(B, a_t, r_t, v2t fit\)", "triplet(B, a_t, r_t, v2t フィット)"),
+        (r"singlet\(a_s, r_s with V1, V2 fit\)", "singlet(a_s, r_sで V1, V2 フィット)"),
+        (r"triplet: ERE fit \(v2 targets\)", "triplet: EREフィット(v2 targets)"),
+        (r"k grid", "kグリッド"),
+        (r"ERE fit", "EREフィット"),
+        (r"fit/predictions − observed \(units: fm³, fm, fm³\)", "フィット/predictions − observed(単位: fm³, fm, fm³)"),
+        (r"effective-range function kcot δ \(fm−1\)", "effective range関数kcot δ(fm−1)"),
+    ],
+    "nuclear_effective_potential_two_range_fit_as_rs_eq19": [
+        (r"two-range hypothesis: fit triplet\(B,a_t,r_t,v2t\) and singlet\(a_s,r_s\), then predict v2s", "2レンジ仮説: 三重項(B,a_t,r_t,v2t)と一重項(a_s,r_s)をフィットし、v2sを予測"),
+        (r"eq19 \(Nijmegen\) two-range well \(shared geometry\)", "eq19（Nijmegen）\n2レンジ井戸（幾何共有）"),
+        (r"Potential V\(r\) \(MeV\)", "ポテンシャル V(r)（MeV）"),
+        (r"triplet \(fit B, a_t, r_t, v2t\)", "三重項（B, a_t, r_t, v2t をフィット）"),
+        (r"singlet \(fit V1, V2 by a_s, r_s\)", "一重項（a_s, r_sで V1, V2 をフィット）"),
+        (r"triplet: ERE fit \(v2 targets\)", "三重項: EREフィット（v2を目標）"),
+        (r"k grid", "kグリッド"),
+        (r"ERE fit", "EREフィット"),
+        (r"fit/predictions − observed \(units: fm³, fm, fm³\)", "フィット/予測 − 観測（単位: fm³, fm, fm³）"),
+        (r"effective-range function kcot δ \(fm−1\)", "有効レンジ関数 kcot δ（fm−1）"),
+        (r"two-range hypothesis: fit triplet\(B,a_t,r_t,v2t\) and singlet\(a_s,r_s\), then predict v2s", "2レンジ仮説: triplet(B,a_t,r_t,v2t) and singlet(a_s,r_s) フィットし, v2s predictions"),
+        (r"eq19 \(Nijmegen\) two-range well \(shared geometry\)", "eq19 (Nijmegen) 2レンジ井戸(幾何共有)"),
+        (r"Potential V\(r\) \(MeV\)", "ポテンシャル V(r)(MeV)"),
+        (r"triplet\(B, a_t, r_t, v2t fit\)", "triplet(B, a_t, r_t, v2t フィット)"),
+        (r"singlet\(a_s, r_s with V1, V2 fit\)", "singlet(a_s, r_sで V1, V2 フィット)"),
+        (r"triplet: ERE fit \(v2 targets\)", "triplet: EREフィット(v2 targets)"),
+        (r"k grid", "kグリッド"),
+        (r"ERE fit", "EREフィット"),
+        (r"fit/predictions − observed \(units: fm³, fm, fm³\)", "フィット/predictions − observed(単位: fm³, fm, fm³)"),
+        (r"effective-range function kcot δ \(fm−1\)", "effective range関数kcot δ(fm−1)"),
+    ],
+    "nuclear_effective_potential_pion_constrained_barrier_tail_kq_scan_eq18": [
+        (
+            r"λπ-constrained three-range \(barrier\+tail split, free tail depth\) \+ \(k,q\) scan",
+            "λπ拘束3レンジ（障壁+テール分割、テール深さ自由）+ (k,q)走査",
+        ),
+        (
+            r"eq18 \(GWU/SAID\) three-range \(λπ constrained, barrier\+tail split, free tail depth\)",
+            "eq18（GWU/SAID）\n3レンジ（λπ拘束、障壁+テール分割、テール深さ自由）",
+        ),
+        (r"Potential V\(r\) \(MeV\)", "ポテンシャル V(r)（MeV）"),
+        (r"triplet \(fit B, a_t, r_t, v2t\)", "三重項（B, a_t, r_t, v2t をフィット）"),
+        (r"singlet \(fit V1, V2>=0 by a_s, r_s\)", "一重項（a_s, r_sで V1, V2>=0 をフィット）"),
+        (r"triplet: ERE fit \(v2 targets\)", "三重項: EREフィット（v2を目標）"),
+        (r"k grid", "kグリッド"),
+        (r"ERE fit", "EREフィット"),
+        (r"fit/predictions − observed \(units: fm³, fm, fm³\)", "フィット/予測 − 観測（単位: fm³, fm, fm³）"),
+        (r"effective-range function kcot δ \(fm−1\)", "有効レンジ関数 kcot δ（fm−1）"),
+        (r"λπ-constrained three-range \(barrier\+tail split, free tail depth\) \+ \(k,q\) scan", "λπ拘束3レンジ(障壁+テール分割, テール深さ自由)+ (k,q)走査"),
+        (r"eq18 \(GWU/SAID\) three-range \(λπ constrained, barrier\+tail split, free tail depth\)", "eq18 (GWU/SAID) 3レンジ(λπ拘束, 障壁+テール分割, テール深さ自由)"),
+        (r"Potential V\(r\) \(MeV\)", "ポテンシャル V(r)(MeV)"),
+        (r"triplet\(B, a_t, r_t, v2t fit\)", "triplet(B, a_t, r_t, v2t フィット)"),
+        (r"singlet\(a_s, r_s with V1, V2>=0 fit\)", "singlet(a_s, r_sで V1, V2>=0 フィット)"),
+        (r"triplet: ERE fit \(v2 targets\)", "triplet: EREフィット(v2 targets)"),
+        (r"k grid", "kグリッド"),
+        (r"ERE fit", "EREフィット"),
+        (r"fit/predictions − observed \(units: fm³, fm, fm³\)", "フィット/predictions − observed(単位: fm³, fm, fm³)"),
+        (r"effective-range function kcot δ \(fm−1\)", "effective range関数kcot δ(fm−1)"),
+    ],
+    "nuclear_effective_potential_pion_constrained_barrier_tail_kq_scan_eq19": [
+        (
+            r"λπ-constrained three-range \(barrier\+tail split, free tail depth\) \+ \(k,q\) scan",
+            "λπ拘束3レンジ（障壁+テール分割、テール深さ自由）+ (k,q)走査",
+        ),
+        (
+            r"eq19 \(Nijmegen\) three-range \(λπ constrained, barrier\+tail split, free tail depth\)",
+            "eq19（Nijmegen）\n3レンジ（λπ拘束、障壁+テール分割、テール深さ自由）",
+        ),
+        (r"Potential V\(r\) \(MeV\)", "ポテンシャル V(r)（MeV）"),
+        (r"triplet \(fit B, a_t, r_t, v2t\)", "三重項（B, a_t, r_t, v2t をフィット）"),
+        (r"singlet \(fit V1, V2>=0 by a_s, r_s\)", "一重項（a_s, r_sで V1, V2>=0 をフィット）"),
+        (r"triplet: ERE fit \(v2 targets\)", "三重項: EREフィット（v2を目標）"),
+        (r"k grid", "kグリッド"),
+        (r"ERE fit", "EREフィット"),
+        (r"fit/predictions − observed \(units: fm³, fm, fm³\)", "フィット/予測 − 観測（単位: fm³, fm, fm³）"),
+        (r"effective-range function kcot δ \(fm−1\)", "有効レンジ関数 kcot δ（fm−1）"),
+        (r"λπ-constrained three-range \(barrier\+tail split, free tail depth\) \+ \(k,q\) scan", "λπ拘束3レンジ(障壁+テール分割, テール深さ自由)+ (k,q)走査"),
+        (r"eq19 \(Nijmegen\) three-range \(λπ constrained, barrier\+tail split, free tail depth\)", "eq19 (Nijmegen) 3レンジ(λπ拘束, 障壁+テール分割, テール深さ自由)"),
+        (r"Potential V\(r\) \(MeV\)", "ポテンシャル V(r)(MeV)"),
+        (r"triplet\(B, a_t, r_t, v2t fit\)", "triplet(B, a_t, r_t, v2t フィット)"),
+        (r"singlet\(a_s, r_s with V1, V2>=0 fit\)", "singlet(a_s, r_sで V1, V2>=0 フィット)"),
+        (r"triplet: ERE fit \(v2 targets\)", "triplet: EREフィット(v2 targets)"),
+        (r"k grid", "kグリッド"),
+        (r"ERE fit", "EREフィット"),
+        (r"fit/predictions − observed \(units: fm³, fm, fm³\)", "フィット/predictions − observed(単位: fm³, fm, fm³)"),
+        (r"effective-range function kcot δ \(fm−1\)", "effective range関数kcot δ(fm−1)"),
+    ],
+    "nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan_eq18": [
+        (
+            r"λπ-constrained three-range \+ channel split \(k,q\) \+ triplet barrier-fraction scan",
+            "λπ拘束3レンジ + チャネル分離(k,q) + 三重項障壁比率走査",
+        ),
+        (
+            r"eq18 \(GWU/SAID\) three-range \(triplet barrier-fraction scan\)",
+            "eq18（GWU/SAID）\n3レンジ（三重項障壁比率走査）",
+        ),
+        (r"Potential V\(r\) \(MeV\)", "ポテンシャル V(r)（MeV）"),
+        (r"triplet \(fit B, a_t, r_t, v2t\)", "三重項（B, a_t, r_t, v2t をフィット）"),
+        (r"singlet \(fit V1, V2>=0 by a_s, r_s\)", "一重項（a_s, r_sで V1, V2>=0 をフィット）"),
+        (r"triplet: ERE fit \(v2 targets\)", "三重項: EREフィット（v2を目標）"),
+        (r"k grid", "kグリッド"),
+        (r"ERE fit", "EREフィット"),
+        (r"fit/predictions − observed \(units: fm³, fm, fm³\)", "フィット/予測 − 観測（単位: fm³, fm, fm³）"),
+        (r"effective-range function kcot δ \(fm−1\)", "有効レンジ関数 kcot δ（fm−1）"),
+        (r"λπ-constrained three-range \+ channel split \(k,q\) \+ triplet barrier-fraction scan", "λπ拘束3レンジ + チャネル分離(k,q) + triplet障壁比率走査"),
+        (r"eq18 \(GWU/SAID\) three-range \(triplet barrier-fraction scan\)", "eq18 (GWU/SAID) 3レンジ(triplet障壁比率走査)"),
+        (r"Potential V\(r\) \(MeV\)", "ポテンシャル V(r)(MeV)"),
+        (r"triplet\(B, a_t, r_t, v2t fit\)", "triplet(B, a_t, r_t, v2t フィット)"),
+        (r"singlet\(a_s, r_s with V1, V2>=0 fit\)", "singlet(a_s, r_sで V1, V2>=0 フィット)"),
+        (r"triplet: ERE fit \(v2 targets\)", "triplet: EREフィット(v2 targets)"),
+        (r"k grid", "kグリッド"),
+        (r"ERE fit", "EREフィット"),
+        (r"fit/predictions − observed \(units: fm³, fm, fm³\)", "フィット/predictions − observed(単位: fm³, fm, fm³)"),
+        (r"effective-range function kcot δ \(fm−1\)", "effective range関数kcot δ(fm−1)"),
+    ],
+    "nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan_eq19": [
+        (
+            r"λπ-constrained three-range \+ channel split \(k,q\) \+ triplet barrier-fraction scan",
+            "λπ拘束3レンジ + チャネル分離(k,q) + 三重項障壁比率走査",
+        ),
+        (
+            r"eq19 \(Nijmegen\) three-range \(triplet barrier-fraction scan\)",
+            "eq19（Nijmegen）\n3レンジ（三重項障壁比率走査）",
+        ),
+        (r"Potential V\(r\) \(MeV\)", "ポテンシャル V(r)（MeV）"),
+        (r"triplet \(fit B, a_t, r_t, v2t\)", "三重項（B, a_t, r_t, v2t をフィット）"),
+        (r"singlet \(fit V1, V2>=0 by a_s, r_s\)", "一重項（a_s, r_sで V1, V2>=0 をフィット）"),
+        (r"triplet: ERE fit \(v2 targets\)", "三重項: EREフィット（v2を目標）"),
+        (r"k grid", "kグリッド"),
+        (r"ERE fit", "EREフィット"),
+        (r"fit/predictions − observed \(units: fm³, fm, fm³\)", "フィット/予測 − 観測（単位: fm³, fm, fm³）"),
+        (r"effective-range function kcot δ \(fm−1\)", "有効レンジ関数 kcot δ（fm−1）"),
+        (r"λπ-constrained three-range \+ channel split \(k,q\) \+ triplet barrier-fraction scan", "λπ拘束3レンジ + チャネル分離(k,q) + triplet障壁比率走査"),
+        (r"eq19 \(Nijmegen\) three-range \(triplet barrier-fraction scan\)", "eq19 (Nijmegen) 3レンジ(triplet障壁比率走査)"),
+        (r"Potential V\(r\) \(MeV\)", "ポテンシャル V(r)(MeV)"),
+        (r"triplet\(B, a_t, r_t, v2t fit\)", "triplet(B, a_t, r_t, v2t フィット)"),
+        (r"singlet\(a_s, r_s with V1, V2>=0 fit\)", "singlet(a_s, r_sで V1, V2>=0 フィット)"),
+        (r"triplet: ERE fit \(v2 targets\)", "triplet: EREフィット(v2 targets)"),
+        (r"k grid", "kグリッド"),
+        (r"ERE fit", "EREフィット"),
+        (r"fit/predictions − observed \(units: fm³, fm, fm³\)", "フィット/predictions − observed(単位: fm³, fm, fm³)"),
+        (r"effective-range function kcot δ \(fm−1\)", "effective range関数kcot δ(fm−1)"),
+    ],
+    "nuclear_binding_energy_frequency_mapping_minimal_additional_physics": [
+        (r"binding saturation per nucleon \(ν\)", "核子あたりの結合飽和（ν）"),
+        (r"minimal additional physics under frozen thresholds", "凍結 threshold 下での最小追加物理"),
+        (r"operational z-score \(abs\(z\)≤3 = pass\)", "運用 z-score（abs(z)≤3 で pass）"),
+        (r"z \(σ_proxy units\)", "z（σ_proxy 単位）"),
+        (r"binding saturation per nucleon \(ν\)", "核子あたり 結合飽和(ν)"),
+        (r"minimal additional physics under frozen thresholds", "凍結 threshold 下atminimal additional physics"),
+        (r"operational z-score \(abs\(z\)≤3 = pass\)", "operational z-score(abs(z)≤3 で pass"),
+        (r"z \(σ_proxy units\)", "z(σ_proxy 単位)"),
+    ],
+    "nuclear_binding_energy_frequency_mapping_falsification_pack": [
+        (r"falsification pack and independent cross-check", "反証条件パックと独立クロスチェック"),
+        (r"A-trend consistency \(\|z_Δmedian\|<=3\)", "Aトレンド整合性（|z_Δmedian|<=3）"),
+        (r"global ratio R", "グローバル比 R"),
+        (r"local spacing ratio d", "局所間隔比 d"),
+        (r"z_Δmedian \(log10 ratio\)", "z_Δmedian（log10比）"),
+        (r"z_median \(log10 ratio\)", "z_median（log10比）"),
+        (r"independent cross-check \(charge-radius kink, A_min=100\)", "独立クロスチェック（電荷半径キンク, A_min=100）"),
+        (r"falsification pack and independent cross-check", "falsification pack and 独立cross-check"),
+        (r"A-trend consistency \(\|z_Δmedian\|<=3\)", "Aトレンドconsistency(|z_Δmedian|<=3)"),
+        (r"global ratio R", "グローバル比 R"),
+        (r"local spacing ratio d", "局所間隔比 d"),
+        (r"z_Δmedian \(log10 ratio\)", "z_Δmedian(log10比)"),
+        (r"z_median \(log10 ratio\)", "z_median(log10比)"),
+        (r"independent cross-check \(charge-radius kink, A_min=100\)", "独立クロスチェック（電荷半径キンク, A_min=100）"),
+    ],
+    "molecular_transitions_exomol_baseline": [
+        (
+            r"representative molecular-transition baseline \(two lines extracted per molecule from primary line lists\)",
+            "分子遷移の代表基準（一次線リストから各分子 2 本を抽出）",
+        ),
+        (r"molecule", "分子"),
+        (r"representative transition 1", "代表遷移 1"),
+        (r"representative transition 2", "代表遷移 2"),
+        (r"representative molecular-transition baseline \(two lines extracted per molecule from primary line lists\)", "分子遷移 代表基準(一次線リストから各分子 2 本 Extracted)"),
+        (r"molecule", "分子"),
+        (r"representative transition 1", "代表遷移 1"),
+        (r"representative transition 2", "代表遷移 2"),
+    ],
+    "v2_trial3_weak_checkpoint_summary": [
+        (r"theory baseline from coupled-localization conditions of W/Z mass anchor points", "W/Z 質量基準点の結合局在条件による理論基準"),
+        (r"errors of mass anchor points on the same family", "同一系列上の質量基準点の誤差"),
+        (r"coupled localization", "結合局在"),
+        (r"closeout scale: about 0\.002%", "closeout 規模: 約 0.002%"),
+        (r"single-component clips are reclassified", "単成分 clip は再分類"),
+        (r"physical localization is judged by coupled eigenmodes", "物理局在は結合固有モードで判定"),
+        (r"numerical solver and spectral scale", "数値解法とスペクトルの尺度"),
+        (r"count \(log axis\)", "件数（対数軸）"),
+        (r"relative error \[%\]", "相対誤差 [%]"),
+        (r"charge-window extension used in the theory baseline", "理論基準で使う電荷窓拡張"),
+    ],
+    "condensed_silicon_thermal_expansion_gruneisen_two_branch_model": [
+        (r"Silicon thermal expansion: two-branch Debye–Grüneisen model", "シリコン熱膨張: 2枝 Debye–Grüneisen モデル"),
+        (r"two-branch model: α≈A1·Cv\(θ1\)\+A2·Cv\(θ2\)", "2枝モデル: α≈A1·Cv(θ1)+A2·Cv(θ2)"),
+        (r"Silicon thermal expansion: two-branch Debye–Grüneisen model", "Siliconthermal expansion: 2枝 Debye–Grüneisen model"),
+        (r"two-branch model: α≈A1·Cv\(θ1\)\+A2·Cv\(θ2\)", "2枝model: α≈A1·Cv(θ1)+A2·Cv(θ2)"),
+        (r"branch 1 contribution", "枝1寄与"),
+        (r"branch 2 contribution", "枝2寄与"),
+    ],
+    "condensed_silicon_thermal_expansion_gruneisen_cp_proxy_gammaT_bulkmodulus_model": [
+        (r"Silicon thermal expansion: Cp-proxy Grüneisen \(tanh γ\(T\)\) ansatz check", "シリコン 熱膨張: Cp-proxy Grüneisen (tanh γ(T)) ansatz check"),
+    ],
+    "condensed_silicon_thermal_expansion_gruneisen_debye_einstein_two_branch_model": [
+        (r"Silicon thermal expansion: Debye\+Einstein×2 \(two optical branches\) ansatz check", "シリコン 熱膨張: Debye+Einstein×2 (two optical branches) ansatz check"),
+    ],
+    "condensed_silicon_thermal_expansion_gruneisen_ioffe_phonon_anchors_three_einstein_model": [
+        (r"Si thermal expansion: Debye\+Einstein×3 with θE anchors from Ioffe phonon frequencies", "Si 熱膨張: Debye+Einstein×3 with θE anchors from Ioffe フォノン frequencies"),
+        (r"pred \(Debye\+Einstein×3\)", "予測 (Debye+Einstein×3)"),
+        (r"z = \(pred−obs\)/σ_fit", "z = (予測−obs)/σ_fit"),
+        (r"E1 \(anchor\)=ν_TA\(X_3\): θE1=216\.0 K", "E1(アンカー)=ν_TA(X_3): θE1=216.0 K"),
+        (r"E2 \(anchor\)=ν_TO\(X_4\): θE2=667\.1 K", "E2(アンカー)=ν_TO(X_4): θE2=667.1 K"),
+        (r"E3 \(anchor\)=ν_TO\(L_3'\): θE3=705\.5 K", "E3(アンカー)=ν_TO(L_3'): θE3=705.5 K"),
+    ],
 }
+
+_BASE_DISPLAY_OVERRIDES_EN: list[tuple[str, str]] = [
+    (r"alpha\^\{-1\}", "α⁻¹"),
+    (r"alpha\^-1", "α⁻¹"),
+    (r"Δ\(alpha\^-1\)", "Δ(α⁻¹)"),
+    (r"10\^-8 / K", "10⁻⁸ K⁻¹"),
+    (r"10\^4 Hz", "10⁴ Hz"),
+    (r"H_I_", "H I "),
+    (r"He_I_", "He I "),
+    (r"log10\(B_pred/B_obs\)", "log10(pred/obs ratio)"),
+    (r"median\(B_pred/B_obs\)", "median(pred/obs ratio)"),
+    (r"B_pred/B_obs", "pred/obs ratio"),
+    (r"C_required/\(A-1\)", "required coherence /(A-1)"),
+    (r"A_eff", "Aeff"),
+    (r"A_inf", "Ainf"),
+    (r"σ_fit", "σ fit"),
+    (r"α_pred", "pred"),
+    (r"α_obs", "obs"),
+]
 
 
 # 関数: `_ordered_patterns` の入出力契約と処理意図を定義する。
@@ -304,15 +717,41 @@ def _pattern_to_display(pattern: str) -> str:
     return text.strip()
 
 
+# 関数: `_localized_to_regex` の入出力契約と処理意図を定義する。
+
+def _localized_to_regex(localized: str) -> str:
+    parts: list[str] = []
+    for ch in localized:
+        if ch in {" ", "\n", "\t"}:
+            parts.append(r"\s*")
+        elif ch in {"（", "("}:
+            parts.append(r"[（(]")
+        elif ch in {"）", ")"}:
+            parts.append(r"[）)]")
+        elif ch in {"：", ":"}:
+            parts.append(r"[:：]\s*")
+        elif ch in {"；", ";"}:
+            parts.append(r"[;；]\s*")
+        elif ch in {"，", ",", "、"}:
+            parts.append(r"[,，、]\s*")
+        elif ch in {"-", "−", "–"}:
+            parts.append(r"[-−–]")
+        else:
+            parts.append(re.escape(ch))
+
+    return "".join(parts)
+
+
 # 関数: `_reverse_patterns` の入出力契約と処理意図を定義する。
 
 def _reverse_patterns(patterns: Iterable[tuple[str, str]]) -> list[tuple[re.Pattern[str], str]]:
-    reverse_pairs = [(re.escape(localized), _pattern_to_display(pattern)) for pattern, localized in patterns]
+    reverse_pairs = [(_localized_to_regex(localized), _pattern_to_display(pattern)) for pattern, localized in patterns]
     return _ordered_patterns(reverse_pairs, ignore_case=False)
 
 
 _BASE_PATTERNS_JA = _ordered_patterns(_BASE_GLOSSARY, ignore_case=True)
 _BASE_PATTERNS_EN = _reverse_patterns(_BASE_GLOSSARY)
+_BASE_DISPLAY_PATTERNS_EN = _ordered_patterns(_BASE_DISPLAY_OVERRIDES_EN, ignore_case=False)
 _STEM_PATTERNS_JA = {
     stem: _ordered_patterns(patterns, ignore_case=True) for stem, patterns in _STEM_SPECIFIC_GLOSSARY.items()
 }
@@ -514,7 +953,7 @@ def _normalize_spacing(text: str, *, target: str) -> str:
 
 def _target_patterns(stem: str | None, *, target: str) -> tuple[list[tuple[re.Pattern[str], str]], list[tuple[re.Pattern[str], str]]]:
     if target == "en":
-        base_patterns = _BASE_PATTERNS_EN
+        base_patterns = _BASE_PATTERNS_EN + _BASE_DISPLAY_PATTERNS_EN
         stem_patterns = _STEM_PATTERNS_EN.get(stem or "", [])
         return stem_patterns, base_patterns
 
@@ -535,10 +974,10 @@ def _translate_segment(text: str, *, stem: str | None, target: str) -> str:
     result = text
     stem_patterns, base_patterns = _target_patterns(stem, target=target)
     for pattern, repl in stem_patterns:
-        result = pattern.sub(repl, result)
+        result = pattern.sub(lambda _m, replacement=repl: replacement, result)
 
     for pattern, repl in base_patterns:
-        result = pattern.sub(repl, result)
+        result = pattern.sub(lambda _m, replacement=repl: replacement, result)
 
     return _normalize_spacing(result, target=target)
 
@@ -669,8 +1108,10 @@ def enable_figure_text_localization(*, default_lang: str = "ja") -> None:
     try:
         from scripts.utils.plot_style import install_wavep_cjk_font_override
 
-        preferred_name = str(os.getenv("WAVEP_MPL_CJK_FONT", "")).strip() or None
-        install_wavep_cjk_font_override(preferred_name=preferred_name)
+        target_lang = get_figure_language(default=default_lang)
+        if not str(target_lang).strip().lower().startswith("en"):
+            preferred_name = str(os.getenv("WAVEP_MPL_CJK_FONT", "")).strip() or None
+            install_wavep_cjk_font_override(preferred_name=preferred_name)
     except Exception:
         pass
 

@@ -3,14 +3,21 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import os
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import matplotlib.pyplot as plt
 
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.plot_style import get_wavep_font_size
 
 enable_japanese_figure_localization()
 
@@ -170,15 +177,26 @@ def main() -> None:
 
     # Figure
 
+    figure_lang = os.getenv("WAVEP_FIGURE_LANG", "ja").strip().lower()
+    is_en = figure_lang.startswith("en")
+    title_font = get_wavep_font_size("title")
+    x_axis_label_font = get_wavep_font_size("axis")
+    y_axis_label_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    legend_font = get_wavep_font_size("legend")
+    lower_xlabel = "T (K)" if is_en else "Temperature T (K)"
+    left_ylabel = "B(T) [GPa]" if is_en else "Bulk modulus B (GPa)"
+
     fig, ax = plt.subplots(1, 1, figsize=(10.2, 4.6))
     ax.plot(temps, b_gpa, color="#1f77b4", lw=2.0, label="B(T) reference")
     ax.axvline(t_switch, color="#999999", lw=1.0, ls="--", alpha=0.85, label=f"switch at {t_switch:.0f} K")
-    ax.set_title("Silicon bulk modulus B(T) (Ioffe elastic constants reference)")
-    ax.set_xlabel("Temperature T (K)")
-    ax.set_ylabel("Bulk modulus B (GPa)")
+    ax.set_title("Silicon bulk modulus B(T) (Ioffe elastic constants reference)", fontsize=title_font)
+    ax.set_xlabel(lower_xlabel, fontsize=x_axis_label_font, labelpad=1.2)
+    ax.set_ylabel(left_ylabel, fontsize=y_axis_label_font, labelpad=0.8)
     ax.grid(True, alpha=0.25)
-    ax.legend(loc="best", fontsize=11.8)
-    fig.tight_layout()
+    ax.tick_params(axis="both", labelsize=tick_font)
+    ax.legend(loc="best", fontsize=legend_font)
+    fig.tight_layout(rect=(0.065, 0.04, 1.0, 1.0) if is_en else None)
     out_png = out_dir / "condensed_silicon_bulk_modulus_baseline.png"
     fig.savefig(out_png, dpi=180)
     plt.close(fig)

@@ -156,6 +156,16 @@ _PROFILE_TO_TEX_TITLE: dict[str, str] = {
     "part5_future_predictions": r"時間波ダイナミクスに基づく統一理論 (The P-model)\\[0.5em]Part V: 将来観測予測\\[1em]\large",
 }
 
+_PROFILE_TO_TEX_TITLE_EN: dict[str, str] = {
+    "paper": r"Unified Theory Based on Time-Wave Dynamics (The P-model)\\[0.5em]Part I: Theoretical Foundations and Mapping Principles",
+    "part2_astrophysics": r"Unified Theory Based on Time-Wave Dynamics (The P-model)\\[0.5em]Part II: Astrophysical and Cosmological Tests\\[1em]\large",
+    PART3_COMPAT_PROFILE: r"Unified Theory Based on Time-Wave Dynamics (The P-model)\\[0.5em]Part III: Reassessment of Microscopic and Quantum Phenomena",
+    PART3A_PROFILE: r"Unified Theory Based on Time-Wave Dynamics (The P-model)\\[0.5em]Part III-A: Quantum Foundations",
+    PART3B_PROFILE: r"Unified Theory Based on Time-Wave Dynamics (The P-model)\\[0.5em]Part III-B: Quantum Verification Applications",
+    "part4_verification": r"Unified Theory Based on Time-Wave Dynamics (The P-model)\\[0.5em]Part IV: Reproducibility Audit, Public Artifact Registry, and Update Operations\\[1em]\large",
+    "part5_future_predictions": r"Unified Theory Based on Time-Wave Dynamics (The P-model)\\[0.5em]Part V: Future Observational Predictions\\[1em]\large",
+}
+
 _DEFAULT_ROOT = Path(__file__).resolve().parents[2]
 _FIGURES_INDEX_KEY = "figures_index"
 _DEFINITIONS_KEY = "definitions"
@@ -220,6 +230,66 @@ _PROFILE_TO_POST_BIBLIOGRAPHY_TEX: dict[str, str] = {
 """.strip(),
 }
 
+_PROFILE_TO_POST_BIBLIOGRAPHY_TEX_EN: dict[str, str] = {
+    "part5_future_predictions": r"""
+\clearpage
+
+\section*{Final Note}
+
+I have often spent time thinking deeply about philosophy as a discipline.
+
+When one tries to understand things in depth, one eventually arrives at science.
+
+And yet I have felt that science, as we have known it, still contains
+something that resembles philosophy.
+
+That point is $\alpha$, and it is the singularity.
+
+Cosmology and quantum physics are the same physical reality, and yet they are
+framed in different ways.
+
+That is why I feel there is something philosophical here.
+
+Human beings are incomplete, and so they prefer incomplete things.
+
+That itself can be called a kind of philosophy.
+
+In this world there are only three spatial dimensions that describe the
+positions of objects, and time.
+
+Everything began with that simple question.
+
+It is acceptable not to be complete.
+Science too is something done by human beings.
+
+There is only one thing that matters.
+
+\textbf{``People live for other people, and are kept alive by other people.''}
+
+To understand this deeply is, I believe, the essence of philosophy and of
+science.
+
+That understanding is also the only morality that can lead to peace.
+
+There is no god and no Buddha in this world.
+
+There is no rank and no class.
+
+What exists is only the wave called time, changing form and continuing to be.
+
+Rather than clinging to something else,
+
+to be grateful for being alive now,
+
+and to be grateful that we are sustained by the people around us,
+
+is the only path that leads to happiness.
+
+\vspace{2em}
+\hfill Shunji Ogawa
+""".strip(),
+}
+
 
 _PART3A_H1 = "# 時間波ダイナミクスに基づく統一理論 (The P-model): Part III-A: 量子基盤理論"
 _PART3B_H1 = "# 時間波ダイナミクスに基づく統一理論 (The P-model): Part III-B: 量子検証応用"
@@ -271,17 +341,20 @@ def _resolve_root(root: Path | None = None) -> Path:
 
 
 # 関数: `_to_rel_from_root` の入出力契約と処理意図を定義する。
+
 def _to_rel_from_root(path: Path, *, root: Path) -> str:
     return str(path.resolve().relative_to(root.resolve())).replace("\\", "/")
 
 
 # 関数: `resolve_manuscript_path` の入出力契約と処理意図を定義する。
+
 def resolve_manuscript_path(root: Path, profile: str, locale: str | None = None) -> Path:
     manifest_key = _PROFILE_TO_MANUSCRIPT[profile]
     return locale_registry.resolve_source_path(root, manifest_key, locale=locale)
 
 
 # 関数: `resolve_lint_manuscripts` の入出力契約と処理意図を定義する。
+
 def resolve_lint_manuscripts(profile: str, *, root: Path | None = None, locale: str | None = None) -> tuple[str, ...]:
     resolved_root = _resolve_root(root)
     keys = _PROFILE_TO_LINT_MANUSCRIPTS[profile]
@@ -292,111 +365,141 @@ def resolve_lint_manuscripts(profile: str, *, root: Path | None = None, locale: 
 
 
 # 関数: `resolve_html_name` の入出力契約と処理意図を定義する。
+
 def resolve_html_name(profile: str, locale: str | None = None) -> str:
     return locale_registry.localized_output_name(_PROFILE_TO_HTML[profile], locale=locale)
 
 
 # 関数: `resolve_docx_name` の入出力契約と処理意図を定義する。
+
 def resolve_docx_name(profile: str, locale: str | None = None) -> str:
     return locale_registry.localized_output_name(_PROFILE_TO_DOCX[profile], locale=locale)
 
 
 # 関数: `resolve_pdf_name` の入出力契約と処理意図を定義する。
+
 def resolve_pdf_name(profile: str, locale: str | None = None) -> str:
     return locale_registry.localized_output_name(_PROFILE_TO_PDF[profile], locale=locale)
 
 
 # 関数: `resolve_tex_name` の入出力契約と処理意図を定義する。
+
 def resolve_tex_name(profile: str, locale: str | None = None) -> str:
     return locale_registry.localized_output_name(_PROFILE_TO_TEX[profile], locale=locale)
 
 
 # 関数: `resolve_font_profile` の入出力契約と処理意図を定義する。
+
 def resolve_font_profile(profile: str) -> str:
     return _PROFILE_TO_FONT_PROFILE[profile]
 
 
 # 関数: `resolve_font_floors` の入出力契約と処理意図を定義する。
+
 def resolve_font_floors(profile: str) -> tuple[str, str]:
     return _PROFILE_TO_FONT_FLOOR[profile]
 
 
 # 関数: `resolve_html_title` の入出力契約と処理意図を定義する。
+
 def resolve_html_title(profile: str) -> str:
     return _PROFILE_TO_HTML_TITLE[profile]
 
 
 # 関数: `resolve_html_subtitle` の入出力契約と処理意図を定義する。
+
 def resolve_html_subtitle(profile: str) -> str:
     return _PROFILE_TO_HTML_SUBTITLE[profile]
 
 
 # 関数: `resolve_html_badge` の入出力契約と処理意図を定義する。
+
 def resolve_html_badge(profile: str) -> str:
     return _PROFILE_TO_HTML_BADGE[profile]
 
 
 # 関数: `resolve_tex_title` の入出力契約と処理意図を定義する。
-def resolve_tex_title(profile: str) -> str:
+
+def resolve_tex_title(profile: str, locale: str | None = None) -> str:
+    active_locale = locale_registry.resolve_active_locale(locale)
+    if active_locale == "en":
+        return _PROFILE_TO_TEX_TITLE_EN.get(profile, _PROFILE_TO_TEX_TITLE[profile])
+
     return _PROFILE_TO_TEX_TITLE[profile]
 
 
 # 関数: `resolve_figures_index_path` の入出力契約と処理意図を定義する。
+
 def resolve_figures_index_path(root: Path, locale: str | None = None) -> Path:
     return locale_registry.resolve_source_path(root, _FIGURES_INDEX_KEY, locale=locale)
 
 
 # 関数: `resolve_definitions_path` の入出力契約と処理意図を定義する。
+
 def resolve_definitions_path(root: Path, locale: str | None = None) -> Path:
     return locale_registry.resolve_source_path(root, _DEFINITIONS_KEY, locale=locale)
 
 
 # 関数: `resolve_uncertainty_path` の入出力契約と処理意図を定義する。
+
 def resolve_uncertainty_path(root: Path, locale: str | None = None) -> Path:
     return locale_registry.resolve_source_path(root, _UNCERTAINTY_KEY, locale=locale)
 
 
 # 関数: `resolve_llr_appendix_path` の入出力契約と処理意図を定義する。
+
 def resolve_llr_appendix_path(root: Path, locale: str | None = None) -> Path:
     return locale_registry.resolve_source_path(root, _LLR_APPENDIX_KEY, locale=locale)
 
 
 # 関数: `resolve_quantum_appendix_a_path` の入出力契約と処理意図を定義する。
+
 def resolve_quantum_appendix_a_path(root: Path, locale: str | None = None) -> Path:
     return locale_registry.resolve_source_path(root, _QUANTUM_APPENDIX_A_KEY, locale=locale)
 
 
 # 関数: `resolve_data_sources_path` の入出力契約と処理意図を定義する。
+
 def resolve_data_sources_path(root: Path, locale: str | None = None) -> Path:
     return locale_registry.resolve_source_path(root, _DATA_SOURCES_KEY, locale=locale)
 
 
 # 関数: `resolve_references_path` の入出力契約と処理意図を定義する。
+
 def resolve_references_path(root: Path, locale: str | None = None) -> Path:
     return locale_registry.resolve_source_path(root, _REFERENCES_KEY, locale=locale)
 
 
 # 関数: `resolve_post_bibliography_tex` の入出力契約と処理意図を定義する。
-def resolve_post_bibliography_tex(profile: str) -> str:
+
+def resolve_post_bibliography_tex(profile: str, locale: str | None = None) -> str:
+    active_locale = locale_registry.resolve_active_locale(locale)
+    if active_locale == "en":
+        return _PROFILE_TO_POST_BIBLIOGRAPHY_TEX_EN.get(profile, _PROFILE_TO_POST_BIBLIOGRAPHY_TEX.get(profile, ""))
+
     return _PROFILE_TO_POST_BIBLIOGRAPHY_TEX.get(profile, "")
 
 
 # 関数: `uses_quantum_table1` の入出力契約と処理意図を定義する。
+
 def uses_quantum_table1(profile: str) -> bool:
     return profile in {PART3_COMPAT_PROFILE, PART3B_PROFILE}
 
 
 # 関数: `should_run_quantum_presteps` の入出力契約と処理意図を定義する。
+
 def should_run_quantum_presteps(profile: str) -> bool:
     return profile in {PART3_COMPAT_PROFILE, PART3B_PROFILE}
 
 
 # 関数: `is_quantum_profile` の入出力契約と処理意図を定義する。
+
 def is_quantum_profile(profile: str) -> bool:
     return profile in {PART3_COMPAT_PROFILE, PART3A_PROFILE, PART3B_PROFILE}
 
 
 # 関数: `_split_part3_sections` の入出力契約と処理意図を定義する。
+
 def _split_part3_sections(md_text: str) -> tuple[str, list[str]]:
     lines = md_text.splitlines()
     if not lines:
@@ -422,6 +525,7 @@ def _split_part3_sections(md_text: str) -> tuple[str, list[str]]:
 
 
 # 関数: `_select_part3a_sections` の入出力契約と処理意図を定義する。
+
 def _select_part3a_sections(sections: list[str]) -> list[str]:
     selected: list[str] = []
     for section in sections:
@@ -441,6 +545,7 @@ def _select_part3a_sections(sections: list[str]) -> list[str]:
 
 
 # 関数: `_select_part3b_sections` の入出力契約と処理意図を定義する。
+
 def _select_part3b_sections(sections: list[str]) -> list[str]:
     selected: list[str] = []
     for section in sections:
@@ -452,6 +557,7 @@ def _select_part3b_sections(sections: list[str]) -> list[str]:
 
 
 # 関数: `_retitle_part3a` の入出力契約と処理意図を定義する。
+
 def _retitle_part3a(text: str) -> str:
     out = text
     out = out.replace(
@@ -466,6 +572,7 @@ def _retitle_part3a(text: str) -> str:
 
 
 # 関数: `load_profile_markdown` の入出力契約と処理意図を定義する。
+
 def load_profile_markdown(root: Path, profile: str, locale: str | None = None) -> str:
     md_path = resolve_manuscript_path(root, profile, locale=locale)
     return md_path.read_text(encoding="utf-8", errors="replace")

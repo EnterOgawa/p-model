@@ -1,0 +1,72 @@
+channel,status,metric,value,note
+vlbi,reject,threshold_chi2_dof,150.73614130970475,
+vlbi,reject,stable_chi2_dof,4.23615028197059,
+vlbi,reject,subset_refit_status,reject,subset_consistency_reject
+vlbi,reject,subset_refit_baseline_abs_z_vs_llr,13.391977394202545,
+llr,pass,kappa_est,1.0006742979447485,
+llr,pass,abs_z,0.7019830114129517,
+messenger,pass,stage_j_status,pass,
+messenger,pass,stage_e_replay_status,pass,
+messenger,pass,stage_e_replay_z_delta_beta,1.9571653261565023,
+messenger,pass,beta_primary_definition,beta_lt,stage_d.beta_lt
+messenger,pass,beta_primary_est,1.0421527766285519,
+messenger,pass,beta_primary_sigma,0.9835875504310281,
+messenger,pass,beta_dyn_diagnostic_est,-8.543545063448692,
+messenger,pass,beta_dyn_diagnostic_sigma,0.6796046586530693,
+messenger,pass,stage_i_odf_baseline_abs_z_beta_minus_1,14.435709175838632,
+messenger,pass,stage_i_odf_best_abs_z_beta_minus_1,11.887478253431036,all_proxies_on
+messenger,pass,stage_i_odf_max_shift_delta_vs_baseline_z,2.637280137935102,plasma_proxy_on
+messenger,pass,stage_i_tnf_baseline_abs_z_beta_minus_1,2.7112835599445715,
+messenger,pass,stage_i_tnf_best_abs_z_beta_minus_1,1.5716574112063881,all_proxies_on
+messenger,pass,stage_i_tnf_max_shift_delta_vs_baseline_z,3.110946467252994,transponder_quad_on
+messenger,pass,stage_i_nuisance_priority_status,pass,rank_by_stage_i_abs_z_shift_across_branches
+messenger,pass,stage_i_nuisance_top1_scenario,transponder_quad_on,prioritize_transponder_drift_model_upgrade
+messenger,pass,stage_i_nuisance_top1_max_abs_z_delta,3.110946467252994,transponder_drift
+messenger,pass,stage_i_stabilization_top1_scenario,all_proxies_on,prioritize_plasma_residual_modeling_and_media_controls
+messenger,pass,stage_i_srp_proxy_registered,True,explicit_srp_proxy_registered_in_stage_i_policy
+messenger,pass,comparator_eligible,True,stage_j_pass+stage_e_replay_pass+stage_d_data_pass
+messenger,pass,policy_note,,"stage_i_core=baseline,station_bias_lowcap,station_bias_highcap,sunq_proxy_on | stage_i_diag=transponder_quad_on,plasma_proxy_on,srp_proxy_on,all_proxies_on | stage_i_top_nuisance=transponder_quad_on | stage_h_required={'odf': ['station', 'link_type'], 'tnf': ['station']} | stage_h_diag={'odf': ['campaign'], 'tnf': ['link_type', 'campaign']}"
+cross_channel,reject,beta_consistency_abs_z,13.391977394202545,
+beta_terminal,pass,beta_combined_est,1.0006743375038871,
+beta_terminal,pass,beta_combined_sigma,0.0009605611706232912,
+beta_terminal,pass,beta_combined_abs_z_minus_1,0.7020245295253377,
+beta_terminal,pass,active_policy_id,policy_D_exclude_plus_messenger_fusion,policy_switch_decision=switch_to_policy_D_now -> auto-promoted to policy_D
+beta_terminal,pass,policy_A_status,reject,
+beta_terminal,pass,policy_B_status,pass,
+beta_terminal,pass,policy_B_hold_status,watch,
+beta_terminal,pass,policy_D_status,pass,
+beta_terminal,pass,policy_D_promotion_status,pass,
+beta_terminal,pass,policy_D_promotion_ready,True,
+beta_terminal,pass,policy_D_llr_gate_order_status,pass,
+beta_terminal,pass,policy_D_llr_gate_execution_order,,
+beta_terminal,pass,policy_D_llr_gate_actions_ordered,,
+beta_terminal,pass,policy_D_llr_gate_repro_commands_min,python -B scripts/llr/llr_kappa_llr_direct_fit.py | python -B scripts/llr/llr_kappa_llr_beta_promotion_gate.py | python -B scripts/summary/beta_cross_channel_registry.py | python -B scripts/summary/beta_terminal_reject_checklist.py,minimal_repro_order
+beta_terminal,pass,policy_D_reassessment_status,pass,"order_match=True, count_delta=0"
+beta_terminal,pass,policy_recommended_active_policy_id,policy_D_exclude_plus_messenger_fusion,policy_D_promotion_ready=true -> allow llr+messenger fusion promotion
+beta_terminal,pass,policy_switch_decision_id,switch_to_policy_D_now,
+beta_terminal,pass,policy_switch_required_now,True,
+beta_terminal,pass,policy_switch_allowed_now,True,
+beta_terminal,pass,policy_terminal_watch_statement_id,watch_resolved_policy_alignment_completed,
+beta_terminal,pass,policy_terminal_watch_statement_text,beta_terminal=watch; policy alignment to governance recommendation is completed.,8.7.48.30_canonical_watch_statement
+beta_terminal,pass,policy_D_promotion_blockers,,
+beta_terminal,pass,policy_D_blocker_order_status,pass,
+beta_terminal,pass,policy_D_blocker_resolution_order,,
+beta_terminal,pass,policy_D_blocker_priority_top1,,
+beta_terminal,pass,policy_D_pair_abs_z_llr_messenger,0.042170581445497804,pass
+beta_terminal,pass,policy_D_pair_abs_delta_beta,0.04147847868380339,
+beta_terminal,pass,policy_D_pair_required_abs_delta_watch,2.950764058404869,
+beta_terminal,pass,policy_D_pair_watch_gate_status,pass,pass if pair_abs_z<=3
+beta_terminal,pass,policy_D_pair_pass_gate_status,pass,pass if pair_abs_z<=2
+beta_terminal,pass,policy_D_pair_gap_to_watch_z,-2.957829418554502,
+beta_terminal,pass,policy_D_pair_gap_to_pass_z,-1.9578294185545022,
+beta_terminal,pass,policy_D_pair_gap_abs_delta_watch,-2.9092855797210655,
+beta_terminal,pass,policy_D_pair_gap_abs_delta_pass,-1.925697560252776,
+beta_terminal,pass,policy_D_required_messenger_beta_min_watch,-1.9500897604601204,
+beta_terminal,pass,policy_D_required_messenger_beta_max_watch,3.9514383563496174,
+beta_terminal,pass,policy_D_required_messenger_sigma_watch,0.013792752066616159,
+beta_terminal,pass,policy_D_stage_i_best_candidate_branch,odf,
+beta_terminal,pass,policy_D_stage_i_best_candidate_shift_needed_to_watch_range,4.9258118971321405,
+beta_terminal,pass,policy_D_stage_i_watch_gate_reachable_status,reject,
+beta_terminal,pass,policy_E_status,pass,
+beta_terminal,pass,vlbi_bias_audit_status,reject,
+beta_terminal,pass,llr_bias_audit_status,pass,

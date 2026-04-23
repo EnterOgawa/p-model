@@ -1,0 +1,159 @@
+{
+  "generated_utc": "2026-04-11T00:24:18.891435+00:00",
+  "dataset": {
+    "source": "NIST belltestdata (processed_compressed/hdf5 build; Shalm et al. 2015 time-tag repository)",
+    "hdf5": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_belltestdata\\processed_compressed\\hdf5\\2015_09_18\\03_43_CH_pockel_100kHz.run4.afterTimingfix2_afterfixingModeLocking.dat.compressed.build.hdf5"
+  },
+  "config": {
+    "alice": {
+      "bitoffset": 28,
+      "pk": 90,
+      "radius": 4
+    },
+    "bob": {
+      "bitoffset": 37,
+      "pk": 125,
+      "radius": 5
+    }
+  },
+  "analysis": {
+    "max_syncs": null,
+    "exclude_bad_sync": true,
+    "coincidence_definition": "same-slot within sync: (alice_clicks & bob_clicks) != 0",
+    "setting_mapping": "1->0, 2->1 (other values treated as invalid and excluded)",
+    "ch_definition": "CH J_prob = P11(A1,B1)+P11(A1,B2)+P11(A2,B1)-P11(A2,B2) - P1(A1) - P1(B1)"
+  },
+  "counts": {
+    "syncs_used": 107109576,
+    "bad_sync_unique": 18,
+    "invalid_settings": 2,
+    "trials_by_setting_pair": [
+      [
+        26789176,
+        26775138
+      ],
+      [
+        26768990,
+        26776272
+      ]
+    ],
+    "coinc_by_setting_pair": [
+      [
+        12591,
+        12554
+      ],
+      [
+        12861,
+        152
+      ]
+    ],
+    "alice_trials_by_setting": [
+      53564314,
+      53545262
+    ],
+    "bob_trials_by_setting": [
+      53558166,
+      53551410
+    ],
+    "alice_clicks_by_setting": [
+      36913,
+      114936
+    ],
+    "bob_clicks_by_setting": [
+      38454,
+      123236
+    ]
+  },
+  "ch_j_variants": {
+    "A1=0,B1=0": {
+      "A1": 0,
+      "A2": 1,
+      "B1": 0,
+      "B2": 1,
+      "J_prob": 6.518427199813021e-06
+    },
+    "A1=0,B1=1": {
+      "A1": 0,
+      "A2": 1,
+      "B1": 1,
+      "B2": 0,
+      "J_prob": -0.0025262957099371507
+    },
+    "A1=1,B1=0": {
+      "A1": 1,
+      "A2": 0,
+      "B1": 0,
+      "B2": 1,
+      "J_prob": -0.0023772500984495103
+    },
+    "A1=1,B1=1": {
+      "A1": 1,
+      "A2": 0,
+      "B1": 1,
+      "B2": 0,
+      "J_prob": -0.003962800537999224
+    },
+    "_best": {
+      "key": "A1=0,B1=0",
+      "J_prob": 6.518427199813021e-06
+    }
+  },
+  "comparison": {
+    "coincidence_sweep_csv": "C:\\develop\\waveP\\output\\public\\quantum\\nist_belltest_coincidence_sweep__03_43_afterfixingModeLocking_s3600.csv",
+    "windows_ns": [
+      0.5,
+      1.0,
+      2.0,
+      5.0,
+      10.0,
+      20.0,
+      50.0,
+      100.0,
+      200.0,
+      500.0,
+      1000.0,
+      2000.0,
+      5000.0
+    ],
+    "pairs_total": [
+      12,
+      22,
+      35,
+      75,
+      120,
+      252,
+      594,
+      1231,
+      2462,
+      6128,
+      12051,
+      23756,
+      56430
+    ],
+    "j_prob_a1_0_b1_0": [
+      -0.0014069705805686468,
+      -0.0014067465023333513,
+      -0.001406485133149337,
+      -0.0014061865090027204,
+      -0.0014055514909662161,
+      -0.0014026387047625898,
+      -0.0013968877944803663,
+      -0.0013852741332796915,
+      -0.001363128890841755,
+      -0.0012962852207825085,
+      -0.0011901170897702313,
+      -0.000982524306564714,
+      -0.00040354898411957315
+    ]
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\locales\\en\\nist_belltest_trial_based__03_43_afterfixingModeLocking_s3600.png",
+    "pdf": "C:\\develop\\waveP\\output\\public\\quantum\\locales\\en\\nist_belltest_trial_based__03_43_afterfixingModeLocking_s3600.pdf",
+    "json": "C:\\develop\\waveP\\output\\public\\quantum\\locales\\en\\nist_belltest_trial_based_metrics__03_43_afterfixingModeLocking_s3600.json",
+    "csv": "C:\\develop\\waveP\\output\\public\\quantum\\locales\\en\\nist_belltest_trial_based_counts__03_43_afterfixingModeLocking_s3600.csv"
+  },
+  "notes": [
+    "This script focuses on trial-based counting using the NIST 'build' (processed) file.",
+    "It is intended to quantify algorithm dependence between trial-based and coincidence-based pipelines."
+  ]
+}

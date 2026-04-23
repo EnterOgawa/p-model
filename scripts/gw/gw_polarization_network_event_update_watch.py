@@ -5,6 +5,7 @@ import csv
 import hashlib
 import json
 import math
+import os
 import shutil
 import subprocess
 import sys
@@ -24,6 +25,11 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+
+
+# 関数: `WAVEP_FIGURE_LANG` から英語 surface かどうかを判定する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
 
 
 # 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
@@ -353,6 +359,11 @@ def _run_coverage_expansion(
 # 関数: `_plot_summary` の入出力契約と処理意図を定義する。
 
 def _plot_summary(row: Dict[str, Any], out_png: Path) -> None:
+    font_scale = 1.18 if _is_en_figure() else 1.0
+    title_fs = 15.6 * font_scale
+    label_fs = 13.0 * font_scale
+    tick_fs = 12.0 * font_scale
+    legend_fs = 11.8 * font_scale
     labels0 = ["3-det events", "hash changed", "rerun"]
     vals0 = np.asarray(
         [
@@ -378,9 +389,10 @@ def _plot_summary(row: Dict[str, Any], out_png: Path) -> None:
     ax0.bar(x0, vals0, color=["#4c78a8", "#f58518", "#54a24b"], alpha=0.9)
     ax0.set_xticks(x0)
     ax0.set_xticklabels(labels0)
-    ax0.set_ylabel("count / flag")
-    ax0.set_title("GW polarization event-update watch (3-detector)")
+    ax0.set_ylabel("count / flag", fontsize=label_fs)
+    ax0.set_title("GW polarization event-update watch (3-detector)", fontsize=title_fs)
     ax0.grid(True, axis="y", alpha=0.25)
+    ax0.tick_params(labelsize=tick_fs)
 
     x1 = np.arange(len(labels1), dtype=float)
     colors = ["#9aa0a6", "#4c78a8", "#9aa0a6", "#f2c744"]
@@ -393,13 +405,15 @@ def _plot_summary(row: Dict[str, Any], out_png: Path) -> None:
     ax1.axhline(0.5, color="#f2c744", linestyle=":", linewidth=1.2, label="watch boundary (best_u2)")
     ax1.set_xticks(x1)
     ax1.set_xticklabels(labels1, rotation=10)
-    ax1.set_ylabel("value")
+    ax1.set_ylabel("value", fontsize=label_fs)
     ax1.grid(True, axis="y", alpha=0.25)
-    ax1.legend(loc="upper right", frameon=True)
+    ax1.legend(loc="upper right", frameon=True, fontsize=legend_fs)
+    ax1.tick_params(labelsize=tick_fs)
 
     fig.tight_layout()
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=180, bbox_inches="tight")
+    fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight")
     plt.close(fig)
 
 

@@ -10,13 +10,20 @@ from __future__ import annotations
 import json
 import math
 import os
+import sys
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from figure_japanese_localizer import enable_japanese_figure_localization
-from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
+from scripts.utils.figure_locale_paths import localize_figure_output_path
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size, install_wavep_font_profile
 
 enable_japanese_figure_localization()
+
+_PROFILE_NAME = "part3b_quantum_verification"
 
 # 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
@@ -133,6 +140,7 @@ def _square_well_from_r(*, mu_mev: float, b_mev: float, r_fm: float, hbarc_mev_f
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
+    install_wavep_font_profile(profile_name=_PROFILE_NAME)
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -235,13 +243,13 @@ def main() -> None:
 
     fig = plt.figure(figsize=(16.6, 7.4), dpi=170)
     apply_wavep_figure_layout(fig, template="part2_side_by_side")
-    fig.set_size_inches(fig.get_figwidth(), 5.65, forward=True)
-    gs = fig.add_gridspec(1, 2, width_ratios=[1.0, 1.56], wspace=0.24)
-    panel_title_font = get_wavep_font_size("title") * 0.82
+    fig.set_size_inches(fig.get_figwidth(), 5.9, forward=True)
+    gs = fig.add_gridspec(1, 2, width_ratios=[1.14, 1.40], wspace=0.20)
+    panel_title_font = get_wavep_font_size("title") * 0.80
     axis_label_font = get_wavep_font_size("axis")
     tick_font = get_wavep_font_size("tick")
-    note_font = get_wavep_font_size("note")
-    suptitle_font = get_wavep_font_size("suptitle") + 3.0
+    note_font = get_wavep_font_size("note") * 0.96
+    suptitle_font = get_wavep_font_size("suptitle") + 1.0
 
     ax0 = fig.add_subplot(gs[0, 0])
     ax0.axis("off")
@@ -259,31 +267,36 @@ def main() -> None:
         0.0,
         0.86,
         (
-            f"B = {b_mev:.6f} ± {sigma_b_mev:.6f} MeV (CODATA mass defect)\n"
-            f"Δω = B/ħ ≈ {delta_omega_per_s:.3e} 1/s\n"
-            f"J (2-mode I/F) = Δω/2 ≈ {j_freq_per_s:.3e} 1/s\n"
-            f"1/κ (tail) ≈ {inv_kappa_fm:.3f} fm,  r_d ≈ {rd_fm:.3f} fm"
+            f"B = {b_mev:.6f} ± {sigma_b_mev:.6f} MeV\n"
+            "(CODATA mass defect)\n"
+            f"Δω = B/ħ ≈ {delta_omega_per_s:.3e} s^-1\n"
+            f"J (2-mode I/F) = Δω/2 ≈ {j_freq_per_s:.3e} s^-1\n"
+            f"1/κ (tail) ≈ {inv_kappa_fm:.3f} fm\n"
+            f"r_d ≈ {rd_fm:.3f} fm"
         ),
         ha="left",
         va="top",
         fontsize=note_font,
         transform=ax0.transAxes,
-        bbox={"boxstyle": "round,pad=0.35", "facecolor": "white", "edgecolor": "0.85"},
+        bbox={"boxstyle": "round,pad=0.34", "facecolor": "white", "edgecolor": "0.85"},
     )
     ax0.text(
-        0.0,
-        0.40,
+        -0.035,
+        0.30,
         (
-            "Square-well example (s-wave):\n"
-            "  V(r)=−V0 (r<R), 0 (r≥R)\n"
-            "  k cot(kR) = −κ,  κ = sqrt(2μB)/ħ\n"
-            "This is an operational I/F for the standing-wave (bound) condition;\n"
-            "it does not claim the nuclear force is literally a square well."
+            "Square-well example (s-wave)\n"
+            "V(r) = -V0 for r < R, and 0 for r ≥ R\n"
+            "k cot(kR) = -κ,   κ = sqrt(2μB)/ħ\n"
+            "\n"
+            "Operational I/F for the standing-wave boundary condition.\n"
+            "It does not assert that the nuclear force is literally\n"
+            "a square-well potential."
         ),
         ha="left",
         va="top",
         fontsize=note_font,
         transform=ax0.transAxes,
+        bbox={"boxstyle": "round,pad=0.32", "facecolor": "white", "edgecolor": "0.87", "alpha": 0.95},
     )
 
     ax1 = fig.add_subplot(gs[0, 1])
@@ -314,11 +327,12 @@ def main() -> None:
     ax1.grid(True, ls=":", lw=0.6, alpha=0.6)
     ax1.tick_params(axis="both", labelsize=tick_font)
 
-    fig.suptitle("deuteron Δω mapping via 2-body boundary condition", y=0.986, fontsize=suptitle_font)
-    fig.subplots_adjust(left=0.085, right=0.985, top=0.880, bottom=0.110, wspace=0.24)
+    fig.suptitle("deuteron Δω mapping via 2-body boundary condition", y=0.982, fontsize=suptitle_font)
+    fig.subplots_adjust(left=0.070, right=0.985, top=0.875, bottom=0.115, wspace=0.20)
 
-    out_pdf = out_dir / "nuclear_binding_energy_frequency_mapping_deuteron_two_body.pdf"
-    out_png = out_dir / "nuclear_binding_energy_frequency_mapping_deuteron_two_body.png"
+    out_pdf = localize_figure_output_path(out_dir / "nuclear_binding_energy_frequency_mapping_deuteron_two_body.pdf", root=root)
+    out_png = localize_figure_output_path(out_dir / "nuclear_binding_energy_frequency_mapping_deuteron_two_body.png", root=root)
+    out_pdf.parent.mkdir(parents=True, exist_ok=True)
     prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
     os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
     try:
@@ -387,7 +401,10 @@ def main() -> None:
         "outputs": {"pdf": str(out_pdf), "png": str(out_png)},
     }
 
-    out_json = out_dir / "nuclear_binding_energy_frequency_mapping_deuteron_two_body_metrics.json"
+    out_json = localize_figure_output_path(
+        out_dir / "nuclear_binding_energy_frequency_mapping_deuteron_two_body_metrics.json",
+        root=root,
+    )
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(f"[ok] pdf : {out_pdf}")

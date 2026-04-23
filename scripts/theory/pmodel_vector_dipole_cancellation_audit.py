@@ -26,14 +26,35 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog
+from scripts.utils.figure_locale_paths import localize_figure_output_path, resolve_figure_output_locale
 from scripts.utils.plot_style import resolve_wavep_cjk_font_family
 
+FIGURE_LOCALE = resolve_figure_output_locale()
+IS_EN = FIGURE_LOCALE == "en"
 
-# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
-def _set_japanese_font() -> None:
+
+# 関数: `_t` の入出力契約と処理意図を定義する。
+def _t(ja: str, en: str) -> str:
+    return en if IS_EN else ja
+
+# 関数: `_configure_font` の入出力契約と処理意図を定義する。
+
+def _configure_font() -> None:
     try:
         import matplotlib as mpl
         import matplotlib.font_manager as fm
+
+        if IS_EN:
+            mpl.rcParams["font.family"] = ["DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = ["DejaVu Sans"]
+            mpl.rcParams["axes.unicode_minus"] = False
+            mpl.rcParams["font.size"] = 15.0
+            mpl.rcParams["axes.titlesize"] = 19.0
+            mpl.rcParams["axes.labelsize"] = 16.0
+            mpl.rcParams["xtick.labelsize"] = 14.0
+            mpl.rcParams["ytick.labelsize"] = 14.0
+            mpl.rcParams["legend.fontsize"] = 14.0
+            return
 
         preferred = resolve_wavep_cjk_font_family(preferred_name="Noto Sans CJK JP")
         if preferred:
@@ -293,7 +314,7 @@ def _gate_payload(rows: Sequence[Dict[str, Any]], z_reject: float, dipole_tol: f
 # 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(rows: Sequence[Dict[str, Any]], z_reject: float, out_png: Path) -> None:
-    _set_japanese_font()
+    _configure_font()
     labels_raw = [str(r.get("id") or f"row{i+1}") for i, r in enumerate(rows)]
     labels = [_pretty_pulsar_name(label) for label in labels_raw]
     x = np.arange(len(rows), dtype=float)
@@ -303,8 +324,8 @@ def _plot(rows: Sequence[Dict[str, Any]], z_reject: float, out_png: Path) -> Non
     dip_c = np.array([float(r.get("dipole_norm_counterfactual") or 0.0) for r in rows], dtype=float)
     eps_lim = np.array([float(r["epsilon_limit_95"]) if r.get("epsilon_limit_95") is not None else np.nan for r in rows], dtype=float)
 
-    fig, (ax0, ax1, ax2) = plt.subplots(3, 1, figsize=(12.8, 12.0), sharex=True)
-    fig.suptitle("P_μ 最小拡張：双極子打ち消し監査（等価原理条件）", fontsize=21.0)
+    fig, (ax0, ax1, ax2) = plt.subplots(3, 1, figsize=(13.0, 12.8), sharex=True)
+    fig.suptitle(_t("Pμ 最小拡張：双極子打ち消し監査（等価原理条件）", "Pμ minimal extension: dipole-cancellation audit"), fontsize=20.0)
 
     ax0.bar(x, np.nan_to_num(z, nan=0.0), color="#1f77b4", alpha=0.9)
     ax0.axhline(z_reject, color="#333333", linestyle="--", linewidth=1.0)
@@ -334,7 +355,7 @@ def _plot(rows: Sequence[Dict[str, Any]], z_reject: float, out_png: Path) -> Non
         clip_on=False,
     )
     ax0.set_ylabel("z = (R-1)/σ", fontsize=17.0)
-    ax0.set_title("双極子=0（四重極主導）での連星パルサー整合", fontsize=20.0, pad=10.0)
+    ax0.set_title(_t("双極子=0（四重極主導）での連星パルサー整合", "Binary-pulsar consistency with dipole = 0"), fontsize=20.0, pad=10.0)
     ax0.grid(True, axis="y", alpha=0.25)
     ax0.tick_params(axis="both", labelsize=14.5)
     max_abs_z = float(np.nanmax(np.abs(np.nan_to_num(z, nan=0.0)))) if len(z) else 1.0
@@ -345,34 +366,34 @@ def _plot(rows: Sequence[Dict[str, Any]], z_reject: float, out_png: Path) -> Non
         ax0.text(xi, y_text, label.split("\n")[0], ha="center", va=va_text, fontsize=13.0, color="0.22")
 
     width = 0.36
-    ax1.bar(x - width / 2.0, dip_u, width=width, color="#2ca02c", alpha=0.9, label="普遍 η（期待値 ≈ 0）")
-    ax1.bar(x + width / 2.0, dip_c, width=width, color="#ff7f0e", alpha=0.9, label="反事実 η2=η1(1+ε)")
+    ax1.bar(x - width / 2.0, dip_u, width=width, color="#2ca02c", alpha=0.9, label=_t("普遍 η", "Universal η"))
+    ax1.bar(x + width / 2.0, dip_c, width=width, color="#ff7f0e", alpha=0.9, label=_t("反事実 η₂=η₁(1+ε)", "Counterfactual"))
     ax1.set_yscale("log")
     ax1.set_ylabel("|d|/(η M r)", fontsize=17.0)
-    ax1.set_title("双極子モーメント規格化", fontsize=20.0, pad=10.0)
+    ax1.set_title(_t("双極子モーメント規格化", "Normalized dipole moment"), fontsize=20.0, pad=10.0)
     ax1.grid(True, axis="y", alpha=0.25)
     ax1.tick_params(axis="both", labelsize=14.5)
-    ax1.legend(loc="upper right", fontsize=14.0)
-    inset = ax1.inset_axes([0.64, 0.12, 0.33, 0.40])
+    ax1.legend(loc="upper left", ncol=2, frameon=False, fontsize=11.4)
+    inset = ax1.inset_axes([0.69, 0.11, 0.24, 0.27])
     inset.bar(x, dip_u, width=0.42, color="#2ca02c", alpha=0.95)
     inset.set_yscale("linear")
     inset.set_xticks([])
-    inset.set_title("拡大：普遍 η", fontsize=12.8)
+    inset.set_title(_t("拡大：普遍 η", "Zoom: universal η"), fontsize=11.8)
     max_u = float(np.max(dip_u)) if len(dip_u) else 0.0
     inset.set_ylim(0.0, max(1e-18, 1.15 * max_u))
     inset.grid(True, axis="y", alpha=0.20)
 
     ax2.bar(x, np.nan_to_num(eps_lim, nan=0.0), color="#9467bd", alpha=0.9)
     ax2.set_ylabel("sqrt(non-GR upper95)", fontsize=17.0)
-    ax2.set_title("推定された普遍性許容幅（95%）", fontsize=20.0, pad=10.0)
+    ax2.set_title(_t("推定された普遍性許容幅（95%）", "Estimated universality tolerance (95%)"), fontsize=20.0, pad=10.0)
     ax2.grid(True, axis="y", alpha=0.25)
     ax2.tick_params(axis="both", labelsize=14.5)
 
     ax2.set_xticks(x)
-    ax2.set_xticklabels(labels, rotation=8, ha="right", fontsize=14.0)
-    ax2.set_xlabel("連星パルサー系", fontsize=16.0)
+    ax2.set_xticklabels(labels, rotation=0, ha="center", fontsize=13.0)
+    ax2.set_xlabel(_t("連星パルサー系", "Binary-pulsar system"), fontsize=16.0)
 
-    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.97))
+    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.965))
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)
     fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight")
@@ -493,10 +514,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         epsilon_gate=float(args.epsilon_gate),
     )
 
-    out_json = outdir / "pmodel_vector_dipole_cancellation_audit.json"
-    out_csv = outdir / "pmodel_vector_dipole_cancellation_audit.csv"
-    out_png = outdir / "pmodel_vector_dipole_cancellation_audit.png"
-    out_pdf = outdir / "pmodel_vector_dipole_cancellation_audit.pdf"
+    out_json = localize_figure_output_path(outdir / "pmodel_vector_dipole_cancellation_audit.json", root=root, locale=FIGURE_LOCALE)
+    out_csv = localize_figure_output_path(outdir / "pmodel_vector_dipole_cancellation_audit.csv", root=root, locale=FIGURE_LOCALE)
+    out_png = localize_figure_output_path(outdir / "pmodel_vector_dipole_cancellation_audit.png", root=root, locale=FIGURE_LOCALE)
+    out_pdf = localize_figure_output_path(outdir / "pmodel_vector_dipole_cancellation_audit.pdf", root=root, locale=FIGURE_LOCALE)
 
     _plot(audit_rows, z_reject=float(args.z_reject), out_png=out_png)
     _write_csv(out_csv, audit_rows)
@@ -538,20 +559,22 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     copied: List[Path] = []
     canon_copied: List[Path] = []
-    for src in (out_json, out_csv, out_png, out_pdf):
-        dst = canon_outdir / src.name
-        # 条件分岐: `src.resolve() == dst.resolve()` を満たす経路を評価する。
-        if src.resolve() == dst.resolve():
-            continue
+    if not IS_EN:
+        for src in (out_json, out_csv, out_png, out_pdf):
+            dst = canon_outdir / src.name
+            # 条件分岐: `src.resolve() == dst.resolve()` を満たす経路を評価する。
+            if src.resolve() == dst.resolve():
+                continue
 
-        shutil.copy2(src, dst)
-        canon_copied.append(dst)
+            shutil.copy2(src, dst)
+            canon_copied.append(dst)
 
     # 条件分岐: `not args.no_public_copy` を満たす経路を評価する。
 
     if not args.no_public_copy:
         for src in (out_json, out_csv, out_png, out_pdf):
-            dst = public_outdir / src.name
+            dst = localize_figure_output_path(public_outdir / src.name, root=root, locale=FIGURE_LOCALE)
+            dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(src, dst)
             copied.append(dst)
 

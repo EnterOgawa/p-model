@@ -20,6 +20,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -684,6 +685,7 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
 # 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, payload: Dict[str, Any]) -> None:
+    is_en = str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
     channel_rows = payload.get("channel_rows") if isinstance(payload.get("channel_rows"), list) else []
     checks = payload.get("checks") if isinstance(payload.get("checks"), list) else []
     calib = payload.get("calibration") if isinstance(payload.get("calibration"), dict) else {}
@@ -709,19 +711,19 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     # 条件分岐: `lambda_rot is not None` を満たす経路を評価する。
     if lambda_rot is not None:
         err = 0.0 if lambda_sigma is None else float(lambda_sigma)
-        ax0.errorbar([0.0], [lambda_rot], yerr=[err], fmt="o", color="#1f77b4", capsize=5, label="事前値")
+        ax0.errorbar([0.0], [lambda_rot], yerr=[err], fmt="o", color="#1f77b4", capsize=5, label="prior value" if is_en else "事前値")
 
     # 条件分岐: `lambda_rot_legacy is not None` を満たす経路を評価する。
 
     if lambda_rot_legacy is not None:
         err_legacy = 0.0 if lambda_sigma_legacy is None else float(lambda_sigma_legacy)
-        ax0.errorbar([0.25], [lambda_rot_legacy], yerr=[err_legacy], fmt="s", color="#ff7f0e", capsize=5, label="旧フィット")
+        ax0.errorbar([0.25], [lambda_rot_legacy], yerr=[err_legacy], fmt="s", color="#ff7f0e", capsize=5, label="legacy fit" if is_en else "旧フィット")
 
     ax0.axhline(0.0, linestyle="--", color="#6b7280", linewidth=1.0)
     ax0.set_xlim(-0.4, 0.65)
-    ax0.set_xticks([0.0, 0.25], ["事前値", "旧値"])
-    ax0.set_ylabel("結合係数", fontsize=12.2)
-    ax0.set_title("L_rot 結合の固定", fontsize=13.4)
+    ax0.set_xticks([0.0, 0.25], ["prior", "legacy"] if is_en else ["事前値", "旧値"])
+    ax0.set_ylabel("coupling coefficient" if is_en else "結合係数", fontsize=12.2)
+    ax0.set_title("L_rot coupling freeze" if is_en else "L_rot 結合の固定", fontsize=13.4)
     # 条件分岐: `kappa_rot is not None` を満たす経路を評価する。
     if kappa_rot is not None:
         ax0.text(0.03, 0.96, f"κ_rot = {kappa_rot:.6f}", transform=ax0.transAxes, fontsize=10.6, va="top")
@@ -736,32 +738,32 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     x = np.arange(len(labels), dtype=float)
     width = 0.48
     display_labels = {
-        "GP-B frame-dragging": "GP-B フレームドラッギング",
-        "LAGEOS frame-dragging": "LAGEOS フレームドラッギング",
+        "GP-B frame-dragging": "GP-B frame dragging" if is_en else "GP-B フレームドラッギング",
+        "LAGEOS frame-dragging": "LAGEOS frame dragging" if is_en else "LAGEOS フレームドラッギング",
     }
     check_label_map = {
-        "l_rot::input_channels": "入力\nチャネル数",
-        "l_rot::static_reject": "静的仮定の\n棄却",
-        "l_rot::lambda_defined": "λ_rot の\n定義済み",
-        "l_rot::lambda_sigma": "λ_rot 誤差の\n定義済み",
-        "l_rot::prior_source_channels": "事前ソース\nチャネル数",
-        "l_rot::prediction_holdout_channels": "予測ホールドアウト\nチャネル数",
-        "l_rot::prediction_holdout_reject": "予測ホールドアウト\n棄却数",
-        "l_rot::prediction_holdout_max_abs_z": "予測ホールドアウト\n最大 |z|",
-        "l_rot::closure_upstream": "上流閉包\n監査",
-        "l_rot::drift_guard": "ドリフト\n監視",
-        "l_rot::small_coupling_watch": "微小結合の\n監視",
-        "l_rot::prior_vs_legacy_watch": "事前値と旧値の\n監視",
-        "l_rot::prior_source_role_watch": "事前ソース役割の\n監視",
+        "l_rot::input_channels": "input\nchannels" if is_en else "入力\nチャネル数",
+        "l_rot::static_reject": "static-model\nreject" if is_en else "静的仮定の\n棄却",
+        "l_rot::lambda_defined": "λ_rot\ndefined" if is_en else "λ_rot の\n定義済み",
+        "l_rot::lambda_sigma": "λ_rot sigma\ndefined" if is_en else "λ_rot 誤差の\n定義済み",
+        "l_rot::prior_source_channels": "prior-source\nchannels" if is_en else "事前ソース\nチャネル数",
+        "l_rot::prediction_holdout_channels": "holdout\nchannels" if is_en else "予測ホールドアウト\nチャネル数",
+        "l_rot::prediction_holdout_reject": "holdout\nreject count" if is_en else "予測ホールドアウト\n棄却数",
+        "l_rot::prediction_holdout_max_abs_z": "holdout max\n|z|" if is_en else "予測ホールドアウト\n最大 |z|",
+        "l_rot::closure_upstream": "upstream\nclosure" if is_en else "上流閉包\n監査",
+        "l_rot::drift_guard": "drift\nwatch" if is_en else "ドリフト\n監視",
+        "l_rot::small_coupling_watch": "small-coupling\nwatch" if is_en else "微小結合の\n監視",
+        "l_rot::prior_vs_legacy_watch": "prior vs legacy\nwatch" if is_en else "事前値と旧値の\n監視",
+        "l_rot::prior_source_role_watch": "prior-source role\nwatch" if is_en else "事前ソース役割の\n監視",
     }
-    ax1.bar(x - width / 2.0, z_static, width=width, color="#d62728", alpha=0.88, label="静的仮定（δP_rot = 0）")
-    ax1.bar(x + width / 2.0, z_lrot, width=width, color="#2ca02c", alpha=0.88, label="L_rot の事前予測")
+    ax1.bar(x - width / 2.0, z_static, width=width, color="#d62728", alpha=0.88, label="static assumption (δP_rot = 0)" if is_en else "静的仮定（δP_rot = 0）")
+    ax1.bar(x + width / 2.0, z_lrot, width=width, color="#2ca02c", alpha=0.88, label="L_rot prior prediction" if is_en else "L_rot の事前予測")
     ax1.axhline(3.0, linestyle="--", color="#6b7280", linewidth=1.0)
     ax1.axhline(-3.0, linestyle="--", color="#6b7280", linewidth=1.0)
     ax1.axhline(0.0, linestyle="-", color="#9ca3af", linewidth=0.9)
     ax1.set_xticks(x, [display_labels.get(label, label) for label in labels], rotation=10, ha="right")
-    ax1.set_ylabel("標準化残差 z", fontsize=12.2)
-    ax1.set_title("フレームドラッギング監査\n静的仮定とホールドアウト予測の比較", fontsize=13.4)
+    ax1.set_ylabel("standardized residual z" if is_en else "標準化残差 z", fontsize=12.2)
+    ax1.set_title("rotational-closure audit\nstatic assumption vs holdout prediction" if is_en else "フレームドラッギング監査\n静的仮定とホールドアウト予測の比較", fontsize=13.4)
     ax1.legend(loc="best", fontsize=10.6)
     ax1.grid(axis="y", alpha=0.25, linestyle=":")
 
@@ -791,8 +793,8 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     ax2.axvline(1.0, linestyle="--", color="#6b7280", linewidth=1.0)
     ax2.set_yticks(y, check_labels)
     ax2.set_xlim(0.0, 1.05)
-    ax2.set_xlabel("ゲートスコア", fontsize=12.2)
-    ax2.set_title("運用監査", fontsize=13.4)
+    ax2.set_xlabel("gate score" if is_en else "ゲートスコア", fontsize=12.2)
+    ax2.set_title("operational audit" if is_en else "運用監査", fontsize=13.4)
     ax2.grid(axis="x", alpha=0.25, linestyle=":")
 
     tick_font = 10.6

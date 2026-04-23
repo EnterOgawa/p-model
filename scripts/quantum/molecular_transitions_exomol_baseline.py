@@ -12,6 +12,7 @@ import bz2
 import csv
 import json
 import math
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -23,6 +24,15 @@ ROOT = Path(__file__).resolve().parents[2]
 # 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+
+from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.quantum.figure_japanese_localizer import get_figure_language
+from scripts.utils.figure_locale_paths import localize_figure_output_path
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size, install_wavep_font_profile
+
+enable_japanese_figure_localization()
+
+_PROFILE_NAME = "part3b_quantum_verification"
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
 
@@ -258,11 +268,14 @@ def _molat_transition_label(*, upper_state: str, vu: int, ju: int, vl: int, jl: 
 
 # 関数: `_compact_transition_entry` の入出力契約と処理意図を定義する。
 
-def _compact_transition_entry(row: dict[str, Any]) -> str:
+def _compact_transition_entry(row: dict[str, Any], *, is_en: bool) -> str:
     label = str(row.get("transition_label") or "").strip()
     nu_cm = float(row["wavenumber_cm^-1"])
     a_value = float(row["A_s^-1"])
-    return f"{label}\n$\\tilde{{\\nu}}$={nu_cm:.3f} cm^-1 / A={a_value:.3e} s^-1"
+    if is_en:
+        return f"{label}\nnu = {nu_cm:.3f} cm^-1\nA = {a_value:.2e} s^-1"
+
+    return f"{label}\nν̃ = {nu_cm:.3f} cm^-1\nA = {a_value:.2e} s^-1"
 
 
 # 関数: `_load_molat_d2_transitions` の入出力契約と処理意図を定義する。
@@ -323,6 +336,9 @@ def _load_molat_d2_transitions(*, source_dir: Path) -> tuple[list[dict[str, Any]
 # 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
+    figure_lang = get_figure_language(default="ja")
+    is_en = figure_lang.startswith("en")
+    install_wavep_font_profile(profile_name=_PROFILE_NAME)
     ap = argparse.ArgumentParser(description="Build an offline-stable molecular transition baseline from ExoMol line lists.")
     ap.add_argument("--top-n", type=int, default=10, help="Number of representative transitions to select per molecule.")
     args = ap.parse_args()
@@ -519,38 +535,53 @@ def main() -> None:
         mol = str(ds["molecule"])
         sub = [r for r in rows_all if str(r["molecule"]) == mol]
         sub = sorted(sub, key=lambda r: int(r["rank_by_A_desc"]))
-        first = _compact_transition_entry(sub[0]) if len(sub) >= 1 else "—"
-        second = _compact_transition_entry(sub[1]) if len(sub) >= 2 and display_n >= 2 else "—"
+        first = _compact_transition_entry(sub[0], is_en=is_en) if len(sub) >= 1 else "—"
+        second = _compact_transition_entry(sub[1], is_en=is_en) if len(sub) >= 2 and display_n >= 2 else "—"
         figure_rows.append([mol, first, second])
 
-    fig, ax = plt.subplots(figsize=(11.8, 5.35), dpi=180)
+    fig, ax = plt.subplots(figsize=(11.4, 4.45), dpi=180)
+    apply_wavep_figure_layout(fig, template="part2_single_panel_legend_bottom")
     ax.set_axis_off()
     font_props = _load_japanese_font_properties()
     title_font_props = font_props.copy() if font_props is not None else None
+    title_font = get_wavep_font_size("title") * (1.10 if is_en else 0.90)
+    body_font = get_wavep_font_size("note") * (0.96 if is_en else 0.82)
     if title_font_props is not None:
-        title_font_props.set_size(17.2)
+        title_font_props.set_size(get_wavep_font_size("title") * 0.90)
 
-    fig.suptitle(
-        "分子遷移の代表基準（一次線リストから各分子 2 本を抽出）",
-        fontsize=17.2,
-        y=0.96,
-        fontproperties=title_font_props,
+    figure_title = (
+        "representative molecular-transition baseline"
+        if is_en
+        else "分子遷移の代表基準（一次線リストから各分子 2 本を抽出）"
     )
+    column_labels = (
+        ["molecule", "representative transition 1", "representative transition 2"]
+        if is_en
+        else ["分子", "代表遷移 1", "代表遷移 2"]
+    )
+    if title_font_props is not None:
+        title_font_props.set_size(title_font)
+    table_bbox = [0.02, 0.20, 0.96, 0.74]
+    if is_en:
+        ax.set_title(figure_title, fontsize=title_font, pad=8.0, fontproperties=title_font_props)
+        table_bbox = [0.00, 0.00, 1.00, 0.94]
+    else:
+        fig.suptitle(figure_title, fontsize=title_font, y=0.90, fontproperties=title_font_props)
     table = ax.table(
         cellText=figure_rows,
-        colLabels=["分子", "代表遷移 1", "代表遷移 2"],
+        colLabels=column_labels,
         cellLoc="left",
         colLoc="center",
-        loc="center",
-        colWidths=[0.12, 0.44, 0.44],
+        bbox=table_bbox,
+        colWidths=[0.13, 0.435, 0.435],
     )
     table.auto_set_font_size(False)
-    table.set_fontsize(16.6)
-    table.scale(1.0, 5.2)
+    table.set_fontsize(body_font)
+    table.scale(1.0, 3.20)
     for (row, col), cell in table.get_celld().items():
         cell.set_edgecolor("#cbd5e1")
         cell.set_linewidth(0.8)
-        cell.PAD = 0.042
+        cell.PAD = 0.025
         if font_props is not None:
             try:
                 cell.get_text().set_fontproperties(font_props)
@@ -559,23 +590,26 @@ def main() -> None:
 
         if row == 0:
             cell.set_facecolor("#e2e8f0")
-            cell.set_text_props(weight="bold", ha="center", va="center", fontsize=15.2)
+            cell.set_text_props(weight="bold", ha="center", va="center", fontsize=body_font * 0.98)
         elif col == 0:
             cell.set_facecolor("#f8fafc")
-            cell.set_text_props(weight="bold", ha="center", va="center", fontsize=15.8)
+            cell.set_text_props(weight="bold", ha="center", va="center", fontsize=body_font * 1.02)
         else:
             cell.set_facecolor("white")
-            cell.set_text_props(ha="left", va="center", fontsize=16.6)
+            cell.set_text_props(ha="left", va="center", fontsize=body_font)
 
-    fig.tight_layout(rect=(0.01, 0.03, 0.99, 0.92))
-    out_pdf = out_dir / "molecular_transitions_exomol_baseline.pdf"
-    out_png = out_dir / "molecular_transitions_exomol_baseline.png"
-    fig.savefig(out_pdf, bbox_inches="tight", pad_inches=0.03)
-    fig.savefig(out_png, bbox_inches="tight", pad_inches=0.03)
+    fig.subplots_adjust(left=0.025, right=0.975, top=0.92, bottom=0.06)
+    if is_en:
+        ax.set_position([0.03, 0.17, 0.94, 0.63])
+    out_pdf = localize_figure_output_path(out_dir / "molecular_transitions_exomol_baseline.pdf", root=root)
+    out_png = localize_figure_output_path(out_dir / "molecular_transitions_exomol_baseline.png", root=root)
+    out_pdf.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_pdf)
+    fig.savefig(out_png)
     plt.close(fig)
 
     # ---- CSV ----
-    out_csv = out_dir / "molecular_transitions_exomol_baseline_selected.csv"
+    out_csv = localize_figure_output_path(out_dir / "molecular_transitions_exomol_baseline_selected.csv", root=root)
     csv_cols = [
         "dataset",
         "molecule",
@@ -615,7 +649,7 @@ def main() -> None:
         "rows": rows_all,
         "outputs": {"pdf": str(out_pdf), "png": str(out_png), "csv": str(out_csv)},
     }
-    out_json = out_dir / "molecular_transitions_exomol_baseline_metrics.json"
+    out_json = localize_figure_output_path(out_dir / "molecular_transitions_exomol_baseline_metrics.json", root=root)
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(f"[ok] wrote: {out_pdf}")

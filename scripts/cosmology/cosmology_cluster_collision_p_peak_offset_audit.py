@@ -16,6 +16,7 @@ Step 8.7.25（優先度S2）:
 - output/public/cosmology/cosmology_cluster_collision_p_peak_offset_audit.json
 - output/public/cosmology/cosmology_cluster_collision_p_peak_offset_audit.csv
 - output/public/cosmology/cosmology_cluster_collision_p_peak_offset_audit.png
+- output/public/cosmology/cosmology_cluster_collision_p_peak_offset_audit.pdf
 """
 
 from __future__ import annotations
@@ -25,6 +26,7 @@ import csv
 import hashlib
 import json
 import math
+import os
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -926,6 +928,12 @@ def _plot(path: Path, *, observations: Sequence[CollisionObs], rows_baryon: Sequ
 
     _set_japanese_font()
     path.parent.mkdir(parents=True, exist_ok=True)
+    figure_lang = str(os.environ.get("WAVEP_FIGURE_LANG", "")).strip().lower() or "ja"
+    font_scale = 1.24 if figure_lang == "en" else 1.0
+    title_font = 14.2 * font_scale
+    label_font = 13.0 * font_scale
+    tick_font = 11.2 * font_scale
+    legend_font = 11.2 * font_scale
 
     by_cluster_b = {str(r["cluster_id"]): r for r in rows_baryon}
     by_cluster_p = {str(r["cluster_id"]): r for r in rows_pmodel}
@@ -947,11 +955,11 @@ def _plot(path: Path, *, observations: Sequence[CollisionObs], rows_baryon: Sequ
     ax0.scatter(pred_p, y - 0.08, marker="o", color="#ff7f0e", label=f"P-model: Δx_P-gas (α={alpha_p:.3f})")
     ax0.set_yticks(y)
     ax0.set_yticklabels(labels)
-    ax0.set_xlabel("offset along collision axis [kpc]", fontsize=13.0)
-    ax0.set_title("Bullet-cluster offset audit: observed lens-gas vs model Δx_P-gas", fontsize=14.2)
+    ax0.set_xlabel("offset along collision axis [kpc]", fontsize=label_font)
+    ax0.set_title("Bullet-cluster offset audit: observed lens-gas vs model Δx_P-gas", fontsize=title_font)
     ax0.grid(alpha=0.25)
-    ax0.legend(loc="best", fontsize=11.2)
-    ax0.tick_params(labelsize=11.2)
+    ax0.legend(loc="best", fontsize=legend_font)
+    ax0.tick_params(labelsize=tick_font)
 
     bar_w = 0.35
     ax1.bar(y - bar_w / 2.0, z_lens_b, width=bar_w, color="#1f77b4", label="baryon-only: |z(Δx_P-lens)|")
@@ -959,14 +967,23 @@ def _plot(path: Path, *, observations: Sequence[CollisionObs], rows_baryon: Sequ
     ax1.axhline(3.0, color="k", linestyle="--", linewidth=1.2, label="hard gate |z|=3")
     ax1.set_yticks(y)
     ax1.set_yticklabels(labels)
-    ax1.set_xlabel("|z|", fontsize=13.0)
-    ax1.set_title("Lens-anchor residual gate", fontsize=14.2)
+    ax1.set_xlabel("|z|", fontsize=label_font)
+    ax1.set_title("Lens-anchor residual gate", fontsize=title_font)
     ax1.grid(alpha=0.25)
-    ax1.legend(loc="best", fontsize=11.2)
-    ax1.tick_params(labelsize=11.2)
+    ax1.legend(loc="best", fontsize=legend_font)
+    ax1.tick_params(labelsize=tick_font)
 
-    fig.subplots_adjust(left=0.18, right=0.98, top=0.90, bottom=0.10, hspace=0.48)
+    for axis in (ax0, ax1):
+        for tick in [*axis.get_xticklabels(), *axis.get_yticklabels()]:
+            tick.set_fontsize(tick_font)
+
+    if figure_lang == "en":
+        fig.subplots_adjust(left=0.21, right=0.98, top=0.90, bottom=0.10, hspace=0.50)
+    else:
+        fig.subplots_adjust(left=0.18, right=0.98, top=0.90, bottom=0.10, hspace=0.48)
+
     fig.savefig(path, dpi=150)
+    fig.savefig(path.with_suffix(".pdf"))
     plt.close(fig)
 
 
@@ -1023,6 +1040,7 @@ def main() -> int:
     json_path = output_dir / "cosmology_cluster_collision_p_peak_offset_audit.json"
     csv_path = output_dir / "cosmology_cluster_collision_p_peak_offset_audit.csv"
     png_path = output_dir / "cosmology_cluster_collision_p_peak_offset_audit.png"
+    pdf_path = output_dir / "cosmology_cluster_collision_p_peak_offset_audit.pdf"
     template_csv_path = output_dir / "collision_offset_observables_primary_template.csv"
     registration_checklist_csv_path = output_dir / "collision_offset_primary_registration_checklist.csv"
     previous_watchpack = _load_previous_watchpack(json_path)
@@ -1137,6 +1155,7 @@ def main() -> int:
             "audit_json": _rel(json_path),
             "audit_csv": _rel(csv_path),
             "audit_png": _rel(png_path),
+            "audit_pdf": _rel(pdf_path),
             "primary_registration_template_csv": _rel(template_csv_path),
             "primary_registration_checklist_csv": _rel(registration_checklist_csv_path),
         },
@@ -1183,6 +1202,7 @@ def main() -> int:
     print(f"[ok] wrote {json_path}")
     print(f"[ok] wrote {csv_path}")
     print(f"[ok] wrote {png_path}")
+    print(f"[ok] wrote {pdf_path}")
     print(f"[ok] wrote {template_csv_path}")
     print(f"[ok] wrote {registration_checklist_csv_path}")
     print(

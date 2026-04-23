@@ -1,0 +1,2815 @@
+     Unified Theory Based on Time-Wave Dynamics (The P-model)
+          Part I: Theoretical Foundations and Mapping Principles
+
+                                              Shunji Ogawa
+                                        ENTERSYSTEM Co., Ltd.
+
+
+                                   Document v2.0         2026/4/8 UTC
+
+
+
+
+Abstract
+
+This paper (Part I) fixes only three items as the reference baseline of the P-model. (i) Mapping:
+from the scalar limit of time-wave density, P (x), and its covariant extension Pµ = (Pt , P1 , P2 , P3 ), we
+define the potential ϕ and fix the main equations that map it to the observables of gravity, clocks,
+light propagation, and rotational effects, including the sign convention. (ii) Freezing: the light-
+propagation parameter β is not fitted ad hoc but derived as the theoretical prediction β = 1 from the
+null geodesics of the effective metric (1A.1), and is managed in three layers together with its operational
+frozen value and terminal audit status (3.4). Parts II and III do not change this value locally; if an
+update becomes necessary, Part I is revised and all downstream outputs are regenerated from here.
+(iii) Falsification conditions: for each observable treated in Parts II and III, we define a machine-
+readable falsification pack that fixes, under this mapping, which statistic must exceed which threshold
+for rejection. In addition, the frozen action skeleton defined here provides the theoretical anchor points
+on the quantum side that are audited in Parts III-A/B: the transverse photon branch, the selector-
+law anchor of the fine-structure constant, and the coupled-localization anchor for the W/Z boson
+masses. Their derivation and acceptance criteria are governed by Parts III-A/B. In this manuscript,
+  closed means mathematical closure, not truth of the theory or eventual observational acceptance.
+Individual application tests in the Solar System, dynamical phenomena, strong-field gravity, cosmology,
+and quantum physics are collected in Parts II and III; here they are referenced only as needed.
+
+
+
+
+                                                     1
+1 Introduction
+
+1.1 Background
+
+The P-model operationally defines the stationary limit P (x) as the base variable of time-wave density,
+and describes systems with rotation or flow by its covariant extension Pµ = (Pt , P1 , P2 , P3 ) (stationary-
+                           P∞
+clock mapping: dτ dt v=0 = P ). The aim of this paper is not to make ontological declarations or
+engage in philosophical dispute, but to offer a testable hypothesis a unified mapping for three
+unresolved questions: (i) what time is, (ii) why gravity appears, and (iii) how quantum correlations
+should be understood.
+The minimum assumption adopted here is that matter is treated as a bound wave, light as a free wave,
+and the rate of a standard clock is controlled by the stationary-limit field P (x) (and by the extension
+Pµ when rotation and flow are included). What matters is not to identify the microscopic ontology
+of P first, but to fix the mapping by which spatial changes in the ratio P /P∞ appear in gravity,
+clocks, and light propagation, and to state that mapping in a form that can be rejected by primary
+data through explicit observables and thresholds.
+Part I is the reference document that fixes the P-model s symbol conventions, minimum assump-
+tions, and mappings from theory to observables (gravity, clocks, and light). The later Part II (astro-
+physics and cosmology) and Part III (quantum physics) follow the conventions and frozen parameters
+fixed here, and use them to perform primary-data-based validation and define falsification conditions.
+Accordingly, this manuscript minimizes the listing of individual empirical results and instead clarifies
+the definitions, mappings, and frozen values that the later parts must inherit.
+The practical goal of the project is to test, in a reproducible way, whether the same weak-field observ-
+ables can be recovered within a scalar representation that is easier to explain physically and
+operationally.
+P-model viewpoint (the axis of this paper): (i) gravity is defined as the spatial gradient of clock rate,
+namely the gradient of P; (ii) bound waves (clocks) and free waves (propagation modes) respond to
+the same P through the null-geodesic structure of the effective metric, yielding β = 1 as a theoretical
+consequence (1A.1); and (iii) cosmological redshift is treated not as geometry but as a mapping of
+the background P field. These points are not obtained by reinterpreting existing theories from within
+themselves. They are fixed as a new mapping and then tested against primary data in a falsifiable
+form.
+Differential predictions that remain after freezing: once the mappings and frozen parameters are fixed,
+the main empirical decision points are (1) the terminal status of the free-wave propagation coeﬀicient
+β through the LLR, MESSENGER, and VLBI eligibility chain, (2) strong-gravity shape observables
+tied to the nonlinear structure of the P gradient, (3) distance-indicator-independent cosmological
+diagnostics that test the background-P mapping, and (4) the procedural dependence of quantum
+interference correlations together with the description of microscopic interaction structure (spin and
+chirality) under the Pµ extension.
+Core definition (Part I): P is operationally defined as the quantity that sets the rate of a standard
+clock. This paper fixes the mappings from P to clocks, motion, and light, and validates them only in
+a form that can be rejected by primary data. Reference frameworks (existing theories) are used only
+for comparison of final observable expressions and are not allowed to redefine the P-model internally.
+
+      Reference note: General relativity (GR) and special relativity (SR) have been extraordi-
+      narily successful in classical tests, but tracing exactly which assumptions enter an observ-
+      able and its validation pipeline requires a formal framework, for example PPN parameteri-
+
+
+                                                     2
+     zation.[2] Quantum mechanics (QM) is also foundational to modern physics, yet the status
+     of time and its unification with gravity remain open questions. The P-model is positioned
+     as a framework that re-derives the same observables from a different mechanism the spa-
+     tial variation of time-wave density P and does not replace its definitions by importing
+     concepts from the reference frameworks.
+
+
+1.2 Contributions of This Study
+
+ • We fix the symbols and sign conventions so that the three statements    P increases near
+   mass,     gravity = sliding down the P gradient, and light also moves toward higher P =
+   refraction are mathematically consistent.
+
+ • We incorporate the minimum coupling between Pµ = (Pt , P1 , P2 , P3 ) and the matter current J µ
+   into the Part I baseline mapping, and state explicitly the exact-reduction condition J i = 0 ⇒
+   Pi = 0 back to the existing scalar theory.
+
+ • We organize the pipeline from data acquisition to analysis to fixed artifacts so that a third party
+   can reproduce the same outputs.
+
+ • We provide both a figure catalog and summary reports, making the global view and the repro-
+   ducibility entry points explicit.
+
+
+1.3 Scope and Claim Boundary of This Paper (Effective Model and Falsification
+    Conditions)
+
+This paper does not redefine the P-model by using the concepts of the reference frameworks (existing
+theories). Instead, it first fixes the P-model’s own minimum assumptions and mappings. The reference
+frameworks are used only for comparing final expressions of results, namely for consistency checks and
+comparisons of predictive accuracy.
+From this point onward, the subject is always the P-model. The mappings, freezing rules, and rejection
+conditions fixed in the main text are not reinterpreted or modified in terms of the reference frameworks.
+Definition of an effective model: in this paper, an ”effective model” is a framework in which the
+action principle (Lagrangian) is defined in minimal form, the mapping to observables is fixed first, and
+consistency with primary data is then tested under that mapping. It is therefore distinct from pure
+phenomenology because it can present falsifiable predictions, namely explicit rejection conditions.
+Definition of ”closed”: in this paper, ”closed” means mathematical closure in the sense that the
+P-model side has already supplied the action skeleton, interaction dictionary, mappings to observables,
+and falsification conditions across the major domains of modern physics. This does not mean that
+the theory is true or that it will eventually be accepted by future observations. P-model v2.0 is the
+version that fixes this mathematical closure and leaves its empirical acceptance or rejection to public
+primary data and future observations.
+Items called ”unresolved” in this paper are not of a single kind. They are classified into the following
+four layers.
+
+ • Theoretically closed: the P-model’s mathematical dictionary and anchor points are already
+   fixed.
+
+ • Adopted effective sector: the derivation of the theoretical origin remains open, but the obser-
+   vational interface is already fixed (for example, retaining local U(1)).
+
+
+                                                   3
+ • Bridge residual: a remaining task in the mapping to observables, such as four-dimensional
+   shape factors or operator corrections.
+
+ • Awaiting observational decision: an item that must wait for public primary data or future
+   observations.
+
+All remaining issues from this point onward belong to one of these four layers; they are not treated as
+missing new laws of physics.
+This ”effective model” is read in two phases. In the theoretical phase, the P-model provides the
+reference surface of an action skeleton and observable mappings that mathematically closes the major
+domains of modern physics. In the observational phase, it is operated as an effective theory whose
+reference surface is tested against primary data by falsification-condition packs.
+The main concern of this paper is to test, with primary sources and reproducible outputs, how con-
+sistently the observables of gravity, clocks, light propagation, and rotational effects can be described
+once the stationary-limit time-wave density P (x) and its covariant extension Pµ are introduced. For
+that reason, this paper does not claim to present the ontological completion of P. Here ”completion”
+would mean identifying the microscopic entity behind P, or presenting a final formalism in which all in-
+teractions are derived from a single principle. The mathematical closure of v2.0 stands independently
+of that layer. The remaining tasks instead belong to observational audit, numerical constraints, and
+the fixing of bridge quantities. Meanwhile, the reference action skeleton is already defined in Part I
+2.8, and the acceptance of derivational closure and drift is fixed mechanically by the audit in Part IV,
+Section 3. In Part I, the static minimal equation in its weak-field limit (of Poisson type) is adopted,
+and the work is positioned as an effective model in which the mapping to observables is fixed first
+and then tested. Accordingly, P is not first declared to be some particular underlying substance. It
+is treated only as a mapping that appears in observables through the ratio P /P∞ .
+The parameter β is managed in three layers: the theoretical prediction (β = 1), the operational frozen
+value (β = 1.0000105), and the terminal audit status (currently Pass). This paper does not optimize
+that value case by case in order to obtain results. Instead, it is fixed as defined in Part I and then used
+for extrapolation (prediction). This paper does not claim theoretical superiority over the reference
+frameworks in the sense of first-principles reducibility.
+The following operating rules are stated explicitly to avoid misunderstanding.
+
+ • The responsibility for freezing is fixed. The theoretical prediction, operational frozen value,
+   and terminal audit status of β are defined in this paper (Part I 3.4). The texts of Parts II and III
+   do not alter the value locally. If an update is required, it is consolidated into a revision of Part
+   I, after which all downstream comparisons, figures, and falsification conditions are regenerated
+   together.
+
+ • Fitting and prediction are separated. (Note) fitting is restricted to the procedure that
+   determines the frozen values; no further optimization is performed in producing later results. β is
+   frozen from primary-source constraints and is thereafter used only for extrapolation (prediction),
+   with the frozen values collected in the frozen-parameter set.
+
+ • In the weak-field regime (the Solar System), agreement with the reference frameworks at high
+   precision is required, while in strong fields, dynamical phenomena, and cosmology the differen-
+   tial predictions are expected to appear in observable form (the concrete examples and required
+   precision are collected in Parts II and III).
+
+ • Some public primary sources (geodetic systems, time systems, catalogs, and so on) may include
+   preprocessing based on the standard theory. In this paper, priority is given first to fixing the pri-
+
+                                                    4
+    mary source inputs and visualizing corrections and systematics through fixed outputs; discussion
+    of raw-data reanalysis is treated separately when necessary.
+
+ • Falsifiability is emphasized by fixing the falsification-condition packs, namely which observable
+   and which threshold must be exceeded for rejection, and not moving them afterward in an ad hoc
+   way.
+
+ • The connection to quantum physics is positioned as a validation target of Part III, while this
+   paper (Part I) fixes only the minimal dictionary required for that connection (Section 2.8).
+
+The limitations of this paper at the present stage are as follows.
+
+ • The action skeleton is already defined, and the acceptance or rejection of derivational closure
+   is determined mechanically by the audit in Part IV, Section 3. At the same time, more highly
+   refined dynamics for strong fields and many-body systems remain in progress. This does not
+   negate the mathematical closure of v2.0; it belongs to the tracking of higher-order effects under
+   the frozen action skeleton.
+
+ • The microscopic origin of β lies outside the scope of this paper, and at the current stage β is frozen
+   from primary-source constraints and then tested. The same is true for extension hypotheses such
+   as velocity saturation; they are not part of the core mapping of this paper.
+
+ • The connection to quantum phenomena remains at the operational level (its placement is treated
+   in Part III).
+
+ • The essential conditions of the covariant extension Pµ (dipole-radiation prohibition, quadrupole
+   leading term, and the exact stationary-limit reduction J i = 0 ⇒ Pi = 0) are already fixed by
+   definition, and their acceptance is continuously audited by the same interface in Parts II and IV.
+
+These are present-stage constraints of the P-model and should be resolved by future theoretical devel-
+opment.
+The list of primary sources (URLs, access dates, and local storage policy) and the reproducibility entry
+points (fixed artifacts, reproduction commands, and audit gates) are collected in Part IV (Verification
+Materials) (GitHub: EnterOgawa/p-model) and are kept separate from the main body of the paper.
+In particular, the acceptance of action-principle derivational closure is governed by Part IV, Section
+3, and the fixed grounds for the Part I core mapping are governed by Part IV, Section 10.[1]
+
+     Reference note: this paper does not adopt the reference frameworks (existing theories)
+     as its foundation. It fixes the P-model side mappings and frozen values first, and limits
+     the reference frameworks to comparison of final expressions.
+
+
+Style Rules The main text closes using only the P-model’s own definitional mapping procedure.
+Comparisons with GR, QM, PPN, and so forth are isolated in reference notes at the end of sections
+and are not allowed to replace definitions or derivations in the main text. In this paper, a reference
+note is defined as a non-normative note that records only comparison with, and placement relative
+to, the reference frameworks. It is not used for the main text’s definitions, derivations, or decision
+conditions.
+
+
+
+
+                                                   5
+2 Theory
+
+The main symbols and sign conventions are collected in the appendix (Symbols and Definitions), and
+only the necessary items are repeated in the main text.
+
+
+2.1 Unified Interpretation (Written in P)
+
+The central claim of the P-model is that gravity, clocks, and light propagation can be expressed
+consistently through the stationary-limit time-wave density P (x) and its extension to Pµ for systems
+with rotation and flow. In this paper, matter is regarded as a bound wave and light as a free wave.
+The ”shortest path” followed by a wave is interpreted not as geometric distance but as the stationarity
+condition of the arrival time (optical path length).
+Under that interpretation, the mapping to observables is unified in the following form (details are
+given in Sections 2.1-2.8):
+
+ • gravitational potential: ϕ = −c2 ln(P /P∞ )
+
+ • gravity (equation of motion): a = −∇ϕ = c2 ∇ ln(P /P∞ )
+                    P∞ dτ
+                           
+ • clock rate: dτ
+               dt = P    dt v
+
+ • light: n(P ) = (P /P∞ )2β (β > 0), so refraction is toward the higher-P side
+
+ • rotation and flow: by introducing the four-vector extension and the minimal coupling, the
+   stationary-limit reduction is fixed by the following expression
+
+                   Pµ = (Pt , P1 , P2 , P3 ),   Lint = gP Pµ J µ ,   J i = 0 ⇒ Pi = 0,   Pt ≡ P    (1)
+
+
+
+
+                                                         6
+                                                                                                      Part I scope
+
+                                                                                             Part I
+                                                                                                      Gravity
+         Part I                                                                                       a = −∇ϕ
+           Time-wave density                   Part I                                           Motion sliding down
+                 (input)                              Central hub:                                the P gradient
+                   P(x)                            potential mapping
+             Base quantity in                           ϕ = −c 2ln(P/P∞ )
+              the static limit                                                               Part I
+                                                  Common entry to gravity,                             Clock
+                                                     clocks, and light                           (bound mode)
+           Part III scope
+                                                                                               dτ/dt = (P∞/P)(dτ/dt)v
+                                                                                               Separate gravity and
+         Part III
+          Quantum correlation                                                                     velocity factors
+                (selection)
+         Pμ ↔ microscopic coupling                                                           Part I
+             Bell, nuclear force,                                                                      Light
+              and V-A (Part III)                                                                   (free wave)
+                                               Part II                                            n(P) = (P/P∞)2β
+                                                    Cosmological                                 Refraction toward
+                                                                                                  the high-P side
+                                                background mapping
+                                                    1 + z = Pem/Pobs
+                                                Time evolution of Pbg(t)
+                                                        (Part II)
+                                                        Part II scope
+
+
+
+              Part I fixes the mapping and βfrozen; Parts II/III run falsification audits with those frozen values.
+
+
+
+
+Figure 1: Core mapping architecture of the P-model. With ϕ as the central hub, the mappings to
+each observable channel are arranged radially, and the jurisdictions of Parts I/II/III are color-coded.
+
+
+
+
+                                                             7
+Table (conceptual comparison):
+
+Viewpoint                        P-model (this paper)        Reference framework (GR)
+gravity                          ϕ = −c2 ln(P /P∞ )          curvature of the metric field
+                                                             (displayed as an effective
+                                                             potential in the weak field)
+motion                           a = −∇ϕ = c2 ∇ ln(P /P∞ )   weak-field, low-velocity limit
+                                                             of the geodesic equation
+light propagation                refraction through          description as a null geodesic
+                                 n(P ) = (P /P∞ )2β          (light ray)
+                                 dτ    P∞ dτ
+                                              
+clock                            dt = P     dt v             metric description of the
+                                                             proper time dτ
+redshift                         time mapping of the         description by the FRW scale
+                                 background wave Pbg (t)     factor a(t)
+
+
+In this paper, GR is treated as a reference framework, and the mappings to observables are fixed by
+the P-model-side definitions (the left column of the table above).
+
+
+
+
+                                                      8
+2.2 P and the Potential �
+
+P (x) denotes the stationary-limit time-wave density at the spatial point x, and P∞ denotes the far-
+field reference density. For systems with rotation and flow, the covariant extension Pµ = (Pt , P1 , P2 , P3 )
+is used (Section 2.8). In this paper, P∞ is used strictly as the far-field reference, while Pt is used as
+the time component of the four-vector. P∞ is a boundary condition for the local systems (the
+asymptotically flat region from Solar-System to galactic scales) considered in this paper
+(Part I), and is treated as constant over the timescales of experiments and observations. In cosmology,
+Pbg (t) is introduced and the decomposition P = Pbg (t)Plocal (x) is used; the time evolution of the
+background is treated in Part II. This paper (Part I) does not identify the microscopic origin of P
+(for example, whether it is an energy density, information, or something else). The connection to
+the quantum vacuum and to local P structure is deferred to Part III. Instead, this paper adopts an
+operational definition. Namely, P is defined as the stationary-limit scalar component of the field
+                                                                                                P∞
+that determines the rate of a standard clock, and the stationary-clock mapping ( dτ   dt v=0 = P )
+
+                                                      
+                                                  dτ                   P∞
+                                                                   =                                      (2)
+                                                  dt       v=0          P
+
+is taken as the observational definition of P (Section 2.3). What appears in observables under this
+mapping is only the ratio P /P∞ (dimensionless). Accordingly, in the stationary-limit channels the
+theory closes mathematically if P is treated as a dimensionless scalar field (or equivalently as a quantity
+of the same dimension as P∞ ). To define ln(P /P∞ ), P and P∞ must have the same dimension. The
+rotation/flow channels are treated by extending to Pµ in Section 2.8. In this project, the convention
+P > P∞ near mass is adopted.
+This paper takes the basic quantity not to be the absolute value of P but the dimensionless ratio
+P /P∞ , and further adopts u(x) ≡ ln(P /P∞ ) as the fundamental variable on the potential side.
+                                                                           
+                                                                        P
+                                              u(x) ≡ ln                                                   (3)
+                                                                       P∞
+
+Using this u, the Newtonian-form potential (zero at infinity, negative near mass) is defined by
+                                                                           
+                                                                        P
+                                             ϕ ≡ −c ln     2
+                                                                                                          (4)
+                                                                       P∞
+
+that is, ϕ = −c2 u.
+Requirement (internal to P) -> consequence: what appears in observations is not the absolute mag-
+nitude but only the ratio P /P∞ . Local delay effects (the rate of a clock) compose multiplicatively,
+while the potential-like effect entering the equation of motion must be handled as an additive quantity.
+Therefore, the logarithm is adopted as the minimal mapping that turns multiplicative composition
+into additive composition, and the expression above is fixed as a definition of the P-model.
+Accordingly, ϕ has the same dimension as the Newtonian potential (the dimension of velocity squared).
+For a point mass M in the weak, static regime, one has u(r) = GM /(c2 r), and therefore
+
+                                       P (r)     GM                             GM
+                                             = e c2 r ,            ϕ(r) = −                               (5)
+                                       P∞                                        r
+
+which recovers the Newtonian limit (presented here as a consistency check rather than as an explana-
+tion).
+
+
+
+                                                               9
+2.3 Gravity = Sliding Down the P Gradient
+
+The gravitational acceleration is unified in Newtonian form as
+                                                                                 
+                                                                             P
+                                      a = −∇ϕ = c ∇ ln     2
+                                                                                                   (6)
+                                                                            P∞
+
+This makes the phrase ”gravity = sliding down the P gradient” identical to its mathematical expression.
+Within the scope of this paper (Part I), namely the static weak field, the Poisson-type equation
+is adopted as the minimal form (the dynamical equation is discussed in Section 2.6). For the mass
+density ρ,
+                                                                           
+                                                                     P                  4πG
+                              ∇ ϕ = 4πGρ,
+                                2
+                                                      ∇ ln2
+                                                                                 =−         ρ      (7)
+                                                                    P∞                   c2
+
+Applying the same weak-field source normalization to the electromagnetic derivation in Part III-A 2.6
+yields the coupling ratio gP /ZP = 4πG.
+This is adopted, and in vacuum one has ∇2 ϕ = 0 (equivalently, ∇2 ln(P /P∞ ) = 0). Since many
+weak-field tests in the Solar System can be discussed from the properties of the vacuum solution, this
+is suﬀicient for the scope of this paper.
+
+
+2.4 Clocks (Gravitational Term + Velocity Term)
+
+Separating the observational time t (external reference time) from the proper time τ (the clock’s own
+time), the rate of a clock is written as
+                                                                       
+                                           dτ   P∞                 dτ
+                                              =                                                    (8)
+                                           dt    P                 dt       v
+
+For a stationary clock (v = 0), in the weak field
+
+                                         P∞       2      ϕ
+                                            = eϕ/c ≈ 1 + 2                                         (9)
+                                          P             c
+which agrees with the first-order gravitational redshift. The velocity term is
+
+                                                            r
+                                             dτ                         v2
+                                                          =     1−                                (10)
+                                             dt       v                 c2
+
+This velocity term is not an assumption borrowed from outside the model. It is derived directly from
+the particle-limit action fixed in Section 2.8.1,
+                                                  Z
+                                                                p
+                                    Sa = −ma c            e−χ    ηµν dxµ dxν                      (11)
+
+Writing the worldline as xµ = (ct, x(t)), one obtains
+                                                                r
+                                     p                                          v2
+                                      ηµν dxµ dxν = c               1−             dt             (12)
+                                                                                c2
+and the factor e−χ in the integrand gives the gravitational term P∞ /Pt . Therefore,
+
+
+
+                                                          10
+                                             r               r
+                                  dτ            v2   P∞               v2
+                                     = e−χ    1− 2 =             1−                                  (13)
+                                  dt            c    Pt               c2
+is obtained. On the stationary branch, Pt = P , so the clock formula used in this section,
+                                                    r
+                                          dτ   P∞           v2
+                                             =         1−                                            (14)
+                                          dt    P           c2
+is recovered exactly.
+
+      Reference note: the velocity term in this section has the same form as the time dilation
+      of SR (special relativity) in the reference framework. Experimental comparisons involving
+      clock systems (gravitational redshift and satellite clocks) are treated in Part II.[3][6][7]
+
+
+
+
+                                                  11
+2.5 Light (Refraction: Bending Toward Higher P)
+
+Requirement (response of the free wave): bound waves (clocks) and free waves (propagating waves)
+may have different responses to the same P. In this section, the response of the free wave is expressed
+with the minimal degree of freedom, namely a single exponent. The refractive index is therefore fixed
+as the one-parameter family n(P ) = (P /P∞ )2β , and β is treated as a quantity frozen by primary data.
+Light (the free wave) is assumed to have a refractive index that changes with P:
+
+                                                         2β
+                                                      P
+                                       n(P ) =                    (β > 0)                             (15)
+                                                     P∞
+
+This form is adopted. The light path is determined by Fermat’s principle, namely the stationarity of
+                       R
+the optical path length nds, and therefore bends toward higher P. Because β > 0 is adopted here,
+near mass (P > P∞ ) one has n > 1, so ceff (P ) = c/n(P ) decreases. Hence, optically, light bends
+toward the higher-P side (the higher-n side).
+Also, when this paper says that ”a wave prefers the shortest path,” it does not mean minimization
+                           R                                                                R
+of the geometric distance ds. It means the stationarity condition of the optical path length nds,
+equivalently of arrival time or phase accumulation.
+Important (to avoid confusion): the factor 2 that appears on the light-propagation side is carried
+by β. Therefore the definition of ϕ in Section 2.1 is fixed, and no square root is inserted on the ϕ side
+to absorb that coeﬀicient.
+
+     Reference note: if PPN is used as the reference framework, the coeﬀicient for light can
+     be compared by the correspondence 1 + γ = 2β (the factor 2 is carried on the β side).
+     The treatment of weak-field primary constraints (for example Cassini) and independent
+     cross-checks (for example VLBI), together with the strong-field differential predictions, is
+     collected in Part II.[2][5][4]
+
+
+2.6 Cosmology (Redshift from the Background P: Fixing the Mapping)
+
+On cosmological scales, the local-gravity contribution Plocal (x) is separated from Pbg (t), which provides
+the time standard of the universe as a whole, so that
+
+
+                                        P (x, t) = Pbg (t) Plocal (x)                                 (16)
+
+This represents the time variation of the background P. If the observed frequency ratio is written as
+νobs /νem = Pobs /Pem , then the redshift is given by
+
+                                                           Pem
+                                              1+z =                                                   (17)
+                                                           Pobs
+
+Thus redshift can be expressed using only the time variation of Pbg (t), without assuming spatial
+expansion. This paper (Part I) only fixes this observational mapping (background P -> redshift and
+distance indicators). The validation and rejection decisions involving distance indicators, first-order
+statistics (BAO), and JWST primary-spectrum entry points are collected in Part II (Astrophysics).
+
+      Reference note: for late-universe comparison, see the standard parameter summary of
+      Planck 2018 and the primary analysis of BOSS DR12 BAO.[13][14]
+
+
+
+                                                      12
+2.6.1 Distance Indicators (DL , DA ) and the Minimal Distance Duality of the P-model
+
+Even without assuming spatial expansion, the definitions of the distance indicators used in observa-
+tion can be adopted unchanged:
+
+ • luminosity distance: Fobs ≡ Lem /(4πDL2 )
+                               2 ≡ dA /dΩ
+ • angular-diameter distance: DA     em   obs
+
+
+In the minimal P-model (static geometry + background-P redshift), time stretching is not introduced
+as an independent assumption. It is derived from the phase interval of a continuous wave. If the
+radiating source marks the same phase difference 2π every period ∆tem , then the same phase difference
+is preserved on the observer side, and therefore
+
+
+                                             νem ∆tem = νobs ∆tobs                                   (18)
+
+holds. Here the frequency ratio is given by the background-P mapping
+
+                                             νobs   Pobs    1
+                                                  =      =                                           (19)
+                                             νem    Pem    1+z
+
+and therefore
+
+
+                                             ∆tobs = (1 + z)∆tem                                     (20)
+
+is obtained. Below, this time-stretch relation is called Condition A. In observational shorthand, it
+corresponds to pt = 1. Further, using photon-number conservation (no opacity) together with E ∝ ν,
+the flux becomes
+
+                                                           Lem
+                                             Fobs =                                                  (21)
+                                                           2
+                                                        4πD (1 + z)2
+
+where the (1+z)2 factor is the attenuation from ”photon energy x arrival rate.” Therefore, by definition,
+
+                                      (P )                           (P )
+                                    DL       = (1 + z)D,         DA = D                              (22)
+
+is obtained, and the minimal distance duality is
+
+                                                (P )              (P )
+                                             DL        = (1 + z)DA                                   (23)
+
+From here, this paper defines the P-model-specific DDR diagnostic as
+
+                                                                DL
+                                             η (P ) (z) ≡                                            (24)
+                                                            (1 + z)DA
+
+and the minimal P-model requires η (P ) = 1. For comparison, in FRW one has DL = (1 + z)2 DA ,
+so inserting the observational pair (DL , DA ) into the same diagnostic formula gives η (P ) = (1 + z).
+Thus, this is not the operation ”substitute FRW into the P-model formula”; it is the operation of
+comparing both hypotheses with the same diagnostic quantity. This contrast, constant vs.
+(1 + z), is the operational discriminant.
+The relation above can be modified if opacity (α), evolution of standard candles/rulers (sL , sR ), or the
+
+                                                         13
+time stretch derived from wave phase (Condition A) fails. The detailed derivation and the validation
+against public primary sources, including the dependence on those assumptions, are collected in Part
+II (with the fixed registry gathered in the verification materials).[1]
+
+
+
+
+                                                14
+2.7 Dynamical P (Radiation and Waves)
+
+Sections 2.1-2.4 dealt mainly with gravity, clocks, and light propagation under the assumption of a
+static time-wave density P (x). To handle phenomena that include ”radiation,” such as binary
+orbital decay and gravitational-wave chirps, one needs the dynamics of P (x, t).
+In this paper (Part I), the dynamical P sector is fixed only up to the minimal derivation (the
+retarded solution of a uniformly moving point source), while the observational validation is
+deferred to Part II (Astrophysics).
+
+ • Basic variable: use u(x, t) ≡ ln(P /P∞ ) (that is, u = −ϕ/c2 ).
+
+ • Minimal dynamical assumption: in order to connect to the Newtonian limit in the static
+   regime, adopt in the weak field
+                                                        
+                                                 1 ∂2      4πG
+                                               − 2 2 +∇ u=− 2 ρ
+                                                       2
+                                                                                                      (25)
+                                                c ∂t        c
+
+    as the minimal wave equation for the weak field (in vacuum, □u = 0).
+
+ • Derivation of the retarded potential (uniformly moving point source): rewrite the above
+   in the equivalent form                      
+                                    1 ∂2            4πG
+                                     2   2
+                                           −∇ u= 2 ρ
+                                              2
+                                                                                      (26)
+                                    c ∂t             c
+
+    and substitute a point source moving at constant velocity,
+
+
+                                                    ρ(r, t) = M δ 3 (r − vt)                          (27)
+
+    Using the retarded Green’s function,
+                                                Z
+                                           G                 ρ(r′ , tr )                |r − r′ |
+                              u(r, t) =              d3 r′               ,   tr = t −                 (28)
+                                           c2                |r − r′ |                     c
+
+    one obtains, for a point source,
+
+                                                                  GM /c2
+                                            u(r, t) =                                                 (29)
+                                                              (1 − nr ·β v ) Rr tr
+
+    where Rr = |r − rs (tr )|, nr = Rr−1 (r − rs (tr )), and β v = v/c. Defining s ≡ r − vt and decomposing
+    it as s = s∥ + s⊥ with s∥ ∥ v gives
+
+                                                GM /c2                                   |v|
+                                 u(r, t) = q                     ,               βv =                 (30)
+                                            s2∥ + (1 − βv2 ) s2⊥                          c
+
+    Therefore the gravitational acceleration is
+                                                                       
+                                             GM 1 − βv2 s + β v (β v ·s)
+                                a = c ∇u = −
+                                       2
+                                               h                   i3/2                               (31)
+                                                 s∥ + (1 − βv ) s⊥
+                                                  2         2    2
+
+
+    Since u ∝ 1/r, the gradient ∇u points toward the source (the negative radial direction), so the
+    leading minus sign is consistent with a = c2 ∇u = −∇ϕ and hence ϕ = −c2 u. In the slow-motion
+    limit,
+
+                                                               15
+                                                        2
+                                                   s    v
+                                          a = −GM 3 + O 2                                         (32)
+                                                 |s|    c
+
+  so a uniformly moving source does not generate an O(v/c) center shift; the acceleration
+  vector points to the current position vt. Accordingly, any observationally significant offset ∆x
+  must be evaluated not from the retarded term of uniform motion alone, but from the full dynamical
+  branch including acceleration, response delay, and multi-source interference (the actual audit is
+  in Part II).
+
+• Radiation structure (minimum requirement): as the protective condition that excludes
+  dipole radiation, require an equivalence-principle-like universal coupling of matter to the time
+  wave, namely gP,a /ma = κ for all matter species. Then the source density of the time wave is
+
+                                                     ρP = κρm                                     (33)
+
+   and the dipole moment is fixed as
+
+
+                                                    DP = κM Xcm                                   (34)
+
+   In the center-of-mass frame,
+
+
+                                             Xcm = 0 ⇒ D̈P = 0                                    (35)
+
+   holds, so the dipole term in the far-zone radiation cancels exactly. The first nontrivial radiation
+   that remains in the weak far field is therefore the quadrupole term, and Part II audits this
+   condition through the recalculation of Ṗb .
+
+• Fixing the derivation chain for τ and ξ: coarse-grain the Pµ /J µ dynamics along the collision
+  axis and fix explicitly the intermediate steps that reduce the wave equation to a first-order delayed
+  equation. First define the low-frequency components along the collision axis x by
+
+
+                         uL (x, t) ≡ (GL ∗ u)(x, t),         ρL (x, t) ≡ (GL ∗ ρ)(x, t)           (36)
+
+  where GL is a coarse-graining kernel, and write the weak-field wave equation as
+
+                                 1                                       4πG
+                                    ∂tt uL − ∂xx uL = SL ,        SL ≡       ρL                   (37)
+                                c2w                                       c2
+
+   Projecting out unresolved modes with an effective equation of the Mori-Zwanzig first-memory-
+   truncation type introduces a friction term for ∂t uL and yields
+
+
+                         τfree ∂tt uL + ∂t uL = D∂xx uL + c2w SL ,        D ≡ c2w τfree           (38)
+
+  which is of telegraph type.
+   Next define the time-scale separation by
+
+                                          τfree
+                                εslow ≡         ,      Tslow ≡ min(τint , τdamp )                 (39)
+                                          Tslow
+
+   and in the slow-manifold regime εslow ≪ 1, discard τfree ∂tt uL to obtain
+
+
+                                                      16
+                                              ∂t uL = D∂xx uL + c2w SL                                      (40)
+
+  To return to PL , use the linearization PL = P∞ (1 + uL ) + O(u2L ) valid for |uL | ≪ 1 together with
+  the source target J 0 , so that the conservation law and the BGK-type relaxation
+
+                                                                   PL − J 0
+                                              ∂t PL + ∂x q = −                                              (41)
+                                                                    τfree
+
+
+                                  q = −D∂x PL − ξ[(1 − η)J x + ηJ x (t − ∆t)]                               (42)
+
+  give
+
+                                              PL − J 0
+                    ∂t PL = D∂xx PL −                  + ξ [(1 − η)∂x J x + η ∂x J x (t − ∆t)]              (43)
+                                               τfree
+
+  as the reduced equation.
+  Now define the first moment of the P -peak centroid, XP ,
+                                                       R
+                                                         x PL (x, t) dx
+                                              XP (t) ≡ R                                                    (44)
+                                                          PL (x, t) dx
+
+  Then the first moment of the kernel projects the dynamics to
+
+                              dXP                                                
+                       τeff       + XP = Xg + ξτeff (1 − η)χ(t)v(t) + ηRdelay (t)                           (45)
+                               dt
+  where
+
+                                              Z t
+                               Rdelay (t) =         Kτk (t − s) χ(s − ∆t) v(s − ∆t) ds                      (46)
+                                               0
+
+  and the characteristic times are fixed by
+                                                    s                                s
+                           Lpath                           ⟨(χv)2 ⟩                         ⟨v 2 ⟩
+                   τfree =       ,      τint =                         ,   τdamp =                          (47)
+                            cw                          ⟨(d(χv)/dt)2 ⟩                   ⟨(dv/dt)2 ⟩
+
+                       τfree                                                                           1
+              η=                ,     τeff = τfree + η τkernel ,     τkernel = wf τf + ws τs , wi ∝         (48)
+                   τfree + τint                                                                        τi
+
+                                                           τint + τdamp
+                                                    ξ=                                                      (49)
+                                                                τeff
+
+  Hence τ and ξ are not externally inserted parameters; they are derived from the Pµ kernel and
+  the J µ transition.
+
+• Emergence of Lpath and its universal scaling law (starting from Lint = gP Pµ J µ ): in
+  the low-frequency limit obtained after eliminating the fast modes of Pµ , the correlation of J x
+  determines the friction rate of the P response.
+                                                        Z ∞
+                                             −1     gP2
+                                    Γpath ≡ τfree =         ⟨δJx (t)δJx (0)⟩ dt                             (50)
+                                                    χP 0
+
+
+                                                           17
+    In the macroscopic branch of a collisional gas, separate the decorrelation into an advection term
+    and a collision term:
+
+                                                                    v
+                       Γpath = Γadv + Γcoll ,          Γadv ≃           ,     Γcoll ≃ Acol ρ T −3/2   (51)
+                                                                Lcorr
+
+    Here Acol is a Coulomb-like transport coeﬀicient, and Lcorr is the correlation length extracted
+    from the gradient of J 0 . The coarse-grained length scale is therefore
+
+                                                                      cw
+                                       Lpath = cw τfree =       v              −3/2
+                                                                                                      (52)
+                                                              Lcorr + A col ρT
+
+    and its ratio to the reference state (ρ0 , v0 , T0 ) is
+
+                          Lpath         1 + Π0                           ρ        v       T
+                                  =               −3/2
+                                                       ,        rρ ≡        , rv ≡ , rT ≡             (53)
+                          Lpath,0   rv + Π 0 rρ r                        ρ0       v0      T0
+                                                   T
+
+                                                           −3/2
+                                                 Acol ρ0 T0             τint,0
+                                          Π0 ≡                      =           −1                    (54)
+                                                  v0 /Lcorr             τfree,0
+
+    so the universal predictions are
+
+                                                 Lpath (2ρ)    1 + Π0
+                                        ρ → 2ρ :             =          ,
+                                                 Lpath (ρ)     1 + 2Π0
+                                                 Lpath (2v)    1 + Π0
+                                        v → 2v :             =        ,                               (55)
+                                                 Lpath (v)     2 + Π0
+                                                 Lpath (2T )      1 + Π0
+                                       T → 2T :              =              .
+                                                 Lpath (T )    1 + Π0 /23/2
+
+    Thus Lpath becomes shorter when the density increases or the flow accelerates, while higher
+    temperature weakens the collisional branch and lengthens Lpath .
+
+
+2.7.1 Minimal Mapping to Structure Formation (f σ8 )
+
+To treat the density perturbation δ ≡ δρ/ρ̄ while keeping the geometry static, linearize the continuity
+and Euler equations as
+
+
+                                           ∂t δ + θ = 0,        θ ≡ ∇·v                               (56)
+
+
+                                             ∂t θ = c2 ∇2 u − c2s ∇2 δ                                (57)
+
+Take this as the kinematic sector. On the gravity side, use a delayed response rather than an instan-
+taneous Poisson equation:
+
+                                                                            4πG
+                                 τeff ∂t u + u = uN ,         ∇2 u N = −        ρ̄ δ                  (58)
+                                                                             c2
+Eliminating u and θ then gives, in k-space,
+
+                                                                                    
+                           τeff δ (3) + δ (2) + τeff c2s k 2 δ (1) + c2s k 2 − 4πGρ̄ δ = 0            (59)
+
+
+                                                         18
+where δ (n) ≡ dn δ/dtn . In the slow-manifold regime εdelay ≡ τeff /Tgrowth ≪ 1, this reduces to
+
+                                                          
+                      δ (2) + Γeff δ (1) + c2s k 2 − 4πGρ̄ δ = 0,                Γeff = 4πGρ̄ τeff      (60)
+
+Thus, even without assuming spatial expansion, the delayed response τeff naturally generates the
+effective friction term Γeff δ (1) that suppresses structure growth.
+The mapping to observables is defined from the background field Pbg by
+
+                                  Pbg (tobs )    1                           d ln aeff    d ln Pbg
+                     aeff (t) ≡               =     ,               Heff ≡             =−               (61)
+                                   Pbg (t)      1+z                             dt           dt
+
+Define Gδ ≡ δ/δref and x ≡ ln aeff . Then
+                                                                                        
+                     d 2 Gδ           d ln Heff   Γeff         dGδ         4πGρ̄ c2s k 2
+                            +                   +                  −         2 − H2            Gδ = 0   (62)
+                      dx2                dx       Heff          dx          Heff     eff
+
+is fixed as the minimal growth equation. The growth rate is then
+
+                                             d ln Gδ
+                                        f≡             ,        f σ8 = f σ8 (aeff )                     (63)
+                                             d ln aeff
+
+which provides the quantity used in the RSD audit of f σ8 (z) in Part II 5.3.2.
+
+ • Theoretical limitation (strong field): the above equation is the weak-field linearized minimum
+   form. In strong fields, such as near black holes or just before compact-binary merger, higher-order
+   terms may become non-negligible. Candidate corrections include self-interaction terms such as u2
+   and higher-order kinetic terms such as ∂µ u∂ µ u. In this paper, however, priority is given to fixing
+   the mapping, while the strong-field equation itself and its validation are left to Part II.
+
+
+2.7.2 Radiation-Dominated Limit of the Background Wave Pbg and the Derivation of
+      qB = 1/2
+
+For the weak-field scalar branch of the action skeleton fixed in Part I, take the equation of motion for
+u ≡ ln(P /P∞ ) to be
+
+                                  1                 4πG                                 3p
+                                    2
+                                      ∂tt u − ∇2 u = 2 ρeff ,              ρeff ≡ ρ +                   (64)
+                                  c                  c                                  c2
+For the cosmological background ubg (t), the field is spatially uniform so that ∇2 ubg = 0, giving
+                                                                            
+                                                               3p
+                                                 übg = 4πG ρ + 2                                       (65)
+                                                               c
+
+Using early-universe blackbody radiation as the source, together with the equation of state p = Urad /3
+and ρ = Urad /c2 , this becomes
+
+                                                 2Urad                   8πG
+                                        ρeff =         ,        übg =       Urad .                     (66)
+                                                  c2                      c2
+Now use the blackbody relation Urad = arad T 4 together with the background mapping T ∝ Pbg , that
+is, T = TB eubg −uB :
+
+
+
+                                                               19
+                         (rad) 4(ubg −uB )                                                 8πG (rad)
+                Urad = UB     e              ,         übg = Ω2B e4(ubg −uB ) ,   Ω2B ≡       U     .   (67)
+                                                                                            c2 B
+Assume the asymptotic form in the early-time limit t → 0+ ,
+                                                        
+                                                         t
+                                   ubg (t) = uB − qB ln    + O(1)                                        (68)
+                                                        tB
+
+Then the left-hand side behaves as übg ∼ qB t−2 , while the right-hand side is dominated by ∼
+Ω2B C t−4qB with C > 0. Matching the leading powers gives
+
+                                                                            1
+                                         2 = 4qB              ⇒     qB =                                 (69)
+                                                                            2
+This result is independent of any coeﬀicient values; it follows from the equality of exponents alone.
+The asymptotic exponent of the radiation-dominated branch is therefore necessarily fixed to qB = 1/2.
+The same conclusion also follows from the first integral
+
+                                                 2       Ω2B 4(ubg −uB )
+                                       u̇bg           −      e            = C0                           (70)
+                                                           2
+
+as well. Since the exponential term dominates as t → 0+ , one obtains ubg (t) = − 21 ln t + O(1),
+confirming the same qB = 1/2. This derivation fixes the baseline value of qB used in the BBN
+freeze-out chain of Part III 5.5 (see Part IV for the verification materials).
+Moreover, the first integral makes the exact family of solutions explicit. Defining ∆u ≡ ubg − uB and
+
+
+                                                          z ≡ e−2∆u                                      (71)
+
+one obtains
+
+                                                     2
+                                                 dz
+                                                           = 2Ω2B + 4C0 z 2                              (72)
+                                                 dt
+
+The closed-form solutions then split according to the sign of C0 :
+For C0 > 0,
+
+                                             ΩB        p      
+                                    z(∆t) = √     sinh 2 C0 ∆t                                           (73)
+                                              2C0
+
+For C0 = 0,
+
+                                                              √
+                                                 z(∆t) =          2 ΩB ∆t                                (74)
+
+For C0 < 0,
+
+                                                      ΩB       p       
+                                   z(∆t) = √               sin 2 −C0 ∆t                                  (75)
+                                                      −2C0
+
+where ∆t ≡ t − t⋆ > 0. In all cases, the expansion for ∆t → 0+ is
+
+                                                       √
+                                      z(∆t) =              2 ΩB ∆t + O(∆t3 )                             (76)
+
+
+                                                             20
+which is common, so
+
+                                              1                                    1
+                            ubg (t) = uB −      ln(∆t) + O(∆t2 ),           qB =                (77)
+                                              2                                    2
+is fixed uniquely, independently of C0 . Therefore qB = 1/2 is not a mere asymptotic guess but a
+necessary consequence of the exact solution family of the background-wave equation with a blackbody-
+radiation source. The exact exponent qB = 1/2 fixed in this radiation-dominated limit is used in Part
+III (quantum physics) to determine the weak-interaction freeze-out temperature in the early universe
+and to derive the minimal BBN chain without assuming spatial expansion, giving the He-4 mass
+fraction Yp ≈ 0.25. The final acceptance or rejection of the full multi-isotope consistency (D/H,
+He-3/He-4, Li-7) is governed by the Watch decision in Part III 5.5.2.
+
+
+2.7.3 Full Time Evolution of the Background Wave Pbg (t) (Radiation-Dominated ->
+      Matter-Dominated -> Present Era)
+
+The background field is not stopped at the radiation-dominated limit; it is defined so as to connect
+the matter-dominated branch and the present-era neighborhood under the same interface.
+Define the background variables by
+                                                    
+                                           Pbg (t)
+                             ubg (t) ≡ ln              ,       Heff (t) ≡ −u̇bg (t)             (78)
+                                           Pbg (t0 )
+
+and introduce the effective scale factor
+
+                                                    Pbg (t0 )
+                                       aeff (t) =             = e−ubg (t)                       (79)
+                                                    Pbg (t)
+
+by
+The continuity equation for each component,
+
+
+                                          ρ̇i + 3(1 + wi )Heff ρi = 0                           (80)
+
+gives
+
+                                                                            
+                                    ρi (ubg ) = ρi,0 exp 3(1 + wi )ubg                          (81)
+
+where wr = 1/3, wm = 0, and wΛ = −1.
+Accordingly, the background equation
+                                                                  
+                                                         3p
+                                           übg = 4πG ρ + 2                                     (82)
+                                                         c
+
+closes as
+
+
+                                     übg = Ω2r e4ubg + Ω2m e3ubg − Ω2Λ                         (83)
+
+with
+
+
+                        Ω2r ≡ 8πGρr,0 ,       Ω2m ≡ 4πGρm,0 ,           Ω2Λ ≡ 8πGρΛ,0 .         (84)
+
+                                                       21
+The first integral is
+
+                                            Ω2r 4ubg    2Ω2m 3u      
+                          u̇2bg = H02 +         e    −1 +     e bg − 1 − 2Ω2Λ ubg                                    (85)
+                                            2             3
+and therefore the complete solution is
+
+                                   Z ubg (t)
+                                                                     dũ
+                        t − t0 =               q                                                                     (86)
+                                                        2                 2
+                                    0           H02 + Ω2r (e4ũ − 1) + 2Ω3m (e3ũ − 1) − 2Ω2Λ ũ
+
+which is defined uniquely by quadrature.
+The direct form for observables, using 1 + z = eubg , is
+
+                                        Ω2r               2Ω2m              
+                  2
+                 Heff (z) = H02 +             (1 + z)4 − 1 +       (1 + z)3 − 1 − 2Ω2Λ ln(1 + z)                     (87)
+                                        2                    3
+as follows.
+To fix the high-redshift behavior, determine analytically how strongly the ln(1 + z) term contributes
+at high redshift. Define the separate contributions by
+
+                   Ω2r                                    2Ω2m              
+        Xr (z) ≡         (1 + z)4 − 1 ,        Xm (z) ≡            (1 + z)3 − 1 ,         XΛ (z) ≡ −2Ω2Λ ln(1 + z)   (88)
+                   2                                         3
+Then for z ≫ 1,
+
+                    |XΛ (z)|  3Ω2 ln(1 + z)                          |XΛ (z)|  4Ω2 ln(1 + z)
+                             ∼ 2Λ           → 0,                              ∼ 2Λ           →0                      (89)
+                     Xm (z)   Ωm (1 + z)3                             Xr (z)    Ωr (1 + z)4
+
+Thus the ln(1 + z) term does not become dominant at high z; the asymptotic behavior is controlled
+by the radiation term ∝ (1 + z)4 and the matter term ∝ (1 + z)3 . This is also consistent with the
+tendency, in the Pantheon+/CC range (z ≲ 2), for the ln(1 + z) term to be partially degenerate with
+the matter term, as seen in the full-form refit of Part II 5.3 where αΛ → 0.
+For a single component with w > −1, the closed form
+
+                                                                              − 2
+                                (w)                       3                      3(1+w)
+                               Pbg (t) = P∗            1 + (1 + w)H∗ (t − t∗ )                                       (90)
+                                                          2
+
+has the exponent
+
+                                                                    2
+                                                       q(w) =                                                        (91)
+                                                                3(1 + w)
+
+In particular,
+
+                                                       1                    2
+                                                   qr = ,            qm =                                            (92)
+                                                       2                    3
+which is consistent with the radiation-dominated derivation of Section 2.6.2, namely qB = 1/2.
+Near the present epoch, where the Λ term dominates, use
+
+                                                                       Ω2Λ
+                                        ubg (t) ≈ −HΛ (t − tΛ ) −          (t − tΛ )2 ,                              (93)
+                                                                        2
+
+                                                                22
+                                                                           
+                                                            Ω2Λ
+                           Pbg (t) ≈ PΛ exp −HΛ (t − tΛ ) −     (t − tΛ ) 2
+                                                                                              (94)
+                                                             2
+
+where PΛ and HΛ are fixed at the junction point tΛ to the matter branch by the C 1 continuity
+conditions, namely continuity of P and Ṗ .
+In this way, the background field Pbg (t) is defined as a complete time evolution that connects the
+radiation branch (q = 1/2), the matter branch (q = 2/3), and the present-era neighborhood (the Λ
+term) within the same system of equations.
+
+
+
+
+                                                  23
+2.8 Reference Action Skeleton (Reference Definition), Rotation (Frame Dragging),
+    and the Four-Vector Extension
+
+In this section, the action skeleton and Noether conservation law are first fixed as Part I reference
+definitions. On that basis, the minimal covariant extension is defined so as to describe rotational mass
+effects (frame dragging) while preserving the static scalar branch.
+
+
+2.8.1 Reference Action Skeleton and Noether Conservation Law (Part I Reference Def-
+      inition)
+
+In this paper, the reference action skeleton is fixed in Part I. By ”reference skeleton” we
+mean the skeleton that explicitly defines the P-model’s own derived terms (the scalar kinetic term
+Lχ , the free vector propagation term Lfree
+                                        Pµ , and the minimal coupling term Lint ), while for the matter,
+electromagnetic, and rotational sectors it declares only the structural roles as adopted effective sectors.
+The derivation status and acceptance or rejection of those adopted sectors are governed by Parts III-
+A/B.
+Reference action skeleton (minimal form):
+                                                        Z
+                                            Stotal :=        d4 x Lvec
+                                                                   total                              (95)
+
+
+                             Lvec           free
+                              total :=Lχ + LPµ + Lmatter + LEM + Lint + Lrot ,
+                                                                                                      (96)
+                                   χ ≡ ln(Pt /Pref ),          ϕ ≡ −c2 χ
+
+                                  Mχ2
+                          Lχ :=       ∂µ χ ∂ µ χ − U (χ),          (P )
+                                                                  Fµν   ≡ ∂ µ Pν − ∂ ν Pµ             (97)
+                                   2
+
+                                                1 (P ) µν   m2P
+                                     Lfree := −  F    F   +     Pµ P µ                                (98)
+                                      Pµ
+                                                4 µν (P )    2
+The Proca-type expression written here is the minimal form used to display the action skeleton in the
+shortest possible way. The complete form including gauge closure is fixed in Section 2.8.2, and the
+above expression is recovered in the limit ZP = 1, Stückelberg field π = 0, and ξg → ∞.
+The minimal coupling to matter is defined by
+
+                                                           µ
+                                             Lint = gP Pµ Jmatter                                     (99)
+
+and in the particle limit we adopt
+                                                    Z
+                                                               p
+                                      Sa := −ma c       e−χ     ηµν dxµ dxν                          (100)
+
+which directly recovers
+
+                                            dτ   Pref p
+                                               =       1 − v 2 /c2                                   (101)
+                                            dt   Pt
+In the optical limit, take
+
+
+
+
+                                                        24
+                                                                    2β
+                                                              Pt
+                                             n(Pt ) =                                              (102)
+                                                              Pref
+
+which connects the theory to the mappings for Shapiro delay and light bending.
+Status of each term:
+
+ • Lχ , Lfree
+          Pµ , and Lint : P-model-specific derived terms explicitly defined in this section. Here χ ≡
+   ln(Pt /Pref ) is a derived quantity rewritten from Pt and is not an independent fundamental field.
+
+ • Lmatter : the standard matter-field action is adopted. In this paper the particle-limit action Sa is
+   kept as the minimal form, while the full quantum-field-theoretic form is delegated to Part III-A.
+
+ • LEM : the photon branch is derived from the transverse component of Pµ (Part III-A 2.6). This
+   paper declares only the structural connection; the derivation and its acceptance or rejection are
+   governed by Part III-A.
+
+ • Lrot : at the present stage the full Lagrangian density has not been fixed uniquely. Only the struc-
+   ture needed for the frame-dragging mapping is fixed in Section 2.8.7, while candidate microscopic
+   extensions are isolated in the reference note of Section 2.8.2 and judged in Part III-B. This does
+   not imply a failure of the action skeleton.
+
+Noether conservation law (fixed form):
+
+                                   X ∂Lvec
+                          µν
+                         Ttot :=           total
+                                                   ∂ ν Φi − η µν Lvec
+                                                                  total ,
+                                                                                µν
+                                                                            ∂µ Ttot =0             (103)
+                                       ∂(∂µ Φi )
+                                   i
+
+Here Φi denotes Pµ and matter. χ ≡ ln(Pt /Pref ) is a derived quantity fixed by Pt and is not an
+                                                                                (P )
+independent fundamental degree of freedom. The optical degree of freedom Aµ is derived as the
+transverse component of Pµ and is likewise not an independent fundamental degree of freedom. In
+addition, for the local phase U(1) retained as an adopted effective sector, fix
+
+
+                                                     ∂µ J µ = 0                                    (104)
+
+as the reference conservation law.
+Uniqueness conditions (frozen):
+
+ • Fundamental degrees of freedom: {Pµ , matter} (here χ ≡ ln(Pt /Pref ) is derived from Pt , and the
+                              (P )        √
+   optical degree of freedom Aµ ≡ δPµT / ZP is likewise derived as the transverse component of
+   Pµ )
+
+ • Differential order: up to second order only (higher derivatives are not adopted)
+
+ • Symmetries: translation and rotation (intrinsic to the P-model); local phase U(1) is retained as
+   an adopted effective sector, while the derivation of its origin is delegated to Part III-A 3.2
+
+With these conditions, the main equations of Part I (gravitational acceleration, clock rate, and the
+light-propagation mapping) can be tracked self-consistently as mappings from the reference action
+skeleton.
+The same skeleton also fixes the localization condition for the bound states used in the weak-interaction
+                                                                                  (P )         √
+sector. When the photon is separated out as the transverse component Aµ = δPµT / ZP , the
+
+                                                         25
+remaining non-transverse components {δP0 , δPiL } decompose into one propagating massive mode and
+one constrained mode. Therefore, the existence of a bound state is judged not by the separate-
+component condition κ2n = 1 − βn2 but by the damped eigenmode of the coupled system.
+
+                                                                           4λv 2
+                                   κ2coupled = m20 − βn2 ,         m20 =                           (105)
+                                                                            ZP
+Even when the separate components appear non-localized because βn > 1, they are treated as a
+physically allowed two-component bound state as long as the coupled system satisfies κcoupled > 0. The
+apparent non-localization of the individual components is a spurious effect of ignoring the coupling;
+the final localization decision is based on the coupled eigenmode.
+The same frozen-action skeleton also provides the derivational anchor that selects the P-model’s own
+fine-structure constant without free parameters. Specifically, after separating out the photon branch
+from the transverse component of Pµ , one can construct two independent readouts from the remaining
+vector Q-ball family, and the consistency condition between those readouts selects the P-model’s fine-
+structure constant (Part III-A 2.6). Part I limits itself to defining the frozen action skeleton that
+serves as the starting point of that derivation; the derivation itself, its numerical audit, and the
+residual evaluation are governed by Part III-A. Likewise, the theoretical anchor point for the W/Z
+boson masses in the two-component coupled Q-ball picture is obtained from the same frozen-action
+skeleton (Part III-A 2.8 / Part III-B 5.5). The canonical derivations and the acceptance or rejection
+of these items are governed by Parts III-A/B.
+
+
+2.8.2 Minimal Coupling Between the Four-Vector Pµ and the Matter Current J µ
+
+Define the time wave by
+
+                                                                  µ
+                              Pµ = (Pt , P1 , P2 , P3 ),         Jmatter = (ρc, ρv)                (106)
+
+To satisfy both local gauge invariance as a vector field and boundedness of the Hamiltonian (elimination
+of ghost modes), define the minimal closed action by introducing a Stückelberg field π. Here π is an
+auxiliary field that restores gauge invariance and is not a physical fundamental degree of freedom; it
+is removed in the unitary gauge π = 0.
+
+                                            (P )
+                                           Fµν   ≡ ∂ µ Pν − ∂ ν Pµ                                 (107)
+
+
+                                                                   
+      free   ZP (P ) µν    m2P               1                   1 µ      1
+    L Pµ = −   Fµν F(P ) +       Pµ −          ∂µ π         P −
+                                                             µ
+                                                                   ∂ π −     (∂µ P µ + ξg mP π)2   (108)
+               4               2            mP                  mP       2ξg
+
+and take the minimal interaction term with matter to be
+
+                                                          µ
+                                            Lint = gP Pµ Jmatter                                   (109)
+
+In this paper, the Stückelberg-plus-gauge-fixing form is adopted as the frozen canonical form that
+includes gauge closure. Within the reference action skeleton, the minimal form involving the vector
+coupling is
+
+
+                          Lvec                           free
+                           total = Lχ + Lmatter + LEM + LPµ + Lint + Lrot                          (110)
+
+
+                                                       26
+while, within the reference skeleton fixed in Section 2.8.1, the rotational coupling is carried by
+Lfree
+  Pµ , Lint , Lrot However, the Lagrangian density of Lrot itself has not yet been fixed uniquely at the
+present stage. Here it is retained only as an effective-sector label representing the structure needed for
+the frame-dragging mapping. This does not mean that the action skeleton has failed; the rotational
+sector is kept as an effective-sector label, and the structure needed for the frame-dragging mapping
+is already fixed in Section 2.8.7. Accordingly, the Noether conservation law of the energy-momentum
+tensor,
+
+                                                    µν
+                                                ∂µ Ttot =0                                          (111)
+
+is adopted as the reference form under the frozen action skeleton. Stable dynamics, whether macro-
+scopic or microscopic, are traced under this Noether form (for the quantum-side connection see Part
+III 2.7).
+Reference note (candidate microscopic dictionary): As a candidate extension of the macro-
+scopic rotation coupling λrot to a microscopic current, consider the coupling to the left-handed chiral
+fermion current JLµ ,
+
+                                                     1 − γ5        λrot gP
+                      Lint + Lrot ⊃ −λrot gP ψ̄γ µ          ψ Pµ −                   (P )
+                                                                           ψ̄σ µν ψ Fµν             (112)
+                                                        2           4m
+This candidate yields frame dragging for rotating stars on the macroscopic side and provides a minimal
+candidate reconstruction of the V-A structure of the weak interaction and the tensor term of the
+nuclear force on the microscopic side. However, it is not a coupling automatically derived from P; it
+is a hand-imposed minimal candidate dictionary. At the present stage, numerical audit rejects Route
+B (the P-model’s own V-A mechanism), and its formal acceptance or rejection is governed by Part
+III-B 5.5.
+
+
+2.8.3 1A Algebraic Bridge from the Vector Field to the Effective Metric gµν (P ) (caseB)
+
+Pµ is mapped to the effective metric gµν (P ) through the following four steps.
+First, decompose the four-vector as
+
+
+                           Pµ = Pt Uµ + Pµ⊥ ,        Uµ U µ = −1,       U µ Pµ⊥ = 0                 (113)
+
+orthogonally, and
+                                                  
+                                              Pt
+                                      u ≡ ln         ,        ϕ ≡ −c2 u                             (114)
+                                              Pref
+
+define
+Next, define the symmetric rank-2 tensor (the effective carrier of the spin-2 observable) by
+
+
+                                            hµν ≡ ηµν + Uµ Uν                                       (115)
+
+                                                                                  
+                     (P )
+                    gµν   := e−2u Uµ Uν + e2u hµν − ξrot Uµ Pν⊥ + Uν Pµ⊥ + O (P ⊥ )2                (116)
+
+and fix
+
+
+
+                                                       27
+                                                     µν (P ) ≡ gµν − ηµν
+                                                    h(2)        (P )
+                                                                                                                        (117)
+
+as the effective spin-2 component generated algebraically from Pµ . In the comoving frame (U µ =
+(1, 0, 0, 0)), one has
+
+                                                                                                                  
+                           = −e−2u ,                                                     gij = e2u δij + O (P ⊥ )2
+                    (P )                       (P )                                       (P )
+                   gtt                        gti     = −ξrot Pi ,                                                      (118)
+
+which gives
+The mapping to observables is
+
+                                               c2             
+                                                          (P )
+                                    ai = −        ∂i ln −gtt     = c2 ∂i u = −∂i ϕ                                      (119)
+                                               2
+
+                                                      (P )
+                                     (P )      g                            (P )          1
+                                   βi       ≡ − ti
+                                                 (P )
+                                                      ,                Ωdrag =              ∇ × β (P )                  (120)
+                                               gtt                                        2
+
+which closes the algebraic bridge. On the optical side,
+
+                                                                                                                 2β
+                            opt                                   −2
+                                                                                                            Pt
+                           gµν     (P )
+                                = gµν   +     1 − n(Pt )                   Uµ Uν ,            n(Pt ) =                  (121)
+                                                                                                             P∞
+
+connects the construction uniquely to the refraction mapping of Section 2.4.
+
+
+2.8.4 1A.1 Deriving β = 1 from the Null Geodesics of the Effective Metric (Theoretical
+      Prediction)
+
+As the theoretical fixing, identify the far-field reference with Pref ≡ P∞ and adopt the isotropic effective
+metric (caseB)
+                                                                                                              
+                                     −2u 2                                                                  Pt
+                           ds = −e
+                             2                  2            2u
+                                            c dt + e (dr + r dΩ ),     2         2       2
+                                                                                                    u = ln              (122)
+                                                                                                            P∞
+
+taking its null geodesics (ds2 = 0). This gives
+
+                                                                                                 −2
+                                                   dr                                        Pt
+                                            ceff ≡    = c e−2u = c                                                      (123)
+                                                   dt                                        P∞
+
+Hence the refractive index is
+
+                                                                                             2
+                                                         c                               Pt
+                                               n≡                 =e       2u
+                                                                                =                                       (124)
+                                                        ceff                             P∞
+
+which, compared with the general optical form
+
+                                                                                    2β
+                                                                                Pt
+                                                       n(Pt ) =                                                         (125)
+                                                                                P∞
+
+yields
+
+
+
+
+                                                                       28
+                                                      β=1                                            (126)
+
+Thus, in this paper, β is not an arbitrary adjustment parameter. It is fixed as a theoretical prediction
+derived from the isotropic effective-metric condition gtt · grr = −c2 (or -1 in units with c = 1).
+The conditions for the existence of a difference prediction relative to GR are defined by
+
+
+                                               ∆µν ≡ gµν
+                                                      (P )
+                                                           − gµν
+                                                              (GR)
+                                                                                                     (127)
+
+and the decision rule of this paper is fixed as follows.
+
+                                     (1PN)
+                            Cweak : ∆µν    ≈ 0 ⇐⇒ |zγ | ≤ 1, |µ − 1| ≤ 1σ                            (128)
+
+
+                                         (2)                 (2)         (N 0)
+                               Cdiff : ∆ij ̸= 0 ⇐⇒ N0              ̸= 0, λH      >0                  (129)
+
+That is, caseB is fixed as the branch that agrees with the reference framework at weak-field 1PN order
+(Cweak ) while still carrying a difference prediction in the second-order nonlinear terms (Cdiff ).
+
+
+2.8.5 1B Gauge Closure and Ghost Elimination for Pµ (Moved from Part III 2.7.1)
+
+To consolidate the closure definition of the four-vector field Pµ into the Part I baseline, fix the minimal
+closed action as
+                                                                                  
+                            ZP (P ) µν       m2P          1                  1 µ
+               LP,full := −     F F +              Pµ −      ∂µ π    P −
+                                                                       µ
+                                                                                ∂ π
+                             4 µν (P )        2          mP                 mP
+                                                                                                     (130)
+                             1                               µ                          µ
+                          −     (∂µ P µ + ξg mP π)2 + gP Pµ Jmatter + λrot Ospin [Pµ , Jmatter ]
+                            2ξg
+
+with gauge transformation
+
+
+                                   Pµ → Pµ + ∂µ α,           π → π + mP α                            (131)
+
+This defines the gauge sector.
+Writing the propagator obtained from the quadratic action as
+                                                                                     
+                                    −i         ηµν − kµ kν /m2P      ξg kµ kν /m2P
+                          Dµν (k) =                             +                                    (132)
+                                    ZP          k 2 − m2P + i0    k 2 − ξg m2P + i0
+
+then throughout the parameter region ZP > 0, m2P ≥ 0, ξg > 0, the residues are non-negative and no
+negative-norm (ghost) mode appears.
+The Noether energy-momentum tensor is
+
+            µν                                 ZP µν (P ) αβ                    m2
+               ) := −ZP F                         η Fαβ F(P ) + m2P Πµ Πν − η µν P Πα Πα + · · ·
+                          (P )µα (P )ν
+           T(P                  F      α+                                                            (133)
+                                                4                                2
+where Πµ := Pµ − ∂µ π/mP . Using the field equations, one obtains
+
+                                                        µν
+                                                    ∂µ Ttot =0                                       (134)
+
+
+                                                        29
+as the closure relation.
+
+
+2.8.6 Exact Reduction in the Stationary Limit (Agreement with the Existing Scalar
+      Theory)
+
+For stationary matter, require J i = 0. The spatial components then reduce to
+
+
+                                               J i = 0 ⇒ Pi = 0,         Pt ≡ P                                              (135)
+
+which recovers exactly the scalar mappings fixed in Sections 2.1-2.4,
+
+                                                                                                                2β
+                      P                            P              dτ   P∞         dτ                               P
+          ϕ = −c ln
+                  2
+                          ,           a = c ∇ ln2
+                                                       ,             =                         ,   n(P ) =                   (136)
+                     P∞                           P∞              dt    P         dt       v                      P∞
+
+Therefore the already-established pass region is preserved non-destructively in the stationary limit.
+
+
+2.8.7 Frame-Dragging Mapping (Connection to Observation)
+
+For a rotating source, J i ̸= 0 and the component Pi becomes nonzero. First fix the quasi-static
+equation for the ν = ϕ component as
+
+                         1                       1                         Pϕ    gP
+                             ∂ r r 2
+                                     ∂ r Pϕ   + 2      ∂θ (sin θ ∂θ Pϕ ) − 2 2 = − 2 Jϕ                                      (137)
+                         r 2                   r sin θ                    r sin θ c
+The exterior solution, valid when r is suﬀiciently larger than the source radius, is
+
+                                    gP J∗ sin2 θ       −3     µdrag sin2 θ                              g P J∗
+                      Pϕ (r, θ) =                + O(r    ) ≡              ,               µdrag ≡                           (138)
+                                     2c2 r2                       r2                                     2c2
+where J∗ is the angular momentum of the source. Next define the off-diagonal component of the
+effective metric from Pϕ as
+
+                        (P )          (P )                        (P )     (P )    (P )              (P )
+             ds2 = gtt dt2 + 2gtϕ dt dϕ + · · · ,                gtϕ ≡ − gtt βϕ ,                  βϕ       ≡ ξrot Pϕ        (139)
+
+                                        (P )
+This closes the mapping Pϕ → gtϕ uniquely. Now take the parallel transport of the spin four-vector
+Sµ,
+
+
+                                               U µ ∇µ S ν = 0,       Uµ S µ = 0                                              (140)
+
+and reduce it to the weak-field, low-velocity limit:
+
+                                     dS    (P )                   (P )  1
+                                        = Ωdrag × S,             Ωdrag ≡ ∇ × β (P )                                          (141)
+                                     dt                                 2
+               (P )
+Substituting βϕ       = ξrot Pϕ gives
+
+                                                                      3ξ µ
+                                                  1              (P )     rot drag sin θ cos θ
+                         (∇ × β (P ) )r =              ∂θ sin θ βϕ     =                       ,                             (142)
+                                               r sin θ                           r3
+
+                                                  1  (P )  ξrot µdrag sin2 θ
+                                (∇ × β (P ) )θ = − ∂r rβϕ   =                                                                (143)
+                                                  r                 r3
+
+                                                             30
+and on the equatorial plane (θ = π/2),
+
+                                      (P )         (P )        |ξrot µdrag |   |gP ξrot J∗ |
+                                    Ωpred = Ωdrag =                          =                                  (144)
+                                                                   2r3           4c2 r3
+
+Thus the chain Pϕ → gtϕ → Ωpred alone yields the r−3 precession law. The observational comparison
+                          (P )       (P )
+
+is performed through
+
+                                                                     |Ωobs |
+                                                        Rdrag ≡        (P )
+                                                                                                                (145)
+                                                                    |Ωpred |
+
+If Rdrag ≈ 1 is obtained, the theory is consistent with weak-field rotation measurements. The numerical
+audit against the primary GP-B / LAGEOS data is collected in Part II 4.12, while derivational closure
+and rejection conditions are collected in Part IV Section 3.[8][9]
+
+       Reference note: the derivation in this section is closed from Pµ and the effective metric
+       gµν (P ) alone. The reference framework is used only in the final comparison step, namely
+       in deciding agreement with the observed values.
+
+
+2.8.8 Minimal Derivation of the Rotating Strong-Field Vacuum Solution (Stationary
+      Axisymmetry)
+
+Fix the Euler-Lagrange equation derived from Lfree                     µ
+                                              Pµ in the vacuum limit (J = 0) and the massless
+limit mP → 0 as
+
+                                          µν
+                                      ∂µ F(P ) = 0,
+                                                                (P )
+                                                               Fµν   = ∂µ Pν − ∂ν Pµ                            (146)
+
+The result is the above equation. The choice of background metric is compared on the same I/F
+through caseA/caseB:
+
+
+                                 caseA : ηµν ⇒ reject,               caseB : gµν (P ) ⇒ pass                    (147)
+
+The metric selection is fixed by adopting the effective-metric branch. Therefore the regular vacuum
+equation used in this paper is
+
+                                                             1        p             
+                                  )) µν                                          µν
+                            ∇(g(P
+                             µ      F(P ) = 0,            p        ∂µ   |g(P )| F(P ) =0                        (148)
+                                                           |g(P )|
+
+as follows. The minimal stationary axisymmetric branch is
+                                                                                                           
+                           −2u 2
+                                                                                                      Pt
+                ds = −e
+                  2                   2
+                                 c dt + e    2u     2      2    2
+                                                  dr + r dθ + r sin θ dϕ2      2   2
+                                                                                           ,   u ≡ ln           (149)
+                                                                                                       Pref
+
+                      p                                    µν
+                       |g(P )| = e2u r2 sin θ,            F(P ) = g (P )g (P ) (∂α Pβ − ∂β Pα )
+                                                                   µα    νβ
+                                                                                                                (150)
+
+with
+
+
+                            ∂t = 0,          ∂ϕ = 0,           Pµ = (Pt (r, θ), 0, 0, Pϕ (r, θ))                (151)
+
+Assuming this form, the independent components reduce to the following nonlinear coupled partial
+
+                                                                31
+differential equations.
+
+                    1                       1                       
+                        ∂r r2 e−2u ∂r Pt + 2      ∂θ sin θ e−2u ∂θ Pt = N0 [u, Pt , Pϕ ]
+                                                                         (2)
+                                                                                                            (152)
+                    r 2                   r sin θ
+
+              1        2 −2u
+                                           1                 −2u
+                                                                          e−2u Pϕ (2)
+                 ∂ r r  e    ∂ r P ϕ   +          ∂ θ sin θ e     ∂ θ Pϕ  − 2 2 = Nϕ [u, Pt , Pϕ ]          (153)
+              r2                         r2 sin θ                          r sin θ
+        (2)                                                                                           (2)
+Here N0 denotes the quadratic source term in the Pt equation, while Nϕ denotes the quadratic
+source term in the rotational component Pϕ equation. In addition, the rotation-induced contribution
+                                      (2)                                  (2)
+inside the Pt equation is written as N0,ϕ in order to distinguish it from Nϕ on the Pϕ side.
+Let u = ϵψ with ϵ ≪ 1. The explicit O(ϵ2 ) terms are fixed as
+
+                                                  (2)           (2)           (2)
+                                            N0          = Nmetric + N0,ϕ                                    (154)
+
+                                                                                                 
+                               (2)                                     1
+                              Nmetric = ϵ2nl 2        (∂r u)(∂r Pt ) + 2 (∂θ u)(∂θ Pt )                     (155)
+                                                                      r
+                                                           "                              #
+                                                                (∂r Pϕ )2   (∂θ Pϕ )2
+                                   N0,ϕ = ϵ2nl e−2u
+                                    (2)
+                                                                          +                                 (156)
+                                                                r2 sin2 θ r4 sin2 θ
+
+with the minimal-branch rotational term Pϕ (r, θ) = µdrag sin2 θ/r2 .
+Furthermore, adopt
+                                                                         Z π
+                                (lin)                               1               (2)
+                          Pt = Pt     + δPt ,             N̄0 (r) =               N0 (r, θ) sin θ dθ        (157)
+                                                                    2     0
+
+                                                                     Z rout        Z rout
+                 1 d       2 d δPt                                                −2
+                         r           = N̄0 (r),            δPt (r) = −       dξ ξ           ds s2 N̄0 (s)   (158)
+                 r2 dr        dr                                              r               ξ
+
+as the perturbative solution, with δPt (rout ) = 0.
+The strong-field higher-order coeﬀicient is interpreted not as a fit coeﬀicient but as something fixed
+                     (2)
+by the strength of N0 .
+
+
+                           ∆Ccore ≡ Clinear − Cref ,                  ∆CN 0 ≡ Cfull − Clinear               (159)
+
+
+                                          (N 0)          ∆CN 0    0.1806%
+                                         λH        ≡            =                                           (160)
+                                                         ∆Ccore   4.6278%
+
+                                                        (N 0)
+                                                   λH           = ϵ2nl ΞN 0                                 (161)
+
+                                                                                                              (2)
+Under this definition, λH is uniquely fixed as the dimensionless strength measuring how much N0
+contributes to the strong-field coeﬀicient difference. From the fixed values ∆Ccore = 4.6278%, ∆CN 0 =
+                                           (N 0)
+0.1806%, and ϵ2nl = 0.0064, one obtains λH = 0.0390 and ΞN 0 = 6.10, which connect directly to the
+Part II / Part IV audit I/F.
+The approximation order is
+
+
+
+                                                                32
+                                     e−2u = 1 − 2u + 2u2 + O(u3 )                                   (162)
+
+That is, terms are retained through O(ϵ2 ) and those of order O(ϵ3 ) and higher are discarded. The
+boundary conditions are
+
+                                              Pt        1 λ2
+                                r→∞:               → 1 + + 2 , Pϕ → 0                               (163)
+                                              Pref      r r
+
+
+             θ = 0, π : Pϕ = 0, ∂θ Pt = 0,           r → rH
+                                                          +
+                                                            : Pt , Pϕ finite (finite radial flux)   (164)
+
+
+                                                     π
+                                              θ=       : ∂θ Pt = 0                                  (165)
+                                                     2
+These are adopted, and the closure decision is fixed as
+
+
+                     Cclosure = Caxis ∧ Casympt ∧ Chorizon ∧ (σflux,rel ≤ 1.0 × 10−3 )              (166)
+
+using the observed fixed value σflux,rel = 1.2527 × 10−16 . The correspondence with machine-readable
+decision keys is collected in the Part IV audit registry. The following linear forms are retained as
+                                                                           (2)
+auxiliary mappings in the weak-field far-zone limit where g(P ) → η and Nν → 0.
+
+                               1                     1
+                                   ∂ r r 2 ∂ r Pt + 2      ∂θ (sin θ ∂θ Pt ) = 0                    (167)
+                               r 2                 r sin θ
+
+                        1                       1                         Pϕ
+                           ∂ r r 2
+                                   ∂ r P ϕ   + 2      ∂θ (sin θ ∂θ Pϕ ) − 2 2 = 0                   (168)
+                        r2                    r sin θ                    r sin θ
+Using the separable form
+
+                                    (0)       (0)                      (ϕ)         (ϕ)
+                             Pt = Rℓ (r)Θℓ (θ),                  Pϕ = Rℓ (r)Θℓ (θ)                  (169)
+
+one obtains the common radial equation
+                                                 
+                                     d      2 dRℓ
+                                          r         − ℓ(ℓ + 1)Rℓ = 0                                (170)
+                                     dr        dr
+
+and the angular equations
+
+                                                      (0)
+                                                             !
+                                 1 d          dΘℓ                            (0)
+                                        sin θ                    + ℓ(ℓ + 1)Θℓ = 0                   (171)
+                               sin θ dθ        dθ
+
+                                               (ϕ)
+                                                     !           (ϕ)
+                             1 d          dΘℓ                 Θℓ               (ϕ)
+                                    sin θ                −          + ℓ(ℓ + 1)Θℓ = 0                (172)
+                           sin θ dθ        dθ                sin2 θ
+
+These imply that the general external solution has the form
+
+                                             ∞ 
+                                             X                      
+                               Pt (r, θ) =          Aℓ rℓ + Bℓ r−ℓ−1 Pℓ (cos θ)                     (173)
+                                             ℓ=0
+
+
+
+
+                                                         33
+                                              ∞ 
+                                              X                     
+                                Pϕ (r, θ) =         Cℓ rℓ + Dℓ r−ℓ−1 Pℓ1 (cos θ)                       (174)
+                                              ℓ=1
+
+as shown above. Operationally, the minimal external branch is fixed by Pt /Pref = 1+a1 /r +a2 /r2 +· · ·
+and Pϕ = (µdrag sin2 θ)/r2 +· · · , for which the rotational term derived from Pϕ gives Ωdrag ∝ r−3 . This
+branch is adopted as the foundation for the strong-field audit (EHT/GW), while its acceptance or
+rejection is decided on the same I/F in Part II. The fixed values in the weak-field coeﬀicient audit
+are Mercury coeﬀicient 0.3333298333 in caseA (reject) and Mercury coeﬀicient 1.0000105000 with
+zγ = −0.7346 and nonlinear PDE closure in caseB (pass).
+
+
+2.8.9 First-Principles Prediction of the EHT Mapping Coeﬀicient κ (Radiative Trans-
+      port Under the Effective Metric)
+
+The EHT coeﬀicient κ (ring diameter / shadow diameter) is not fixed by the capture boundary bsh (P )
+(geometry) alone. It is fixed by simultaneously solving light-ray tracing on gµν (P ) and the radiative
+transfer of emission/absorption using Pµ and J µ .
+Fix the effective optical metric by
+
+                                                                                                2β
+                         opt                            −2
+                                                                                            P
+                        gµν  = gµν (P ) +   1 − n(P )            Uµ Uν ,      n(P ) =                  (175)
+                                                                                            P∞
+
+Then the rays satisfy
+
+                                  µν                     dkµ    1    αβ
+                                 gopt kµ kν = 0,             = − ∂µ gopt kα kβ                         (176)
+                                                         dλ     2
+as above. The radiative transfer is written in terms of the invariants
+
+                                        Iν                jν
+                                   I˜ν ≡ 3 ,         J˜ν ≡ 2 ,             Ãν ≡ αν ν                  (177)
+                                        ν                 ν
+and
+
+
+                                            k µ ∇(g(P
+                                                 µ      Iν = J˜ν − Ãν I˜ν
+                                                      )) ˜
+                                                                                                       (178)
+
+Extending this to polarization, the Stokes vector
+
+
+                                               S̃ν ≡ (I˜ν , Q̃ν , Ũν )T                               (179)
+
+obeys
+
+
+                                 k µ ∇(g(P
+                                      µ
+                                           ))
+                                              S̃ν = J̃ν − Ãν S̃ν + τ̇T M(µ, φ)S̃ν                     (180)
+
+Here τ̇T = ne σT a is the Thomson scattering rate. In the axisymmetric approximation (azimuthal
+average), the phase matrix is
+
+                               3
+                    M(µ) =        (1 + µ2 , 1 − µ2 , 0); (1 − µ2 , 1 + µ2 , 0); (0, 0, 2µ)             (181)
+                               4
+given by the above expression. The form in which the local quadrupole Π becomes the polarization
+
+
+                                                          34
+source is
+                                                                                                                        
+                                                                                                    3               ±2iφ
+            k µ ∇(g(P
+                 µ
+                      ))
+                         ( Q̃ ν ± i Ũ ν ) = − Ã P ( Q̃ ν ± i Ũ ν ) + τ̇ T   −( Q̃ ν ± i Ũ ν ) +   (1 − µ 2
+                                                                                                               )Π e          (182)
+                                                                                                    4
+
+fixed as above.
+The origin of Π is the fluid-velocity gradient that carries a phase lag of π/2 relative to the density
+perturbation. Write the continuity equation as
+
+                                             1                                        k
+                                         Θ′ + ∇· vpb = 0,                      Θ′k = − vpb,k                                 (183)
+                                             3                                        3
+and substitute the acoustic mode
+
+
+                                             Θk (rs ) = Θeq,k + ∆Θk cos(krs )                                                (184)
+
+to obtain
+
+
+                       vpb,k (rs ) = 3cs,P ∆Θk sin(krs ),                  ∇· vpb,k = ik vpb,k ∝ sin(krs )                   (185)
+
+as above. The quadrupole hierarchy closes as
+
+                                                                          8
+                                                   Π′k + τ̇T Πk =            k vpb,k                                         (186)
+                                                                          15
+which implies that in the tight-coupling limit (τ̇T ≫ ∂s )
+
+                                                      8 k           8 1
+                                            Πk ≃            vpb,k ≃        ∇· vpb,k                                          (187)
+                                                     15 τ̇T         15 τ̇T
+
+so that Π is generated from the velocity gradient. Therefore the polarization source term is propor-
+tional to τ̇T (1 − µ2 )Π, and the E mode is excited on the sin(krs ) branch.
+For the acoustic phase x ≡ krs , adopt the minimal approximation
+
+
+                                                  Θ ∝ cos x,               E ∝ sin x                                         (188)
+
+Then
+
+                                                                                                       1
+                    CℓT T ∝ cos2 x,           CℓEE ∝ sin2 x,                   CℓT E ∝ sin x cos x =     sin(2x)             (189)
+                                                                                                       2
+the extremum conditions are
+                                                                                                          
+                                                                  1                                      1
+                         xTn T = nπ,          xEE
+                                               n =          n+            π,       xTmE,ext =       m+           π           (190)
+                                                                  2                                      4
+
+and the phase differences are
+
+                                                            π                              π
+                                          ∆xEE−T T =          ,            ∆xT E−T T =                                       (191)
+                                                            2                              4
+which are fixed uniquely as the half-wavelength shift and the intermediate phase relation among
+TT/EE/TE. From this phase relation, using ℓTn T ≈ (n − ϕ)ℓA as the TT reference,
+
+
+                                                                  35
+                                        1                                         1
+                            n ≈ (n − ϕ + )ℓA ,
+                           ℓEE                                 ℓTmE,ext ≈ (m − ϕ + )ℓA                        (192)
+                                        2                                         4
+these are fixed as analytic predictions (for TE, the sign alternates from extremum to extremum).
+
+                               Z λout                                                      Z λout
+               I˜ν,obs (b) =            J˜ν (λ, b) exp[−τν (λ, b)] dλ,       τν (λ, b) =            Ãν dλ′   (193)
+                                λin                                                         λ
+
+This is fixed by taking the minimal coupling of Pµ and J µ as the primary structure, rather than by
+replacing it with an already-solved GRMHD background.
+The observed intensity is obtained from the redshift factor
+
+                                        (kµ uµ )obs                      3        3 ˜
+                         gred (b) =                 ,      Iν,obs (b) = gred (b) νobs Iν,obs (b)              (194)
+                                        (kµ uµ )em
+
+as above. The ring radius is defined as the solution of dIν,obs /db = 0, and
+
+                                               bpeak         dIν,obs
+                                        κ≡             ,                  =0                                  (195)
+                                              bsh (P )         db b=bpeak
+
+is fixed in that way. With the first-order expansion bpeak = bsh + δb, one obtains
+
+                            1                        
+                κ≃1+                    3 ¯
+                                 ∂b ln gred Jν − ∂b τ̄ν b=b ,             Λ2 ≡ − ∂b2 ln G(b) b           >0   (196)
+                          bsh Λ2                           sh                                       sh
+
+
+
+Here G(b) is the geometric amplification factor near the capture boundary. Therefore κ is not deter-
+mined by geometry alone, but by (i) G from g(P ), (ii) the radiative gradient from J µ , and (iii) the
+absorption/scattering contribution entering τ̄ν .
+The analytic boundary conditions are
+
+
+                                        r → rH
+                                             +
+                                               : k r < 0, I˜ν finite, τν finite                               (197)
+
+
+                                  r → ∞ : u → 0, Pϕ → 0, I˜ν → 0, τν → 0                                      (198)
+
+
+                                             θ = 0, π : Pϕ = 0, ∂θ I˜ν = 0                                    (199)
+
+These are fixed as the analytic boundary conditions. Part II uses this chain of equations to compare
+the fitted value and the first-principles envelope of κ on the same I/F.[10][11]
+
+
+
+
+                                                            36
+2.9 Quantum (Connection Point: Selection)
+
+The connection to quantum physics is a validation target of Part III (Quantum Physics). In this
+paper (Part I), only the minimal dictionary for the phase mapping and the observation process is
+fixed, while the detailed acceptance or rejection is delegated to the same audit interface of Part III
+(input / freezing / statistics / decision / output).
+Definition of phase and reduction to the Schrödinger equation: Assume that the phase of a
+bound mode (particle) accumulates in proportion to the proper time τ (ψ ∝ e−iω0 τ ). Using the clock
+                     2
+mapping dτ /dt = eϕ/c ≈ 1 + ϕ/c2 , the phase in the weak field separates as follows.
+
+
+                                                 ψ ∝ e−iω0 τ                                         (200)
+
+
+                                        e−iω0 τ ≈ e−iω0 t e−iω0 ϕt/c
+                                                                       2
+                                                                                                     (201)
+
+Here, define E = h̄ω0 and m = h̄ω0 /c2 . Applying the nonrelativistic envelope approximation then
+yields
+
+                                                               
+                                          ∂ψ           h̄2 2
+                                      ih̄    =       −    ∇ + mϕ ψ                                   (202)
+                                          ∂t           2m
+
+is recovered. That is, quantum-mechanical behavior in the P-model is positioned as an approximate
+expression (an effective equation) of deterministic interference generated by fluctuations of time-wave
+density together with the delay of proper time.
+Operational adoption of the Born rule and the limit scale (mcrit ): This paper does not treat
+the Born rule (probability density ∝ |ψ|2 ) as a first principle. It is treated as an operational effective
+law valid in the range where linear response and the Markov approximation hold. The critical mass
+at which the self-gravity (mean-field) effect of the wave packet becomes manifest is estimated by
+                                                        r
+                                                            h̄R
+                                              mcrit ∼                                                (203)
+                                                            GT
+This provides the estimate. In addition, wave-packet collapse is described not as something caused
+by ”the observer’s consciousness” or by ”many worlds,” but as a physical time-evolution process
+driven by the pointer degrees of freedom of the apparatus and by environmental dissipation (branch
+convergence in a nonlinear continuous-measurement equation). The details are validated in Part III.
+Likewise, nonlocality in Bell tests and related cases is treated as a systematic effect in which the
+event-adoption rule (selection) changes the statistical ensemble, and the falsification conditions are
+constructed within the framework of local realism.[15][16]
+
+
+
+
+                                                       37
+3 Methods
+
+3.1 Common Rejection Procedure
+
+Each validation in this paper fixes falsifiability in the following common format.
+
+ • Input: the data used (primary / already-estimated), dependency assumptions, acquisition source,
+   and local cache name.
+
+ • Freeze: frozen parameters and the grounds for freezing (which primary constraint fixed them,
+   and when).
+
+ • Output: fixed filenames, column definitions, units, and reproduction commands.
+
+ • Statistics: evaluation statistics (for example RMS, �², logL, ΔAIC, slope). ∆AIC is defined by
+
+                                       ∆AIC ≡ AICbaseline − AICP-model                                     (204)
+
+    as above.
+
+ • Decision: rejection thresholds (for example exceeding 3σ, ∆AIC < −10 meaning strong baseline
+   preference, or excess after including systematics).
+
+From this point onward, every test is written in this format so that it is reproducibly rejectable as a
+protocol, not as a discussion.
+
+
+
+
+          Inputs            Freeze              Statistics            Decision             Outputs
+
+
+        Primary data    Frozen parameters      RMS, χ², z      Threshold gate   Stable filenames
+       assumed priors     freeze rationale    ΔAIC, slope        (3σ, ΔAIC)     repro command
+           source           freeze point   error propagation to branch decision     audit log
+
+
+
+
+                                                            Decision branch
+
+                                                                                 Pass     Watch   Reject
+
+
+                             Part I fixes input → freeze → statistics → decision → output
+                         as one common I/F and runs it as a reproducible rejection protocol.
+
+
+
+
+Figure 2: Flowchart of the rejection protocol. It shows the decision chain input → freeze → statistics
+→ decision → output, together with the post-decision branches adopt / watch / reject.
+
+                                                       38
+3.2 Reproducibility (Execution and Artifacts)
+
+In this study, the processing conditions that generate the figures, tables, and key numerical values from
+primary data are fixed for each topic so that the same input yields the same output. However, the paper
+body itself does not enumerate concrete filenames, folder names, or script names. The information
+needed for reproduction (processing conditions, primary sources, access dates, frozen parameters, fixed
+artifact lists, reproduction commands, and audit gates) is governed by Part IV (Verification Materials)
+(GitHub: EnterOgawa/p-model). The acceptance of the action principle is given in Part IV, Section
+3, and the grounds specific to the Part I mappings are given in Part IV, Section 10.[1]
+
+
+3.3 Data Acquisition and Local Cache
+
+Data acquired from primary sources are recorded together with their access dates, and the acquired
+files are managed in a form identifiable by content identity (for example hashes). This makes it possible
+to trace which data underlie the results of this paper even if the upstream distribution source is later
+updated.
+The list of primary sources is collected in the appendix (Data Sources).
+
+
+3.4 Three-Layer Definition and Operation of the Common Parameter β
+
+The role of β is managed in three layers: the theoretical prediction, the operational frozen value, and
+the terminal audit status.
+
+ 1. Theoretical prediction: β = 1. It is derived from the null geodesics of the effective metric
+    (Section 2.5). It is the reference value that follows from the isotropic form of the P-model (gtt ·grr =
+    −c2 ).
+
+ 2. Operational frozen value: β = 1.0000105. This is the reference value obtained by mapping
+    Cassini’s published PPN γ through β = (1 + γ)/2. It is an operational value obtained through
+    the GR-side framework and is not itself the independent validation value of the theoretical pre-
+    diction. When the difference from β = 1 is below observational precision in weak-field numerical
+    calculations, this frozen value is used in the extrapolation calculations.[5]
+
+ 3. Terminal audit status: Pass (current). In the PPN-independent cross-channel audit, both
+    LLR and MESSENGER (beta_lt as the primary estimate) are consistent with β = 1, and the
+    pair gate has also achieved Pass. The policy governance has already been promoted to policy_
+    D_exclude_plus_messenger_fusion (details are given in Part II 4.4 / the Part IV registry).
+
+ • ϕ: the Newtonian-form potential defined from P (Section 2.1). The definition of ϕ is not changed
+   in order to absorb coeﬀicients; if necessary, that is handled on the β side.
+
+ • The frozen values and terminal decisions are stored in the frozen-parameter set (machine-readable),
+   and the same values are referenced in comparison extrapolation and audit.
+
+      Reference note: if PPN is used as the reference framework, Cassini’s γ constraint can
+      be mapped to β through the correspondence 1 + γ = 2β (the reference-framework limit is
+      β = 1).[2][5]
+
+
+
+
+                                                    39
+                                       Why β is frozen
+                                  Cassini + VLBI cross-check
+
+                             Left panel: β - 1                         Right panel: |β − βfrozen|/σ
+          Cassini
+        (primary)
+
+
+                                                                    0.00σ
+
+
+
+
+             VLBI                                                           0.73σ
+   (Shapiro 2004)
+
+
+
+
+                                                                    0.00σ
+
+                                                                                                 1σ
+           Frozen                   β_frozen=1.0000105                                           3σ
+            value
+                          -0.00015
+                    -0.00020          -0.00005
+                                -0.00010     0.00000
+                                                   0.00005         0         1          2       3
+                            β - 1 (unity offset)                              |β − βfrozen|/σ
+
+
+
+
+Figure 3: Visualization of the grounds for freezing β. The left panel displays the deviation of β − 1,
+while the right panel shows the deviation from the frozen value in units of σ and compares it with the
+1σ/3σ thresholds.
+
+
+
+
+                                                   40
+4 Summary of Results and Connection to Parts II/III
+
+This paper (Part I) fixes the P-model’s symbol conventions, minimum assumptions, and map-
+pings to observables as the canonical baseline, summarizes the fixed outputs (falsification conditions
+and audit gates), and then connects them to Parts II and III. The applied validation against observa-
+tional data is divided into the following two later parts, both of which reanalyze the data and present
+falsification conditions under the same conventions fixed in Part I.
+The recommended reading order is Part I -> Part II -> Part III. Parts II and III assume the
+vocabulary, sign conventions, and frozen values fixed in this paper and do not rewrite mappings or
+parameters ad hoc for the convenience of the application sections.
+
+ • Part II (Astrophysics)
+
+ • Part III (Quantum Physics)
+
+ • Part IV (Verification Materials)
+
+
+4.1 Decision Conditions for the Differential Predictions (Overview)
+
+The condition under which the P-model becomes observationally distinguishable from the reference
+frameworks is that the differential predictions exceed the statistical and systematic uncer-
+tainties. This paper (Part I) leaves the detailed calculations and primary-source organization to
+Parts II and III, while fixing only the main decision points, that is, which classes of observations can
+settle the issue.
+1. Terminal status of the free-wave propagation coeﬀicient β (LLR / MESSENGER /
+VLBI eligibility chain)
+
+ • In the P-model, the light-response exponent β is theoretically predicted to be β = 1 from the null
+   geodesics of the effective metric.
+
+ • If β is not exactly 1, systematic residual patterns appear in light bending and Shapiro delay.
+
+ • Decision condition: whether LLR and MESSENGER (through βlt ) satisfy consistency with the
+   theoretical prediction β = 1. VLBI remains an auxiliary audit until the eligibility of the compar-
+   ison baseline is established.
+
+2. Shape observables in the strong-gravity regime (nonlinear structure of the P gradient)
+
+ • In the P-model, the structure of the P gradient in the strong-field regime may differ from that of
+   the reference framework.
+
+ • The difference appears as coeﬀicient shifts in shape observables such as the shadow diameter and
+   ring morphology.
+
+ • Decision condition: whether EHT-class shape observables become statistically distinguishable
+   from the theoretical prediction.
+
+3. Cosmological distance-indicator-independent quantities (validation of the background-
+P mapping)
+
+
+
+                                                  41
+ • In the P-model, redshift is explained without spatial expansion, through the time evolution of
+   the background P field.
+
+ • It can therefore be tested with observables that do not depend on distance indicators, such as
+   time-dilation scaling and the CMB temperature.
+
+ • Decision condition: whether distance-independent probes are consistent with the background-P
+   mapping.
+
+4. Simultaneous success of rotation and polarization (survival condition of the Pµ exten-
+sion)
+
+ • The reason for introducing the Pµ extension is that it permits a simultaneous description of
+   rotating sources (frame dragging) and gravitational-wave polarization.
+
+ • Decision condition: simultaneously achieving scalar-polarization rejection and tensor-polarization
+   consistency with a three-detector network (H1/L1/V1).[12]
+
+ • This simultaneous achievement is the highest-priority audit gate on the Part II side; if it is not
+   met, the effectiveness of the Pµ extension remains under continuing audit (watch).
+
+5. Resolution of nonlocality on the quantum scale and the microscopic coupling of Pµ
+
+ • The P-model treats the nonlocality of quantum entanglement as a statistical-ensemble variation
+   (a systematic effect) induced by the event-adoption rule (selection).
+
+ • For the microscopic nuclear force (tensor force) and the V-A structure of the weak interaction,
+   the candidate dictionary connecting Pµ to spin and chiral currents is retained as the reference
+   note of Part I 2.8.2.
+
+ • Decision condition: Bell tests must be carried out with a setting-independent ensemble. For
+   the weak-interaction candidate dictionary, a full tensor calculation using Pµ must reproduce
+   observables such as Q values and half-lives.
+
+ • At present, however, the authoritative decision remains the Part III-B 5.5 outcome of A adopted
+   / B rejected. Route B can be reopened only if the full tensor calculation above demonstrates
+   reproducibility and triggers re-audit.
+
+6. Frozen-action reference skeleton and the theoretical anchor points on the quantum
+side
+
+ • From the frozen-action reference skeleton fixed in this paper, the transverse component of Pµ
+   yields the transverse photon branch and the massless photon mode (the canonical derivation is
+   Part III-A 2.6).
+
+ • The same frozen-action skeleton provides the starting point for the derivation of the fine-structure
+   constant described in detail in Part III-A. Part I limits itself to defining that starting-point action,
+   while the numerical endpoint and residual evaluation are delegated to Part III-A.
+
+ • Likewise, the coupled-localization condition for the W/Z boson masses in the two-component
+   coupled Q-ball construction is obtained from the same frozen-action skeleton. The canonical
+   theoretical anchor point and the observational acceptance or rejection are governed by Parts
+   III-A/B.
+
+                                                   42
+ • Decision condition: Part I fixes only the starting point that provides the quantum-side theoretical
+   anchor points; the detailed derivations and the observational acceptance or rejection are delegated
+   to the audit framework of Parts III-A/B.
+
+The decision points for the differential predictions are fixed in the correspondence between observable,
+required precision, and rejection condition.
+
+Decision point            Representative              Required precision      Fixed rejection condition
+                          observable                  (guide)
+
+Terminal status of the   LLR + MESSENGER              Precision suﬀicient to Reject if the pair gate
+free-wave propagation    (βlt ) + the audit of        decide the             fails, or if the terminal
+coeﬀicient β (LLR,       VLBI baseline eligibility.   LLR/MESSENGER pair status cannot be fixed to
+MESSENGER, VLBI          Acceptance or rejection      gate                   Pass because the
+eligibility chain)       is decided against the                              governance conditions
+                         theoretical prediction                              are not satisfied
+                         β = 1 under the
+                         policy_D governance
+                         rule.
+Shape observables in the EHT ring-shape            Shape systematic errors Reject if high-precision
+strong-gravity regime    coeﬀicients (κ, ϵ)        reduced to <= 0.2 of the data continue to favor
+                                                   current level              GR over the P-model
+                                                                              (for example, persistent
+                                                                              ∆AIC <= 2 against the
+                                                                              P-model)
+Distance-independent      Time and temperature     Precision high enough to Reject if multiple probes
+cosmological quantities scalings tied to the       audit multiple             continue to show
+                          background mapping       distance-independent       inconsistency larger than
+                                                   probes under the same      3σ
+                                                   mapping
+Simultaneous success of Scalar-polarization        Securing usable events     Reject if
+rotation and polarization rejection and            with three or more         scalar-polarization
+                          tensor-polarization      detectors                  rejection and
+                          consistency in GW                                   tensor-polarization
+                          observations                                        consistency cannot be
+                                                                              achieved simultaneously
+Quantum scale (selection Bell fixed-window         Statistical decisions      Reject if excess
+and microscopic           CHSH/CH tests and        under pre-fixed windows correlations continue to
+coupling)                 weak-interaction Q       and numerical              be reproduced under
+                          values / half-lives      verification of the full   fixed windows, or if the
+                                                   tensor route               microscopic coupling
+                                                                              fails to reproduce the
+                                                                              observables
+Electromagnetic           Selector-law anchor of   Precision suﬀicient to     Reject if the
+constants and             the fine-structure       reduce the residual of the frozen-action skeleton
+weak-boson masses         constant and the W/Z     fine-structure constant    fails to provide the
+                          mass anchor point under and keep κcoupled > 0 at selector-law anchor of
+                          the coupled-localization the W/Z mass anchor        the fine-structure
+                          condition                point                      constant, or if the W/Z
+                                                                              mass anchor point
+                                                                              collapses under the
+                                                                              coupled-localization
+                                                                              condition
+
+
+
+The concrete observables, primary sources, and error budgets (required precision) are collected in
+Parts II and III.
+
+
+
+                                                           43
+                                                         Rotating P profile audit                                                      Frame-dragging ratio audit
+                                    1.30                                                                                     1.4                                     Observed / ref
+                                                                                                                                                                     δP_rot=0
+                                    1.25                                                                                     1.2                                     δP_rot≠0
+
+
+
+
+                                                                                                       Dimensionless ratio
+                                                                                                                                   0.995           0.990   0.990             0.990
+ P/Pstatic (r = 1.5R)
+
+
+
+
+                                                                                                                             1.0
+                                    1.20
+                                                                                                                             0.8
+                                                                  δP_rot=0 (no rotation term)
+                                    1.15
+                                                                  δP_rot≠0 (with rotation term)                              0.6
+
+                                    1.10                                                                                     0.4
+
+                                    1.05                                                                                     0.2
+                                                                                                                                           0.000                    0.000
+                                                                                                                             0.0
+                                    1.00
+
+                                                0   25     50      75   100   125    150   175                                           GP-B                  LAGEOS
+                                                                                                                                    frame-dragging          frame-dragging
+                                                          Polar angle θ [deg]
+
+
+                                                                                     Precession gate comparison
+                                                                                                                                              19.80
+                                          20                                                                                                                               δP_rot=0
+                                                                                                                                                                           δP_rot≠0
+                                          15
+         z = (observed - predicted) / σ
+
+
+
+
+                                          10
+                                                          5.42
+                                           5
+
+                                                                              0.02
+                                           0
+                                                                                                                                                                   -0.01
+
+                                           -5
+
+                                          -10
+
+                                          -15
+
+                                          -20
+
+                                                                     GP-B                                                                             LAGEOS
+                                                                frame-dragging                                                                     frame-dragging
+
+
+
+
+Figure 4: Audit of the P /P∞ distribution in the rotating-sphere model. It compares the radial and
+angular distributions together with the normalized stationary-branch ratio at the reference radius
+r = 1.5R, thereby visualizing the transition from the weak to the strong field.
+
+
+
+
+                                                                                                  44
+                                            Observed Lorentz-factor scale
+                                                                                            γ_max (δ=1.00e-60)
+
+     LHC proton              γ≈7.5e+03
+        (7 TeV)
+
+
+
+
+ UHE cosmic ray                                   γ≈1.1e+11
+   (~10^20 eV)
+
+
+
+
+  High-energy ν                                                            γ≈1.0e+17
+       (10 PeV)
+
+
+
+                  0           5              10                 15              20             25               30
+                                                             log10(γ_obs)
+
+
+
+
+                                            Approximate δ upper bounds
+                       adopted δ=1.00e-60
+
+     LHC proton                                                                                           1.8e-08
+        (7 TeV)
+
+
+
+
+ UHE cosmic ray                                                                   8.8e-23
+   (~10^20 eV)
+
+
+
+
+  High-energy ν                                                 1.0e-34
+       (10 PeV)
+
+
+
+                      -60         -50             -40                -30             -20            -10              0
+                                                             log10(δupper)
+
+
+
+
+Figure 5: Constraint plot for the velocity-saturation parameter δ. It places upper bounds inferred
+from the Lorentz factors γ reached by existing observations side by side and compares the order of
+the allowed range.
+
+
+
+
+                                                        45
+                                                  P minimal extension: dipole-cancellation audit
+
+                                                          Binary-pulsar consistency with dipole = 0
+                              3                                                                                                        3 (Reject)
+                              2
+                              1                                                                                           J0348+0432
+          z = (R-1)/
+
+
+
+
+                              0
+                             -1                                         J0737-3039A/B           J1738+0333
+                                       B1913+16
+                             -2
+                             -3                                                                                                        -3 (Reject)
+                                                                         Normalized dipole moment
+                  10 3
+                                  Universal            Counterfactual
+                  10 6
+|d|/( M r)
+
+
+
+
+                  10 9
+              10 12                                                                                          1e-17Zoom: universal
+                                                                                                         1
+              10 15
+                                                                                                         0
+
+                                                            Estimated universality tolerance (95%)
+                            0.6
+     sqrt(non-GR upper95)
+
+
+
+
+                            0.5
+                            0.4
+                            0.3
+                            0.2
+                            0.1
+                            0.0        B1913+16                         J0737-3039A/B           J1738+0333                J0348+0432
+                                      (Hulse-Taylor)                    (Double Pulsar)
+                                                                                Binary-pulsar system
+
+
+ Figure 6: Audit of vector dipole cancellation. The upper panel shows the z-test decision, the middle
+ panel compares the universal and counterfactual branches and enlarges the universal branch, and the
+ lower panel visualizes the allowed widths for each system.
+
+
+
+
+                                                                                          46
+5 Discussion
+
+5.1 What This Paper (Part I) Has Fixed
+                                                                            
+ • Fixed mappings: ϕ = −c2 ln(P /P∞ ), a = c2 ∇ ln(P /P∞ ), dτ   P∞
+                                                            dt = P
+                                                                         dτ
+                                                                         dt v , and n(P ) = (P /P∞ )
+                                                                                                     2β
+
+   have been established as the unified conventions.
+
+ • Minimal closure of the dynamical branch: the formula chain for the retarded potential, dipole-
+   radiation prohibition, and coarse-grained relaxation (τ, ξ) has been fixed.
+
+ • Introduction of the rotational extension: the minimal coupling between Pµ and J µ , the Stück-
+   elberg closure, and the entry point to the strong-field equations have been made explicit and
+   connected to the audit interfaces of Parts II and III.
+
+
+5.2 Explicit Limitations of This Paper Taken Alone
+
+ • The quantum connection remains at the operational stage, and the final acceptance of nonlocal
+   correlations depends on the primary-data audit of Part III.
+
+ • While the theoretical prediction β = 1 has already been derived from the null geodesics of the
+   effective metric, its microscopic origin (why the isotropic effective metric holds) has not yet been
+   identified.
+
+ • The final decisions in the strong-field regime (EHT/GW) and for cosmological first-order statistics
+   (BAO/CMB/RSD) are reached through the statistical and systematic gates on the Part II side.
+
+
+
+
+                                                 47
+6 Conclusion
+
+This paper (Part I) fixed the symbol conventions, minimum assumptions, mappings to observables,
+and falsification procedures as the reference baseline of the P-model. The key point is that it placed
+the stationary-limit scalar branch and the Pµ extension including rotation under the same reference
+skeleton and thereby supplied the foundation on which the later validations (Parts II and III) become
+reproducible and rejectable under the same interface.
+In addition, the same frozen-action reference skeleton provides the quantum-side theoretical anchor
+points audited in Parts III-A/B: the transverse photon branch and selector-law anchor of the fine-
+structure constant, together with the coupled-localization condition for the W/Z boson masses in the
+two-component coupled Q-ball picture. The derivations and the observational acceptance or rejection
+of these items are governed by Parts III-A/B.
+At the same time, this paper made explicit both the scope and the limits of the theory. The final
+decisions on the quantum side and in cosmological strong-field regimes are delegated to Parts II and
+III, while the responsibility of Part I alone is to fix which equations are taken as baseline and what is
+adopted as the falsification conditions. This separation prevents the claims of the theory from being
+confused with the claims of its validation and preserves a consistent auditability across the whole
+series.
+
+
+
+
+                                                   48
+7 Appendix A. Symbols and Definitions (Minimal Table)
+
+Symbol             Definition                      Note
+P                  stationary-limit time-wave      the basic quantity appearing
+                   density                         in observations is the ratio
+                                                   P /P∞
+P∞                 far-field reference time-wave   constant in local systems
+                   density
+Pref               reference time-wave density     for example u = ln(Pt /Pref )
+                   used in strong-field
+                   normalization
+Pµ                 four-vector time wave (time     used in the rotation and flow
+                   component Pt and spatial        channels
+                   components Pi )
+ϕ                  −c2 ln(P /P∞ )                  zero at infinity and negative
+                                                   near mass
+β                  light-propagation response      the frozen value is given in
+                   index                           Part I 3.4
+u                  ln(P /P∞ )                      basic variable of the
+                                                   dynamical equation
+D                  c2w τfree                       diffusion coeﬀicient in the
+                                                   dynamical branch (2.6)
+Gδ                 δ/δref                          growth normalization factor
+                                                   in structure formation (2.6.1)
+τfree              Lpath /cw                       free-propagation timescale of
+                                                   the coarse-grained channel
+τeff               τfree + ητkernel                effective timescale of delayed
+                                                   response
+ξ                  (τint + τdamp )/τeff            strength coeﬀicient of the
+                                                   coarse-grained coupling
+κ                  bpeak /bsh (P )                 EHT ring/shadow mapping
+                                                   coeﬀicient
+qB                 radiation-dominated             fixes the asymptotic law of
+                   exponent (qB = 1/2)             the background wave ubg
+                                                   Pbg ∝ t−2/3
+                                                     (m)
+qm                 matter-dominated exponent
+                   (qm = 2/3)
+C0                 integration constant in         determines the branching of
+                          Ω2
+                   u̇2bg − 2B e4(ubg −uB ) = C0    the exact solution family
+Ω2r                8πGρr,0                         radiation-source coeﬀicient of
+                                                   the background-wave
+                                                   equation
+Ω2m                4πGρm,0                         matter-source coeﬀicient of
+                                                   the background-wave
+                                                   equation
+                                                            Continued on next page
+
+
+
+
+                                          49
+Symbol   Definition                       Note
+Ω2Λ      8πGρΛ,0                          present-era term in the
+                                          background-wave equation
+                                          (contributing with a negative
+                                          sign)
+gP       minimal coupling coeﬀicient      interaction term
+         between Pµ and the matter        Lint = gP Pµ J µ
+         current J µ
+                                                 (P )µν
+ZP       wavefunction-normalization       − Z4P Fµν F(P )
+         coeﬀicient of the vector-field
+         kinetic term
+mP       effective mass scale of Pµ       used in the Stückelberg
+                                          closure
+ξg       gauge-fixing coeﬀicient          − 2ξ1g (∂µ P µ + ξg mP π)2
+ξrot     response coeﬀicient of the       sets the strength of the
+         rotation channel                 frame-dragging mapping
+λrot     dimensionless coeﬀicient of      connects macroscopic
+         the rotation coupling            rotation (Part II) to
+                                          microscopic interaction (Part
+                                          III)
+µdrag    rotating-source coeﬀicient       coeﬀicient in
+         g_{P} J_*/(2c^2)                 Pϕ = (µdrag sin2 θ)/r2
+Rdrag    observed frame-dragging          in the GR reference one has
+         ratio Ωobs /Ωpred                Rdrag = 1
+Jµ       matter current                   enters the minimal coupling
+                                          term gP Pµ J µ
+
+
+
+
+                           50
+8 Appendix B. Data Sources and Reproducibility Entry (Minimal)
+
+The canonical registry for primary-source URLs, access dates, fixed artifact lists, reproduction com-
+mands, and audit gates is collected in Part IV (Verification Materials). In the Part I main text, only
+the reproducibility path is fixed; the actual file layout and operation logs are managed mechanically
+in the Part IV registry.[1]
+The representative primary sources used repeatedly in this paper are, for light propagation, Cassini
+/ LLR / MESSENGER (with VLBI as an auxiliary audit)[5][4]; for clocks, GP-A / Galileo[6][7]; for
+rotation, GP-B / LAGEOS[8][9]; for strong gravity, EHT[10][11]; for gravitational waves, LIGO[12];
+for cosmology, Planck / BOSS[13][14]; and for quantum correlations, Bell[15][16].
+
+
+
+
+                                                 51
+References
+
+ [1] P-model Verification Materials (supplementary material for reproduction commands, fixed arti-
+     fact lists, audit gates, hashes, and manifests). Web: EnterOgawa/p-model (Releases: GitHub
+     Releases). Accessed: 2026-02-15.
+
+ [2] Will, C. M. The Confrontation between General Relativity and Experiment. Living Reviews
+     in Relativity 17, 4 (2014). DOI: 10.12942/lrr-2014-4. Accessed: 2026-01-03.
+
+ [3] Ashby, N. Relativity in the Global Positioning System. Living Reviews in Relativity 6, 1 (2003).
+     DOI: 10.12942/lrr-2003-1. Accessed: 2026-01-03.
+
+ [4] Shapiro, I. I., et al. Measurement of the Solar Gravitational Deflection of Radio Waves Us-
+     ing Geodetic Very-Long-Baseline Interferometry Data, 1979 1999. Physical Review Letters 92,
+     121101 (2004). DOI: 10.1103/PhysRevLett.92.121101. Accessed: 2026-01-03.
+
+ [5] Bertotti, B., Iess, L., and Tortora, P. A test of general relativity using radio links with the Cassini
+     spacecraft. Nature 425, 374-376 (2003). DOI: 10.1038/nature01997. Accessed: 2026-01-03.
+
+ [6] Vessot, R. F. C., et al. Test of Relativistic Gravitation with a Space-Borne Hydrogen Maser.
+     Physical Review Letters 45, 2081 (1980). DOI: 10.1103/PhysRevLett.45.2081. Accessed: 2026-01-
+     04.
+
+ [7] Delva, P., et al. A gravitational redshift test using eccentric Galileo satellites. Physical Review
+     Letters 121, 231101 (2018). DOI: 10.1103/PhysRevLett.121.231101. arXiv:1810.12191. Accessed:
+     2026-01-04.
+
+ [8] Everitt, C. W. F., et al. Gravity Probe B: Final Results of a Space Experiment to Test General
+     Relativity. Physical Review Letters 106, 221101 (2011). DOI: 10.1103/PhysRevLett.106.221101.
+     arXiv:1105.3456. Accessed: 2026-01-08.
+
+ [9] Ciufolini, I., and Pavlis, E. C. A confirmation of the general relativistic prediction of the Lense-
+     Thirring effect. Nature 431, 958-960 (2004). DOI: 10.1038/nature03007. Accessed: 2026-01-08.
+
+[10] Event Horizon Telescope Collaboration. First M87 Event Horizon Telescope Results. I. The
+     Shadow of the Supermassive Black Hole. The Astrophysical Journal Letters 875, L1 (2019).
+     DOI: 10.3847/2041-8213/ab0ec7. Accessed: 2026-01-22.
+
+[11] Event Horizon Telescope Collaboration. First Sagittarius A* Event Horizon Telescope Results.
+     I. The Astrophysical Journal Letters 930, L12 (2022). DOI: 10.3847/2041-8213/ac6674. Accessed:
+     2026-01-22.
+
+[12] Abbott, B. P., et al. Observation of Gravitational Waves from a Binary Black Hole Merger.
+     Physical Review Letters 116, 061102 (2016). DOI: 10.1103/PhysRevLett.116.061102. Accessed:
+     2026-01-06.
+
+[13] Planck Collaboration. Planck 2018 results. VI. Cosmological parameters. Astronomy & Astro-
+     physics 641, A6 (2020). DOI: 10.1051/0004-6361/201833910. arXiv:1807.06209. Accessed: 2026-
+     01-09.
+
+[14] Alam, S., et al. The clustering of galaxies in the completed SDSS-III Baryon Oscillation Spectro-
+     scopic Survey: cosmological analysis of the DR12 galaxy sample. Monthly Notices of the Royal
+     Astronomical Society 470, 2617-2652 (2017). DOI: 10.1093/mnras/stx721. arXiv:1607.03155. Ac-
+     cessed: 2026-01-09.
+
+
+                                                    52
+[15] NIST belltestdata (public time-tag data for Shalm et al. 2015). Bucket: https://s3.amazonaws.
+     com/nist-belltestdata/ (prefix: belldata/). Accessed: 2026-01-25.
+
+[16] Delft loophole-free Bell test dataset(Hensen et al. 2015;event-ready / CHSH).4TU: https://data.
+     4tu.nl/datasets/e8cf2991-3153-48ad-b67d-dfd7d7d97fd3. Accessed: 2026-01-25.
+
+
+
+
+                                                53
+

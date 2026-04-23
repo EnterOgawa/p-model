@@ -26,6 +26,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
@@ -38,6 +39,20 @@ import numpy as np
 
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
+
+
+# Function: Detect whether the current figure surface is English-localized.
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
+
+
+# Function: Resolve public sync destination for the active locale.
+def _public_output_dir(root: Path) -> Path:
+    base = root / "output" / "public" / "vlbi"
+    if _is_en_figure():
+        return base / "locales" / "en"
+
+    return base
 
 
 # Function: Normalize labels for stable output filenames.
@@ -134,6 +149,11 @@ def _plot_rows(
     if not rows:
         return
 
+    font_scale = 1.22 if _is_en_figure() else 1.0
+    title_font = 14.0 * font_scale
+    axis_font = 12.8 * font_scale
+    tick_font = 11.4 * font_scale
+    legend_font = 11.2 * font_scale
     modes = [str(r["mode"]) for r in rows]
     x = np.arange(len(modes), dtype=np.float64)
     beta_sel = np.asarray([float(r["beta_selected"]) for r in rows], dtype=np.float64)
@@ -146,11 +166,15 @@ def _plot_rows(
     ax.errorbar(x + 0.08, beta_all, yerr=sig_all, fmt="s", capsize=4, color="tab:orange", label="all sources")
     ax.axhline(1.0, color="tab:gray", linestyle="--", linewidth=1.2, label="beta=1")
     ax.set_xticks(x)
-    ax.set_xticklabels(modes)
-    ax.set_ylabel("beta estimate")
-    ax.set_title("VLBI beta source-filter sensitivity (all vs selected)")
+    ax.set_xticklabels(modes, fontsize=tick_font)
+    ax.set_ylabel("beta estimate", fontsize=axis_font)
+    ax.set_title("VLBI beta source-filter sensitivity (all vs selected)", fontsize=title_font)
     ax.grid(True, alpha=0.28)
-    ax.legend(loc="best")
+    ax.legend(loc="best", fontsize=legend_font)
+    ax.tick_params(labelsize=tick_font)
+    for tick in [*ax.get_xticklabels(), *ax.get_yticklabels()]:
+        tick.set_fontsize(tick_font)
+
     fig.tight_layout()
     fig.savefig(str(pdf_path))
     fig.savefig(str(png_path), dpi=170)
@@ -160,7 +184,7 @@ def _plot_rows(
 # Function: Copy generated artifacts to output/public/vlbi.
 
 def _sync_public(root: Path, outputs: Sequence[Path]) -> None:
-    dst = root / "output" / "public" / "vlbi"
+    dst = _public_output_dir(root)
     dst.mkdir(parents=True, exist_ok=True)
     for path in outputs:
         if path.exists():

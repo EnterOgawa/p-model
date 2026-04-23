@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from scripts.utils.figure_locale_paths import localize_figure_output_path
 from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
 
 enable_japanese_figure_localization()
@@ -120,13 +121,15 @@ def build_matter_wave_interference_precision_audit(
     out_dir: Path,
     electron_metrics: dict,
 ) -> tuple[Path, Path]:
+    figure_lang = str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower()
+    is_en = figure_lang.startswith("en")
     alpha_metrics_path = out_dir / "de_broglie_precision_alpha_consistency_metrics.json"
     atom_audit_path = out_dir / "atom_interferometer_unified_audit_metrics.json"
     molecular_metrics_path = out_dir / "molecular_isotopic_scaling_metrics.json"
 
-    alpha_metrics = _load_json(alpha_metrics_path)
-    atom_audit_metrics = _load_json(atom_audit_path)
-    molecular_metrics = _load_json(molecular_metrics_path)
+    alpha_metrics = _load_json(localize_figure_output_path(alpha_metrics_path, root=root)) or _load_json(alpha_metrics_path)
+    atom_audit_metrics = _load_json(localize_figure_output_path(atom_audit_path, root=root)) or _load_json(atom_audit_path)
+    molecular_metrics = _load_json(localize_figure_output_path(molecular_metrics_path, root=root)) or _load_json(molecular_metrics_path)
 
     rows: list[dict] = []
     notes: list[str] = []
@@ -263,7 +266,8 @@ def build_matter_wave_interference_precision_audit(
     else:
         notes.append("Missing molecular_isotopic_scaling_metrics.json; molecular row skipped.")
 
-    summary_csv = out_dir / "matter_wave_interference_precision_audit_summary.csv"
+    summary_csv = localize_figure_output_path(out_dir / "matter_wave_interference_precision_audit_summary.csv", root=root)
+    summary_csv.parent.mkdir(parents=True, exist_ok=True)
     csv_fields = [
         "channel",
         "observable",
@@ -289,11 +293,11 @@ def build_matter_wave_interference_precision_audit(
     fig.set_size_inches(fig.get_figwidth(), 6.60, forward=True)
     fig.subplots_adjust(left=0.115, right=0.985, top=0.885, bottom=0.120, wspace=0.34, hspace=0.52)
 
-    panel_title_font = get_wavep_font_size("title")
-    axis_label_font = get_wavep_font_size("axis")
+    panel_title_font = get_wavep_font_size("title") * (0.80 if is_en else 1.0)
+    axis_label_font = get_wavep_font_size("axis") * (0.84 if is_en else 1.0)
     tick_font = get_wavep_font_size("tick")
-    legend_font = get_wavep_font_size("legend")
-    suptitle_font = get_wavep_font_size("suptitle")
+    legend_font = get_wavep_font_size("legend") * (0.82 if is_en else 1.0)
+    suptitle_font = get_wavep_font_size("suptitle") * (0.82 if is_en else 1.0)
 
     ax0 = axes[0, 0]
     ax0.bar(
@@ -311,7 +315,7 @@ def build_matter_wave_interference_precision_audit(
     z_values: list[float] = []
     # 条件分岐: `alpha_z_abs is not None and np.isfinite(alpha_z_abs)` を満たす経路を評価する。
     if alpha_z_abs is not None and np.isfinite(alpha_z_abs):
-        z_labels.append("原子 α 整合")
+        z_labels.append("atomic α consistency" if is_en else "原子 α 整合")
         z_values.append(float(alpha_z_abs))
 
     for row in rows:
@@ -319,7 +323,7 @@ def build_matter_wave_interference_precision_audit(
         if row["channel"] == "molecular_isotopic_scaling" and isinstance(row["metric_value"], (int, float)):
             # 条件分岐: `np.isfinite(float(row["metric_value"]))` を満たす経路を評価する。
             if np.isfinite(float(row["metric_value"])):
-                z_labels.append("分子スケーリング")
+                z_labels.append("molecular scaling" if is_en else "分子スケーリング")
                 z_values.append(float(row["metric_value"]))
 
     # 条件分岐: `z_values` を満たす経路を評価する。
@@ -362,8 +366,9 @@ def build_matter_wave_interference_precision_audit(
 
     fig.suptitle("物質波干渉の精度監査", y=0.992, fontsize=suptitle_font)
 
-    out_png = out_dir / "matter_wave_interference_precision_audit.png"
-    out_pdf = out_dir / "matter_wave_interference_precision_audit.pdf"
+    out_png = localize_figure_output_path(out_dir / "matter_wave_interference_precision_audit.png", root=root)
+    out_pdf = localize_figure_output_path(out_dir / "matter_wave_interference_precision_audit.pdf", root=root)
+    out_png.parent.mkdir(parents=True, exist_ok=True)
     normalize_backup = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
     os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
     try:
@@ -403,7 +408,7 @@ def build_matter_wave_interference_precision_audit(
             "Step 7.16.13 freezes a cross-particle I/F with available primary-backed outputs; fullerene raw-integration can be appended without changing this schema.",
         ],
     }
-    out_json = out_dir / "matter_wave_interference_precision_audit_metrics.json"
+    out_json = localize_figure_output_path(out_dir / "matter_wave_interference_precision_audit_metrics.json", root=root)
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
     return summary_csv, out_json
@@ -415,6 +420,8 @@ def main() -> None:
     root = ROOT
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
+    figure_lang = str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower()
+    is_en = figure_lang.startswith("en")
 
     cfg = Config()
     lam = electron_de_broglie_wavelength_m(energy_eV=cfg.energy_eV)
@@ -458,10 +465,10 @@ def main() -> None:
     fig, ax = plt.subplots(dpi=150)
     apply_wavep_figure_layout(fig, template="part2_single_panel")
 
-    panel_title_font = get_wavep_font_size("title")
-    axis_label_font = get_wavep_font_size("axis")
+    panel_title_font = get_wavep_font_size("title") * (0.80 if is_en else 1.0)
+    axis_label_font = get_wavep_font_size("axis") * (0.84 if is_en else 1.0)
     tick_font = get_wavep_font_size("tick")
-    legend_font = get_wavep_font_size("legend")
+    legend_font = get_wavep_font_size("legend") * (0.82 if is_en else 1.0)
     ax.plot(theta_mrad, p12_n, lw=2.0, label="P12（二重スリット；coherent）")
     ax.plot(theta_mrad, p1p2_n, lw=1.6, ls="--", label="P1+P2（単スリット和）")
     ax.plot(theta_mrad, p1_n, lw=1.2, ls=":", label="P1（単スリット包絡）")
@@ -478,8 +485,9 @@ def main() -> None:
     ax.legend(frameon=True, fontsize=legend_font, loc="upper right")
     ax.tick_params(axis="both", labelsize=tick_font)
 
-    out_png = out_dir / "electron_double_slit_interference.png"
-    out_pdf = out_dir / "electron_double_slit_interference.pdf"
+    out_png = localize_figure_output_path(out_dir / "electron_double_slit_interference.png", root=root)
+    out_pdf = localize_figure_output_path(out_dir / "electron_double_slit_interference.pdf", root=root)
+    out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png)
     fig.savefig(out_pdf)
     plt.close(fig)
@@ -520,7 +528,7 @@ def main() -> None:
             "The experiment uses electron optics (magnification) for imaging; this script focuses on the slit-defined angular pattern.",
         ],
     }
-    out_json = out_dir / "electron_double_slit_interference_metrics.json"
+    out_json = localize_figure_output_path(out_dir / "electron_double_slit_interference_metrics.json", root=root)
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
     audit_csv, audit_json = build_matter_wave_interference_precision_audit(

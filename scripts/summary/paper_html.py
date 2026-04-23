@@ -1764,6 +1764,7 @@ def _render_html(
 ) -> Path:
     out_dir.mkdir(parents=True, exist_ok=True)
     html_path = out_dir / str(out_name)
+    html_path.parent.mkdir(parents=True, exist_ok=True)
 
     parts: List[str] = []
     parts.append("<!doctype html>")

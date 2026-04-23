@@ -1,16 +1,24 @@
 from __future__ import annotations
 
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import matplotlib.pyplot as plt
 
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.figure_locale_paths import localize_figure_output_path
+from scripts.utils.plot_style import get_wavep_font_size, install_wavep_font_profile
 
 enable_japanese_figure_localization()
+
+_PROFILE_NAME = "part3b_quantum_verification"
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
@@ -40,6 +48,7 @@ def _as_float(x: object) -> float | None:
 
 def main() -> None:
     root = _repo_root()
+    install_wavep_font_profile(profile_name=_PROFILE_NAME)
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -108,27 +117,33 @@ def main() -> None:
     # ---- Figure ----
     plt.rcParams["pdf.fonttype"] = 42
     plt.rcParams["ps.fonttype"] = 42
+    title_font = get_wavep_font_size("title")
+    axis_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    note_font = get_wavep_font_size("note")
+    line_label_font = get_wavep_font_size("note")
 
     fig_w, fig_h, dpi = 11.5, 6.4, 190
     fig, ax = plt.subplots(1, 1, figsize=(fig_w, fig_h), dpi=dpi)
-    ax.set_title("Atomic baseline (Helium, NIST ASD)", fontsize=17.2)
-    ax.set_xlabel("Vacuum wavelength λ [nm] (from NIST ASD)", fontsize=14.6)
+    ax.set_title("Atomic baseline (Helium, NIST ASD)", fontsize=title_font)
+    ax.set_xlabel("Vacuum wavelength λ [nm] (from NIST ASD)", fontsize=axis_font)
     ax.set_yticks([])
     ax.set_xlim(350, 720)
     ax.set_ylim(0, 1)
     ax.grid(True, axis="x", alpha=0.25)
-    ax.tick_params(axis="x", labelsize=12.8)
+    ax.tick_params(axis="x", labelsize=tick_font)
 
     for i, r in enumerate(lines_out):
         lam = float(r["lambda_vac_nm"])
-        label = str(r.get("id") or "")
+        raw_label = str(r.get("id") or "")
+        label = raw_label.replace("_", " ")
         ax.axvline(lam, color="#2f855a", lw=2.2, alpha=0.95)
         y = 0.82 if (i % 2 == 0) else 0.58
         ax.text(
             lam + 2.0,
             y,
             f"{label}\n{lam:.3f} nm",
-            fontsize=12.8,
+            fontsize=line_label_font,
             ha="left",
             va="center",
             color="#2f855a",
@@ -139,13 +154,14 @@ def main() -> None:
         0.05,
         "Data: NIST ASD (He I)\nThis figure fixes baseline targets for Part III; it is not a derivation.",
         transform=ax.transAxes,
-        fontsize=12.2,
+        fontsize=note_font,
         bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor="#cccccc"),
     )
 
     fig.tight_layout()
-    out_pdf = out_dir / "atomic_helium_baseline.pdf"
-    out_png = out_dir / "atomic_helium_baseline.png"
+    out_pdf = localize_figure_output_path(out_dir / "atomic_helium_baseline.pdf", root=root)
+    out_png = localize_figure_output_path(out_dir / "atomic_helium_baseline.png", root=root)
+    out_pdf.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_pdf)
     fig.savefig(out_png)
     plt.close(fig)
@@ -165,7 +181,7 @@ def main() -> None:
         ),
         "outputs": {"pdf": str(out_pdf), "png": str(out_png)},
     }
-    out_json = out_dir / "atomic_helium_baseline_metrics.json"
+    out_json = localize_figure_output_path(out_dir / "atomic_helium_baseline_metrics.json", root=root)
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"[ok] wrote: {out_pdf}")
     print(f"[ok] wrote: {out_png}")

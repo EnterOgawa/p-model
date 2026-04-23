@@ -247,7 +247,7 @@
       "Non-Bullet transfer rows do not yet have observed offsets/sigma."
     ]
   },
-  "generated_utc": "2026-04-06T11:09:00.931208+00:00",
+  "generated_utc": "2026-04-12T10:42:37.778183+00:00",
   "inputs": {
     "apply_primary_registration": false,
     "bootstrap_primary_registration": false,

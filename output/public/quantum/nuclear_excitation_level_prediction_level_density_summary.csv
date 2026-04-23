@@ -1,0 +1,6 @@
+group_type,group,n,median_n_observed_levels,rms_n_observed_levels
+A_band,A_2_40,67,2.0,2.256003599023275
+A_band,A_41_100,166,3.0,2.5233846079260434
+A_band,A_101_plus,432,2.0,2.5078580206725922
+magic,magic_any,123,2.0,2.439512146351217
+magic,nonmagic,542,2.0,2.498338931565165

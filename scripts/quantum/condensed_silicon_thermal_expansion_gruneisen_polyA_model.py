@@ -4,6 +4,8 @@ import csv
 import hashlib
 import json
 import math
+import os
+import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -11,8 +13,13 @@ from typing import Any, Optional
 
 import matplotlib.pyplot as plt
 
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.plot_style import get_wavep_font_size
 
 enable_japanese_figure_localization()
 
@@ -484,6 +491,16 @@ def main() -> None:
 
     # Figure
 
+    figure_lang = os.getenv("WAVEP_FIGURE_LANG", "ja").strip().lower()
+    is_en = figure_lang.startswith("en")
+    title_font = get_wavep_font_size("title")
+    x_axis_label_font = get_wavep_font_size("axis")
+    y_axis_label_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    legend_font = get_wavep_font_size("legend")
+    upper_ylabel = "α(T) [10^-8/K]" if is_en else "α(T) (10^-8 / K)"
+    lower_xlabel = "T (K)" if is_en else "Temperature T (K)"
+
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10.5, 7.0), sharex=True, gridspec_kw={"height_ratios": [2, 1]})
 
     ax1.plot(temps, alpha_obs_1e8, color="#d62728", lw=2.0, label="NIST TRC fit (obs) α(T)")
@@ -495,21 +512,23 @@ def main() -> None:
         label=f"Poly A_eff(T) deg={best.degree}: α≈A_eff(T)·Cv_D(θ_D)",
     )
     ax1.axhline(0.0, color="#666666", lw=1.0, alpha=0.6)
-    ax1.set_ylabel("α(T) (10^-8 / K)")
-    ax1.set_title("Silicon thermal expansion: polynomial A_eff(T) ansatz (diagnostic)")
+    ax1.set_ylabel(upper_ylabel, fontsize=y_axis_label_font, labelpad=0.8)
+    ax1.set_title("Silicon thermal expansion: polynomial A_eff(T) ansatz (diagnostic)", fontsize=title_font)
     ax1.grid(True, alpha=0.25)
-    ax1.legend(loc="best", fontsize=11.8)
+    ax1.tick_params(axis="both", labelsize=tick_font)
+    ax1.legend(loc="best", fontsize=legend_font)
 
     ax2.plot(temps, z_score, color="#000000", lw=1.2, alpha=0.9, label="z = (α_pred−α_obs)/σ_fit")
     ax2.axhline(0.0, color="#666666", lw=1.0, alpha=0.6)
     ax2.axhline(3.0, color="#999999", lw=1.0, ls="--", alpha=0.7)
     ax2.axhline(-3.0, color="#999999", lw=1.0, ls="--", alpha=0.7)
-    ax2.set_xlabel("Temperature T (K)")
-    ax2.set_ylabel("z")
+    ax2.set_xlabel(lower_xlabel, fontsize=x_axis_label_font, labelpad=1.2)
+    ax2.set_ylabel("z", fontsize=y_axis_label_font, labelpad=1.5)
     ax2.grid(True, alpha=0.25)
-    ax2.legend(loc="best", fontsize=11.8)
+    ax2.tick_params(axis="both", labelsize=tick_font)
+    ax2.legend(loc="best", fontsize=legend_font)
 
-    fig.tight_layout()
+    fig.tight_layout(rect=(0.065, 0.045, 1.0, 1.0) if is_en else None)
     out_png = out_dir / "condensed_silicon_thermal_expansion_gruneisen_polyA_model.png"
     fig.savefig(out_png, dpi=180)
     plt.close(fig)

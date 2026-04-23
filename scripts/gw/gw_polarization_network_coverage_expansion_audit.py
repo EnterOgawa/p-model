@@ -11,6 +11,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import shutil
 import subprocess
 import sys
@@ -31,6 +32,11 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+
+
+# 関数: `WAVEP_FIGURE_LANG` から英語 surface かどうかを判定する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
 
 
 # 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
@@ -283,14 +289,15 @@ def _as_metric_row(subset: Tuple[str, ...], payload: Dict[str, Any], gate_scalar
 # 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(rows: List[Dict[str, Any]], gate_scalar_max: float, out_png: Path) -> None:
+    font_scale = 1.18 if _is_en_figure() else 1.0
     labels = [_format_subset_label(str(row.get("subset_events", ""))) for row in rows]
     y_scalar = np.asarray([_safe_float(row.get("best_u2_scalar_overlap_proxy")) for row in rows], dtype=float)
     y_usable = np.asarray([float(row.get("best_coverage_n_usable_events", 0)) for row in rows], dtype=float)
     pass_found = np.asarray([float(row.get("best_gate_found", 0)) for row in rows], dtype=float)
-    title_fs = 16.4
-    label_fs = 13.0
-    legend_fs = 12.0
-    tick_fs = 11.0
+    title_fs = 16.4 * font_scale
+    label_fs = 13.0 * font_scale
+    legend_fs = 12.0 * font_scale
+    tick_fs = 11.0 * font_scale
 
     x = np.arange(len(rows), dtype=float)
     fig, (ax1, ax2) = plt.subplots(

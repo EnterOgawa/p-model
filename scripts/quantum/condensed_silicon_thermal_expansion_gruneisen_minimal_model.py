@@ -4,6 +4,8 @@ import csv
 import hashlib
 import json
 import math
+import os
+import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -19,6 +21,20 @@ enable_japanese_figure_localization()
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
+
+
+_ROOT = _repo_root()
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
+from scripts.utils.figure_locale_paths import localize_figure_output_path
+from scripts.utils.plot_style import (
+    get_wavep_font_size,
+    install_wavep_font_profile,
+    normalize_wavep_export_canvas_to_textwidth,
+)
+
+_PROFILE_NAME = "part3b_quantum_verification"
 
 
 # 関数: `_sha256` の入出力契約と処理意図を定義する。
@@ -323,6 +339,7 @@ def main() -> None:
     root = _repo_root()
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
+    install_wavep_font_profile(profile_name=_PROFILE_NAME)
 
     # Alpha(T) source (NIST TRC Cryogenics).
     alpha_src = root / "data" / "quantum" / "sources" / "nist_trc_silicon_thermal_expansion" / "extracted_values.json"
@@ -461,7 +478,13 @@ def main() -> None:
 
     # Plot
 
-    legend_font = 11.8
+    figure_lang = os.getenv("WAVEP_FIGURE_LANG", "ja").strip().lower()
+    is_en = figure_lang.startswith("en")
+    title_font = get_wavep_font_size("title")
+    axis_label_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    legend_font = get_wavep_font_size("legend") * (0.80 if is_en else 1.0)
+    note_font = get_wavep_font_size("note") * (0.92 if is_en else 1.0)
 
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10.2, 7.0), sharex=True, gridspec_kw={"height_ratios": [2, 1]})
 
@@ -475,24 +498,35 @@ def main() -> None:
             float(zero["x_cross"]) + 5,
             ax1.get_ylim()[0] * 0.8,
             f"sign change ~{zero['x_cross']:.0f} K",
-            fontsize=9,
+            fontsize=note_font,
             alpha=0.85,
         )
 
-    ax1.set_ylabel("α(T) (10^-8 / K)")
-    ax1.set_title("Silicon thermal expansion: Debye–Grüneisen minimal model check")
+    ax1.set_ylabel("α(T) (10^-8 / K)", fontsize=axis_label_font)
+    ax1.set_title("Silicon thermal expansion: Debye–Grüneisen minimal model check", fontsize=title_font)
     ax1.grid(True, alpha=0.25)
+    ax1.tick_params(axis="both", labelsize=tick_font)
     ax1.legend(loc="best", fontsize=legend_font)
 
     ax2.plot(temps, ratio_alpha_over_cv, color="#000000", lw=1.5, label="α/Cv (obs)")
     ax2.axhline(a_eff, color="#1f77b4", lw=2.0, alpha=0.85, label=f"A_fit (T≥{fit_min_k:.0f} K)")
-    ax2.set_xlabel("Temperature T (K)")
-    ax2.set_ylabel("α/Cv (mol/J)")
+    ax2.set_xlabel("Temperature T (K)", fontsize=axis_label_font)
+    ax2.set_ylabel("α/Cv (mol/J)", fontsize=axis_label_font)
     ax2.grid(True, alpha=0.25)
+    ax2.tick_params(axis="both", labelsize=tick_font)
     ax2.legend(loc="best", fontsize=legend_font)
 
     fig.tight_layout()
-    out_png = out_dir / "condensed_silicon_thermal_expansion_gruneisen_minimal_model.png"
+    normalize_wavep_export_canvas_to_textwidth(fig, profile_name=_PROFILE_NAME)
+    out_pdf = localize_figure_output_path(
+        out_dir / "condensed_silicon_thermal_expansion_gruneisen_minimal_model.pdf",
+        root=root,
+    )
+    out_png = localize_figure_output_path(
+        out_dir / "condensed_silicon_thermal_expansion_gruneisen_minimal_model.png",
+        root=root,
+    )
+    fig.savefig(out_pdf)
     fig.savefig(out_png, dpi=180)
     plt.close(fig)
 
@@ -501,7 +535,10 @@ def main() -> None:
     reject_rel_rmse_threshold = 0.05
     rejected = (sign_mismatch > 0) or (fit_rel_rmse >= reject_rel_rmse_threshold)
 
-    out_metrics = out_dir / "condensed_silicon_thermal_expansion_gruneisen_minimal_model_metrics.json"
+    out_metrics = localize_figure_output_path(
+        out_dir / "condensed_silicon_thermal_expansion_gruneisen_minimal_model_metrics.json",
+        root=root,
+    )
     out_metrics.write_text(
         json.dumps(
             {
@@ -546,7 +583,7 @@ def main() -> None:
                         "Even restricting to the positive-α range (T≥200 K), α is not proportional to Debye Cv with a constant factor; additional physics (e.g., mode-dependent γ or anharmonicity) is required.",
                     ],
                 },
-                "outputs": {"csv": str(out_csv), "png": str(out_png)},
+                "outputs": {"csv": str(out_csv), "pdf": str(out_pdf), "png": str(out_png)},
                 "notes": [
                     "This step is a minimal-model check to define what must be reproduced by any future derivation.",
                     "Cv is computed from a 1-parameter Debye model using θ_D fixed (or refit) from JANAF Cp° points.",
@@ -560,6 +597,7 @@ def main() -> None:
     )
 
     print(f"[ok] wrote: {out_csv}")
+    print(f"[ok] wrote: {out_pdf}")
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_metrics}")
 

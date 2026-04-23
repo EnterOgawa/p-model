@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -15,29 +16,46 @@ from typing import Any
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
 
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.utils.figure_locale_paths import localize_figure_output_path, resolve_figure_output_locale
 from scripts.utils.plot_style import (
     apply_paper_style,
     apply_wavep_figure_layout,
     resolve_wavep_cjk_font_family,
 )
-
-ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR_CANON = ROOT / "output" / "theory"
 OUT_DIR_PRIVATE = ROOT / "output" / "private" / "theory"
 OUT_DIR_PUBLIC = ROOT / "output" / "public" / "theory"
+FIGURE_LOCALE = resolve_figure_output_locale()
+IS_EN = FIGURE_LOCALE == "en"
+
+
+# 関数: `_t` の入出力契約と処理意図を定義する。
+def _t(ja: str, en: str) -> str:
+    return en if IS_EN else ja
 
 
 # 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
+# 関数: `_configure_font` の入出力契約と処理意図を定義する。
 
-def _set_japanese_font() -> None:
+def _configure_font() -> None:
     try:
         import matplotlib as mpl
         import matplotlib.font_manager as fm
+
+        if IS_EN:
+            mpl.rcParams["font.family"] = ["DejaVu Sans"]
+            mpl.rcParams["font.sans-serif"] = ["DejaVu Sans"]
+            mpl.rcParams["axes.unicode_minus"] = False
+            return
 
         preferred = resolve_wavep_cjk_font_family(preferred_name="Noto Sans CJK JP")
         if preferred:
@@ -69,18 +87,23 @@ def _write_json(path: Path, obj: Any) -> None:
 
 def _save_figure_bundle(*, fig: Any, stem: str) -> dict[str, str]:
     outputs = {
-        "png_canon": OUT_DIR_CANON / f"{stem}.png",
-        "png_private": OUT_DIR_PRIVATE / f"{stem}.png",
-        "png_public": OUT_DIR_PUBLIC / f"{stem}.png",
-        "pdf_canon": OUT_DIR_CANON / f"{stem}.pdf",
-        "pdf_private": OUT_DIR_PRIVATE / f"{stem}.pdf",
-        "pdf_public": OUT_DIR_PUBLIC / f"{stem}.pdf",
+        "png_canon": OUT_DIR_CANON / f"{stem}.png" if not IS_EN else localize_figure_output_path(OUT_DIR_PRIVATE / f"{stem}.png", root=ROOT, locale=FIGURE_LOCALE),
+        "png_private": localize_figure_output_path(OUT_DIR_PRIVATE / f"{stem}.png", root=ROOT, locale=FIGURE_LOCALE),
+        "png_public": localize_figure_output_path(OUT_DIR_PUBLIC / f"{stem}.png", root=ROOT, locale=FIGURE_LOCALE),
+        "pdf_canon": OUT_DIR_CANON / f"{stem}.pdf" if not IS_EN else localize_figure_output_path(OUT_DIR_PRIVATE / f"{stem}.pdf", root=ROOT, locale=FIGURE_LOCALE),
+        "pdf_private": localize_figure_output_path(OUT_DIR_PRIVATE / f"{stem}.pdf", root=ROOT, locale=FIGURE_LOCALE),
+        "pdf_public": localize_figure_output_path(OUT_DIR_PUBLIC / f"{stem}.pdf", root=ROOT, locale=FIGURE_LOCALE),
     }
-    for path in outputs.values():
+    save_targets = dict(outputs)
+    if IS_EN:
+        save_targets.pop("png_canon", None)
+        save_targets.pop("pdf_canon", None)
+
+    for path in save_targets.values():
         path.parent.mkdir(parents=True, exist_ok=True)
 
     with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
-        for path in outputs.values():
+        for path in save_targets.values():
             if path.suffix.lower() == ".png":
                 fig.savefig(path, dpi=220)
             else:
@@ -101,6 +124,15 @@ def _box(
     desc: str,
     part: str,
     fc: str,
+    title_y: float = 0.72,
+    formula_y: float = 0.50,
+    desc_y: float = 0.25,
+    title_fontsize: float = 8.8,
+    formula_fontsize: float = 8.2,
+    desc_fontsize: float = 7.2,
+    part_x: float = 0.02,
+    part_y: float = 0.97,
+    part_fontsize: float = 6.0,
 ) -> None:
     x, y = xy
     w, h = wh
@@ -116,8 +148,8 @@ def _box(
     )
     ax.add_patch(patch)
     part_text = ax.text(
-        x + 0.03 * w,
-        y + 0.93 * h,
+        x + part_x * w,
+        y + part_y * h,
         part,
         transform=ax.transAxes,
         ha="left",
@@ -126,11 +158,11 @@ def _box(
         color="0.33",
         fontweight="bold",
     )
-    part_text.set_fontsize(6.8)
+    part_text.set_fontsize(part_fontsize)
     part_text.set_fontweight("bold")
     title_text = ax.text(
         x + 0.5 * w,
-        y + 0.72 * h,
+        y + title_y * h,
         title,
         transform=ax.transAxes,
         ha="center",
@@ -140,11 +172,11 @@ def _box(
         color="0.10",
         linespacing=1.18,
     )
-    title_text.set_fontsize(8.8)
+    title_text.set_fontsize(title_fontsize)
     title_text.set_fontweight("bold")
     formula_text = ax.text(
         x + 0.5 * w,
-        y + 0.50 * h,
+        y + formula_y * h,
         formula,
         transform=ax.transAxes,
         ha="center",
@@ -153,10 +185,10 @@ def _box(
         color="0.10",
         linespacing=1.14,
     )
-    formula_text.set_fontsize(8.2)
+    formula_text.set_fontsize(formula_fontsize)
     desc_text = ax.text(
         x + 0.5 * w,
-        y + 0.25 * h,
+        y + desc_y * h,
         desc,
         transform=ax.transAxes,
         ha="center",
@@ -165,7 +197,7 @@ def _box(
         color="0.22",
         linespacing=1.15,
     )
-    desc_text.set_fontsize(7.2)
+    desc_text.set_fontsize(desc_fontsize)
 
 
 # 関数: `_arrow` の入出力契約と処理意図を定義する。
@@ -200,13 +232,15 @@ def main() -> None:
     OUT_DIR_PUBLIC.mkdir(parents=True, exist_ok=True)
 
     out_json_canon = OUT_DIR_CANON / "pmodel_core_mapping_overview_metrics.json"
-    out_json_private = OUT_DIR_PRIVATE / "pmodel_core_mapping_overview_metrics.json"
-    out_json_public = OUT_DIR_PUBLIC / "pmodel_core_mapping_overview_metrics.json"
+    out_json_private = localize_figure_output_path(OUT_DIR_PRIVATE / "pmodel_core_mapping_overview_metrics.json", root=ROOT, locale=FIGURE_LOCALE)
+    out_json_public = localize_figure_output_path(OUT_DIR_PUBLIC / "pmodel_core_mapping_overview_metrics.json", root=ROOT, locale=FIGURE_LOCALE)
 
     apply_paper_style()
-    _set_japanese_font()
+    _configure_font()
     fig, ax = plt.subplots(dpi=220)
     apply_wavep_figure_layout(fig, template="paper_diagram")
+    fig.set_size_inches(fig.get_size_inches()[0], 4.45, forward=True)
+    fig.subplots_adjust(left=0.038, right=0.992, top=0.965, bottom=0.062)
     ax.set_axis_off()
 
     wh_input = (0.24, 0.20)
@@ -222,9 +256,9 @@ def main() -> None:
     pos_cosmo = (0.36, 0.21)
 
     group_labels = [
-        (0.845, 0.973, "Part I 所管", "#2f6b39"),
-        (0.140, 0.615, "Part III 所管", "#9a5c0f"),
-        (0.49, 0.165, "Part II 所管", "#276749"),
+        (0.845, 0.973, _t("Part I 所管", "Part I scope"), "#2f6b39"),
+        (0.140, 0.628, _t("Part III 所管", "Part III scope"), "#9a5c0f"),
+        (0.49, 0.165, _t("Part II 所管", "Part II scope"), "#276749"),
     ]
     for gx, gy, text, color in group_labels:
         group_text = ax.text(
@@ -247,19 +281,24 @@ def main() -> None:
         xy=pos_p,
         wh=wh_input,
         fc="#dfe8f8",
-        title="時間波密度（入力）",
+        title=_t("時間波密度（入力）", "Time-wave density\n(input)"),
         formula=r"$P(x)$",
-        desc="静止極限の基底量",
+        desc=_t("静止極限の基底量", "Base quantity in\nthe static limit"),
         part="Part I",
+        title_y=0.67,
+        formula_y=0.40,
+        desc_y=0.20,
+        title_fontsize=8.2,
+        formula_fontsize=7.8,
     )
     _box(
         ax=ax,
         xy=pos_phi,
         wh=wh_hub,
         fc="#e7ddff",
-        title="中心ハブ：ポテンシャル写像",
-        formula=r"$\phi=-c^2\ln(P/P_0)$",
-        desc="重力・時計・光への共通入口",
+        title=_t("中心ハブ：ポテンシャル写像", "Central hub:\npotential mapping"),
+        formula=r"$\phi=-c^2\ln(P/P_{\infty})$",
+        desc=_t("重力・時計・光への共通入口", "Common entry to gravity,\nclocks, and light"),
         part="Part I",
     )
     _box(
@@ -267,9 +306,9 @@ def main() -> None:
         xy=pos_gravity,
         wh=wh_leaf,
         fc="#e3f1e3",
-        title="重力",
+        title=_t("重力", "Gravity"),
         formula=r"$\mathbf{a}=-\nabla\phi$",
-        desc="P勾配へ滑る運動",
+        desc=_t("P勾配へ滑る運動", "Motion sliding down\nthe P gradient"),
         part="Part I",
     )
     _box(
@@ -277,40 +316,67 @@ def main() -> None:
         xy=pos_clock,
         wh=wh_leaf,
         fc="#e3f1e3",
-        title="時計（束縛モード）",
-        formula=r"$d\tau/dt=(P_0/P)(d\tau/dt)_v$",
-        desc="重力項と速度項を分離",
+        title=_t("時計（束縛モード）", "Clock\n(bound mode)"),
+        formula=r"$d\tau/dt=(P_{\infty}/P)(d\tau/dt)_v$",
+        desc=_t("重力項と速度項を分離", "Separate gravity and\nvelocity factors"),
         part="Part I",
+        title_y=0.66,
+        formula_y=0.41,
+        desc_y=0.18,
+        title_fontsize=8.2,
+        formula_fontsize=6.8,
+        desc_fontsize=6.6,
     )
     _box(
         ax=ax,
         xy=pos_light,
         wh=wh_leaf,
         fc="#e3f1e3",
-        title="光（自由波）",
-        formula=r"$n(P)=(P/P_0)^{2\beta}$",
-        desc="高P側へ屈折",
+        title=_t("光（自由波）", "Light\n(free wave)"),
+        formula=r"$n(P)=(P/P_{\infty})^{2\beta}$",
+        desc=_t("高P側へ屈折", "Refraction toward\nthe high-P side"),
         part="Part I",
+        title_y=0.66,
+        formula_y=0.41,
+        desc_y=0.18,
+        title_fontsize=8.2,
+        formula_fontsize=6.9,
+        desc_fontsize=6.6,
     )
     _box(
         ax=ax,
         xy=pos_quantum,
         wh=wh_leaf,
         fc="#fdeccf",
-        title="量子相関（selection）",
-        formula=r"$P_\mu\leftrightarrow$ 微視結合",
-        desc="Bell・核力・V-A（Part III）",
+        title=_t("量子相関（selection）", "Quantum correlation\n(selection)"),
+        formula=_t(r"$P_\mu\leftrightarrow$ 微視結合", r"$P_\mu\leftrightarrow$ microscopic coupling"),
+        desc=_t("Bell・核力・V-A（Part III）", "Bell, nuclear force,\nand V-A (Part III)"),
         part="Part III",
+        title_y=0.66,
+        formula_y=0.35,
+        desc_y=0.12,
+        title_fontsize=7.8,
+        formula_fontsize=6.8,
+        desc_fontsize=6.8,
     )
     _box(
         ax=ax,
         xy=pos_cosmo,
         wh=wh_leaf,
         fc="#ddf3e8",
-        title="宇宙論背景写像",
+        title=_t("宇宙論背景写像", "Cosmological\nbackground mapping"),
         formula=r"$1+z=P_{\mathrm{em}}/P_{\mathrm{obs}}$",
-        desc=r"$P_{\mathrm{bg}}(t)$ の時間変化（Part II）",
+        desc=_t(
+            r"$P_{\mathrm{bg}}(t)$ の時間変化（Part II）",
+            "Time evolution of $P_{\\mathrm{bg}}(t)$\n(Part II)",
+        ),
         part="Part II",
+        title_y=0.66,
+        formula_y=0.35,
+        desc_y=0.12,
+        title_fontsize=7.8,
+        formula_fontsize=6.8,
+        desc_fontsize=6.8,
     )
 
     _arrow(
@@ -360,8 +426,11 @@ def main() -> None:
 
     footer_text = ax.text(
         0.5,
-        0.058,
-        r"Part I は写像と $\beta_{\mathrm{frozen}}$ を固定し、Part II/III は固定値のまま反証監査を行う。",
+        0.044,
+        _t(
+            r"Part I は写像と $\beta_{\mathrm{frozen}}$ を固定し、Part II/III は固定値のまま反証監査を行う。",
+            r"Part I fixes the mapping and $\beta_{\mathrm{frozen}}$; Parts II/III run falsification audits with those frozen values.",
+        ),
         transform=ax.transAxes,
         ha="center",
         va="center",
@@ -389,7 +458,9 @@ def main() -> None:
             "Velocity saturation δ is treated as an extension (not used in the Part I core).",
         ],
     }
-    _write_json(out_json_canon, payload)
+    if not IS_EN:
+        _write_json(out_json_canon, payload)
+
     _write_json(out_json_private, payload)
     _write_json(out_json_public, payload)
 

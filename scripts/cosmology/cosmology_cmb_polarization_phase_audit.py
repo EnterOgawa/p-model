@@ -29,6 +29,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import shutil
 import sys
 from dataclasses import dataclass
@@ -37,6 +38,20 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
+
+
+# 関数: `WAVEP_FIGURE_LANG` から英語 surface かどうかを判定する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
+
+
+# 関数: locale ごとの既定出力先を解決する。
+def _default_output_dir(kind: str) -> Path:
+    base = ROOT / "output" / kind / "cosmology"
+    if _is_en_figure():
+        return base / "locales" / "en"
+
+    return base
 
 ROOT = Path(__file__).resolve().parents[2]
 # 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
@@ -474,6 +489,12 @@ def _plot(
     _set_japanese_font()
     import matplotlib.pyplot as plt
 
+    font_scale = 1.14 if _is_en_figure() else 1.0
+    axis_font = 18.4 * font_scale
+    title_font = 20.8 * font_scale
+    legend_font = 19.0 * font_scale
+    tick_font = 17.2 * font_scale
+    suptitle_font = 22.2 * font_scale
     # 図102: 4段を2ブロック（上段:TT/EE, 下段:TE/位相）へ分割して可読性を上げる。
     fig, axes = plt.subplots(2, 2, figsize=(17.8, 15.2))
     ax_tt, ax_ee = axes[0]
@@ -485,11 +506,11 @@ def _plot(
         ax_tt.axvline(f.ell_pred, color="#d62728", linestyle="--", linewidth=1.0, alpha=0.5)
 
     ax_tt.set_xlim(120, 1100)
-    ax_tt.set_xlabel("multipole ℓ", fontsize=18.4)
-    ax_tt.set_ylabel("D_ℓ [μK²]", fontsize=18.4)
-    ax_tt.set_title("TT peaks used to fix ℓ_A and φ", fontsize=20.8)
+    ax_tt.set_xlabel("multipole ℓ", fontsize=axis_font)
+    ax_tt.set_ylabel("D_ℓ [μK²]", fontsize=axis_font)
+    ax_tt.set_title("TT peaks used to fix ℓ_A and φ", fontsize=title_font)
     ax_tt.grid(True, linestyle="--", alpha=0.35)
-    ax_tt.legend(fontsize=19.0, loc="upper right")
+    ax_tt.legend(fontsize=legend_font, loc="upper right")
 
     ax_ee.errorbar(ee.ell, ee.dl, yerr=ee.sigma, fmt=".", color="#bbbbbb", alpha=0.35, label="EE observed")
     ax_ee.plot(ee.ell, ee.bestfit, color="#2ca02c", linewidth=1.3, label="EE best-fit")
@@ -498,11 +519,11 @@ def _plot(
         ax_ee.axvline(f.ell_pred, color="#9467bd", linestyle="--", linewidth=1.0, alpha=0.65)
 
     ax_ee.set_xlim(220, 1250)
-    ax_ee.set_xlabel("multipole ℓ", fontsize=18.4)
-    ax_ee.set_ylabel("D_ℓ [μK²]", fontsize=18.4)
-    ax_ee.set_title("EE: predicted half-phase shift from TT", fontsize=20.8)
+    ax_ee.set_xlabel("multipole ℓ", fontsize=axis_font)
+    ax_ee.set_ylabel("D_ℓ [μK²]", fontsize=axis_font)
+    ax_ee.set_title("EE: predicted half-phase shift from TT", fontsize=title_font)
     ax_ee.grid(True, linestyle="--", alpha=0.35)
-    ax_ee.legend(fontsize=19.0, loc="upper right")
+    ax_ee.legend(fontsize=legend_font, loc="upper right")
 
     ax_te.errorbar(te.ell, te.dl, yerr=te.sigma, fmt=".", color="#bbbbbb", alpha=0.35, label="TE observed")
     ax_te.plot(te.ell, te.bestfit, color="#ff7f0e", linewidth=1.3, label="TE best-fit")
@@ -515,11 +536,11 @@ def _plot(
         ax_te.axvline(f.ell_pred, color="#17becf", linestyle="--", linewidth=1.0, alpha=0.65)
 
     ax_te.set_xlim(180, 1900)
-    ax_te.set_xlabel("multipole ℓ", fontsize=18.4)
-    ax_te.set_ylabel("D_ℓ [μK²]", fontsize=18.4)
-    ax_te.set_title("TE: predicted quarter-phase shift from TT", fontsize=20.8)
+    ax_te.set_xlabel("multipole ℓ", fontsize=axis_font)
+    ax_te.set_ylabel("D_ℓ [μK²]", fontsize=axis_font)
+    ax_te.set_title("TE: predicted quarter-phase shift from TT", fontsize=title_font)
     ax_te.grid(True, linestyle="--", alpha=0.35)
-    ax_te.legend(fontsize=19.0, loc="upper right")
+    ax_te.legend(fontsize=legend_font, loc="upper right")
 
     expected = [0.5, 0.25]
     fitted = [float(phase_fit_ee["delta_fit"]), float(phase_fit_te["delta_fit"])]
@@ -530,16 +551,21 @@ def _plot(
     ax_phase.bar(x + 0.5 * w, fitted, width=w, color="#1f77b4", label="fitted")
     ax_phase.set_xticks(x)
     ax_phase.set_xticklabels(labels)
-    ax_phase.set_ylabel("phase offset Δφ", fontsize=18.4)
+    ax_phase.set_ylabel("phase offset Δφ", fontsize=axis_font)
     ax_phase.set_ylim(0.0, 0.9)
     ax_phase.grid(True, linestyle="--", alpha=0.35, axis="y")
-    ax_phase.set_title("位相ずれ監査（Planck TT/TE/EE）", fontsize=20.8)
-    ax_phase.legend(fontsize=19.0, loc="upper right")
+    ax_phase.set_title(
+        "Phase-offset audit (Planck TT/TE/EE)" if _is_en_figure() else "位相ずれ監査（Planck TT/TE/EE）",
+        fontsize=title_font,
+    )
+    ax_phase.legend(fontsize=legend_font, loc="upper right")
 
     for axis in (ax_tt, ax_ee, ax_te, ax_phase):
-        axis.tick_params(labelsize=17.2)
+        axis.tick_params(labelsize=tick_font)
+        for tick in [*axis.get_xticklabels(), *axis.get_yticklabels()]:
+            tick.set_fontsize(tick_font)
 
-    fig.suptitle("CMB polarization transfer audit (Stokes extension + Thomson source)", fontsize=22.2)
+    fig.suptitle("CMB polarization transfer audit (Stokes extension + Thomson source)", fontsize=suptitle_font)
     # 図下注記は論文本文側へ移し、図中の重なりを回避する。
     plt.tight_layout(rect=(0.0, 0.03, 1.0, 0.972))
     out_png.parent.mkdir(parents=True, exist_ok=True)
@@ -657,7 +683,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     quadrupole_derivation = _quadrupole_velocity_gradient_summary()
     phase_shift_proof = _phase_shift_complete_proof(delta_ee=delta_ee, delta_te=delta_te, gate=gate)
 
-    out_dir = Path(args.out_dir).resolve()
+    default_private = (ROOT / "output" / "private" / "cosmology").resolve()
+    requested_private = Path(args.out_dir).resolve()
+    out_dir = _default_output_dir("private") if _is_en_figure() and requested_private == default_private else requested_private
     out_dir.mkdir(parents=True, exist_ok=True)
     base = "cosmology_cmb_polarization_phase_audit"
     out_png = out_dir / f"{base}.png"
@@ -766,7 +794,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     copied: Dict[str, str] = {}
     # 条件分岐: `not bool(args.skip_public_copy)` を満たす経路を評価する。
     if not bool(args.skip_public_copy):
-        copied = _copy_to_public([out_png, out_pdf, out_json, out_fals, out_csv], Path(args.public_dir).resolve())
+        default_public = (ROOT / "output" / "public" / "cosmology").resolve()
+        requested_public = Path(args.public_dir).resolve()
+        public_dir = _default_output_dir("public") if _is_en_figure() and requested_public == default_public else requested_public
+        copied = _copy_to_public([out_png, out_pdf, out_json, out_fals, out_csv], public_dir)
 
     print(f"[ok] png : {out_png}")
     print(f"[ok] pdf : {out_pdf}")

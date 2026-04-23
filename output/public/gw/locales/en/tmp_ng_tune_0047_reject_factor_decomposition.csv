@@ -1,0 +1,4 @@
+pair,bottleneck_rank,n_rows,n_reject_event_rows,n_tensor_fail,tensor_fail_rate,scalar_overlap_rate,mean_reject_tensor_mismatch_share,median_tensor_mismatch,median_scalar_mismatch,median_abs_corr,median_abs_lag_over_tolerance,median_obs_ratio_iqr_rel
+H1-V1,1,2,2,2,1,0.5,0.6795582,1.5887759,7.2060903,0.0670193,8.75,0.539379
+L1-V1,2,2,2,2,1,1,0.3204404,0.0527417,0.1224168,0.0890621,6.2142857,0.5522872
+H1-L1,3,1,1,0,0,1,2.91074e-06,1.727103e-07,0.0017741,0.6529841,0.7586206,0.5982712

@@ -1,0 +1,5 @@
+cluster_id,label,model,obs_lens_gas_offset_kpc,obs_lens_gas_sigma_kpc,sigma_p_lens_kpc,pred_delta_x_p_gas_kpc,pred_delta_x_p_lens_kpc,residual_delta_x_p_gas_kpc,residual_delta_x_p_lens_kpc,z_delta_x_p_gas,z_delta_x_p_lens,alpha
+bullet_main,Bullet main halo,baryon_only,190.0,25.0,15.0,0.0,-190.0,-190.0,-190.0,-7.6,-12.666666666666666,0.0
+bullet_sub,Bullet sub-halo,baryon_only,140.0,20.0,12.0,0.0,-140.0,-140.0,-140.0,-7.0,-11.666666666666666,0.0
+bullet_main,Bullet main halo,pmodel_corrected,190.0,25.0,15.0,164.63172235629847,-25.368277643701532,-25.368277643701532,-25.368277643701532,-1.0147311057480612,-1.6912185095801022,0.8664827492436761
+bullet_sub,Bullet sub-halo,pmodel_corrected,140.0,20.0,12.0,121.30758489411465,-18.692415105885345,-18.692415105885345,-18.692415105885345,-0.9346207552942672,-1.5577012588237789,0.8664827492436761

@@ -22,6 +22,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import shutil
 import sys
 from datetime import datetime, timezone
@@ -37,6 +38,20 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+
+
+# 関数: 英語 localized surface かどうかを判定する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
+
+
+# 関数: locale ごとの既定出力先を解決する。
+def _default_output_dir(kind: str) -> Path:
+    base = ROOT / "output" / kind / "cosmology"
+    if _is_en_figure():
+        return base / "locales" / "en"
+
+    return base
 
 
 # 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
@@ -284,6 +299,13 @@ def _plot(
     _set_japanese_font()
     import matplotlib.pyplot as plt
 
+    font_scale = 1.16 if _is_en_figure() else 1.0
+    axis_font = 15.8 * font_scale
+    title_font = 17.4 * font_scale
+    legend_font = 14.2 * font_scale
+    tick_font = 13.8 * font_scale
+    note_font = 14.0 * font_scale
+    suptitle_font = 17.8 * font_scale
     fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(12.8, 9.6))
 
     rows_b = boss.get("rows") if isinstance(boss.get("rows"), list) else []
@@ -309,11 +331,11 @@ def _plot(
     ax0.axhline(5.0, color="#9467bd", linestyle=":", linewidth=1.2, label="|z|=5 reject line")
     ax0.set_xticks(x)
     ax0.set_xticklabels(z_labels)
-    ax0.set_ylabel("BOSS |eps|/sigma_eps", fontsize=15.8)
-    ax0.set_title("Stage A: BOSS xi_l peakfit", fontsize=17.4)
+    ax0.set_ylabel("BOSS |eps|/sigma_eps", fontsize=axis_font)
+    ax0.set_title("Stage A: BOSS xi_l peakfit", fontsize=title_font)
     ax0.grid(True, axis="y", linestyle="--", alpha=0.35)
-    ax0.legend(loc="upper right", fontsize=14.2)
-    ax0.tick_params(labelsize=13.8)
+    ax0.legend(loc="upper right", fontsize=legend_font)
+    ax0.tick_params(labelsize=tick_font)
 
     rows_d = desi.get("rows") if isinstance(desi.get("rows"), list) else []
     z_span_min = math.inf
@@ -342,7 +364,7 @@ def _plot(
             textcoords="offset points",
             va="center",
             ha="left",
-            fontsize=14.0,
+            fontsize=note_font,
             bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.86, "pad": 0.15},
             annotation_clip=False,
         )
@@ -351,10 +373,10 @@ def _plot(
     ax1.axvline(3.0, color="#d62728", linestyle=":", linewidth=1.2)
     ax1.axvline(-3.0, color="#d62728", linestyle=":", linewidth=1.2)
     ax1.set_yticks([])
-    ax1.set_xlabel("DESI z_score_combined range", fontsize=15.8)
-    ax1.set_title("Stage B: DESI promotion gate", fontsize=17.4)
+    ax1.set_xlabel("DESI z_score_combined range", fontsize=axis_font)
+    ax1.set_title("Stage B: DESI promotion gate", fontsize=title_font)
     ax1.grid(True, axis="x", linestyle="--", alpha=0.35)
-    ax1.tick_params(labelsize=13.8)
+    ax1.tick_params(labelsize=tick_font)
     if z_span_min < math.inf and z_span_max > -math.inf:
         ax1.set_xlim(min(-3.6, z_span_min - 0.35), max(3.6, z_span_max + 1.65))
 
@@ -370,11 +392,11 @@ def _plot(
         transform=ax1.transAxes,
         ha="left",
         va="top",
-        fontsize=14.0,
+        fontsize=note_font,
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "edgecolor": "#999999", "alpha": 0.92},
     )
 
-    fig.suptitle("BAO xi_l cross integration (BOSS Stage A + DESI Stage B)", fontsize=17.8)
+    fig.suptitle("BAO xi_l cross integration (BOSS Stage A + DESI Stage B)", fontsize=suptitle_font)
     fig.tight_layout(rect=(0.0, 0.040, 1.0, 0.95), h_pad=2.2)
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)
@@ -450,8 +472,12 @@ def main() -> int:
     overall = _overall_status(str(boss.get("status")), str(desi.get("status")))
     part4_update = _part4_update_recommendation(overall)
 
-    out_private = Path(args.out_private_dir).resolve()
-    out_public = Path(args.out_public_dir).resolve()
+    default_private = (ROOT / "output" / "private" / "cosmology").resolve()
+    default_public = (ROOT / "output" / "public" / "cosmology").resolve()
+    requested_private = Path(args.out_private_dir).resolve()
+    requested_public = Path(args.out_public_dir).resolve()
+    out_private = _default_output_dir("private") if _is_en_figure() and requested_private == default_private else requested_private
+    out_public = _default_output_dir("public") if _is_en_figure() and requested_public == default_public else requested_public
     out_png = out_private / "cosmology_bao_xi_cross_integration.png"
     out_pdf = out_private / "cosmology_bao_xi_cross_integration.pdf"
     out_json = out_private / "cosmology_bao_xi_cross_integration_metrics.json"

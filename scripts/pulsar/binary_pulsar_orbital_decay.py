@@ -27,6 +27,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.quantum.figure_japanese_localizer import get_figure_language  # noqa: E402
 from scripts.utils.plot_style import (  # noqa: E402
     apply_paper_style,
     apply_wavep_figure_layout,
@@ -61,6 +62,11 @@ def _set_japanese_font() -> None:
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         pass
+
+
+# 関数: `_plot_text` の入出力契約と処理意図を定義する。
+def _plot_text(ja: str, en: str, *, lang: str) -> str:
+    return ja if lang == "ja" else en
 
 
 # 関数: `_read_json` の入出力契約と処理意図を定義する。
@@ -302,7 +308,9 @@ def _compute_metrics(systems: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
 def _render_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
     apply_paper_style()
-    _set_japanese_font()
+    figure_lang = get_figure_language(default="ja")
+    if figure_lang == "ja":
+        _set_japanese_font()
 
     labels = [_compact_system_label(m) for m in metrics]
     x = list(range(len(labels)))
@@ -322,7 +330,7 @@ def _render_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
         capsize=4,
         elinewidth=1.2,
         color="#1f77b4",
-        label="観測/P-model",
+        label=_plot_text("観測/P-model", "Observed / P-model", lang=figure_lang),
     )
 
     for xi, m in zip(x, metrics):
@@ -349,8 +357,8 @@ def _render_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
 
     ax.set_xticks(x, labels, rotation=0, ha="center")
     ax.tick_params(axis="x", pad=4)
-    ax.set_ylabel("一致度 R")
-    ax.set_title("二重パルサー：軌道減衰の一致度 R", pad=6.0)
+    ax.set_ylabel(_plot_text("一致度 R", "Agreement R", lang=figure_lang))
+    ax.set_title(_plot_text("二重パルサー：軌道減衰の一致度 R", "Binary pulsars:\norbital-decay agreement R", lang=figure_lang), pad=6.0)
     ax.grid(True, alpha=0.25)
 
     # Tight y-range for readability (auto but keep around 1)
@@ -371,7 +379,9 @@ def _render_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
 
 def _render_public_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
     apply_paper_style()
-    _set_japanese_font()
+    figure_lang = get_figure_language(default="ja")
+    if figure_lang == "ja":
+        _set_japanese_font()
 
     labels = [_compact_system_label(m) for m in metrics]
     x = list(range(len(labels)))
@@ -402,7 +412,7 @@ def _render_public_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
         capsize=4,
         color="#1f77b4",
         alpha=0.9,
-        label="0% が完全一致",
+        label=_plot_text("0% が完全一致", "0% = perfect agreement", lang=figure_lang),
     )
 
     for xi, d, s in zip(x, delta_pct, sigma_pct):
@@ -427,8 +437,8 @@ def _render_public_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
         )
 
     ax.set_xticks(x, labels, rotation=0, ha="center")
-    ax.set_ylabel("ずれ（観測/予測 - 1）[%]")
-    ax.set_title("二重パルサー：軌道減衰の観測はどれくらい一致するか", pad=6.0)
+    ax.set_ylabel(_plot_text("ずれ（観測/予測 - 1）[%]", "Shift (observed/predicted - 1) [%]", lang=figure_lang))
+    ax.set_title(_plot_text("二重パルサー：軌道減衰の観測はどれくらい一致するか", "Binary pulsars:\nhow closely orbital decay agrees", lang=figure_lang), pad=6.0)
     ax.grid(True, alpha=0.25, axis="y")
     ax.legend(loc="upper left", frameon=True, fontsize=get_wavep_font_size("legend"))
 

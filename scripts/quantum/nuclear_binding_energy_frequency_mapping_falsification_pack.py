@@ -15,6 +15,7 @@ from pathlib import Path
 
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.figure_locale_paths import localize_figure_output_path
 from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
 
 enable_japanese_figure_localization()
@@ -400,8 +401,10 @@ def _load_selected_nuclei_rows(*, csv_path: Path, keys: list[tuple[int, int]]) -
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "public" / "quantum"
+    out_dir = localize_figure_output_path(root / "output" / "public" / "quantum" / "nuclear_binding_energy_frequency_mapping_falsification_pack.png", root=root).parent
     out_dir.mkdir(parents=True, exist_ok=True)
+    figure_lang = str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower()
+    is_en = figure_lang.startswith("en")
 
     diff_csv = out_dir / "nuclear_binding_energy_frequency_mapping_differential_predictions.csv"
     # 条件分岐: `not diff_csv.exists()` を満たす経路を評価する。
@@ -480,7 +483,7 @@ def main() -> None:
     _configure_japanese_font()
     import matplotlib.pyplot as plt
 
-    labels = ["グローバル比 R", "局所間隔比 d"]
+    labels = ["global ratio R", "local spacing ratio d"] if is_en else ["グローバル比 R", "局所間隔比 d"]
     z_vals = [float(m["z_median"]) for m in models]
     z_delta_vals = [float(m["z_delta_median"]) for m in models]
 
@@ -500,8 +503,8 @@ def main() -> None:
     ax0.axhline(0.0, color="0.4", lw=0.9)
     ax0.set_xticks(range(len(labels)))
     ax0.set_xticklabels(labels, rotation=15, ha="right")
-    ax0.set_ylabel("z_median（log10比）", fontsize=axis_label_font)
-    ax0.set_title("中央値残差の整合性（|z|<=3）", fontsize=panel_title_font, pad=6.0)
+    ax0.set_ylabel("z_median (log10 ratio)" if is_en else "z_median（log10比）", fontsize=axis_label_font)
+    ax0.set_title("median residual consistency (|z|<=3)" if is_en else "中央値残差の整合性（|z|<=3）", fontsize=panel_title_font, pad=6.0)
     ax0.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
     ax0.tick_params(labelsize=tick_font)
 
@@ -511,8 +514,8 @@ def main() -> None:
     ax1.axhline(0.0, color="0.4", lw=0.9)
     ax1.set_xticks(range(len(labels)))
     ax1.set_xticklabels(labels, rotation=15, ha="right")
-    ax1.set_ylabel("z_Δmedian（log10比）", fontsize=axis_label_font)
-    ax1.set_title("Aトレンド整合性（|z_Δmedian|<=3）", fontsize=panel_title_font, pad=6.0)
+    ax1.set_ylabel("z_Δmedian (log10 ratio)" if is_en else "z_Δmedian（log10比）", fontsize=axis_label_font)
+    ax1.set_title("A-trend consistency (|z_Δmedian|<=3)" if is_en else "Aトレンド整合性（|z_Δmedian|<=3）", fontsize=panel_title_font, pad=6.0)
     ax1.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
     ax1.tick_params(labelsize=tick_font)
 
@@ -526,15 +529,15 @@ def main() -> None:
     ax2.bar(range(len(ch_labels)), ch_vals, color=["tab:red", "tab:blue"], alpha=0.85)
     ax2.set_xticks(range(len(ch_labels)))
     ax2.set_xticklabels(ch_labels, rotation=15, ha="right")
-    ax2.set_ylabel("中央値 σ_req,rel [%]", fontsize=axis_label_font)
-    ax2.set_title("チャネル精度要求（3σ）", fontsize=panel_title_font, pad=6.0)
+    ax2.set_ylabel("median σ_req,rel [%]" if is_en else "中央値 σ_req,rel [%]", fontsize=axis_label_font)
+    ax2.set_title("channel precision requirement (3σ)" if is_en else "チャネル精度要求（3σ）", fontsize=panel_title_font, pad=6.0)
     ax2.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
     ax2.tick_params(labelsize=tick_font)
 
     radius_threshold = _safe_float(radii_crosscheck.get("strict_threshold_sigma"))
     base = radii_crosscheck.get("baseline_def0") if isinstance(radii_crosscheck.get("baseline_def0"), dict) else {}
     pair = radii_crosscheck.get("pairing_def0_fit") if isinstance(radii_crosscheck.get("pairing_def0_fit"), dict) else {}
-    radius_labels = ["基準 Sn", "基準 Sp", "pair-fit Sn", "pair-fit Sp"]
+    radius_labels = ["baseline Sn", "baseline Sp", "pair-fit Sn", "pair-fit Sp"] if is_en else ["基準 Sn", "基準 Sp", "pair-fit Sn", "pair-fit Sp"]
     radius_vals = [
         _safe_float(base.get("max_abs_resid_sigma_sn")),
         _safe_float(base.get("max_abs_resid_sigma_sp")),
@@ -549,8 +552,14 @@ def main() -> None:
 
     ax3.set_xticks(range(len(radius_labels)))
     ax3.set_xticklabels(radius_labels, rotation=15, ha="right")
-    ax3.set_ylabel("最大絶対残差 [σ]", fontsize=axis_label_font)
-    ax3.set_title("独立クロスチェック（電荷半径キンク, A_min=100）", fontsize=panel_title_font, pad=6.0)
+    ax3.set_ylabel("maximum absolute residual [σ]" if is_en else "最大絶対残差 [σ]", fontsize=axis_label_font)
+    ax3.set_title(
+        "independent cross-check\n(charge-radius kink, A_min=100)"
+        if is_en
+        else "独立クロスチェック（電荷半径キンク, A_min=100）",
+        fontsize=panel_title_font,
+        pad=6.0,
+    )
     ax3.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
     ax3.tick_params(labelsize=tick_font)
 
@@ -559,10 +568,10 @@ def main() -> None:
     gap_sn_med = _safe_float(sep_crosscheck.get("gap_sn_rms_median_mev"))
     gap_s2n_med = _safe_float(sep_crosscheck.get("gap_s2n_rms_median_mev"))
     text_lines = [
-        f"Sn RMS: {sn_rms:.2f} MeV" if sn_rms is not None else "Sn RMS: なし",
-        f"S2n RMS: {s2n_rms:.2f} MeV" if s2n_rms is not None else "S2n RMS: なし",
-        f"gap Sn 中央RMS: {gap_sn_med:.2f} MeV" if gap_sn_med is not None else "gap Sn 中央RMS: なし",
-        f"gap S2n 中央RMS: {gap_s2n_med:.2f} MeV" if gap_s2n_med is not None else "gap S2n 中央RMS: なし",
+        f"Sn RMS: {sn_rms:.2f} MeV" if sn_rms is not None else ("Sn RMS: n/a" if is_en else "Sn RMS: なし"),
+        f"S2n RMS: {s2n_rms:.2f} MeV" if s2n_rms is not None else ("S2n RMS: n/a" if is_en else "S2n RMS: なし"),
+        f"gap Sn median RMS: {gap_sn_med:.2f} MeV" if gap_sn_med is not None else ("gap Sn median RMS: n/a" if is_en else "gap Sn 中央RMS: なし"),
+        f"gap S2n median RMS: {gap_s2n_med:.2f} MeV" if gap_s2n_med is not None else ("gap S2n median RMS: n/a" if is_en else "gap S2n 中央RMS: なし"),
     ]
     ax3.text(
         0.98,
@@ -575,15 +584,21 @@ def main() -> None:
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.8, "edgecolor": "0.8"},
     )
 
-    fig.suptitle("反証条件パックと独立クロスチェック", y=0.992, fontsize=suptitle_font)
+    fig.suptitle(
+        "falsification pack and independent cross-check" if is_en else "反証条件パックと独立クロスチェック",
+        y=0.992,
+        fontsize=suptitle_font,
+    )
     fig.subplots_adjust(left=0.085, right=0.985, top=0.905, bottom=0.095, wspace=0.22, hspace=0.64)
 
     out_png = out_dir / "nuclear_binding_energy_frequency_mapping_falsification_pack.png"
+    out_pdf = out_dir / "nuclear_binding_energy_frequency_mapping_falsification_pack.pdf"
     prev_disable_normalize = os.environ.get("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE")
     os.environ["WAVEP_MPL_DISABLE_CANVAS_NORMALIZE"] = "1"
     try:
         with plt.rc_context({"savefig.bbox": "standard", "savefig.pad_inches": 0.0}):
             fig.savefig(out_png)
+            fig.savefig(out_pdf)
     finally:
         if prev_disable_normalize is None:
             os.environ.pop("WAVEP_MPL_DISABLE_CANVAS_NORMALIZE", None)
@@ -736,7 +751,7 @@ def main() -> None:
                         "statement": "差分チャネルの3σ判定は、独立cross-check（separation energies と charge-radius kink）の固定指標を併記し、半径kink strict（A_min=100, pairing凍結）と整合する場合に限って採用する",
                     },
                 ],
-                "outputs": {"png": str(out_png)},
+                "outputs": {"png": str(out_png), "pdf": str(out_pdf)},
                 "notes": [
                     "This pack is intended to prevent 'fit-escape': thresholds are frozen before adding extra physics parameters.",
                     "σ_proxy is a robust internal proxy derived from (p16,p84) of the log10 ratio distribution; it is not an experimental uncertainty.",
@@ -758,6 +773,7 @@ def main() -> None:
 
     print("[ok] wrote:")
     print(f"  {out_png}")
+    print(f"  {out_pdf}")
     # 条件分岐: `table_rows` を満たす経路を評価する。
     if table_rows:
         print(f"  {out_table}")

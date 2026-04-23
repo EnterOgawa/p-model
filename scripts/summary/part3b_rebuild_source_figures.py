@@ -17,6 +17,11 @@ Part III-B manuscript が参照する図の source script を inventory から�
 出力:
 - output/private/summary/part3b_source_rebuild_audit.json
 - output/private/summary/part3b_source_rebuild_audit.csv
+
+補足:
+- `--figure-lang ja|en` で図中テキストの locale を切り替える。
+- `--locale ja|en` を与えた場合は `WAVEP_PAPER_LOCALE` /
+  `WAVEP_FIGURE_LOCALE` にも同値を流す。
 """
 
 from __future__ import annotations
@@ -106,14 +111,18 @@ def _collect_candidate_scripts(payload: dict[str, Any]) -> list[Path]:
 
 # 関数: 単一 script を Part III-B 共通環境で実行して結果行を返す。
 
-def _run_script(path: Path) -> dict[str, Any]:
+# 関数: 単一 script を指定 locale で実行して結果行を返す。
+def _run_script(path: Path, *, figure_lang: str, locale: str | None) -> dict[str, Any]:
     env = os.environ.copy()
     env["PYTHONPATH"] = str(ROOT)
     env["MPLBACKEND"] = "Agg"
     env["WAVEP_MPL_FONT_PROFILE"] = "part3b_quantum_verification"
     env["WAVEP_MPL_FONT_SCALE"] = "1.0"
     env["WAVEP_MPL_CJK_FONT"] = "Noto Sans CJK JP"
-    env["WAVEP_FIGURE_LANG"] = "ja"
+    env["WAVEP_FIGURE_LANG"] = str(figure_lang)
+    if locale:
+        env["WAVEP_PAPER_LOCALE"] = str(locale)
+        env["WAVEP_FIGURE_LOCALE"] = str(locale)
 
     started = time.perf_counter()
     completed_utc = None
@@ -180,13 +189,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--inventory", type=Path, default=DEFAULT_INVENTORY, help="Inventory JSON path.")
     parser.add_argument("--out-json", type=Path, default=DEFAULT_OUT_JSON, help="Audit JSON output path.")
     parser.add_argument("--out-csv", type=Path, default=DEFAULT_OUT_CSV, help="Audit CSV output path.")
+    parser.add_argument("--figure-lang", choices=["ja", "en"], default="ja", help="Figure text locale.")
+    parser.add_argument("--locale", choices=["ja", "en"], default=None, help="Paper/figure locale manifest key.")
     args = parser.parse_args(argv)
 
     payload = _load_inventory(args.inventory)
     candidates = _collect_candidate_scripts(payload)
     rows: list[dict[str, Any]] = []
     for script_path in candidates:
-        row = _run_script(script_path)
+        row = _run_script(script_path, figure_lang=str(args.figure_lang), locale=args.locale)
         rows.append(row)
         print(f"[{row['returncode']}] {row['script']}")
 

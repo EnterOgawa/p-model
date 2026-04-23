@@ -25,6 +25,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog
+from scripts.quantum.figure_japanese_localizer import get_figure_language
 from scripts.utils.plot_style import apply_wavep_compact_legend, apply_wavep_figure_layout
 
 C = 299792458.0
@@ -71,6 +72,45 @@ def _set_japanese_font() -> None:
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         pass
+
+
+# 関数: `_set_figure_font_for_lang` の入出力契約と処理意図を定義する。
+
+def _set_figure_font_for_lang(lang: str) -> None:
+    if lang != "en":
+        _set_japanese_font()
+
+
+# 関数: `_cassini_plot_text` の入出力契約と処理意図を定義する。
+
+def _cassini_plot_text(text: str, *, lang: str) -> str:
+    if lang != "en":
+        return text
+
+    mapping = {
+        "観測（PDS TDF 処理後）": "Observed (PDS TDF, processed)",
+        "観測（PDS ODF）": "Observed (PDS ODF)",
+        "観測（論文図）": "Observed (paper figure)",
+        "観測": "Observed",
+        "Cassini TDF 直接fit": "Cassini TDF direct fit",
+        "Cassini ODF raw 直接fit": "Cassini ODF raw direct fit",
+        "Cassini：ドップラー y（観測 vs P-model）": "Cassini: Doppler y\n(observed vs P-model)",
+        "Cassini：ドップラー y（±10日, 観測 vs P-model）": "Cassini: Doppler y\n(±10 days, observed vs P-model)",
+        "Cassini：残差（観測 - P-model）": "Cassini: residuals\n(observed - P-model)",
+        "Cassini：ドップラー y（±10日, 最適β）": "Cassini: Doppler y\n(±10 days, best β)",
+        "Cassini：βスイープ（RMSE）": "Cassini: β sweep (RMSE)",
+        "t（日, b_min からの相対）": "t [days from b_min]",
+        "y（周波数比）": "y (fractional frequency)",
+        "TDF疑似残差（デトレンド後）": "TDF proxy residuals (detrended)",
+        "線形fit: a0 + Δβ·y_unit": "linear fit: a0 + Δβ·y_unit",
+        "残差（観測 - モデル）": "Residual (observed - model)",
+        "P-model（最適β）": "P-model (best β)",
+        "全区間": "all points",
+        "±10日": "±10 days",
+        "±3日": "±3 days",
+        "最適β": "best β",
+    }
+    return mapping.get(text, text)
 
 
 # 関数: Cassini 図を fixed canvas のまま保存し、tight bbox による legend/caption 崩れを防ぐ。
@@ -1350,7 +1390,8 @@ def try_plot_delta_beta_fit(
         print("matplotlib not available; skipping delta-beta fit plot:", e)
         return
 
-    _set_japanese_font()
+    figure_lang = get_figure_language(default="ja")
+    _set_figure_font_for_lang(figure_lang)
     ordered = sorted(fit_rows, key=lambda r: float(r["t_days"]))
     xs = [float(r["t_days"]) for r in ordered]
     ys_obs = [float(r["y_obs"]) for r in ordered]
@@ -1364,11 +1405,26 @@ def try_plot_delta_beta_fit(
         sharex=True,
         gridspec_kw={"height_ratios": [2.2, 1.0]},
     )
-    ax0.scatter(xs, ys_obs, s=18, color="tab:orange", alpha=0.85, label="TDF疑似残差（デトレンド後）")
-    ax0.plot(xs, ys_fit, color="tab:blue", linewidth=2.0, label="線形fit: a0 + Δβ·y_unit")
-    ax0.set_ylabel("y（周波数比）", fontsize=12.4)
+    ax0.scatter(
+        xs,
+        ys_obs,
+        s=18,
+        color="tab:orange",
+        alpha=0.85,
+        label=_cassini_plot_text("TDF疑似残差（デトレンド後）", lang=figure_lang),
+    )
+    ax0.plot(
+        xs,
+        ys_fit,
+        color="tab:blue",
+        linewidth=2.0,
+        label=_cassini_plot_text("線形fit: a0 + Δβ·y_unit", lang=figure_lang),
+    )
+    ax0.set_ylabel(_cassini_plot_text("y（周波数比）", lang=figure_lang), fontsize=12.4)
     ax0.set_title(
-        f"{title_prefix}（β_ref={beta_ref:.9f}, β_est={beta_est:.9f}, Δβ={delta_beta:+.3e}）",
+        f"{_cassini_plot_text(title_prefix, lang=figure_lang)} ({'β_ref' if figure_lang == 'en' else 'β_ref'}={beta_ref:.9f}, {'β_est' if figure_lang == 'en' else 'β_est'}={beta_est:.9f}, Δβ={delta_beta:+.3e})"
+        if figure_lang == "en"
+        else f"{title_prefix}（β_ref={beta_ref:.9f}, β_est={beta_est:.9f}, Δβ={delta_beta:+.3e}）",
         fontsize=13.6,
         pad=8.0,
     )
@@ -1378,7 +1434,7 @@ def try_plot_delta_beta_fit(
 
     ax1.axhline(0.0, color="black", linewidth=1.0, alpha=0.6)
     ax1.scatter(xs, ys_res, s=14, color="tab:green", alpha=0.85)
-    ax1.set_xlabel("t（日, b_min からの相対）", fontsize=12.4)
+    ax1.set_xlabel(_cassini_plot_text("t（日, b_min からの相対）", lang=figure_lang), fontsize=12.4)
     ax1.set_ylabel("residual", fontsize=12.4)
     ax1.grid(True, alpha=0.3)
     ax1.tick_params(labelsize=11.2)
@@ -1488,7 +1544,8 @@ def try_plot(
         print("matplotlib not available; skipping plots:", e)
         return
 
-    _set_japanese_font()
+    figure_lang = get_figure_language(default="ja")
+    _set_figure_font_for_lang(figure_lang)
 
     xs_pts = [p.t_days for p in points]
     yd_pts = [p.y_obs for p in points]
@@ -1499,15 +1556,15 @@ def try_plot(
     def _compact_obs_label(label: str) -> str:
         normalized = str(label).strip()
         if "PDS TDF" in normalized:
-            return "観測（PDS TDF 処理後）"
+            return _cassini_plot_text("観測（PDS TDF 処理後）", lang=figure_lang)
 
         if "PDS ODF" in normalized:
-            return "観測（PDS ODF）"
+            return _cassini_plot_text("観測（PDS ODF）", lang=figure_lang)
 
         if "デジタイズ" in normalized:
-            return "観測（論文図）"
+            return _cassini_plot_text("観測（論文図）", lang=figure_lang)
 
-        return "観測"
+        return _cassini_plot_text("観測", lang=figure_lang)
 
     compact_obs_label = _compact_obs_label(obs_label)
 
@@ -1515,9 +1572,9 @@ def try_plot(
     fig, ax = plt.subplots(figsize=(10, 5))
     ax.plot(model_t_days, model_y, label="P-model", linewidth=2, color="tab:blue")
     ax.scatter(xs_pts, yd_pts, s=12, label=compact_obs_label, alpha=0.85, color="tab:orange")
-    ax.set_title("Cassini：ドップラー y（観測 vs P-model）", fontsize=13, pad=8.0)
-    ax.set_xlabel("t（日, b_min からの相対）")
-    ax.set_ylabel("y（周波数比）")
+    ax.set_title(_cassini_plot_text("Cassini：ドップラー y（観測 vs P-model）", lang=figure_lang), fontsize=13, pad=8.0)
+    ax.set_xlabel(_cassini_plot_text("t（日, b_min からの相対）", lang=figure_lang))
+    ax.set_ylabel(_cassini_plot_text("y（周波数比）", lang=figure_lang))
     ax.grid(True, alpha=0.3)
     apply_wavep_figure_layout(fig, template="part2_single_panel")
     ax.legend(loc="lower right", framealpha=0.95)
@@ -1530,9 +1587,9 @@ def try_plot(
     ax.plot(model_t_days, model_y, label="P-model", linewidth=2, color="tab:blue")
     ax.scatter(xs_pts, yd_pts, s=12, label=compact_obs_label, alpha=0.85, color="tab:orange")
     ax.set_xlim(-10, 10)
-    ax.set_title("Cassini：ドップラー y（±10日, 観測 vs P-model）", fontsize=13, pad=8.0)
-    ax.set_xlabel("t（日, b_min からの相対）")
-    ax.set_ylabel("y（周波数比）")
+    ax.set_title(_cassini_plot_text("Cassini：ドップラー y（±10日, 観測 vs P-model）", lang=figure_lang), fontsize=13, pad=8.0)
+    ax.set_xlabel(_cassini_plot_text("t（日, b_min からの相対）", lang=figure_lang))
+    ax.set_ylabel(_cassini_plot_text("y（周波数比）", lang=figure_lang))
     ax.grid(True, alpha=0.3)
     # 図5は plot 内 legend を使い、canvas 高を増やさずに系列識別を残す。
     apply_wavep_figure_layout(fig, template="part2_single_panel")
@@ -1545,9 +1602,9 @@ def try_plot(
     fig, ax = plt.subplots(figsize=(10, 4.5))
     ax.axhline(0.0, color="k", linewidth=1, alpha=0.5)
     ax.scatter(xs_pts, res_pts, s=12, alpha=0.85, color="tab:red")
-    ax.set_title("Cassini：残差（観測 - P-model）", fontsize=13, pad=8.0)
-    ax.set_xlabel("t（日, b_min からの相対）")
-    ax.set_ylabel("残差（観測 - モデル）")
+    ax.set_title(_cassini_plot_text("Cassini：残差（観測 - P-model）", lang=figure_lang), fontsize=13, pad=8.0)
+    ax.set_xlabel(_cassini_plot_text("t（日, b_min からの相対）", lang=figure_lang))
+    ax.set_ylabel(_cassini_plot_text("残差（観測 - モデル）", lang=figure_lang))
     ax.grid(True, alpha=0.3)
     apply_wavep_figure_layout(fig, template="part2_single_panel")
     _save_figure_fixed_canvas(fig, out_dir / "cassini_fig2_residuals.png", dpi=180)
@@ -1558,12 +1615,12 @@ def try_plot(
     if best_beta_zoom is not None:
         best_beta, best_model_y = best_beta_zoom
         fig, ax = plt.subplots(figsize=(10, 5))
-        ax.plot(model_t_days, best_model_y, label="P-model（最適β）", linewidth=2, color="tab:blue")
+        ax.plot(model_t_days, best_model_y, label=_cassini_plot_text("P-model（最適β）", lang=figure_lang), linewidth=2, color="tab:blue")
         ax.scatter(xs_pts, yd_pts, s=12, label=compact_obs_label, alpha=0.85, color="tab:orange")
         ax.set_xlim(-10, 10)
-        ax.set_title("Cassini：ドップラー y（±10日, 最適β）", fontsize=13, pad=8.0)
-        ax.set_xlabel("t（日, b_min からの相対）")
-        ax.set_ylabel("y（周波数比）")
+        ax.set_title(_cassini_plot_text("Cassini：ドップラー y（±10日, 最適β）", lang=figure_lang), fontsize=13, pad=8.0)
+        ax.set_xlabel(_cassini_plot_text("t（日, b_min からの相対）", lang=figure_lang))
+        ax.set_ylabel(_cassini_plot_text("y（周波数比）", lang=figure_lang))
         ax.grid(True, alpha=0.3)
         apply_wavep_figure_layout(fig, template="part2_single_panel")
         ax.legend(loc="lower right", framealpha=0.95)
@@ -1627,14 +1684,17 @@ def run_beta_sweep(
         print("matplotlib not available; skipping beta sweep plot:", e)
         return best_beta, rmse_10
 
-    _set_japanese_font()
+    figure_lang = get_figure_language(default="ja")
+    _set_figure_font_for_lang(figure_lang)
     fig, ax = plt.subplots(figsize=(10, 5))
-    ax.plot(betas, rmse_all, label="全区間")
-    ax.plot(betas, rmse_10, label="±10日")
-    ax.plot(betas, rmse_3, label="±3日")
-    ax.axvline(best_beta, color="k", linewidth=1, alpha=0.5, label="最適β")
-    ax.set_title("Cassini：βスイープ（RMSE）", fontsize=13, pad=8.0)
-    ax.set_xlabel("β")
+    beta_offsets = [((b - 1.0) * 1.0e5) for b in betas]
+    best_beta_offset = (best_beta - 1.0) * 1.0e5
+    ax.plot(beta_offsets, rmse_all, label=_cassini_plot_text("全区間", lang=figure_lang))
+    ax.plot(beta_offsets, rmse_10, label=_cassini_plot_text("±10日", lang=figure_lang))
+    ax.plot(beta_offsets, rmse_3, label=_cassini_plot_text("±3日", lang=figure_lang))
+    ax.axvline(best_beta_offset, color="k", linewidth=1, alpha=0.5, label=_cassini_plot_text("最適β", lang=figure_lang))
+    ax.set_title(_cassini_plot_text("Cassini：βスイープ（RMSE）", lang=figure_lang), fontsize=13, pad=8.0)
+    ax.set_xlabel("Δβ × 10^-5")
     ax.set_ylabel("RMSE")
     ax.grid(True, alpha=0.3)
     apply_wavep_figure_layout(fig, template="part2_single_panel")
@@ -2892,20 +2952,25 @@ def main() -> None:
                 try:
                     import matplotlib.pyplot as plt  # type: ignore
 
-                    _set_japanese_font()
+                    figure_lang = get_figure_language(default="ja")
+                    _set_figure_font_for_lang(figure_lang)
                     fig, ax = plt.subplots(figsize=(10, 5))
-                    ax.scatter(obs_t, obs_y, s=12, alpha=0.75, color="tab:blue", label="PDS（処理後）")
+                    ax.scatter(obs_t, obs_y, s=12, alpha=0.75, color="tab:blue", label=("PDS (processed)" if figure_lang == "en" else "PDS（処理後）"))
                     ax.scatter(
                         [float(t) + float(best_shift_days) for t, _y in digitized],
                         [y for _t, y in digitized],
                         s=10,
                         alpha=0.8,
                         color="tab:orange",
-                        label=f"論文図（shift {best_shift_days:+.2f}日）",
+                        label=(f"Paper figure (shift {best_shift_days:+.2f} days)" if figure_lang == "en" else f"論文図（shift {best_shift_days:+.2f}日）"),
                     )
-                    ax.set_title("Cassini：PDS一次データ（処理後） vs 論文図デジタイズ", fontsize=13, pad=8.0)
-                    ax.set_xlabel("t（日, b_min からの相対）")
-                    ax.set_ylabel("y（周波数比）")
+                    ax.set_title(
+                        "Cassini: processed PDS data vs.\ndigitized paper figure" if figure_lang == "en" else "Cassini：PDS一次データ（処理後） vs 論文図デジタイズ",
+                        fontsize=13,
+                        pad=8.0,
+                    )
+                    ax.set_xlabel(_cassini_plot_text("t（日, b_min からの相対）", lang=figure_lang))
+                    ax.set_ylabel(_cassini_plot_text("y（周波数比）", lang=figure_lang))
                     ax.grid(True, alpha=0.3)
                     apply_wavep_figure_layout(fig, template="part2_single_panel")
                     ax.legend(loc="lower right", framealpha=0.95)

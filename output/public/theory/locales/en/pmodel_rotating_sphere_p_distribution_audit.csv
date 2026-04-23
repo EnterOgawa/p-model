@@ -1,0 +1,7 @@
+branch,id,label,kind,experiment,observable,unit,value_domain,observed,observed_sigma,reference_prediction,pmodel_prediction,residual,z_score,status,note
+static_iso,gpb_geodetic_control,GP-B geodetic (control),control,GP-B,geodetic_precession,arcsec/yr,absolute,6.6,0.018,6.6,6.6,0,0,pass,GP-B geodetic precession representative value.
+static_iso,gpb_frame_dragging,GP-B frame-dragging,frame_dragging,GP-B,frame_dragging,arcsec/yr,absolute,0.039,0.0072,0.0392,0,0.039,5.41666667,reject,GP-B frame-dragging representative value; scalar-only limit predicts zero.
+static_iso,lageos_frame_dragging,LAGEOS frame-dragging,frame_dragging,LAGEOS,frame_dragging,mu_ratio,ratio_to_gr,0.99,0.05,1,0,0.99,19.8,reject,一次ソースの要旨にある「99±5% of the value predicted by general relativity」を、μ=0.99±0.05（1σ相当の目安）として扱う。
+vortex_gradient,gpb_geodetic_control,GP-B geodetic (control),control,GP-B,geodetic_precession,arcsec/yr,absolute,6.6,0.018,6.6,6.6,0,0,pass,GP-B geodetic precession representative value.
+vortex_gradient,gpb_frame_dragging,GP-B frame-dragging,frame_dragging,GP-B,frame_dragging,arcsec/yr,absolute,0.039,0.0072,0.0392,0.03882125,0.00017875348,0.02482687,pass,GP-B frame-dragging representative value; scalar-only limit predicts zero.
+vortex_gradient,lageos_frame_dragging,LAGEOS frame-dragging,frame_dragging,LAGEOS,frame_dragging,mu_ratio,ratio_to_gr,0.99,0.05,1,0.99033792,-0.00033792132,-0.00675843,pass,一次ソースの要旨にある「99±5% of the value predicted by general relativity」を、μ=0.99±0.05（1σ相当の目安）として扱う。

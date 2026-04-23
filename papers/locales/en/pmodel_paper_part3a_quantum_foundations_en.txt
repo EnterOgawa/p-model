@@ -1,0 +1,2378 @@
+    Unified Theory Based on Time-Wave Dynamics (The P-model)
+                          Part III-A: Quantum Foundations
+
+                                            Shunji Ogawa
+                                       ENTERSYSTEM Co., Ltd.
+
+
+                                  Document v2.0        2026/4/8 UTC
+
+
+
+
+Abstract
+
+This paper (Part III-A) explicitly separates what is fixed from first principles from what remains at the
+level of an effective theory in the quantum foundations of the P-model. While retaining the dynamical
+time-wave vector and the proper-time mapping fixed in Part I, it uniquely specifies the correspondence
+between the wave function and the time wave by requiring consistency with the Noether energy flow,
+and it organizes the minimum conditions under which the theory reduces to a Schrödinger-type form
+in the short-wavelength, nonrelativistic limit.
+For the Born rule, the phase-diffusion relation
+
+                                                      kB Tenv
+                                        Γdeph = ω∗2           τfree
+                                                        χP
+
+combined with the lowest-order linear detection response upgrades the detection probability p ∝ |ψ|2
+to an effective derivation under four conditions: phase mixing, linear detection response,
+weak backreaction, and frequentist coarse-graining. For measurement, the detector-side stable
+state is taken as the reference, and the diagonal Lueders/Kraus update is recovered as a coarse-grained
+limit of decoherence and conditional update.
+Electromagnetism is treated with a two-layer conclusion. The transverse component of the time-wave
+vector fixes the transverse-wave photon branch and the massless light mode, and it fixes the selection
+equation that chooses a single fine-structure constant from a single frozen action. At the same time, the
+origin of the local U(1) redundancy, charge quantization, and charge normalization remain outstanding
+tasks on the already adopted effective-theory side. Within this organization, the source dynamics of
+entanglement is fixed as three-wave mixing on the adopted U(1) sector. For quantum information,
+the paper reaches a minimal bridge that connects phase relaxation time, gate fidelity, pair-correlation
+retention depth, and the origin of error channels to existing results.
+The point reached here is not to claim a replacement of quantum mechanics. Rather, it is to fix
+the physical contributions for which the P-model takes responsibility as reproducible equations, de-
+cision language, and audit procedures at the respective entry points of the Born rule, measurement,
+correlation, and quantum information.
+
+
+
+
+                                                   1
+1 Introduction
+
+The stance the P-model can take toward quantum phenomena is to close the main interfaces of quan-
+tum mechanics with the equations of the P-model and thereby show how far the theory can be fixed as
+a falsifiable entry point. The P-model assumes time to be a wave, reinterprets particles as boundary
+conditions (reflections) of that wave, and can reinterpret correlations as the sharing of local P-structure.
+This paper, however, closes the major quantum-mechanical interfaces with P-model equations while
+leaving the empirical acceptance or rejection of each individual observational prediction to the veri-
+fication judgments of Part III-B. For the weak interaction, the final observational judgment is fixed
+as ”adopt Route A (transplant the electroweak effective theory) and reject Route B (the P-native
+replacement) by numerical audit,” which restricts the scope to the operational verification of Route A.
+The theoretical mechanism candidates of Route B and the theoretical reference points for the W/Z
+masses from two-component coupled Q-balls are organized in Section 3.2 separately from the accep-
+tance judgment itself. Quantum measurement is treated in the same way: this paper does not claim
+a complete derivation of the Born rule or state update. Instead, by combining phase diffusion and the
+linear detection response, it fixes the detection probability p ∝ |ψ|2 up to an effective derivation
+under four conditions: phase mixing, linear detection response, weak backreaction, and
+frequentist coarse-graining. State update is fixed as a coarse-grained effective derivation of the di-
+agonal Lueders/Kraus update, while the remaining common residue is the probabilistic interpretation
+of single events and the irreversibility of statistical mechanics.
+As the first entry point, Section 2.5.1 makes explicit that the minimum assumptions of the dynamical
+P sector from Part I reduce to a Schrödinger-type form in the short-wavelength, nonrelativistic limit,
+thereby fixing the minimum consistency conditions on the quantum side first.
+What this paper handles is to fix, on the basis of public primary data, which assumption can fail under
+which analysis procedure, and to reduce that into differential predictions (falsification conditions).
+As in the astrophysical volume (Part II), the paper takes the verification summary (scoreboard) as
+the entry point and uses a format in which the inputs, processing conditions, and metrics of each
+verification can be tracked mechanically, so that future data additions (planned tests) can be absorbed
+on the same input/output surface.
+This trilogy is intended to be read in the order Part I -> Part II -> Part III. Part I establishes
+the mapping, frozen quantities, and falsification form; Part II accumulates application-level tests from
+classical to cosmological scales within the same framework; and Part III-A / III-B treats the quantum
+domain on an isomorphic input/output surface, so that the unity of the P-model can be evaluated not
+as a ”claim” but as the consistency of its falsifiability.
+This organization of the quantum-foundations side also connects to the second and third attack routes.
+The exact vector hierarchy fixed on the mass-origin route yields a discrete series of particle-mass
+                                                                                    (P )
+ratios, and the same late-universe background law of the P-model, Pbg (t) ∝ exp[−H0 (t − t0 )], with
+         (P )             (P )        (P )
+ωbg = H0 , λbg = 2πc/H0 , a0 = cH0 /(2π), so the SPARC acceleration scale in Part II 4.14 is not
+read as a phenomenological fit constant but as the direct bridge quantity κa = 1/(2π) connecting the
+mass-origin route and the background wave.
+Style rule: the main text is closed only by the P-model’s own definitional mapping procedure. Com-
+parisons with reference frameworks (existing theories) are isolated in the reference notes at the end
+of sections, and the definitions or derivations in the main text are not replaced by those reference
+frameworks.
+Reference note: this paper is not an attempt to reinterpret standard quantum mechanics (QM) by
+adding hidden variables. It starts from the minimum P-model equations and mappings fixed in Part I
+and tests how their wave-like properties reproduce quantum phenomena (interference and correlation)
+
+
+                                                     2
+as macroscopic observations. The standard formal structure of quantum mechanics is positioned as
+a phenomenological benchmark for checking the validity of the derived approximation formulas and
+metrics.
+
+
+
+
+                                               3
+2 Theoretical Framework
+
+The notation, minimum assumptions, and mappings used in this paper follow Part I. The re-statement
+of formulas is kept to a minimum; here only the minimum needed for standalone readability is sum-
+marized.
+
+
+2.1 The P Field and the Potential �
+
+Let the static limit of the time-wave density be P (x) and the far-field reference be P∞ , adopting
+P > P∞ in the vicinity of mass. Systems with rotation and flow follow the rotational extension
+defined in Part I, Pµ = (Pt , P1 , P2 , P3 ). Only the ratio P /P∞ (dimensionless) appears in observables;
+the identification of the absolute value or dimension of P is outside the scope of this paper. However,
+P and P∞ must have the same dimension in order for ln(P /P∞ ) to be defined. The gravitational
+potential is defined by
+                                                                
+                                                             P
+                                           ϕ ≡ −c2 ln
+                                                            P∞
+
+which is zero at infinity and negative near mass.
+
+
+
+
+                                                    4
+2.2 Gravity (Equation of Motion)
+
+The gravitational acceleration is unified as
+                                                                                  
+                                                                               P
+                                         a = −∇ϕ = c ∇ ln    2
+                                                                              P∞
+
+thereby fixing in equation form the statement that matter ”slides down the P-gradient.”
+
+
+2.3 Clocks (Gravitational Term + Velocity Term)
+
+The clock rate is decomposed as
+                                                                         
+                                            dτ   P∞                  dτ
+                                               =
+                                            dt    P                  dt       v
+
+and the velocity factor is taken in the standard recovered form
+
+                                                               r
+                                                dτ                        v2
+                                                             =    1−
+                                                dt       v                c2
+.
+Reference note: the velocity term in this section is isomorphic to the time-dilation factor of SR (special
+relativity) in the reference framework.
+
+
+2.4 Light (Refraction Toward Higher P)
+
+Light is assigned the refractive index
+
+                                                                     2β
+                                                                  P
+                                            n(P ) =
+                                                                 P∞
+
+and, following Fermat’s principle, is taken to refract toward the higher-P side. β is treated as
+the frozen value from Part I (β ≈ 1); the main text of Parts II and III does not change the value of β
+case by case, and any update is concentrated into a revision of Part I.
+Reference note: when the PPN framework is used as the reference frame, the coeﬀicient for light can
+be compared under the correspondence 1 + γ = 2β (the factor of 2 is carried on the β side).
+
+
+2.5 Quantum (Local P Structure, Correlation, and Selection)
+
+Part I centers on gravity, clocks, and light propagation, but the starting point of the P-model, namely
+that ”all matter is wave and its medium is time,” can also connect to quantum phenomena such as
+interference and correlation. Here the paper does not claim a rederivation of quantum mechanics.
+Instead, it states on the theoretical side the minimum stance and the verification entry point:
+what is assumed and where the possible falsification points lie.
+
+
+2.5.1 Fixing the Minimum Conditions (1-5) (P -> Phase -> Schr/KG)
+
+To connect the Part I approach, which reduces dynamical P not to constants e, m but to q(P ), u(P ),
+into the quantum domain, the following five minimum conditions are fixed. They function as necessary
+
+
+                                                             5
+conditions for consistency with the Schrödinger equation.
+
+ 1. Wave description (complexification): the rotation of a single P, θ → θ + ωt, is transferred
+    into the complex representation (e−iωt ) as a phase on a 2D projective plane. This extends the
+    interference pattern in spatial interference (C-I) from a scalar sum to a vector sum.
+
+ 2. Coupling between energy and frequency: the angular rotation rate ωP in the P-model is
+    fixed to be proportional to the observed energy E through E = h̄ωP . This guarantees consistency
+    with the local rate of time defined by the clock mapping.
+
+ 3. Coupling between momentum and wavelength: from the relation between the interfer-
+    ence path ∆x and phase, the wave number k of a traveling wave is fixed to be proportional to
+    momentum through p = h̄k.
+
+ 4. Energy dispersion relation (nonrelativistic limit): to define the local traveling state of P,
+                                                p2
+    the classical energy conservation law E = 2m   +V in the v ≪ c regime is accepted. In the P-model,
+    V is described as spatial distortion (refraction) due to an external field.
+
+ 5. Principle of superposition (linearity): it is assumed that, in the collective behavior of P, a
+    linear combination of multiple states is itself a state.
+
+From these five fixed conditions, differentiating ψ(x, t) = Aei(kx−ωt) once in time and twice in space
+yields the form
+
+                                                                    
+                                             ∂ψ             h̄2 2
+                                       ih̄      =       −      ∇ + mϕ ψ                             (1)
+                                             ∂t             2m
+
+The minimum relativistic free-field form is the Klein-Gordon equation
+                                                                 
+                                           1 ∂2      m2 c2
+                                         − 2 2 + ∇2 − 2               Ψ=0                           (2)
+                                          c ∂t        h̄
+
+This is isomorphic to the usual derivation process of the Schrödinger equation, but in the P-model the
+difference is that ψ is treated as a ”geometric mapping of the local rotation and propagation of P.”
+Here, the minimal form of the ψ ↔ P correspondence is fixed under the following conditions.
+First, on top of the static background solution P∗ (x) > 0 from Part I, we superpose a small fluctuation
+on the positive-frequency branch,
+
+                                                                                 δP±
+                P (x, t) = e−iω∗ t (P∗ (x) + δP+ (x, t)) + e+iω∗ t δP− (x, t),       ≪1
+                                                                                  P∗
+
+where the positive-frequency branch δP+ is taken to correspond to particle-like excitations, while δP−
+is relegated to higher-order corrections in the nonrelativistic, weak-field, slowly varying branch. Then
+
+
+                                      δP+ (x, t) = P∗ (x) a(x, t) eiϑ(x,t)
+
+if we write it this way, a is the dimensionless amplitude fluctuation relative to the background, and ϑ
+is the local phase with the carrier removed. Accordingly,
+
+                                     p        δP+ (x, t) p
+                         ψ(x, t) ≡    2ω∗ P∗2           = 2ω∗ P∗2 a(x, t)eiϑ(x,t)
+                                               P∗ (x)
+
+
+                                                            6
+is adopted as the minimal definition of the wave function in the P-model. With this definition,
+
+                                                  δP+
+                                       |ψ| ∝          ,          arg ψ = ϑ
+                                                   P∗
+
+so the amplitude of ψ corresponds to the relative fluctuation of the positive-frequency envelope with
+respect to the background field P∗ , and its phase corresponds to the residual phase obtained by
+subtracting the carrier from the local rotation of the time wave.
+That this normalization is not arbitrary can be checked by reducing the Noether conservation law for
+time translation fixed in Part I 2.7.0,
+
+                                                       µν
+                                                   ∂µ Ttot =0
+
+to second-order perturbations on a static background. Isolating only the second-order energy flow
+gives
+
+                                                        µ0
+                                                   ∂µ δT(2) =0
+
+and under the positive-frequency, slowly varying approximation |∂t ψ| ≪ ω∗ |ψ|,
+                                                                                 !
+                                 h̄2                              δP+ 3
+              00
+            δT(2) = h̄ω∗ |ψ|2 +      |∇ψ|2 + m∗ ϕ |ψ|2 + O ε2ad ,                    ,       m∗ c2 = h̄ω∗
+                                2m∗                                P∗
+                                                                                         !
+                                     h̄2    ∗           ∗             δP+ 3
+                            i0
+                          δT(2) =         (ψ ∂i ψ − ∂i ψ ψ) + O εad ,
+                                                                 2
+                                    2m∗ i                              P∗
+
+we obtain
+
+                                                                                        
+                        ∂t h̄ω∗ |ψ|2 + ∇·Sψ = 0,               Sψ ≡ δT(2)
+                                                                      10      20
+                                                                          , δT(2)     30
+                                                                                  , δT(2)
+
+Therefore, |ψ|2 is fixed uniquely, at least within this approximation, not as a probability density but as
+the normalization of the wave-packet energy density transported on the background. In other words,
+the gate for the ψ ↔ P correspondence closes by reading the relative fluctuation of the positive-
+frequency branch with a normalization that is consistent with the Noether energy flow.
+Returning this definition to the positive-frequency branch of the KG equation, the envelope equation
+on a static background becomes
+
+                                                                         
+                                   ∂ψ             h̄2 2
+                               ih̄    =        −     ∇ + m∗ ϕ + Ulin (P∗ ) ψ
+                                   ∂t            2m∗
+
+Here Ulin (P∗ ) can be absorbed into a redefinition of the carrier set by the background solution, so in
+Part III the Schrödinger form
+
+                                                                     
+                                           ∂ψ              h̄2 2
+                                     ih̄      =       −       ∇ + m∗ ϕ ψ
+                                           ∂t             2m∗
+
+is taken as the canonical form.
+Points fixed in this paper:
+
+
+
+                                                           7
+ 1. The amplitude of ψ is the normalized form of δP+ /P∗ and reads the relative envelope fluctuation
+    from the background.
+
+ 2. The phase of ψ corresponds to the local phase ϑ with the carrier removed.
+                                                                                           µ0
+ 3. The normalization of ψ is fixed to remain consistent with the Noether energy flow ∂µ δT(2) = 0,
+    rather than being left as an arbitrary constant.
+
+ 4. The effective range is limited to a static background, linear perturbations, the positive-frequency
+    branch, and the weak-field, slowly varying regime.
+
+Still not derived here (and therefore not claimed): Underdived 1: a complete first-principles
+derivation of the Born rule (probability density |ψ|2 ), including phase randomization, linear detection
+response, and conditional update closed from P dynamics all the way through detector irreversibility.
+Underdived 2: a first-principles derivation of measurement (state update), including a microscopic
+description of device irreversibility and amplification. Underdived 3: spin, charge, gauge fields, and
+interaction terms (electromagnetism onward is introduced minimally in later sections).
+Observability of P-model-specific corrections (entry point): Observability 1: the ”form” of
+the Schrödinger equation is isomorphic to the standard one, but because the definition of the potential
+ϕ is specific to the P-model, differential predictions can appear when P deviates from the standard
+gravitational potential in the strong-field regime (while remaining equivalent in the weak field). Ob-
+servability 2: experimentally, the main entry point is atom interferometry that involves not only
+matter phases but also light (laser phase and readout), where phase terms from light propagation
+(through β) can generate differential predictions.
+
+
+2.5.2 Born Rule: Domain of Adoption and Regimes of Deviation (P-model Stance)
+
+This paper does not claim a complete first-principles derivation of the entire Born rule. In particular,
+the probabilistic interpretation of single events and irreversibility in the thermodynamic limit remain
+as common residues, not P-model-specific ones. At the same time, the A1/A2 organization in this
+paper upgrades the detection probability p ∝ |ψ|2 itself to an effective derivation under four
+conditions: phase mixing, linear detection response, weak backreaction, and frequentist
+coarse-graining. On that basis, this section makes explicit both the domain in which the rule is
+adopted and the conditions under which the Born rule, as an approximation in use, can appear to fail.
+Adopted here (fixed): Adoption A (position measurement): the detection probability density is
+treated as
+
+
+                                            p(x) ∝ |ψ(x)|2                                          (3)
+
+Adoption B (continuous detection): the local detection rate is approximated as
+
+
+                                       λ(x, t) = κ(x, t) |ψ(x, t)|2
+
+where κ is a coarse-grained coeﬀicient for the detector response, threshold, and gain.
+Statistical entry point (initial bridge): Under the ψ ↔ P correspondence fixed above, ψ is the
+normalized form of the relative fluctuation δP+ /P∗ of the positive-frequency envelope, and |ψ|2 can
+be read as a proxy for local transported energy density consistent with the Noether energy flow. Let
+the pre-detection amplitude entering coarse-grained cell j be
+
+
+
+                                                    8
+                                    X
+                                    Nj
+                                                                   X
+                                                                   Nj
+                             Aj =         ajn e   iθjn
+                                                         ,               |ajn |2 ≡ ρj ∝ |ψj |2
+                                    n=1                            n=1
+
+Here θjn is the microscopic phase with the carrier removed, and if the fluctuations of many time-wave
+modes, environmental modes, and trial-to- trial variations satisfy
+
+                                             D                E
+                                                 ei(θjn −θjm ) = δnm
+
+then
+
+                                     X             D             E X
+                          |Aj |2 =         ajn a∗jm ei(θjn −θjm ) =  |ajn |2 = ρj
+                                     n,m                                          n
+
+and the cross terms are washed out in the ensemble average. If, furthermore, the single-event detection
+response is linear in the local transported energy,
+
+
+                                                         λj = κj ρj
+
+and if κj is spatially constant or can be removed as a known factor by flat-field calibration, then
+
+                                            λj     ρj
+                                      fj = P     =P     ∝ |ψj |2
+                                              λ
+                                             k k     ρ
+                                                    k k
+
+Therefore |ψ|2 appears as the frequentist limit of the normalized envelope energy density.
+A1 (origin of phase diffusion): Let the time component of the static background be
+
+
+                            Pt (x, t) = P∗ (x) [1 + uenv (x, t)],                  |uenv | ≪ 1
+
+Using the proper-time mapping fixed in Part I 2.7.0,
+
+                                            dτ   Pref p
+                                               =       1 − v 2 /c2
+                                            dt   Pt
+and expanding to first order in uenv after removing the mean carrier term ω∗ τ∗ , we obtain
+
+
+                                              ϑ̇(t) = −ω∗ uenv (t)
+
+Thus the phase-mixing problem reduces to an open-system problem in which the local phase ϑ after
+carrier removal is driven by the low-frequency background fluctuation uenv .
+In the Mori-Zwanzig coarse-graining of Part I 2.7, the decorrelation time of the same background
+branch is fixed as τfree = Γ−1
+                            path . Taking the minimal thermal closure as
+
+
+                                                                                                 kB Tenv
+                u̇env = −Γpath uenv + ξenv (t),                  ⟨ξenv (t)ξenv (0)⟩ = 2Γpath             δ(t)
+                                                                                                   χP
+
+we identify χP with the same coarse-grained susceptibility defined in Part I 2.7 through
+
+                                                         Z ∞
+                                           g2
+                                    Γpath = P                     ⟨δJx (t)δJx (0)⟩ dt
+                                           χP                0
+
+
+
+                                                                 9
+and since Tenv is an external condition on the background, it is not a new free parameter. Then
+
+                                                                       kB Tenv −Γpath |t|
+                                     ⟨uenv (t)uenv (0)⟩ =                     e
+                                                                         χP
+
+follows.
+                  RT
+Since ∆ϑ(T ) = −ω∗ 0 uenv (s) ds,
+                                                                       "                              #
+                                             kB Tenv                        T      1 − e−Γpath T
+                          Var[∆ϑ(T )] = 2ω∗2                                     −
+                                               χP                          Γpath      Γ2path
+
+Under the Gaussian/Markov approximation, the off-diagonal coherence is given by
+
+                                      D                 E                      
+                                                                   1
+                                          e   i∆ϑ(T )
+                                                            = exp − Var[∆ϑ(T )]
+                                                                   2
+
+and for Γpath T ≫ 1,
+
+                           D           E                                               kB Tenv
+                               ei∆ϑ(T ) ≃ e−Γdeph T ,                    Γdeph = ω∗2           τfree
+                                                                                         χP
+
+Furthermore, using the transport relation from Part I 2.7,
+
+                                                                                           −1
+                                         Lpath                    v                 −3/2
+                                 τfree =       =                           + Acol ρTenv
+                                          cw                     Lcorr
+
+we obtain
+
+                                      kB Tenv                     1                       kB Tenv 1
+                        Γdeph = ω∗2                                −3/2
+                                                                                  = ω∗2
+                                        χP              v                                   χP Γpath
+                                                    Lcorr + Acol ρTenv
+
+which closes the expression. Therefore the diagnostic quantity for phase mixing is
+                                                                                               
+                                                                   2       kB Tenv        Tobs
+                                 Γdeph Tobs = (ω∗ τfree )
+                                                                             χP           τfree
+
+If this is ≫ 1, then the condition required for the statistical bridge,
+
+                                                   D                E
+                                                       ei(θjn −θjm ) → δnm
+
+holds after coarse-graining. Conversely, if it is ≲ 1, cross terms can survive in ultracold, highly
+isolated systems or over short observation windows. This connects directly to the ”regimes of possible
+deviation” described below.
+A2 (origin of the linear detection response): Take the minimal interaction fixed in Part I 2.7.0,
+
+                                                                  µ
+                                                   Lint := gP Pµ Jmatter
+
+and expand it around the detector’s macroscopic background
+
+
+                                  Pµ,det (x, t) := Pµ,det,∗ (x) + δPµ,det (x, t)
+
+
+
+                                                                  10
+and the incoming positive-frequency signal
+                                                                                         Z
+                                                                           −iω∗ t
+                     δP+ (x, t) := P∗ (xj ) ψj (t) uj (x) e                         ,             |uj (x)|2 d3 x = 1
+                                                                                             Vj
+
+Here Vj is the position-readout cell, uj is the mode function within the cell, and |δP+ /Pdet,∗ | ≪ 1 is
+taken as the weak-signal gate. Since the stationary background Pµ,det,∗ itself does not induce transi-
+tions, the lowest-order term that drives detection is, with respect to the detector-current fluctuation
+   0 ,
+δJdet
+                                     Z
+                                                                                                     
+                                                                    (x, t) + δP+∗ (x, t) δJdet
+                  (1)
+                 Hint,j (t) := −gP                              0
+                                              d3 x δP+ (x, t) δJdet                        0
+                                                                                               (x, t)
+                                         Vj
+
+The detector’s initial pointer-ready state is denoted by |D0 ⟩, and the microscopic final state after
+absorption by |Dα ⟩. Then Fermi’s golden rule gives
+
+                                               *         Z                                            +2
+                  2πgP2 P∗ (xj )2
+          λj→α :=                 |ψj |2           Dα                 3           0
+                                                                     d x uj (x) δJdet (x) D0               δ(Eα − E0 − h̄ω∗ )
+                        h̄                                   Vj
+
+The key point is that the lowest-order transition amplitude is linear in δP+ ∝ ψj , so in the transition
+rate |ψj |2 factors out in front. Summing over final states then gives
+
+                                                        X
+                                               λj :=              λj→α := κj |ψj |2
+                                                            α
+
+with
+
+                                          *         Z                                              +2
+                  2πgP2 P∗ (xj )2 X
+            κj :=                             Dα                           0
+                                                             d3 x uj (x) δJdet (x) D0                   δ(Eα − E0 − h̄ω∗ )
+                        h̄        α                     Vj
+
+
+giving the detector-side local spectral response. If the weight of the coarse-grained cell is read as
+                                                                 Z
+                                                   ρj :=                  |ψ(x)|2 d3 x
+                                                                     Vj
+
+the same expression can be written as
+
+
+                                                             λj := κ̄j ρj
+
+where κ̄j is the detector spectral density averaged over the cell and can be treated as known after
+flat-field calibration. As an equivalent correlation-function representation, define the operator
+                                                        Z
+                                              bj :=
+                                              O                                0
+                                                                 d3 x uj (x) δJdet (x)
+                                                            Vj
+
+Then
+                                                   Z ∞
+                                 (j)
+                                SOO (ω) :=                                      bj (0)|D0 ⟩
+                                                                          bj (t)O
+                                                             dt eiωt ⟨D0 |O
+                                                    −∞
+
+implies
+
+
+
+                                                                          11
+                                                   gP2 P∗ (xj )2 (j)
+                                          κj :=                 SOO (ω∗ )
+                                                        h̄2
+Thus the only additional ingredients required in A2 are the coupling gP already fixed in Part I and the
+detector-current correlation; no new free parameter of the P-model is introduced. Next, if one keeps
+the next nonlinear term around the detector background, the amplitude acquires one extra factor of
+δP+ /Pdet,∗ . Therefore the relative correction to the rate is suppressed as
+
+                                              (nl)                     !
+                                           ∆λj                δP+ 2
+                                             (1)
+                                                     =O
+                                            λj                Pdet,∗
+
+In the asymmetric limit where the detector is a macroscopic background and the incoming wave is a
+small fluctuation, |δP+ /Pdet,∗ |2 ≪ 1, so the linear response is stable as the lowest-order consequence.
+After removing κj by flat-fielding,
+
+                                   (ff)       λj /κj      ρj
+                                  fj      := P          =P      ∝ |ψj |2
+                                               k λk /κk    k ρk
+
+Thus the A2 gap closes in the form: ”in the weak-signal / weak-backreaction limit, the detector’s
+lowest-order transition rate is proportional to |ψ|2 .”
+What can and cannot be claimed at this stage: From the derivation above, among the previously
+open items of the Born rule:
+
+ 1. Why phase mixing generally occurs
+
+is closed as an open-system closure using τfree , Γpath , and χP from Part I 2.7.
+
+ 1. Why the detector response may be treated as linear
+
+is closed by the minimal coupling Lint = gP Pµ J µ from Part I 2.7.0 together with the weak-signal
+gate |δP+ /Pdet,∗ |2 ≪ 1. Therefore the detection probability p ∝ |ψ|2 and local detection rate λj =
+κ̄j ρj reach an effective derivation under phase mixing, lowest-order linear response, weak
+backreaction, and frequentist coarse-graining. Meanwhile,
+
+ 1. Why conditioning (state update) takes the Lueders / Kraus form
+
+is closed up to an effective derivation through decoherence plus conditioning in Sections 2.5.3 and
+2.5.4. Accordingly, the present judgment is: ”the Born-rule detection probability is fixed as
+an effective derivation under phase mixing, linear detection response, weak backreaction,
+and frequentist coarse-graining, while diagonal Lueders/Kraus update is fixed as a coarse-
+grained effective derivation.” The remaining common residues are: (i) foundational probability
+theory concerning how probabilities are assigned to single events, and (ii) C3, namely why this coarse-
+grained update appears thermodynamically irreversible.
+Domain of adoption (conditions under which validity is expected): Condition 1: the phase-
+diffusion gate Γdeph Tobs ≫ 1 holds, so cross terms are washed out in the ensemble average. Supplement
+(justification of the Markov approximation): the OU closure in A1 is applied to the local phase ϑ after
+removal of the carrier. Therefore, the correlation time
+
+
+                                             τcorr = Γ−1
+                                                      path = τfree
+
+
+                                                         12
+should not be compared with the raw carrier period
+
+
+                                                 τcarrier = ω∗−1
+
+but with
+
+
+                                                       Tobs
+
+which defines the coarse-graining of counting, readout, and the envelope. The ratio required by the
+Markov closure is in fact
+
+                                          τcorr       1        τfree
+                                                =            =       ≪1
+                                          Tobs    Γpath Tobs   Tobs
+
+which reduces to the same coarse-grained criterion as the phase-diffusion gate in A1. By contrast,
+
+                                                 τcorr
+                                                         = ω∗ τfree
+                                                τcarrier
+is only a diagnostic ratio comparing directly to the optical carrier, and it is not a condition that inval-
+idates the open-system closure of this section where the carrier has already been factored out. Taking
+the representative optical readout condition ω∗ = 3.0 × 1015 s−1 , together with τfree = 10−13 . . . 10−10 s
+allowed by the transport relation in Part I 2.7 and the readout windows Tobs = 10−9 . . . 10−5 s, the
+coarse-graining ratios are
+
+Representative ω∗ (s−1 )      τfree (s)         Tobs (s)           ω∗ τfree    τfree /Tobs
+condition
+
+Optical        3.0 × 1015     1.0 × 10−13       1.0 × 10−9         3.0 × 102   1.0 × 10−4
+high-speed bin
+readout
+Optical ns     3.0 × 1015     1.0 × 10−12       1.0 × 10−7         3.0 × 103   1.0 × 10−5
+readout
+Optical us     3.0 × 1015     1.0 × 10−10       1.0 × 10−5         3.0 × 105   1.0 × 10−5
+integration
+
+
+
+and in all cases Γpath Tobs = 104 . . . 105 ≫ 1. Therefore, for representative room-temperature optical
+readout windows, the Markov approximation is well justified on the coarse-grained detector timescale.
+Representative reproducibility artifacts are listed in the Part IV ledger. Condition 2: the device
+remains in the weak-signal linear-response regime (|δP+ /Pdet,∗ |2 ≪ 1, and κ does not depend strongly
+on the intensity, phase, or past history of ψ). Condition 3: the Markov approximation holds (the
+device/environment correlation time is suﬀiciently shorter than the system timescale). Condition
+4: backreaction is negligible (during one trial, the energy flow associated with detection does not
+significantly change the u(P ) field itself). Supplement (accumulated backreaction under repeated
+detections): the A2 weak-signal gate for a single event requires
+
+                                                  δP+ 2
+                                                         ≪1
+                                                  Pdet,∗
+
+but if N detections accumulate on the same detector background, the minimal estimate becomes
+
+
+
+
+                                                           13
+                                          ∆Pdet,∗    δP+ 2
+                                                  ∼N
+                                          Pdet,∗     Pdet,∗
+
+Therefore the perturbative gate including many events is
+
+                                                 δP+ 2
+                                            N           ≪1
+                                                 Pdet,∗
+
+Representative examples are summarized in the Part IV reproducibility ledger; only the results are
+recorded here.
+
+Representative condition |δP+ /Pdet,∗ |         N                   N |δP+ /Pdet,∗ |2
+
+single-photon counting  10−20                   1010                10−30
+bright calibrated run   10−10                   1012                10−8
+ultra-intense many-body 10−4                    108                 1
+injection
+
+
+Thus, while the cumulative change of the detector background can be neglected for single-photon
+detection or calibrated many-shot runs, regimes such as ultra-intense laser irradiation or many-body
+injection into a Bose-Einstein condensate can approach
+
+                                                 δP+ 2
+                                            N           ≳1
+                                                 Pdet,∗
+
+In such a regime, the linear response of A2 should not be used unchanged; one must switch to a
+different specification that includes background retuning and nonlinear detector dynamics. Condition
+5: the system is in the weak field (|ϕ|/c2 ≪ 1), so higher-order terms of the clock mapping (the
+exponential nonlinearity) remain suﬀiciently small relative to the experimental precision.
+Regimes where deviations may occur (domains requiring an additional specification):
+Regime 1 (macroscopic superposition / highly isolated systems / many-body injection): if the system
+becomes large, or if Γdeph Tobs ≲ 1 in an ultracold, high-Q, short-observation-window setting, then
+one or more of (i) phase mixing, (ii) neglect of backreaction, (iii) the Markov approximation, and
+(iv) linear response may fail. A concrete example is when N |δP+ /Pdet,∗ |2 ≳ 1 under ultra-intense
+laser irradiation or many-body injection into a Bose-Einstein condensate, in which case the adopted
+form of the Born rule itself may need to be changed. Regime 2 (strong gravity): in regions where
+|ϕ|/c2 is not negligible, the nonlinearity, spacetime dependence, and fluctuations of u become explicit,
+and the detection-rate coeﬀicient κ may itself depend on u (currently left undefined). Regime 3 (self-
+gravitating mean field): if one feeds the quantum mass density into the source of u (for example
+ρ → m|ψ|2 ), then the Schrödinger equation becomes of the Schrödinger-Newton type (nonlinear), and
+the visibility, phase, and stability of interference/superposition change. This is an extra assumption
+beyond the Part I core, and if adopted it should be fixed explicitly as a ”separate hypothesis” with
+its own falsification conditions. Space-based macroscopic interferometer plans such as MAQRO-like
+concepts could become the decisive tests.
+Observability (quantitative form): Observable A: if a small deviation of the adopted form of the
+Born rule is written as p → p(1 + δ), then in simple counting statistics one obtains
+
+                                                       3
+                                                |δ| ≳ √
+                                                        N
+which gives a 3σ detection threshold, where N is the effective number of trials. Observable B: if κ
+
+                                                       14
+responds linearly to u (or ∇u), so that δ ≈ ϵu |u| or δ ≈ ϵg ℓ|∇u|, then
+
+
+                                     u = −ϕ/c2 ,           |∇u| = |∇ϕ|/c2
+
+so in the laboratory gravitational field (|∇ϕ| ≈ g), one has |u| ∼ 10−9 and |∇u| ∼ 10−16 m−1 , both
+extremely small. Therefore any effect large enough to break the Born rule would require another
+amplification mechanism, such as device nonlinearity, self-gravity, or non-Markovianity.
+Observable C: the scale at which self-gravity (mean field) becomes relevant in macroscopic interference
+is estimated, in terms of wave-packet size R and interference time T , by
+
+                                               EG      Gm2
+                                                   T ∼     T ≳1                                         (4)
+                                                h̄     h̄R
+where EG ∼ Gm2 /R is a rough scale for the gravitational self-energy. The mass, size, and time
+at which an ”additional effect becomes visible” are set by this kind of dimensionless quantity. For
+example,
+                                                           r
+                                                               h̄R
+                                                 mcrit ∼
+                                                               GT
+is the scale at which the gravitational self-effect contributes of order 1 radian to the phase. For
+R = 100 nm and T = 1 s, this gives mcrit ∼ 4 × 10−16 kg (about 2 × 1011 amu).
+Experimental connection (predictions for planned experiments): Concrete examples of mcrit
+        p
+(mcrit ≡ h̄R/(GT ), rough estimate) are:
+
+R (wave-packet size)   T (interference time)      mcrit                     Corresponding mass
+                                                                            scale
+
+1 nm                   1 ms                       1.3 × 10−15 kg            Upper scale of
+                                                  (7.6 × 1011 amu)          sub-micron to micron
+                                                                            nanoparticle interference
+100 nm                 1s                         4.0 × 10−16 kg            Micron-class
+                                                  (2.4 × 1011 amu)          nanoparticles (1011 amu
+                                                                            scale)
+1 �m                   10 s                       4.0 × 10−16 kg            Same R/T ratio
+                                                  (2.4 × 1011 amu)
+10 �m                  100 s                      4.0 × 10−16 kg            Same R/T ratio
+                                                  (2.4 × 1011 amu)
+
+
+
+Space interferometer concepts such as MAQRO can simultaneously realize long T and large R, so
+they are relatively more likely to approach mcrit scales of the kind listed above while suppressing
+environmental decoherence better than ground-based systems. If one adopts the additional hypothesis
+that quantum mass density enters the source of u (a Schrödinger-Newton-type mean field), then phase
+shifts and visibility loss may be predicted near m ∼ mcrit , appearing as apparent deviations from the
+Born rule.
+By contrast, in molecular interference such as OTIMA (106 . . . 108 amu scale), one has m ≪ mcrit ,
+so this paper does not predict a Born-rule deviation there. Altitude-comparison optical lattice clocks
+also predict ϵ ≈ 0 in the weak field and remain consistent with current observations (Section 4.3).
+A direct test of Born-rule deviation is therefore diﬀicult with present ground-based experiments, and
+future space experiments, including MAQRO-like concepts, could become decisive.
+Supplement (boundary of the single-event probability interpretation): what is fixed directly by the
+
+                                                          15
+derivation in this section is the coarse-grained law for the frequentist limit of independent trials,
+
+
+                                     fj → pj ∝ |ψj |2        (N → ∞)
+
+The interpretation of a single event, namely ”why this result occurs with this probability in one
+measurement,” belongs to the foundations of probability theory under any of the frequentist, Bayesian,
+or de Finetti viewpoints, and it remains a common residue across Copenhagen, many-worlds, QBism,
+and other interpretations of quantum mechanics. Therefore what remains here is not a P-model-specific
+underivation, but a common residue concerning the foundations of single-event probability.
+With that boundary made explicit, the Born rule is reclassified here not as a ”conditional derivation”
+but as an effective derivation under the four conditions of phase mixing, linear detection
+response, weak backreaction, and frequentist coarse-graining.
+Reference note (relation to Gleason-type structure): The physical route of the P-model (A1 phase
+diffusion + A2 linear detection) and Gleason’s structural route (Hilbert-space linearity + noncon-
+textuality) are independent. Once the fifth condition in Section 2.5.1 assumes the linear structure
+of superposition, part of Gleason’s premises is already satisfied. However, this paper does not push
+uniquely from there to a probability measure; instead it derives
+
+
+                                                 p ∝ |ψ|2
+
+from the lowest-order transition rate of the detector coupling. Therefore the fact that both routes
+reach the same
+
+
+                                                   |ψ|2
+
+already serves as a double guarantee of the robustness of the derivation. In particular, the answer to
+”why not
+
+
+                                                   |ψ|4
+
+?” is that in A2 the transition amplitude is first order in ψ and the rate is given by its absolute square,
+while higher-order processes are suppressed by
+
+                                    δP+ 2                    δP+ 2
+                                           ≪ 1,          N          ≪1
+                                    Pdet,∗                   Pdet,∗
+
+the gates above.
+
+
+2.5.3 Positioning of Measurement (State Update): Lueders Adoption, Decoherence, and
+      Penrose-Diosi
+
+This paper does not assert ”wave-function collapse” as a literal physical fact. Instead it treats the
+measurement result m as a macroscopic record and state update as conditioning on that record,
+namely an effective state conditioned by the observed record. In that minimal form, it adopts
+both projective measurement (Lueders type) and general measurement (POVM/Kraus), while stating
+clearly the reasons for adoption and the points that remain unresolved.
+Adopted here (fixed): Adoption A (projective measurement; Lueders):
+
+
+
+                                                    16
+                                                                   Πm ρΠm
+                              p(m) = Tr(Πm ρ),          ρ → ρm =
+                                                                   Tr(Πm ρ)
+
+Adoption B (general measurement; Kraus):
+
+                                              Mm ρMm †                            X
+                                                                    †
+           p(m) = Tr(Em ρ),        ρ → ρm =            ,     E m = Mm Mm ,             Em = I
+                                              Tr(Em ρ)                             m
+
+Reasons for adoption (why Lueders is used): Reason 1: it is the minimal update rule and is
+consistent with (i) conditioning by records, (ii) reproducibility under immediate remeasurement (the
+same record is stably repeated), and (iii) the standard open-system formalism (quantum trajectories
+and Lindblad unraveling). Reason 2: in the vocabulary of the P-model, Πm and Mm are not ”arbitrary
+axioms” but are interpreted as equivalence classes of macroscopic records (pointer states)
+that remain after coarse-graining over the many degrees of freedom of the apparatus and environment.
+Accordingly, the update is treated as conditional update, not as a literal assertion of collapse.
+Decoherence mechanism (phrased in P-model language): Mechanism 1: measurement is the
+interference between the local P-structure (mode) of the target and the large P-structure of the
+apparatus (boundary condition + dissipation + amplification), and in the effective description after
+coarse-graining, the off-diagonal components in the pointer basis decay (decoherence). Mechanism
+2: in the C1/C2 organization of this paper, the pointer basis is fixed as the stable mode of the P
+background, and the Πm / Kraus operators are fixed as conditionings on the detector-record region
+Fr . What remains open at this stage is the statistical-mechanical question of why the environmental
+trace appears irreversible; the update rule itself has been closed up to an effective derivation. Figure~1
+fixes that placement, while detailed discussion is separated into supplementary material.
+
+
+
+
+                                                   17
+          Quantum Measurement Positioning (Born Rule and State Update)
+
+
+
+                 P field (time-wave density)                                               Bound-mode envelope
+                     u = ln(P/P0), φ = -c²u                                                          ψ(x,t)
+           (Part I mapping and local description)                                   (Schr/KG in the short-wavelength limit)
+
+
+
+
+                                                                                        Detection rate / click probability
+                                                                                                  λ(x,t) ∝ |ψ|²
+              Selection and analysis pipeline                                          (Born rule: operational adoption)
+          w_ab(λ) (setting-dependent acceptance)
+            systematics entry for Bell analysis
+
+
+
+                                                                                            Measurement record m
+                                                                                        pointer states / coarse-graining
+                                                                                         ρ → ρ_m (conditional update)
+
+
+
+
+         This first release fixes the boundary between derived elements and adopted elements,
+         and makes the verification entry explicit against the criticism that the model is only semi-classical.
+         A first-principles derivation of the Born rule and update rule remains future work.
+
+
+
+
+Figure 1: This figure summarizes the placement of the Born rule (|ψ|2 ) and state update (conditional
+update).
+
+
+Relation to Penrose-Diosi-type proposals: Relation 1: this paper does not adopt objective
+collapse, namely the hypothesis that gravity spontaneously collapses the wave packet. Therefore the
+Penrose-Diosi type remains a separate hypothesis and is not identified with the present framework.
+Relation 2: if one later introduces objective collapse starting from fluctuations of P or backreaction,
+it must be constrained by primary data on the same footing as existing Penrose-Diosi / CSL bounds,
+and its domain of adoption and falsification conditions must be fixed separately. That is left undefined
+in this paper.
+Falsification entry point: selection and the statistical population: Entry definition: in Bell
+tests, observational procedures (timestamp coincidence windows, trial-based definitions, and event-
+ready windows) can change the set of events admitted into the statistical population. Writing
+this as a selection weight wab (λ) that depends on settings a, b and latent variable λ, one obtains
+                                                      R
+                                                          dλ ρ(λ) wab (λ) P (x | a, λ)P (y | b, λ)
+                             Pobs (x, y | a, b) =                  R                                                          (5)
+                                                                     dλ ρ(λ) wab (λ)
+
+This wab (λ) is only a notation for the event set selected by the analysis procedure; it does not claim that
+the P-model dynamics introduces a new degree of freedom. If the assumption that wab is independent
+of the settings (the same statistical population) fails, then the applicability conditions of the standard
+
+
+                                                                  18
+CHSH derivation are not met. The point of the present program is to test, using public primary data,
+exactly which assumption can fail under which analysis procedure, and thereby connect that failure
+to explicit falsifiability.
+
+
+2.5.4 ”Dynamical Collapse” in Quantum Theory: Simulation of the Measurement Prob-
+      lem (P-model Working Hypothesis)
+
+The Bell section of Part III is primarily aimed at quantifying the selection entry point, namely pro-
+cedural dependence. For that reason it is not enough merely to suggest that standard quantum
+mechanics might be wrong; the P-model side must also present, as a time evolution, what happens
+during measurement.
+Hard challenge addressed here: ”It is clear that systematic effects may exist. But then how
+does the P-model describe wave-function collapse? Can it depict, not only in words but through a
+time-evolution equation, the process by which one branch is selected?”
+Minimal policy of this paper: As an effective description including the measuring device, we adopt
+a nonlinear continuous-measurement equation (state-dependent drift) and visualize the simultaneous
+dynamics of the branch and the pointer degree of freedom. We do not claim that the first-principles
+derivation is complete. The first goal is to fix a visualizable physical process in a falsifiable form.
+Minimal model (operational form):
+
+                        h         γm                 √                 i
+                  d|ψ⟩ = −iH dt −    (M − ⟨M ⟩)2 dt + γm (M − ⟨M ⟩) dWt |ψ⟩                        (6)
+                                   2
+
+
+                                   dx = (−Γx + χ⟨M ⟩) dt + σξ dWt′
+
+Here M is the measurement operator (σz in the two-state case), x is the pointer degree of freedom of
+the measurement device, and dWt , dWt′ are Wiener noises. The term involving (M −⟨M ⟩) provides the
+nonlinearity and drives convergence from a superposed state to a branched state, namely collapse-like
+dynamics.
+Required checks (scope fixed in this paper):
+
+ • Whether the state expectation value z(t) = ⟨M ⟩ converges to a branch immediately after interac-
+   tion with the measuring device.
+
+ • Whether the pointer degree of freedom x(t) correlates with the branch and makes measurement
+   visible as a physical process, not merely as an interpretation.
+
+The quantitative results of this minimal implementation are shown in Section 4.11. Additional degrees
+of freedom, such as multi-degree measurement devices and dissipative channels, are left for later
+extensions.
+C1 (P-model basis for the pointer basis): Map the phase-diffusion rate obtained in A1 to the
+low-frequency stable mode of the detector’s macroscopic background Pµ,det,∗ . Let the coarse-grained
+mode amplitude of the detector background be qa and the branch label be m = ±1. Then the minimal
+free energy corresponding to pointer-basis selection is
+
+                                    (m)     1X             X
+                                  Fdet :=       Γa qa2 − m   χ a qa
+                                            2 a            a
+
+
+
+
+                                                  19
+Here Γa is the relaxation rate of the background mode and χa is the coupling to the target branch
+variable m. The multi-pointer-degree equation in Section 2.5.4,
+
+
+                               dxk := (−Γk xk + χk ⟨M ⟩ + ηk E) dt + σξ,k dWk
+
+is an OU closure under the identification qa ↔ xk . Accordingly, the deterministic fixed point is
+
+                                                                  χa
+                                                    qa(m) := m
+                                                                  Γa
+Thus the pointer basis is not an arbitrary projection; rather, it is fixed as two attractors given by
+stable modes of Pµ,det,∗ whose signs reverse according to the branch label.
+When the environment E is included, the offset is
+
+                                                                 ηa
+                                               δqa,env :=           E
+                                                                 Γa
+and the stationary noise width is
+
+                                                          σξ,a
+                                                 σq(∞)
+                                                    a
+                                                       := √
+                                                            2Γa
+
+Therefore the strength of branch separation is measured by
+
+                                                     (+)
+                                                    |qa |         |χa |/Γa
+                                         Sa :=       (∞)
+                                                            =          √
+                                                    σqa          σξ,a / 2Γa
+
+Using the existing three-channel pointer-degree parameters from Section 2.5.4,
+
+
+       Γk = (2.4, 2.0, 2.8) s−1 ,      χk = (5.0, 4.3, 5.7) s−1 ,                 σξ,k = (0.30, 0.34, 0.27) s−1/2
+
+we obtain
+
+                      (+)                                          (∞)
+                    xk      = (2.083, 2.150, 2.036) ,            σx,k = (0.137, 0.170, 0.114)
+
+and
+
+
+                                         Sk = (15.2, 12.6, 17.8) ≫ 1
+
+Thus the stationary branch overlap is extremely small, and mixing of the pointer basis is governed not
+by static overlap but mainly by transient environmental fluctuations, Hamiltonian drift, and finite-time
+readout.
+Next, identify the measurement rate γm of Section 2.5.4 with the coarse-grained dephasing rate ob-
+tained by moving A1 to the detector side,
+                                                                          
+                                            (det)                kB Tdet
+                                    γm ≡ Γdeph := ω∗2                          τfree,det
+                                                                 χP,det
+
+Then, after adiabatically eliminating the pointer-degree modes, the effective rate that accelerates
+branch selection becomes
+
+
+
+                                                            20
+                                                            1 X χ2k
+                                                                    Nptr
+                                              Γptr := γm +
+                                                           Nptr Γk
+                                                                    k=1
+
+The second term here is a coarse-grained feedback term that measures how quickly the susceptibility
+of the stable mode feeds off-diagonal coherence into the pointer system; it is not a new free parameter.
+                                                                  √
+Estimating the coherence of a pure two-state branch by |ρ01 | = 12 1 − z 2 and setting the collapse gate
+as |z| ≥ zth , we obtain
+
+                                             q
+                                         1                            ln(|ρ01 (0)|/|ρ01 |th )
+                          |ρ01 |th :=         1 − zth
+                                                   2 ,       τD :=
+                                         2                                    2Γptr
+
+for the decoherence time. Substituting the existing simulation values γm = 9.0 s−1 , zth = 0.95, and
+the three-channel pointer-degree set gives
+
+
+                                   Γptr = 19.42 s−1 ,             τD = 29.97 ms
+
+This is of the same order as the collapse indicators in Part III-B Section 4.11,
+
+
+         τ50 = 39.6 ms,       pointer consensus = 0.9656,                   branch stable fraction = 0.925
+
+and is consistent with the ratio τ50 /τD = 1.32. Therefore the pointer-degree dynamics of Section 2.5.4
+can be read as a coarse-grained closure obtained by mapping the detector-side decoherence of A1 onto
+stable modes of the macroscopic P background. What is closed at this stage is what the pointer
+basis is.
+C2 (recovery of Lueders/Kraus from partial trace + conditioning): Once C1 has fixed the
+pointer basis {Πm } as the stable mode of the detector background, the full three-sector system of S
+(system), D (detector), and E (environment) can be written as
+
+                                                           X
+                  U (t) (ρ ⊗ ρD,0 ⊗ ρE,0 ) U † (t) =
+                                                                              (m,n)         (m,n)
+                                                                 Πm ρΠn ⊗ ρD          (t) ⊗ ρE      (t)
+                                                           m,n
+
+Tracing out the environment, the off-diagonal residue is measured by
+
+                                                           |ρ01 (tread )|
+                                                 rcoh :=
+                                                             |ρ01 (0)|
+
+and the reduced state falls to
+
+                                 (dec)
+                                                   X                    (m)
+                              ρSD (tread ) =             Πm ρΠm ⊗ ρD + O(rcoh )
+                                                    m
+
+Here rcoh is not a new assumption; it can be read directly from the existing dynamical-collapse
+simulation in Part III-B Section 4.11. In the current artifacts,
+
+
+                                 rcoh = 0.0276,            |ρ01 |final,med = 0.0138
+
+so by the time the pointer readout is fixed, the off-diagonal terms have been suppressed to the few-
+percent level.
+Next, conditioning on the positive operator Fr (r ∈ {+, −}) that represents the coarse-grained region
+
+                                                           21
+of the detector record, the instrument map becomes
+
+                                         h                                      i
+                           Ir (ρ) := TrDE (I ⊗ Fr ⊗ I) U (ρ ⊗ ρD,0 ⊗ ρE,0 ) U †
+
+                           X                                                            
+                                                                                     (m)
+                       =        rr|m Πm ρΠm + O(rcoh ),              rr|m := TrD Fr ρD
+                            m
+
+Accordingly, the Kraus operators are recovered as diagonal on the pointer basis,
+
+                                 Xp                                              X
+                        Mr :=      rr|m Πm ,           Er = Mr† Mr ,                  Er = I
+                                  m                                               r
+
+This is not a ”new measurement axiom”; it is precisely the effective state conditioned by the
+coarse-grained detector record after tracing over the environment.
+From the current three-channel pointer-degree artifacts, the misclassification floor from static overlap
+is
+                                                                
+                                               1           S
+                                 ϵstatic := max erfc       √a        = 5.8 × 10−37
+                                             a 2             2
+
+which is effectively zero. By contrast, the nominal finite-response error read from the dynamical run
+is
+
+
+                           ϵnom := max (ϵstatic , 1 − pointer consensus) = 0.0344
+
+and the conservative bound including branch instability is
+
+
+                         ϵub := max (ϵnom , 1 − branch stable fraction) = 0.0750
+
+Therefore the response matrix for binary readout is
+                                                !                                        !
+                                  0.9656 0.0344                             0.9250 0.0750
+                      Rnom =                      ,          Rub =
+                                  0.0344 0.9656                             0.0750 0.9250
+
+and the corresponding Kraus operators are
+
+                      p              √                                  √                p
+               M+ =    1 − ϵresp Π+ + ϵresp Π− ,            M− =            ϵresp Π+ +    1 − ϵresp Π−
+
+Here ϵresp lies in the range from ϵnom to ϵub .
+In the ideal limit ϵresp → 0,
+
+                                                       Πr ρΠr
+                                              ρr →
+                                                      Tr(Πr ρ)
+
+so the Lueders rule is recovered directly. The current detector is not perfectly ideal, but under pointer
+consensus 0.9656 and branch stable fraction 0.925 it still falls within finite-response measurement
+as a diagonal Kraus family. Accordingly, the substantive remaining issue after A3 / C2 is no
+longer ”the form of the update rule” but only C3, namely why the environmental trace appears
+irreversible in the thermodynamic limit.
+
+
+                                                       22
+C3 (boundary of irreversibility): Since C1/C2 close the form of the update rule itself, the only
+remaining points to assess here are:
+
+ 1. how far the reduced description after tracing out the environment is effectively one-way within
+    the coarse-grained resolution, and
+
+ 2. whether the microscopic irreversibility beyond that should be regarded as part of the responsibility
+    of this paper.
+
+In the integrated audit that bundles the existing audit artifacts, we fix rcoh = 0.0276, τ50 /τD = 1.32,
+cv(τ50 ) = 0.0380, pointer consensusmin = 0.953, branch reversalmax = 0.0677. Therefore, the reduced
+state conditioned on the detector record is suﬀiciently one-way at the coarse-grained resolution of this
+paper, and the Born detection probability, pointer basis, and diagonal Lueders/Kraus update may be
+regarded as closed as an effective derivation.
+What still remains at the first-principles level is the thermodynamic-limit question of why Loschmidt
+reversal or Poincare recurrence is not observed in experiment after tracing over the huge environmental
+degrees of freedom T rE . This is not a P-model-specific missing derivation, but a residue common
+to any open-system quantum theory. Accordingly, the judgment of this section is fixed as: ”the
+measurement route is closed as an effective derivation, and irreversibility is a statistical-
+mechanical residue that does not block progress.” No new free parameter is introduced.
+
+
+2.5.5 Minimal Connection to Quantum Information
+
+This paper does not attempt a full treatment of quantum information. What is handled here is only
+the minimal connection for which the P-model-specific physical contribution can be stated explicitly.
+The key point is to map the phase-diffusion rate from A1,
+                                                                   
+                                                          kB Tenv
+                                        Γdeph = ω∗2                     τfree
+                                                            χP
+
+directly onto qubit coherence time, gate fidelity, pair decoherence, and the physical origin of error
+channels.
+Reference note (quantum information): No-cloning, teleportation, entanglement entropy, QEC
+code structure, universality, and QKD protocol structure are treated as standard Hilbert-space math-
+ematics following from the fifth condition in Section 2.5.1 (linearity) and the Born rule in Section
+2.5.2. The P-model does not modify those mathematical structures. Its specific contribution lies in
+the decoherence rate and the physical origin of error channels.
+Core of the minimal connection: On the quantum-information side we use
+
+                                                                                                1
+                ∼ Γ−1
+         (P )                     (ϕ)
+       T2          deph ,   1 − F2q ∼ Γdeph τgate,2q ,        Γpair = 2Γdeph ,   dmax ∼
+                                                                                          Γpair τgate,2q
+
+as the evaluation formulas for a first estimate. No new free parameter is introduced here; we simply
+read off the carrier-to-transport correspondence and A1 as they stand.
+The first estimates for representative platforms are as follows.
+
+
+
+
+                                                      23
+Platform            Choice of ω∗         First estimate of        P-side judgment     Fixed result
+                                         τfree
+
+superconducting     qubit transition     upper-bounded by         lower-bound          (kB Tenv /χP )req ≥
+transmon            2π × 5 GHz           the shortest             consistency          3.75 × 10−10 ,
+                                                                                             (ϕ)
+                                         two-qubit gate,          satisfying the entry 1 − F2q ≤
+                                         30 ns                    condition            3.33 × 10−4 ,
+                                                                                       dmax ≥ 1.5 × 103
+trapped-ion 43 Ca+ hyperfine splitting   upper-bounded by         lower-bound          (kB Tenv /χP )req ≥
+                   2π × 3.2 GHz          the shortest             consistency          1.30 × 10−17 ,
+                                                                                             (ϕ)
+                                         two-qubit gate,          satisfying the entry 1 − F2q ≤
+                                         3.8 µs                   condition            7.6 × 10−8 ,
+                                                                                       dmax ≥ 6.58 × 106
+photonic            telecom-band         use τfree ≈ Lcoh /cw     passes as a strict   (kB Tenv /χP )req =
+polarization        carrier              as the proxy             proxy                2.70 × 10−24 ,
+1550 nm                                                                                T2 = 5.003 × 10−4 s,
+                                                                                       Γpair =
+                                                                                       3.997 × 103 s−1 ,
+                                                                                       pair distance
+                                                                                       budget = 37.5 km
+
+
+
+Thus, for the photonic branch, the coherence-length proxy passes directly as a strict proxy, while
+for gate-executable transmon / trapped-ion platforms τfree remains at the stage of an upper-bound
+envelope. Even so, the P-side first estimate has been closed up to consistency of the entry con-
+ditions. Moreover, the phase-scattering loss for two-qubit gates stays below the lower surface-code
+threshold 5.02 × 10−3 in all cases, so the minimal P-model connection does not immediately break the
+error-correction threshold.
+Connection to entanglement resources: Reading the quantity fixed in Section 2.6.4,
+
+
+                                                   Γpair = 2Γdeph
+
+directly as a two-qubit entanglement resource, the gate-depth lower bound dmax is given by the table
+above for gate-executable platforms, while for the photonic branch the pair-time budget is
+
+
+                                         Tpair ∼ Γ−1
+                                                  pair /2 = 2.50 × 10
+                                                                     −4
+                                                                        s
+
+and the pair-distance budget 37.5 km is fixed as well. What is claimed at this stage is not universality
+of the entire circuit model, but rather that the phase-scattering-limited depth budget read
+from A1 (phase diffusion) and B3 (pair decoherence) closes in terms of P-side physical
+quantities.
+Physical origin of the error channels: In this paper, the primary channels in the minimal con-
+nection to quantum information are fixed as follows:
+
+                                             dephasing primary : Γϕ ≡ Γdeph
+                                                amplitude origin : Γamp ∼ Γk
+                                   depolarization non-primary : pdep ≲ ϵub
+
+Phase scattering is the primary channel on all three platforms. The photonic branch uses a strict
+proxy, while transmon / trapped-ion use upper-bound envelopes. Amplitude damping is tied to the
+stable-pointer relaxation of C1, Γk ≈ 2.0–2.8 s−1 . We do not newly fit the platform-specific T1 values
+here. In addition, the C2 stability audit gives
+
+
+                                                             24
+       ϵub = 0.0750,      branch reversalmax = 0.0677,      diagonal preservation floor = 0.925
+
+so basis disturbance remains only a residual upper bound and does not justify promoting depolarization
+to an independent dominant P-channel.
+Summary: Quantum information is no longer treated as entirely out of scope. What this paper fixes
+is a minimal connection in which phase scattering is the primary channel, amplitude damping is a
+secondary channel with fixed physical origin, and depolarization is treated as a non-primary channel.
+By contrast, the protocol-side mathematics (no-cloning, teleportation, QEC code structure, QKD, and
+so on) remains outside scope as standard Hilbert-space mathematics. Therefore the P-model-specific
+contribution lies not in the computational logic of quantum information itself, but in assigning physical
+origins, through A1 (phase diffusion), B3 (pair decoherence), and C1 (stable-pointer relaxation), to
+quantities such as decoherence, fidelity, pair-depth budgets, and the origin of error channels.
+
+
+
+
+                                                   25
+2.6 Position of Electromagnetism
+
+Electromagnetism is an essential ingredient for proceeding to atoms, molecules, and condensed-matter
+systems. In this paper, starting from the transverse mode of the time-wave vector and a single frozen
+action, the backbone of electromagnetism and the fine-structure constant has been carried through
+to the level of source fixation, theoretical derivation, and judgment of overall consistency.
+The main claim here is not a local CODATA competition. Rather, the core theoretical claim is that
+a single P-model-specific fine-structure constant is derived from a single frozen action with no free
+parameter, and that the same action supports the verification surface of the entire theory.
+
+
+2.6.1 Derivational Skeleton Fixed in This Paper
+                                                                                (P )      √
+ • In the frozen action adopted here, the transverse fluctuation is written as Aµ = δPµT / ZP . This
+   fixes the transverse-wave branch corresponding to light and the massless light mode.
+
+ • From the same frozen action, we also fix the skeleton leading to a Maxwell-type curvature, the
+   inverse-square law of the electrostatic field, and the Coulomb 1/r potential. The coupling constant
+                         √
+   is written as e = gP / ZP , and the fine-structure constant as α = gP2 /(4πZP h̄c).
+
+ • In the central theoretical claim, two independent readouts, αq∗ (β) and αR (β), are constructed
+   from the Mexican-hat-type vector Q-ball family yβ (x), and the selection equation without any
+   external target value,
+
+
+                                              αq∗ (β∗ ) = αR (β∗ )                                 (7)
+
+    uniquely determines the P-model-specific fine-structure constant.
+
+ • The exact expression retained here is
+
+                                [4(gβ + ϵβ − bβ ) − qβ ] [2(5 + β 2 ) + 10gβ − qβ − 4bβ ]
+                       α(β) =                                                                      (8)
+                                                     36(1 + β 2 )2
+
+    and the reference value at the symbolic solution of the selection equation, βsymbolic =
+    0.9983014179284181, is
+
+                                                                          1
+                        αP,frozen = 0.007302943961943229 ≈                                         (9)
+                                                                 136.93107946756194
+    The confirmed common-intersection value of the two readouts is kept as αcommon =
+    0.00730293811658175. Here ϵβ = 1 − β 2 , gβ = Ig /I2 , qβ = I4 /I2 , and bβ = B/I2 . I2 is the
+    quadratic integral, Ig the gradient integral, I4 the quartic integral, and B the boundary term of
+    the weighted EOM. All of them are normalization quantities constructed from the same vector
+    Q-ball profile.
+
+ • In the strictly retained interval 0 ≤ q/m0 ≤ 4, the sign-alternation property is retained as support
+   on the theory side. In the audit on the higher-q side, the mean zero spacing in 4 ≤ q/m0 ≤ 8 is
+   0.1047476796, the relative gap to the finite-box theory value π/Rbox = 0.1047197551 is 2.67×10−4 ,
+   and the maximum error against the half-integer lattice is 0.00216. This shows that the exact
+   theorem is maintained in the retained interval, whereas its extension to the asymptotic side is
+   controlled by the boundary scale of the current computational box.
+
+ • For exact internal rank-1 consistency, we fix the following rank-1 condition and ρexact = 1:
+
+
+                                                    26
+                                              A2F H = AF F AHH
+
+     The symbols used here are organized as follows.
+
+
+Symbol                                        Definition
+ρexact                                        Mixing parameter satisfying rank-1
+                                              consistency (fixed to ρexact = 1)
+AF F , AHH                                    Diagonal components of the shape-factor
+                                              matrix (FF: field self-coupling, HH:
+                                              higher-order coupling)
+AF H                                          Off-diagonal component of the
+                                              shape-factor matrix (cross term of FF and
+                                              HH)
+qtheory                                       Momentum-transfer correspondence scale
+                                              fixed on the theory side
+λ+                                            Principal eigenvalue of the shape-factor
+                                              matrix (λ+ = A2F H /AF F when ρ = 1)
+αmix,exact                                    Diagnostic value of the fine-structure
+                                              constant obtained from the mixed readout
+
+
+With local closure at the fixed correspondence scale qtheory , we obtain AHH,exact = 0.0569663806,
+AF H,exact = 0.1176373937, λ+ (qtheory ) = 0.2998913524, and αmix,exact (qtheory ) = 0.00715678583937324.
+See the table above for the definitions. Therefore the internal consistency itself is fixed, but the HH
+surface across the full q domain remains unfinished.
+
+ • In the piecewise extension on the harmonic lattice, the deviations from the theoretical standard
+   in the harmonic windows 3–8, 9–16, and 17–24 are kept at (0.219, 0.216, 0.244), so the piecewise
+   extension on the lattice can be retained as support on the theory side. However, the exact theorem
+   for the filling index itself still remains as a separate mathematical task.
+
+The corresponding public figure, output/public/quantum/v2_trial2_theorem_support_summary.
+pdf, is a summary figure of the selection theorem that compacts onto one page the sign alternation
+in the retained interval, internal rank-1 consistency, the piecewise extension on the harmonic lattice,
+and support for the fine-structure constant at the fixed momentum transfer q.
+Supplement: what is retained here is the support surface on the theory side. This figure does not add
+any further claim about the asymptotic theorem without boundaries or the HH surface over the full
+q domain. [1]
+
+ • In the numerical tracking of the fine-structure constant, using the weak-field normalization from
+   Part I, gP /ZP = 4πG, together with m20 = 4λv 2 /ZP , we rewrite
+
+                                              16πG2 λv 2   GχP m20
+                                         α=              =
+                                                m20 h̄c     2h̄c
+
+     accordingly.
+
+
+
+                                                   27
+ • Under the auxiliary dictionary that maps the vector Q-ball ground state of the mass-origin route
+   to the electron mass, the diagnostic from the older spherically symmetric approximation again
+   yields
+
+
+                                 αmix,exact (qtheory ) = 0.00715678583937324
+
+    once more. In other words, the old-approximation diagnostic value here is the same quantity
+    as the mixed readout shown above; it does not introduce another independent fine-structure
+    constant. It lies about 1.93 percent below the reference value. However, that 1.93 percent is a
+    diagnostic value based on the old approximation, not the current representative residual itself. In
+    the current representative value with the four-dimensional correction included, the gap has been
+    reduced to about 0.00624 percent below 1/137.
+
+ • Therefore the remaining tasks do not indicate failure of the theory itself. Rather, they concern the
+   organization of four-dimensional shape factors, operator corrections, and the bridge to observables.
+
+ • Accordingly, the selection rule itself is read as complete at the level of the main theory-side result of
+   v2.0. The remaining four-dimensional shape factors, operator corrections, and observable bridges
+   are treated not as a failure to derive the fine-structure constant itself, but as bridge-side residues.
+   [12]
+
+ • The ”propagation of light seen in coordinate time” in a gravitational field continues to be handled
+   by the Part I mapping (refractive index) n(P ) = (P /P∞ )2β .
+
+
+2.6.2 Still Not Derived: Fixing the Approximation Check and the Judgment
+
+The stance of this paper is: first challenge the derivation (A), and only if that is too dif-
+ficult, constrain the theory through an effective description (B). The derivation remains
+unfinished, but agreement with observation as an approximation is treated as the primary
+criterion. Accordingly, underived items are organized within the framework: fix the domain in which
+the approximation holds, and reject it if deviations appear.
+In this section, the photon field derived from the transverse component of the time-wave vector is
+              (P )
+denoted by Aµ , while the formally independent local U(1) connection is denoted by Aµ .
+Derivation challenge (A -> B):
+
+ • A: assume the phase degree of freedom of P and ask whether U(1) can be made necessary from
+   local phase invariance.
+
+ • B: only if A fails, adopt U(1) independently and fix its coupling to P as an effective theory
+   constrained by observations.
+
+Minimal assumptions for derivation challenge A:
+
+ • Treat P as a complex degree of freedom with amplitude and phase θ (θ being 2π-periodic).
+
+ • Impose the condition that observables remain invariant under local phase transformations.
+
+ • As a result, a connection (gauge field) that compensates the phase gradient is required, and
+   minimal coupling is introduced.
+
+ • As the low-energy effective theory in local proper time, first adopt only the minimal order, namely
+   second derivatives.
+
+                                                    28
+ • Check whether charge discretization follows from the single-valuedness of the phase; if not, move
+   to B.
+
+Explicit form (A; minimal):
+
+ • Decompose P into amplitude and phase and impose local phase invariance.
+
+                                                    P = R eiθ
+
+ • Define the local phase transformation and the corresponding gauge-field transformation.
+
+                                                               1
+                                 P → P eiχ(x) ,       Aµ → Aµ − ∂µ χ(x)
+                                                               q
+
+ • Introduce the covariant derivative to preserve local invariance.
+
+                                                Dµ = ∂µ + iqAµ
+
+ • Place a Dµ P term in the action (or effective energy) and confirm that a gauge-field degree of
+   freedom is required.
+
+ • Check whether charge quantization follows from phase single-valuedness and boundary conditions;
+   if not, move to B.
+
+Minimal action (A; example):
+
+ • One example of the minimal form satisfying local phase invariance and minimal coupling is:
+
+                                                1
+                       L = |Dµ P |2 − V (|P |) − Fµν F µν ,        Fµν = ∂µ Aν − ∂ν Aµ
+                                                4
+ • What matters here is the necessity of the form itself (gauge invariance); the coeﬀicients
+   and the details of the potential are evaluated through the observational constraints in Section
+   2.6.3.
+
+Variational derivation (EL; minimal):
+
+ • Under boundary conditions for which the variations vanish (δP = δP ∗ = δAµ = 0), variation
+   with respect to P ∗ yields
+
+                                                            ∂V
+                                               Dµ D µ P +        =0
+                                                            ∂P ∗
+    .
+
+ • Variation with respect to Aν yields
+
+                             ∂µ F µν = j ν ,     j ν = iq[P ∗ (Dν P ) − (Dν P )∗ P ]
+
+    .
+
+
+
+
+                                                     29
+ • From the antisymmetry of Fµν and consistency with the equation above, current conservation
+
+
+                                                      ∂ν j ν = 0
+
+    follows.
+
+ • The minimal assumptions required for the derivation are fixed to three points: (i) smoothness
+   of the field (at minimum C 1 ), (ii) vanishing boundary terms, and (iii) a minimal action without
+   higher-derivative terms.
+
+ • The audit of this derivation procedure (gauge covariance and invariance checks) is fixed in Part
+   IV (verification materials).
+
+Nonrelativistic limit (2.6 -> 2.5; fixing the approximation order):
+
+ • Linearize the EL equation (scalar component) near the mass term and separate fast phase from
+   slow envelope through
+
+
+                                            P (x, t) = e−imc t/h̄ ψ(x, t)
+                                                               2
+
+
+
+
+    .
+
+ • Rearranging while preserving minimal coupling, the envelope ψ satisfies
+                                                                    2
+                    (−ih̄∇ − qA)2                 h̄2       i
+          ih̄∂t ψ =               + qA0 + mϕ ψ −        ∂t + (qA0 + mϕ) ψ + O(c−4 )
+                         2m                      2mc2       h̄
+
+    .
+
+ • Define the approximation order by
+
+                                                                         |∂t2 ψ|       1
+                          ϵv2 ≡ (v/c)2 ,     ϵϕ ≡ |ϕ|/c2 ,     ϵenv ≡             ∼
+                                                                        ω0 |∂t ψ|   ω0 Tenv
+
+    and adopt max(ϵv2 , ϵϕ , ϵenv ) ≤ 10−6 as the operational acceptance condition.
+
+ • Under this condition, dropping the c−2 correction term recovers the Schrödinger form of Section
+   2.5.1,
+                                                                    
+                                               ∂ψ           h̄2 2
+                                           ih̄    =       −    ∇ + mϕ ψ
+                                               ∂t           2m
+    .
+
+ • Breakdown of the approximation (the A -> B judgment entry point) is declared whenever any of
+   ϵv2 , ϵϕ , or ϵenv exceeds the acceptance threshold. The audit result is fixed in Part IV (verification
+   materials).
+
+Minimal extra assumptions (A; external conditions):
+
+ • Adopt a minimal gauge field without a mass term (assume zero photon mass).
+
+ • Assume the coupling constant q is independent of the environment; any P -dependence is upper-
+   bounded by the observational constraints in Section 2.6.3.
+
+                                                          30
+ • Suppress higher-derivative terms and nonlinear terms in A, and evaluate them as part of the
+   effective theory B only if needed.
+
+ • Keep the potential V (|P |) in its minimal stabilizing form, and constrain its concrete shape through
+   consistency checks.
+
+Judgment framework:
+
+ • In this paper, the treatment of U(1) is not organized as a single A/B dichotomy, but as three
+   layers: derivation of light, local origin, and retention as an effective theory.
+
+ • The derivation of light is the layer in which the photon branch is extracted from the transverse
+   component of the time-wave vector, yielding the massless light mode and a Maxwell-type descrip-
+   tion; this is already fixed.
+
+ • The local origin is the layer that would close local phase redundancy, charge quantization, and
+   charge normalization from the local dynamics of P alone; this remains unfinished.
+
+ • Retention as an effective theory is the layer in which the already adopted U(1) sector is kept as
+   an effective theory and constrained by the observational results of Part III-B / Part IV.
+
+Position of the local phase:
+
+ • The phase ϑ of ψ ∝ δP+ /P∗ is the local envelope phase with the carrier removed, and it enters
+
+                                                   1 ∗
+                                           i0
+                                         δT(2) ∝     (ψ ∂i ψ − ∂i ψ ∗ ψ)
+                                                   i
+    as a physical quantity. Therefore, within the internal logic of the P-model alone, one cannot treat
+    ϑ → ϑ + χ(x) as a purely redundant transformation, and the claim that ”local phase is a gauge
+    redundancy” does not follow automatically from the ψ ↔ P correspondence.
+
+ • To reproduce minimal coupling completely, Aµ must be introduced as an independent connec-
+   tion that compensates the local phase gradient. Therefore the theorem for the local U(1) origin
+   cannot be said to be complete from P alone.
+
+ • This does not imply that the entire electromagnetic sector remains unclosed. The transverse
+   photon branch, the massless light mode, and the selection rule for the fine-structure constant are
+   already fixed; the residue belongs only to the layer of the local source theorem.
+
+ • This reservation does not negate the derivation of the transverse photon and the Maxwell-type
+   structure obtained from the frozen action used here. Even with the reservation that an indepen-
+   dent connection is needed, the theorem on the light side itself remains closed.
+
+Judgment table:
+
+Layer                          Content                             Judgment
+Derivation of light            Transverse photon branch,           Fixed
+                               massless light mode,
+                               Maxwell/Coulomb skeleton
+                                                                           Continued on next page
+
+
+
+                                                    31
+Layer                          Content                          Judgment
+Local origin                  Origin of local U(1)              Unresolved
+                              redundancy, charge
+                              quantization, charge
+                              normalization
+Retention as effective theory Observational constraints         Retained
+                              using the already adopted
+                              U(1) sector
+
+
+ • Therefore the older one-shot expression ”reject A, adopt B” is too coarse. The organization in
+   this paper is: the derivation of light is fixed, the local origin remains unresolved, and
+   U(1) as an effective theory is retained.
+
+ • On the frozen theory side of this paper, under an action containing only the Mexican-hat structure,
+     (P )       √
+   Aµ = δPµT / ZP is fixed as the photon branch, along with the skeleton leading to Maxwell-type
+                                                                                                  √
+   curvature, the inverse-square Coulomb law and the 1/r potential, and the couplings e = gP / ZP
+   and α = gP2 /(4πZP h̄c). Therefore the derivation of this fine-structure constant is retained as the
+   main theory-side result of v2.0: a single fine-structure constant fixed from a single
+   frozen action and connected to the consistency of all physics.
+
+ • Additional derivation of the local U(1) origin, selection of the four-dimensional correction, and
+   the bridge to observables remain, but none of them overturns the central theory-side claim; they
+   belong to the category of tracking tasks.
+
+ • The localization condition required for completion judgments in the weak interaction sector is
+   taken from the coupled-localization condition fixed in Part I 2.7.0 and is only referenced here.
+
+ • As a downstream implication, the entanglement candidate of Section 2.6.4 does not rely on the
+   premise that ”U(1) has been fully derived from P as a local origin.” At the current stage, only
+   the minimal candidate is fixed in which the shared envelope of Pµ and the source phase serve as
+   the placement for the inseparable pair amplitude; microscopic source dynamics and the
+   quantitative connection to Bell datasets are treated as separate tasks.
+
+ • The mechanism of charge quantization remains underived, but the observed discreteness is fixed
+   as an adoption condition. If continuation to a continuous charge becomes necessary, the
+   approximation is rejected.
+
+ • The electromagnetic energy-momentum tensor and the backreaction of P are treated phenomeno-
+   logically at this stage, and the range in which the approximation holds (allowable error) is fixed
+   as a constraint.
+
+
+2.6.3 Consistency Checks (Scope of This Paper)
+
+ • Observational upper bound on the P -dependence of α: if one introduces
+
+                                 α(P /P∞ ) = α0 (1 + κ ln(P /P∞ ) + · · · )
+
+   in that form, then atomic-clock and cosmological constraints provide an upper bound on |κ|.
+   The constraints are fixed in the ledger, and at the current stage we adopt κ = 0 (P -independence).
+   [12]
+
+
+                                                  32
+ • Spectral consistency across different ϕ environments: for H 1S-2S and independent measurements
+   of α, the range in which the hypothetical contribution from κ ̸= 0 remains below observational
+   precision is also listed in the same ledger. [11][8][9]
+
+(With a figure showing the scale difference between Coulomb and gravity, and the constraints on α(P ),
+this section indicates not a derivation but the scope of the approximation, namely what is fixed.)
+
+
+2.6.4 Candidate for Entanglement Generation: Shared Pµ Phase and Nonseparable Pair
+      Amplitude
+
+Position fixed here: By the organization of Section 2.6.2, the polarization/spin degrees of freedom
+used here are placed on the already adopted U(1) sector. Therefore this section does not claim to
+have derived entanglement from first principles using P alone. What is fixed here is only the minimal
+effective candidate specifying where pair correlation is placed on the P-model side.
+Minimal candidate (source-level placement): For a separated two-photon / two-mode pair, let
+the source-shared envelope and phase be represented by Ξ(Pµ ; xA , xB ) and χs , and write
+
+                                                                  |HA VB ⟩ − |VA HB ⟩
+                       ΨAB (xA , xB ) = N Ξ(Pµ ; xA , xB ) eiχs           √
+                                                                            2
+
+as the minimal pair amplitude. Here |H⟩, |V ⟩ are polarization bases of the already adopted U(1)
+sector, and Ξ denotes the common envelope of the two modes generated simultaneously at the source.
+The role assigned to the P-model is not a purely local P-only gauge redundancy; it is to provide the
+common envelope and the bookkeeping of source proper time.
+Let the local analyzer angles be a, b, and project with
+
+
+                    |+⟩a = cos a |H⟩ + sin a |V ⟩,        |−⟩a = − sin a |H⟩ + cos a |V ⟩
+
+(and similarly on the b side). Then the idealized coincidence probabilities are
+
+                                                             |Ξ|2
+                               P++ (a, b) = P−− (a, b) =          sin2 (a − b),
+                                                              2
+
+                                                             |Ξ|2
+                               P+− (a, b) = P−+ (a, b) =          cos2 (a − b)
+                                                              2
+Therefore the normalized correlation is
+
+
+                         E(a, b) = P++ + P−− − P+− − P−+ = − cos 2(a − b)
+
+and at the standard CHSH angles a = 0, a′ = π/4, b = π/8, b′ = −π/8 one obtains
+
+                                                       √
+                                                |S| = 2 2
+
+. At the same time, the local marginals are
+
+                                           1                                            1
+                   PA (+ | a) = P++ + P+− = ,              PB (+ | b) = P++ + P−+ =
+                                           2                                            2
+so they do not depend on the remote setting.
+
+
+                                                     33
+Important point here (no overclaiming): In the equations above, Bell-type correlations are
+carried by the full nonseparable pair amplitude, not by the shared phase χs by itself. Since
+χs is a global U(1) phase, it does not remain directly in the probabilities. Therefore we do not write
+that ”Bell correlations arise from the shared phase of Pµ alone.” The correct statement is: for a
+nonseparable pair amplitude on the already adopted U(1) sector, the P-model provides
+the place where the source envelope and time bookkeeping are stored.
+Relation to 4.8.8 (analogy from spin coupling): In Part III-B 4.8.8, an antisymmetric spin
+coupling derived from the spatial component of Pµ was fixed as the minimal candidate producing the
+triplet/singlet difference. Likewise, for the photon-polarization pair of this section, the core of the
+correlation lies in the symmetrized/antisymmetrized pair kernel. The only difference is that for
+nuclei the relevant objects are Pauli matrices and S12 , whereas for photons they are the transverse
+polarization bases.
+Separation from Bell selection: This candidate places a source-level pair kernel and does not
+eliminate the selection weight wab (λ) defined in Section 2.5.3. Therefore the sensitivity to window /
+offset / trial definitions that remained in the Bell audit of Part III-B stays fully in force, and this
+section does not overwrite the selection watch of Sections 4.2 / 5.1.
+Figure~2 summarizes the ideal correlation obtained from the minimal pair amplitude, the remote-
+setting independence of the local marginals, and the global invariance of the shared phase.
+
+
+
+
+                                                  34
+                                                             Entanglement Candidate:
+                                                Nonseparable Pair Amplitude and Shared Source Phase
+
+
+                                         Ideal Correlations from the                                                    Coincidence Probabilities and
+                                          Shared-Phase Pair Kernel                                                       Local-Marginal Consistency
+                                                                                                              1.0
+                            1.00
+
+
+                            0.75
+                                                                                                              0.8
+                            0.50
+Correlation / probability
+
+
+
+
+                            0.25
+                                                                                                              0.6
+
+
+
+
+                                                                                                Probability
+                            0.00
+
+                                                                                                              0.4
+                            -0.25
+
+
+                            -0.50
+                                                                                                              0.2
+                                         Pair amplitude
+                            -0.75
+                                         Same-sign probability                                                                Local marginal with remote setting b
+                                         Opposite-sign probability                                                            Local marginal with remote setting b'
+                            -1.00
+                                                                                                              0.0
+                                    0   25    50     75       100    125    150       175                           0   25   50     75     100     125    150    175
+                                         Analyzer angle difference Δ (deg)                                               Analyzer angle difference Δ (deg)
+
+
+
+
+                             Figure 2: This figure fixes the ideal correlation E(a, b) = − cos 2(a − b) derived from the minimal
+                             pair amplitude, the remote-setting independence of the local marginals, and the global invariance of
+                             the shared phase. Numerically, at the standard CHSH angles one obtains |S| = 2.828427, while the
+                             local-marginal error is 3.89 × 10−16 and the shared-phase global-invariance error is 3.33 × 10−16 , all
+                             within machine precision.
+
+                              B1 (source dynamics; three-wave mixing): Decompose the source on the already adopted U(1)
+                              sector, over a background with crystal bias, as
+
+                                                                                   X
+                                                          Psrc (x, τs ) = P∗ +               Pν (x, τs ) ei(kν ·x−ων τs ) + c.c.
+                                                                                 ν∈{p,s,i}
+
+                              Here τs is the proper time of the source, defined by
+
+                                                                                        Z t
+                                                                                                Pref
+                                                                            τs (t) =                    dt′
+                                                                                               Pt (t′ )
+
+                              Expanding the stabilizing potential used in Section 2.6.2 around P∗ gives
+
+                                                                    1 (2)       1 (3)
+                                                     V (|P |) = V∗ + V∗ |δP |2 + V∗ (δP + δP ∗ )3 + O(δP 4 )
+                                                                    2           6
+
+                                                                                         35
+          (n)
+where V∗ ≡ ∂ n V /∂|P |n |P∗ . Retaining only the resonant pump / signal / idler term under the
+rotating-wave approximation gives
+
+                                                                                      1 (3)
+                         L3w = g3w Pp Ps∗ Pi∗ e−i∆ωτs +i∆k·x + c.c.,             g3w ≡ V∗
+                                                                                      2
+Here
+
+
+                                     ∆ω ≡ ωp − ωs − ωi ,           ∆k ≡ kp − ks − ki
+
+Therefore, from the stationary-phase condition in the source proper time,
+
+
+                                            ∆ω = 0      ⇒         ωp = ωs + ωi
+
+is fixed, and the shared source phase can be defined as
+
+
+                                                 χs = ωp τs + arg Ap,0
+
+.
+undepleted-pump approximation
+
+
+                                              Pp (z, Ω) = Ap,0 αp (Ω) eiχs
+
+Under the undepleted-pump approximation, the coupled-mode equations are
+
+
+                               ∂z Ps = ig3w Pp Pi∗ ei∆kz ,         ∂z Pi = ig3w Pp Ps∗ ei∆kz
+
+Integrating to first order over a source length L, the pair kernel propagated to the detector position
+is given by
+
+
+                               Z                                           
+                                                               ∆k(Ωs , Ωi )L i∆kL/2
+    Ξ(Pµ ; xA , xB ) = g3w L       dΩs dΩi αp (Ωs + Ωi ) sinc                 e     GA (xA ; Ωs ) GB (xB ; Ωi )
+                                                                   2
+
+Here GA and GB are the propagation kernels from the source to the analyzer/detector. In this form,
+because the pump envelope depends on (Ωs + Ωi ) and the phase matching depends on ∆k(Ωs , Ωi ), one
+generally has
+
+
+                                             Ξ(Ωs , Ωi ) ̸= ξA (Ωs ) ξB (Ωi )
+
+so nonseparability is generated naturally at the source. In other words, the pair amplitude of Part
+III-A 2.6.4 is not simply ”placed by hand”; it is supplied from the source of three-wave mixing on the
+adopted U(1) sector as
+
+                                                                   |HA VB ⟩ − |VA HB ⟩
+                                    ΨAB ∝ Ξ(Pµ ; xA , xB ) eiχs            √
+                                                                             2
+.
+There are two principal gates here. First, g3w is not a new P-model parameter; it is shorthand for
+                            (3)
+the background derivative V∗ of the existing potential. Second, L, the pump bandwidth, and the
+
+                                                             36
+crystal refractive index / phase- matching condition are external settings of the source and are not
+interpreted as a derivation of U(1) from P . The P-model side is responsible only for the bookkeeping
+of the source proper time τs and the shared phase.
+The metrics/cases required for reproducibility are summarized in the Part IV ledger. Here we fix
+only the phase-matching peak of the three-wave-mixing kernel, the global phase invariance of the
+source, the effective Schmidt rank (nonseparability), and the judgment that no new free parameter is
+introduced.
+B2/B3 (Bell-dataset connection + pair decoherence): The connection to Bell datasets is closed
+as an audit that ties the CHSH upper bound of the ideal pair kernel,
+
+                                                                √
+                                                    |S|ideal = 2 2
+
+directly to the reference statistics pre-frozen in Part III-B 4.2. For the CHSH family (Weihs / Delft
+2015 / Delft 2016),
+
+                                            |Sfrozen |           (max)
+                                  VBell ≡      √ ,             Dpair     ≡ − ln VBell
+                                              2 2
+define
+
+
+                                              Eobs = e−Dpair Eideal
+
+Eobs = e−Dpair Eideal is a trial form that coarse-grains isotropic two-mode phase scattering, and Dpair
+is the dimensionless integrated phase-scattering budget. From the fixed statistics one obtains
+
+                      (Weihs)                      (Delft15)                           (Delft16)
+                    VBell       = 0.903,       VBell           = 0.859,              VBell         = 0.820
+
+
+                                           (max)
+                                      Dpair        = (0.103, 0.152, 0.198)
+
+Thus the CHSH-family Bell data do not completely exclude the ideal pair kernel; instead they require
+the post-blind-freeze correlation visibility to lie in O(0.8 − 0.9) and the integrated pair-dephasing
+budget to remain in O(10−1 ).
+On the theory side, pair decoherence closes as the two-mode extension of A1,
+
+
+                            Γpair = Γdeph,A + Γdeph,B ,                Dpair = Γpair Tprop
+
+and for symmetric two branches,
+                                                                        
+                                                               kB Tenv
+                                           Γpair = 2ω∗2                      τfree
+                                                                 χP
+
+No new free parameter is introduced. By contrast, in the CH family (NIST / Kwiat), the frozen
+statistic is Jprob , so we do not uniquely invert VBell from the public values alone. Instead we fix the
+proxy indicators for pair generation and transmission as
+
+                                              Ncoinc
+                                    ηpair ≡          ,          Aatt ≡ − ln ηpair
+                                              Ntrial
+
+and from the trial-based event counts obtain
+
+                                                          37
+                                     = 3.56 × 10−4 ,                      = 5.06 × 10−4
+                            (NIST)                             (Kwiat)
+                           ηpair                              ηpair
+
+
+                                      (NIST)                    (Kwiat)
+                                     Aatt      = 7.94,        Aatt        = 7.59
+
+while the proxy for local eﬀiciency is
+
+
+                                            ηmin = (1.42, 2.02) × 10−3
+
+Therefore the CH family is positioned less as a direct constraint on pair visibility itself and more as a
+constraint on the throughput / attenuation budget from the source to the detector record.
+The key point is that this connection does not eliminate the selection weight wab (λ) of Section 2.5.3
+or the pre-freeze procedures of Part III-B Sections 4.2 / 5.1. Indeed, in the existing Bell artifacts
+every dataset still retains a selection ratio ∆(stat)/σstat > 1; the fast-switching proxy indicators for
+Weihs / NIST are z = (5.54, 43.9), while only Kwiat has z = 0.721 and is therefore non-primary.
+Moreover, the dataset-crossing correlation of the sweep profile is 0.856 for Delft 2015/2016, while for
+Weihs/NIST it swings strongly to the negative side with magnitude 0.891, so it is more conservative
+not to count the selection knob as independent evidence. Thus what closes in this section is the audit
+interface that maps the ideal pair kernel onto frozen Bell statistics and trial throughput,
+while the selection watch itself is retained exactly as judged in Part III-B.
+The metrics/cases required for reproducibility are listed in the Part IV ledger. Here we fix only the
+post-freeze CHSH-visibility proxy, the integrated pair-decoherence budget, the trial-based proxy for
+pair throughput, the cross-dataset correlation, and the judgment that the selection watch is retained.
+Current judgment: For entanglement generation, we have fixed the placement of the nonsepara-
+ble pair amplitude, fixed the source dynamics of Ξ(Pµ ; xA , xB ) as three-wave mixing on the already
+adopted U(1) sector, and fixed the connection to Bell datasets plus pair decoherence as an audit
+surface based on blind-freeze statistics and trial counts. Therefore the current conclusion is: source
+dynamics fixed, dataset connection fixed, pair decoherence fixed as an integrated upper
+bound, and judgment reserve retained.
+
+
+
+
+                                                         38
+2.7 Mathematical Basis: Lagrangian and Conservation Laws
+
+The reference skeleton of the action and the reference definition of the Noether conservation laws were
+moved to Part I 2.7.0. This section fixes only the connections needed for the quantum-side audit
+interface and refers to Part I as the canonical source for the action skeleton itself.
+The coupled-localization condition used for the mass reference points of the weak-interaction sector
+with the two-component coupled Q-ball is the reference formula fixed in Part I 2.7.0. In this section
+it is only referenced, not redefined on the Part III-A side.
+Part I reference standard:
+
+                                                         R
+ • Reference action skeleton (minimal form): Stotal =        d4 x Lvec
+                                                                   total
+
+ • Fundamental degrees of freedom: {Pµ , matter}, where χ is a derived quantity determined by Pt ,
+                                    (P )
+   and the light degree of freedom Aµ is also derived as the transverse component of Pµ
+                          µν
+ • Conservation laws: ∂µ Ttot = 0, ∂µ J µ = 0
+
+Role of this section (Part III): It connects the reference action skeleton fixed in Part I to the
+quantum-side audits of observables (Bell, nuclei, weak interaction, BBN, materials/thermal systems).
+Accordingly, Part III is not the addition of new foundational definitions, but an audit of the applica-
+bility range of the Part I standard.
+
+
+2.7.1 Gauge Closure of Pµ and Ghost Exclusion
+
+For the strict definition of the P-field action integral, propagator, and Noether conservation laws, see
+Part I (Section 2.7). In this paper we adopt the cross-scale freeze hypothesis, namely that the
+rotational coupling coeﬀicient λrot frozen in Part II is brought unchanged into the microscopic side,
+ignoring running / scale dependence. Therefore the judgment of acceptance or rejection in this paper
+is interpreted as a result under that freeze hypothesis.
+
+
+
+
+                                                  39
+2.8 Position of the Weak Interaction (� Decay and Flavor Conversion)
+
+In Part III we first fixed the gravity side (clock and light-propagation mapping) and the nuclear
+interface on the strong-interaction side. Among the four interactions, the weak interaction remains an
+unconnected item for the unification claim of the P-model.
+Hard criticism: ”If nuclear force is interference of P waves, then how does the P-model describe the
+flavor conversion neutron -> proton (� decay)? If this remains undefined, it cannot be called a unified
+theory.”
+Position of this paper (fixed): The weak interaction is compared and audited through the same
+observables along two routes.
+
+ • Route A (transplant): keep electroweak theory (SU (2)L × U (1)Y ) as an effective theory, and
+   let the P-model couple only as a background mapping (time, phase, and environmental terms).
+
+ • Route B (replacement): introduce flavor-conversion terms derived from the P field and describe
+   directly the �-decay Q value, transition rate, and half-life.
+
+Note (moved to the discussion section): the theoretical mechanism of Route B, the W/Z mass ref-
+erence points from the two-component coupled Q-ball, and the final numerical judgment of accep-
+tance/rejection are handled separately in Section 3.2.
+To avoid ending the theory-side reference points at the level of names only, this section also fixes
+the concrete route leading to the W/Z mass reference points. On the theory side of this paper,
+starting from the non-transverse basis {δP0 , δPL } after extracting light, we assume a two-component
+coupled Q-ball and scan the branches of the same family by a four-state shooting method for the
+state vector y = (f0 , f0′ , fL , fL′ ). Along this route, the initial full scan reconstructs 41 localized sectors
+and a strict vector table of 905,838 lines, and in the final organization the W/Z mass reference points
+belonging to the same family (17, 1, 1) are fixed under the coupled-localization condition. Specifically,
+κcoupled,W = 1.6024037199 and κcoupled,Z = 1.6817234304 are both positive, and the relative errors of
+the reference points are 2.40 × 10−5 and 2.07 × 10−5 (about 0.002 percent). Therefore the theoretical
+footing of the weak-interaction sector is not blank, and the older single-component zero-κ truncation
+is treated not as a physical rejection rule but as an artifact of component decomposition.
+The corresponding public figure, output/public/quantum/v2_trial3_weak_checkpoint_summary.
+pdf, summarizes the coupled-localization condition for the W/Z mass reference points, the reference-
+point errors for family (17, 1, 1), positive coupled localization, the numerical solution method and
+spectral scale, and the extension of the charge window.
+Supplement: this figure is a summary of the theory-side reference points. The observational accep-
+tance/rejection of the weak interaction itself is left to Section 3.2 and the numerical audits of Part
+III-B as the canonical source. [1]
+The minimal unified expression is
+
+                                     d                                     
+                                                       (P )
+                               ih̄      Ψf = HEW + ϵf Hflavor [P, ∇P, ∂t P ] Ψf                              (10)
+                                     dt
+where ϵf = 0 corresponds to Route A and ϵf ̸= 0 to Route B.
+The observational interface for � decay is fixed as
+
+                                                                                                
+                            (P )        (EW)       (P )         (P )      (EW)            (P )
+                          Qβ       = Qβ        + ∆Qβ ,         Γβ      = Γβ          1 + ηβ                  (11)
+
+and ∆Qβ and ηβ are treated as audit quantities for the ”P-added effect.”
+
+                                                          40
+Required checks (minimum requirements fixed in this paper):
+
+ 1. Definition of the flavor-conversion mechanism: make explicit the degrees of freedom, sym-
+                                     (P )
+    metry, and conservation laws of Hf lavor .
+
+ 2. Decision between transplant/replacement strategies: fix on an observable basis which of
+    Route A/B is the main system.
+
+ 3. Fixing the observational gate: audit Qβ , half-life, log f t, and if necessary CKM/PMNS con-
+    sistency under the same interface.
+
+ 4. Explicit rejection conditions: do not adopt any route that fails to satisfy the 3� operating
+    threshold.
+
+Until these four conditions are closed, the observational acceptance/rejection of the weak-interaction
+sector remains on watch.
+
+
+
+
+                                                 41
+3 Discussion
+
+This chapter crosses the theoretical sections 2.5-2.8 and organizes what has been fixed and what still
+remains as a follow-up task.
+
+
+3.1 Quantum Foundations Fixed in This Paper
+
+The point reached in Part III-A is not a declaration that quantum mechanics as a whole has been
+replaced. Rather, it is that the foundational entry points for which the P-model takes responsibility
+have been fixed explicitly. Specifically, this paper has fixed: (i) the minimum conditions under which
+the phase of the time wave reduces to the Schrödinger / KG forms, (ii) the derivation of the Born rule
+through phase diffusion and linear detection response, (iii) the coarse-grained Lueders/Kraus update
+through decoherence and conditional update, (iv) the transverse photon branch and the selection rule
+for the fine-structure constant, and (v) the nonseparable pair amplitude and the source dynamics of
+three-wave mixing.
+Electromagnetism, however, must be read on two layers. On the light side, the transverse photon
+branch and the massless light mode are fixed, along with the selection rule that chooses a single fine-
+structure constant from a single frozen action and its reference value. By contrast, the origin of local
+U(1) redundancy, charge quantization, and charge normalization is still not closed from P alone, so
+on the observational side the already adopted U(1) sector is retained.
+
+
+
+
+                                                  42
+3.2 Residual Items, Conditional Holds, and the Division of Labor with Part III-B
+
+The items remaining after the reorganization are not all unresolved in the same sense. First, for the
+fine-structure constant, the central theory-side claim is already firm. The roughly 1.93 percent gap
+seen in the old spherical approximation is a diagnostic value, and in the current representative value the
+gap has already been reduced to about 0.00624 percent below 1/137. The remaining four-dimensional
+shape factors, operator corrections, and the bridge to observables are treated not as failure of the
+theory, but as follow-up tasks on the observable side. Accordingly, Part III-A retains the selection
+rule and the reference value as the canonical source, while local tables and auxiliary diagnostics are
+left to the supporting surfaces of Part III-B / Part IV.
+Second, the origin of local U(1) redundancy, charge quantization, and charge normalization remains
+a truly unresolved item. The transverse photon branch, the massless light mode, and the selection
+rule for the fine-structure constant are already fixed, but the full local source theorem including the
+adopted U(1) sector is still not closed. Here Part III-A makes the missing theory-side piece explicit,
+while Part III-B takes as canonical the verification surface using the already adopted sector.
+Third, the weak interaction must be read with a separation between the theoretical mechanism and the
+observational acceptance/rejection. On the theory side, the W/Z mass reference points on the same
+family generated by the two-component coupled Q-ball have been fixed on family (17, 1, 1) under
+the coupled-localization condition, with κcoupled,W = 1.6024037199, κcoupled,Z = 1.6817234304, and
+relative reference-point errors = (2.40, 2.07) × 10−5 . Therefore the weak-interaction sector does not
+remain without any footing at all. On the other hand, the paper’s acceptance/rejection judgment
+takes the numerical audit of Part III-B as canonical, and at the present stage is fixed as adopt Route
+A and reject Route B. Thus the V-A mechanism of Route B is retained as a theoretical candidate, but
+not as an adopted operating mechanism.
+Accordingly, Part III-A is the document that gives the fixed points, residual gaps, and conditionally
+held items on the theory side, while the verification results based on public primary data, the cross-
+sectional scoreboard, differential predictions, and the falsification-condition pack are canonical in
+Part III-B. The reproduction commands, fixed artifact list, and audit gates are canonical in Part IV
+(verification materials). [1]
+
+
+
+
+                                                   43
+4 Conclusion
+
+The conclusions of this paper can be summarized in five points.
+
+ 1. The minimum conditions connecting the local phase of P and the proper-time mapping to the
+    Schrödinger / KG forms have been fixed.
+
+ 2. For the Born rule, the detection probability p ∝ |ψ|2 has been effectively derived through phase
+    diffusion and linear detection response under the four conditions of phase mixing, linear detection
+    response, weak backreaction, and frequentist coarse-graining.
+
+ 3. For measurement, diagonal Lueders/Kraus update has been recovered in coarse- grained form
+    from the detector’s stable basis, decoherence, and conditional update.
+
+ 4. For electromagnetism, the transverse photon branch and the selection rule for the fine-structure
+    constant have been fixed, while the origin of local U(1) and charge normalization remain unre-
+    solved.
+
+ 5. For entanglement, the nonseparable pair amplitude, the source dynamics of three-wave mixing,
+    and the audit surface toward Bell datasets have been fixed, while the judgment itself is left to
+    Part III-B.
+
+For the weak interaction, the W/Z mass reference points from the two-component coupled Q-ball are
+retained as theory-side references, while the canonical source for observational acceptance/rejection
+is the numerical audit of Part III-B, and the present conclusion is fixed as adopt Route A and reject
+Route B.
+Accordingly, the role of Part III-A is to fix the theoretical foundations of the quantum volume, while
+the final judgment table that decides theoretical acceptance or rejection is left to the verification
+system of Part III-B / Part IV.
+
+
+
+
+                                                 44
+5 Reproducibility / Availability
+
+The theoretical formulas, fixed artifacts, and reproduction commands referenced in this paper are
+collected in Part IV (verification materials). For public artifacts, fixed parameters, audit summaries,
+and reproducibility routes, refer to the Part IV ledger and the public artifacts. [1]
+The verification results based on public primary data, the cross-sectional judgment tables, the dif-
+ferential predictions, and the falsification-condition pack are canonical in Part III-B. Part III-A is
+positioned as the document that provides the theory-side fixed points and the interpretive boundaries
+used in that verification system.
+
+
+
+
+                                                  45
+6 Appendix A: Data Sources (Primary Sources)
+
+This appendix is a concise list of representative primary sources referenced in the theoretical sections
+of Part III-A. Detailed URLs, access dates, and the artifact correspondence table are canonical in the
+Part IV ledger. [1]
+
+Topic                           Representative primary           Main text sections
+                                sources
+Bell tests                      NIST Bell test data, Delft       2.6.4, 3.2
+                                event-ready public primary
+                                data
+� / atomic metrology            atom-recoil �, electron g − 2,   2.6.1-2.6.3
+                                H 1S-2S
+Gravity x quantum               COW, atom interferometer         2.5, 3.1
+interference
+Optical / single-photon         single-photon interference,      2.6.4
+interference                    optical reference systems
+
+
+Bell test sources: [3][4][5]
+� / atomic metrology sources: [8][9][11][12]
+Gravity x quantum interference sources: [6][7]
+Optical / single-photon interference sources: [10][2]
+
+
+References
+
+ [1] P-model Verification Materials (supplementary material for reproduction commands, fixed arti-
+     fact lists, audit gates, hashes, and manifests). Web: EnterOgawa/p-model (Releases: GitHub
+     Releases). Accessed: 2026-02-15.
+
+ [2] Born, M., and Wolf, E. Principles of Optics (7th ed., expanded). Cambridge University Press
+     (1999).
+
+ [3] NIST belltestdata (public time-tag data for Shalm et al. 2015). Bucket: https://s3.amazonaws.
+     com/nist-belltestdata/ (prefix: belldata/). Accessed: 2026-01-25.
+
+ [4] Delft loophole-free Bell test dataset(Hensen et al. 2015;event-ready / CHSH).4TU: https://data.
+     4tu.nl/datasets/e8cf2991-3153-48ad-b67d-dfd7d7d97fd3. Accessed: 2026-01-25.
+
+ [5] Delft second loophole-free Bell test dataset(Hensen et al. 2016;Sci Rep 6, 30289;event-
+     ready / CHSH).4TU: https://data.4tu.nl/articles/dataset/Second_loophole-free_Bell_test_
+     with_electron_spins_separated_by_1_3_km/12694403. Accessed: 2026-01-25.
+
+ [6] Colella, R., Overhauser, A. W., and Werner, S. A. Observation of gravitationally induced
+     quantum interference. Phys. Rev. Lett. 34, 1472 (1975). DOI: 10.1103/PhysRevLett.34.1472.
+
+ [7] Müller, H., Chiow, S.-W., Herrmann, S., Chu, S., and Chung, K.-Y. Atom Interferometry tests
+     of the isotropy of post-Newtonian gravity. arXiv:0710.3768 (2007). Web: https://arxiv.org/abs/
+     0710.3768. Accessed: 2026-01-25.
+
+
+
+                                                   46
+ [8] Cadoret, M., de Mirandes, E., Cladé, P., Schwob, C., Nez, F., Julien, L., Biraben, F., and Guellati-
+     Khélifa, S. Determination of the fine structure constant with atom interferometry and Bloch
+     oscillations. arXiv:0812.3139 (2008). Web: https://arxiv.org/abs/0812.3139. Accessed: 2026-01-
+     25.
+
+ [9] Hanneke, D., Fogwell, S., and Gabrielse, G.    New Measurement of the Electron Magnetic
+     Moment and the Fine Structure Constant. Physical Review Letters 100, 120801 (2008). DOI:
+     10.1103/PhysRevLett.100.120801. arXiv:0801.1134.
+
+[10] Kimura, T., Nambu, Y., Hatanaka, T., et al. Single-photon interference over 150 km transmission
+     using silica-core microstructured optical fiber. arXiv:quant-ph/0403104 (2004). Accessed: 2026-
+     01-25.
+
+[11] Parthey, C. G., Matveev, A., Alnis, J., et al. Improved Measurement of the Hydrogen 1S-2S
+     Transition Frequency. Physical Review Letters 107, 203001 (2011). arXiv:1107.3101. Accessed:
+     2026-01-26.
+
+[12] Particle Data Group (S. Navas et al.). Review of Particle Physics (2024).        Prog. Theor. Exp.
+     Phys. 2024, 083C01 (2024). DOI: 10.1093/ptep/ptae093.
+
+
+
+
+                                                   47
+

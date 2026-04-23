@@ -19,6 +19,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -27,6 +28,11 @@ from typing import Any, Dict, List, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
+
+
+# 関数: `WAVEP_FIGURE_LANG` から英語 surface かどうかを判定する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
 
 ROOT = Path(__file__).resolve().parents[2]
 # 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
@@ -281,10 +287,12 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]], criteria: List[Dict[str, 
 # 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, rows: List[Dict[str, Any]], threshold: float) -> None:
+    is_en = _is_en_figure()
+    font_scale = 1.18 if is_en else 1.0
     display_labels = {
-        "cow_neutron": "COW中性子",
-        "atom_gravimeter": "原子干渉計重力計",
-        "optical_clock_leveling_proxy": "光格子時計\nレベリング代理量",
+        "cow_neutron": "COW neutron" if is_en else "COW中性子",
+        "atom_gravimeter": "atom interferometer\ngravimeter" if is_en else "原子干渉計重力計",
+        "optical_clock_leveling_proxy": "optical clock\nleveling proxy" if is_en else "光格子時計\nレベリング代理量",
     }
     labels = [display_labels.get(str(r.get("channel") or ""), str(r.get("channel") or "")) for r in rows]
     eps_v2 = np.asarray([float(r.get("epsilon_v2", math.nan)) for r in rows], dtype=float)
@@ -311,15 +319,19 @@ def _plot(path: Path, rows: List[Dict[str, Any]], threshold: float) -> None:
     ax.barh(y, _safe_width(eps_phi), left=eps_floor, height=h, color="#f59e0b", label="ε_phi")
     ax.barh(y + h, _safe_width(eps_env), left=eps_floor, height=h, color="#2f9e44", label="ε_env")
     ax.scatter(np.clip(eps_max, eps_floor, None), y, marker="D", color="#111827", s=24, label="ε_max")
-    ax.axvline(threshold, linestyle="--", color="#6b7280", linewidth=1.2, label="ゲート閾値")
+    ax.axvline(threshold, linestyle="--", color="#6b7280", linewidth=1.2, label="gate threshold" if is_en else "ゲート閾値")
     ax.set_xscale("log")
     ax.set_xlim(eps_floor, x_max)
-    ax.set_yticks(y, labels, fontsize=10.8)
-    ax.set_xlabel("無次元スケール（対数）", fontsize=14.0)
-    ax.set_title("非相対論極限監査（2.6 から 2.5 Schr 対応）", fontsize=15.0, pad=10.0)
-    ax.tick_params(axis="x", labelsize=12.4)
+    ax.set_yticks(y, labels, fontsize=10.8 * font_scale)
+    ax.set_xlabel("dimensionless scale (log)" if is_en else "無次元スケール（対数）", fontsize=14.0 * font_scale)
+    ax.set_title(
+        "Nonrelativistic-limit audit (2.6 -> 2.5 Schr. mapping)" if is_en else "非相対論極限監査（2.6 から 2.5 Schr 対応）",
+        fontsize=15.0 * font_scale,
+        pad=10.0,
+    )
+    ax.tick_params(axis="x", labelsize=12.4 * font_scale)
     ax.grid(axis="x", alpha=0.25, linestyle=":")
-    ax.legend(loc="center right", bbox_to_anchor=(0.98, 0.50), fontsize=11.5)
+    ax.legend(loc="center right", bbox_to_anchor=(0.98, 0.50), fontsize=11.5 * font_scale)
     fig.subplots_adjust(left=0.16, right=0.98, top=0.88, bottom=0.16)
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path)

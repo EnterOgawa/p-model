@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-04-09T17:10:13.567772+00:00",
+  "generated_utc": "2026-04-10T15:53:59.307635+00:00",
   "dataset": {
     "source": "NIST belltestdata (Shalm et al. 2015; time-tag repository)",
     "run_base_alice": "03_31_CH_pockel_100kHz.run4.afterTimingfix2_training",
@@ -25,7 +25,7 @@
       5000.0
     ],
     "pairing": "greedy (1-1 pairing on sorted click streams)",
-    "max_seconds": null,
+    "max_seconds": 3600,
     "out_tag": "03_43_afterfixingModeLocking_s3600"
   },
   "alignment": {

@@ -19,6 +19,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+import numpy as np  # noqa: E402
 
 _ROOT = Path(__file__).resolve().parents[2]
 # 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
@@ -26,6 +27,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.quantum.figure_japanese_localizer import get_figure_language  # noqa: E402
 from scripts.utils.plot_style import (  # noqa: E402
     apply_paper_style,
     apply_wavep_figure_layout,
@@ -100,6 +102,39 @@ def _format_num(x: float, *, digits: int = 4) -> str:
         return f"{x:.{digits}g}"
 
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
+
+
+# 関数: `_df_display_text` の入出力契約と処理意図を定義する。
+
+def _df_display_text(text: str, *, lang: str) -> str:
+    if lang != "en":
+        return text
+
+    mapping = {
+        "現状 σ_obs（リング統計; κ=1）": "Current ring σ_obs",
+        "参考：+κ系統（κ_obs優先 / fallback=Kerr係数レンジ）": "Ref: +κ systematic",
+        "参考：+κ+散乱（屈折distortionのmid；Zhu 2018）": "Ref: +κ + scattering",
+        "3σ判別に必要な σ_obs（影直径）": "Required shadow σ_obs (3σ)",
+        "観測誤差（1σ）[μas]": "Observed error (1σ) [μas]",
+        "EHT：3σ判別に必要な観測精度": "EHT required precision (3σ)",
+        "速度飽和 δ：既知の高γ観測が与える上限": "Velocity saturation δ: upper limits",
+        "反証条件パック：必要精度と棄却条件の要点": "Falsification pack",
+    }
+    return mapping.get(text, text)
+
+
+# 関数: `_df_delta_label` の入出力契約と処理意図を定義する。
+
+def _df_delta_label(text: str, *, lang: str) -> str:
+    if lang != "en":
+        return text
+
+    mapping = {
+        "LHCの陽子（7 TeV）": "LHC proton\n(7 TeV)",
+        "超高エネルギー宇宙線（陽子 10^20 eV）": "Ultra-high-energy\ncosmic ray\n(proton $10^{20}$ eV)",
+        "高エネルギーν（10 PeV, m=0.1 eV仮定）": "High-energy ν\n(10 PeV,\nassuming $m=0.1$ eV)",
+    }
+    return mapping.get(text, text)
 
 
 # 関数: `_max_finite` の入出力契約と処理意図を定義する。
@@ -429,6 +464,7 @@ def _extract_delta_constraints(delta_j: Dict[str, Any]) -> Dict[str, Any]:
 def _render_figure(payload: Dict[str, Any], *, out_png: Path) -> None:
     apply_paper_style()
     _set_japanese_font()
+    figure_lang = get_figure_language(default="ja")
 
     eht = payload.get("eht") if isinstance(payload.get("eht"), dict) else {}
     eht_rows = eht.get("rows") if isinstance(eht.get("rows"), list) else []
@@ -461,12 +497,18 @@ def _render_figure(payload: Dict[str, Any], *, out_png: Path) -> None:
 
     x = list(range(len(names)))
     width = 0.20
-    ax1.bar([i - 1.5 * width for i in x], sigma_now, width=width, label="現状 σ_obs（リング統計; κ=1）", color="#1f77b4")
+    ax1.bar(
+        [i - 1.5 * width for i in x],
+        sigma_now,
+        width=width,
+        label=_df_display_text("現状 σ_obs（リング統計; κ=1）", lang=figure_lang),
+        color="#1f77b4",
+    )
     ax1.bar(
         [i - 0.5 * width for i in x],
         sigma_now_kappa,
         width=width,
-        label="参考：+κ系統（κ_obs優先 / fallback=Kerr係数レンジ）",
+        label=_df_display_text("参考：+κ系統（κ_obs優先 / fallback=Kerr係数レンジ）", lang=figure_lang),
         color="#7f7f7f",
         alpha=0.75,
     )
@@ -474,11 +516,17 @@ def _render_figure(payload: Dict[str, Any], *, out_png: Path) -> None:
         [i + 0.5 * width for i in x],
         sigma_now_kappa_scatt,
         width=width,
-        label="参考：+κ+散乱（屈折distortionのmid；Zhu 2018）",
+        label=_df_display_text("参考：+κ+散乱（屈折distortionのmid；Zhu 2018）", lang=figure_lang),
         color="#bcbd22",
         alpha=0.75,
     )
-    ax1.bar([i + 1.5 * width for i in x], sigma_need, width=width, label="3σ判別に必要な σ_obs（影直径）", color="#ff7f0e")
+    ax1.bar(
+        [i + 1.5 * width for i in x],
+        sigma_need,
+        width=width,
+        label=_df_display_text("3σ判別に必要な σ_obs（影直径）", lang=figure_lang),
+        color="#ff7f0e",
+    )
     sigma_annotation_specs: List[Tuple[int, float, str]] = []
     for i, (d, s0, sk, sks, s1) in enumerate(zip(diffs, sigma_now, sigma_now_kappa, sigma_now_kappa_scatt, sigma_need, strict=False)):
         # 条件分岐: `math.isfinite(d)` を満たす経路を評価する。
@@ -490,10 +538,37 @@ def _render_figure(payload: Dict[str, Any], *, out_png: Path) -> None:
 
     ax1.set_xticks(x, names)
     ax1.tick_params()
-    ax1.set_ylabel("観測誤差（1σ）[μas]")
-    ax1.set_title("EHT：3σ判別に必要な観測精度", fontsize=get_wavep_font_size("title"))
+    ax1.set_ylabel(_df_display_text("観測誤差（1σ）[μas]", lang=figure_lang))
+    ax1.set_title(
+        _df_display_text("EHT：3σ判別に必要な観測精度", lang=figure_lang),
+        fontsize=get_wavep_font_size("title") * (0.94 if figure_lang == "en" else 1.0),
+        pad=12 if figure_lang == "en" else None,
+    )
     ax1.grid(True, axis="y", alpha=0.25)
-    ax1.legend(loc="upper left", fontsize=get_wavep_font_size("legend"))
+    handles, labels = ax1.get_legend_handles_labels()
+    if figure_lang == "en":
+        fig.legend(
+            handles,
+            labels,
+            loc="upper center",
+            bbox_to_anchor=(0.5, 0.985),
+            ncol=2,
+            fontsize=max(7.0, get_wavep_font_size("legend") - 1.5),
+            frameon=False,
+            columnspacing=1.0,
+            handlelength=1.5,
+        )
+    else:
+        ax1.legend(
+            loc="upper center",
+            bbox_to_anchor=(0.5, 1.14),
+            ncol=2,
+            fontsize=max(7.6, get_wavep_font_size("legend") - 1.2),
+            frameon=False,
+            columnspacing=1.1,
+            handlelength=1.7,
+        )
+
     finite_sigma = [v for v in sigma_now + sigma_now_kappa + sigma_now_kappa_scatt + sigma_need if math.isfinite(v)]
     if finite_sigma:
         y_max = max(finite_sigma) * 1.28 + 0.45
@@ -518,8 +593,13 @@ def _render_figure(payload: Dict[str, Any], *, out_png: Path) -> None:
     if isinstance(ratio, (int, float)) and isinstance(diff_pct, (int, float)) and math.isfinite(float(ratio)) and math.isfinite(float(diff_pct)):
         ax1.text(
             0.01,
-            0.02,
-            f"係数差（β固定）: 係数比 P/GR={float(ratio):.4f}（差 {float(diff_pct):.2f}%）",
+            0.045,
+            (
+                f"Coefficient difference (β fixed): P/GR={float(ratio):.4f} "
+                f"(difference {float(diff_pct):.2f}%)"
+                if figure_lang == "en"
+                else f"係数差（β固定）: 係数比 P/GR={float(ratio):.4f}（差 {float(diff_pct):.2f}%）"
+            ),
             transform=ax1.transAxes,
             fontsize=get_wavep_font_size("note"),
             color="#444",
@@ -536,42 +616,82 @@ def _render_figure(payload: Dict[str, Any], *, out_png: Path) -> None:
         if not isinstance(r, dict):
             continue
 
-        labels.append(str(r.get("label") or r.get("key") or "obs"))
+        labels.append(_df_delta_label(str(r.get("label") or r.get("key") or "obs"), lang=figure_lang))
         log10_upper.append(float(r.get("log10_delta_upper", float("nan"))))
         gamma_obs.append(float(r.get("gamma_obs", float("nan"))))
 
+    delta_adopted = float(delta.get("delta_adopted", float("nan")))
     ax2.bar(range(len(labels)), log10_upper, color="#2ca02c", alpha=0.85)
     for i, g in enumerate(gamma_obs):
         # 条件分岐: `math.isfinite(g) and g > 0` を満たす経路を評価する。
         if math.isfinite(g) and g > 0:
-            ax2.text(i, log10_upper[i] + 0.6, f"γ≈1e{math.log10(g):.1f}", ha="center", va="bottom", fontsize=get_wavep_font_size("note"))
+            ax2.text(
+                i,
+                log10_upper[i] + 0.6,
+                f"γ≈1e{math.log10(g):.1f}",
+                ha="center",
+                va="bottom",
+                fontsize=get_wavep_font_size("note"),
+            )
 
-    delta_adopted = float(delta.get("delta_adopted", float("nan")))
-    # 条件分岐: `math.isfinite(delta_adopted) and delta_adopted > 0` を満たす経路を評価する。
     if math.isfinite(delta_adopted) and delta_adopted > 0:
         y = math.log10(delta_adopted)
-        ax2.axhline(y, color="#d62728", linestyle="--", linewidth=1.8, label=f"採用 δ = 1e{y:.0f}")
+        adopted_delta_label = (
+            f"Adopted δ = 1e{y:.0f}" if figure_lang == "en" else f"採用 δ = 1e{y:.0f}"
+        )
+        ax2.axhline(
+            y,
+            color="#d62728",
+            linestyle="--",
+            linewidth=1.8,
+            label=adopted_delta_label if figure_lang != "en" else None,
+        )
 
-    ax2.set_xticks(range(len(labels)), labels, rotation=0)
-    ax2.tick_params()
-    ax2.set_ylabel("log10(δの上限)")
-    ax2.set_title("速度飽和 δ：既知の高γ観測が与える上限", fontsize=get_wavep_font_size("title"))
+    xtick_rotation = 18 if figure_lang == "en" else 0
+    ax2.set_xticks(range(len(labels)), labels, rotation=xtick_rotation)
+    if figure_lang == "en":
+        for tick in ax2.get_xticklabels():
+            tick.set_ha("right")
+            tick.set_rotation_mode("anchor")
+
+    ax2.tick_params(
+        axis="x",
+        labelsize=max(7.6, get_wavep_font_size("tick") - (1.3 if figure_lang == "en" else 1.0)),
+    )
+    ax2.tick_params(axis="y", labelsize=get_wavep_font_size("tick"))
+    ax2.set_ylabel("log10(δ upper limit)" if figure_lang == "en" else "log10(δの上限)")
     ax2.grid(True, axis="y", alpha=0.25)
-    # 条件分岐: `math.isfinite(delta_adopted) and delta_adopted > 0` を満たす経路を評価する。
     if math.isfinite(delta_adopted) and delta_adopted > 0:
         ax2.text(
-            0.58,
-            0.96,
-            f"採用 δ = 1e{y:.0f}",
+            0.72,
+            0.95,
+            adopted_delta_label,
             transform=ax2.transAxes,
             ha="left",
             va="top",
-            fontsize=get_wavep_font_size("legend"),
+            fontsize=get_wavep_font_size("note"),
             bbox={"facecolor": "white", "alpha": 0.84, "edgecolor": "none", "pad": 0.26},
             color="#d62728",
         )
 
-    fig.suptitle("反証条件パック：必要精度と棄却条件の要点", fontsize=get_wavep_font_size("suptitle"), y=0.98)
+    ax2.set_title(
+        _df_display_text("速度飽和 δ：既知の高γ観測が与える上限", lang=figure_lang),
+        fontsize=get_wavep_font_size("title"),
+    )
+
+    if figure_lang != "en":
+        fig.suptitle(
+            _df_display_text("反証条件パック：必要精度と棄却条件の要点", lang=figure_lang),
+            fontsize=get_wavep_font_size("suptitle") * 0.88,
+            y=0.968,
+        )
+
+    fig.subplots_adjust(
+        top=0.83 if figure_lang == "en" else 0.87,
+        bottom=0.13 if figure_lang == "en" else 0.09,
+        left=0.18 if figure_lang == "en" else 0.12,
+        hspace=0.52,
+    )
     out_png.parent.mkdir(parents=True, exist_ok=True)
     with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):
         fig.savefig(out_png)

@@ -19,6 +19,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -518,20 +519,21 @@ def _wrap_two_line_label(text: str) -> str:
 # 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, payload: Dict[str, Any]) -> None:
+    is_en = str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
     display_labels = {
-        "closure_drift::overall_status": "ドリフト: 全体判定",
-        "closure_drift::hard_fail_ids_n": "ドリフト: hard失敗件数",
-        "closure_drift::watch_ids_n": "ドリフト: 監視件数",
-        "closure_drift::missing_equations_n": "ドリフト: 欠落式件数",
-        "closure_drift::missing_nonrel_channels_n": "ドリフト: 欠落channel件数",
-        "closure_drift::route_a_gate": "ドリフト: 経路A判定",
-        "closure_drift::transition": "ドリフト: 遷移判定",
-        "closure_drift::shared_gate_policy": "ドリフト: 共有ゲート方針",
-        "closure_drift::checks_all_pass": "ドリフト: 判定通過数",
-        "closure_drift::noether_gauge_margin_positive": "ドリフト: Noether\nゲージ余裕の正値性",
-        "closure_drift::noether_realness_margin_positive": "ドリフト: Noether\n実数性余裕の正値性",
-        "closure_drift::noether_gauge_margin_ratio": "ドリフト: Noether\nゲージ余裕比",
-        "closure_drift::noether_realness_margin_ratio": "ドリフト: Noether\n実数性余裕比",
+        "closure_drift::overall_status": "drift: overall status" if is_en else "ドリフト: 全体判定",
+        "closure_drift::hard_fail_ids_n": "drift: hard-fail count" if is_en else "ドリフト: hard失敗件数",
+        "closure_drift::watch_ids_n": "drift: watch count" if is_en else "ドリフト: 監視件数",
+        "closure_drift::missing_equations_n": "drift: missing equations" if is_en else "ドリフト: 欠落式件数",
+        "closure_drift::missing_nonrel_channels_n": "drift: missing channels" if is_en else "ドリフト: 欠落channel件数",
+        "closure_drift::route_a_gate": "drift: route-A gate" if is_en else "ドリフト: 経路A判定",
+        "closure_drift::transition": "drift: transition" if is_en else "ドリフト: 遷移判定",
+        "closure_drift::shared_gate_policy": "drift: shared-gate policy" if is_en else "ドリフト: 共有ゲート方針",
+        "closure_drift::checks_all_pass": "drift: passed checks" if is_en else "ドリフト: 判定通過数",
+        "closure_drift::noether_gauge_margin_positive": "drift: Noether gauge\nmargin positive" if is_en else "ドリフト: Noether\nゲージ余裕の正値性",
+        "closure_drift::noether_realness_margin_positive": "drift: Noether realness\nmargin positive" if is_en else "ドリフト: Noether\n実数性余裕の正値性",
+        "closure_drift::noether_gauge_margin_ratio": "drift: Noether gauge\nmargin ratio" if is_en else "ドリフト: Noether\nゲージ余裕比",
+        "closure_drift::noether_realness_margin_ratio": "drift: Noether realness\nmargin ratio" if is_en else "ドリフト: Noether\n実数性余裕比",
     }
     checks = payload.get("checks") if isinstance(payload.get("checks"), list) else []
     baseline = payload.get("frozen_baseline") if isinstance(payload.get("frozen_baseline"), dict) else {}
@@ -577,17 +579,23 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
         elif rid == "closure_drift::noether_realness_margin_ratio":
             ratio_map["realness"] = _as_float(row.get("value"))
 
-    ratio_labels = ["Noether ゲージ", "Noether 実数性"]
+    ratio_labels = ["Noether gauge", "Noether realness"] if is_en else ["Noether ゲージ", "Noether 実数性"]
     ratio_values = [
         float(ratio_map["gauge"]) if ratio_map["gauge"] is not None else 0.0,
         float(ratio_map["realness"]) if ratio_map["realness"] is not None else 0.0,
     ]
 
-    title_size = max(get_wavep_font_size("title"), 16.0)
-    axis_size = max(get_wavep_font_size("axis"), 14.0)
-    tick_size = max(get_wavep_font_size("tick"), 13.0)
-    upper_y_tick_size = max(tick_size + 1.8, 14.8)
-    legend_size = max(get_wavep_font_size("legend"), 12.8)
+    title_font_scale = 1.18 if is_en else 1.0
+    axis_font_scale = 1.16 if is_en else 1.0
+    tick_font_scale = 1.14 if is_en else 1.0
+    legend_font_scale = 1.14 if is_en else 1.0
+    title_size = max(get_wavep_font_size("title"), 16.0) * title_font_scale
+    axis_size = max(get_wavep_font_size("axis"), 14.0) * axis_font_scale
+    tick_size = max(get_wavep_font_size("tick"), 13.0) * tick_font_scale
+    x_tick_size = max(tick_size + (1.8 if is_en else 0.0), 14.8 if is_en else tick_size)
+    y_tick_size = max(tick_size + (1.8 if is_en else 0.0), 14.8 if is_en else tick_size)
+    upper_y_tick_size = max(tick_size + (2.4 if is_en else 1.8), 15.6 if is_en else 14.8)
+    legend_size = max(get_wavep_font_size("legend"), 12.8) * legend_font_scale
 
     upper_height = max(14.4, 0.78 * len(ids) + 5.0)
     fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(13.0, upper_height), dpi=180, gridspec_kw={"height_ratios": [5.55, 1.55]})
@@ -598,27 +606,32 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     ax0.set_yticks(y)
     ax0.set_yticklabels(wrapped_ids, fontsize=upper_y_tick_size)
     for tick in ax0.get_yticklabels():
+        tick.set_fontsize(upper_y_tick_size)
         tick.set_linespacing(1.15)
 
     ax0.set_xlim(0.0, 1.05)
     ax0.axvline(1.0, linestyle="--", color="#6b7280", linewidth=1.2)
-    ax0.set_xlabel("ドリフト監査スコア（1で通過、0.5で監視、0で棄却）", fontsize=axis_size)
-    ax0.set_title("Lagrangian-Noether 閉包ドリフト監査（ゲート運用）", fontsize=title_size, pad=9.0)
-    ax0.tick_params(axis="x", labelsize=tick_size)
+    ax0.set_xlabel("drift-audit score (1 pass, 0.5 watch, 0 reject)" if is_en else "ドリフト監査スコア（1で通過、0.5で監視、0で棄却）", fontsize=axis_size)
+    ax0.set_title("observable-closure drift audit" if is_en else "Lagrangian-Noether 閉包ドリフト監査（ゲート運用）", fontsize=title_size, pad=9.0)
+    ax0.tick_params(axis="x", labelsize=x_tick_size)
+    for tick in ax0.get_xticklabels():
+        tick.set_fontsize(x_tick_size)
     ax0.tick_params(axis="y", pad=7.0)
     ax0.grid(axis="x", alpha=0.25, linestyle=":")
 
     x = np.arange(len(ratio_labels))
     ax1.bar(x, ratio_values, color="#2563eb")
     ax1.set_xticks(x)
-    ax1.set_xticklabels(ratio_labels, rotation=0, ha="center", fontsize=tick_size)
+    ax1.set_xticklabels(ratio_labels, rotation=0, ha="center", fontsize=x_tick_size)
     ymax = max(1.05, max(ratio_values) * 1.2 if ratio_values else 1.05)
     ax1.set_ylim(0.0, ymax)
-    ax1.axhline(pass_ratio, linestyle="--", color="#2f9e44", linewidth=1.2, label=f"通過 >= {pass_ratio:g}")
-    ax1.axhline(watch_ratio, linestyle="--", color="#eab308", linewidth=1.2, label=f"監視 >= {watch_ratio:g}")
-    ax1.set_ylabel("固定基準に対する余裕比", fontsize=axis_size)
-    ax1.set_title("Noether 余裕比ドリフト監視", fontsize=title_size, pad=8.0)
-    ax1.tick_params(axis="y", labelsize=tick_size)
+    ax1.axhline(pass_ratio, linestyle="--", color="#2f9e44", linewidth=1.2, label=f"{'pass' if is_en else '通過'} >= {pass_ratio:g}")
+    ax1.axhline(watch_ratio, linestyle="--", color="#eab308", linewidth=1.2, label=f"{'watch' if is_en else '監視'} >= {watch_ratio:g}")
+    ax1.set_ylabel("margin ratio to frozen baseline" if is_en else "固定基準に対する余裕比", fontsize=axis_size)
+    ax1.set_title("Noether margin-ratio watch" if is_en else "Noether 余裕比ドリフト監視", fontsize=title_size, pad=8.0)
+    ax1.tick_params(axis="y", labelsize=y_tick_size)
+    for tick in ax1.get_yticklabels():
+        tick.set_fontsize(y_tick_size)
     ax1.grid(axis="y", alpha=0.25, linestyle=":")
     ax1.legend(loc="upper right", frameon=False, fontsize=legend_size)
 

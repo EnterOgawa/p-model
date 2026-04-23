@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-04-07T14:28:12.450721+00:00",
+  "generated_utc": "2026-04-10T15:33:13.880818+00:00",
   "figure_stem": "v2_trial3_weak_checkpoint_summary",
   "sources": {
     "coupled_localization_closeout": "output/public/quantum/mass_origin_v2_t3_t2_coupled_localization_closeout_audit_metrics.json",
@@ -29,5 +29,6 @@
       39532,
       60000
     ]
-  }
+  },
+  "reconstructed_from_summary_only": true
 }

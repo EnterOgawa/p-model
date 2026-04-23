@@ -4,6 +4,7 @@ import csv
 import hashlib
 import json
 import math
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,6 +16,8 @@ import matplotlib.pyplot as plt
 from figure_japanese_localizer import enable_japanese_figure_localization
 
 enable_japanese_figure_localization()
+
+_PROFILE_NAME = "part3b_quantum_verification"
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
@@ -29,6 +32,12 @@ if str(_ROOT) not in sys.path:
 # Reuse the same implementation as Step 7.14.11/7.14.14 so that
 # the holdout test (7.14.15) is comparable and does not fork physics code.
 
+from scripts.utils.figure_locale_paths import localize_figure_output_path
+from scripts.utils.plot_style import (
+    get_wavep_font_size,
+    install_wavep_font_profile,
+    normalize_wavep_export_canvas_to_textwidth,
+)
 from scripts.quantum.condensed_silicon_thermal_expansion_gruneisen_debye_einstein_model import (  # noqa: E402
     _alpha_1e8_per_k,
     _debye_cv_molar,
@@ -326,6 +335,7 @@ def main() -> None:
     root = _repo_root()
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
+    install_wavep_font_profile(profile_name=_PROFILE_NAME)
 
     alpha_src = root / "data" / "quantum" / "sources" / "nist_trc_silicon_thermal_expansion" / "extracted_values.json"
     # 条件分岐: `not alpha_src.exists()` を満たす経路を評価する。
@@ -505,10 +515,20 @@ def main() -> None:
 
     x = list(range(len(categories)))
     w_bar = 0.38
-    title_font = 15.2
-    axis_label_font = 13.6
-    tick_font = 12.2
-    legend_font = 11.6
+    figure_lang = os.getenv("WAVEP_FIGURE_LANG", "ja").strip().lower()
+    is_en = figure_lang.startswith("en")
+    title_font = get_wavep_font_size("title")
+    axis_label_font = get_wavep_font_size("axis")
+    x_axis_label_font = axis_label_font
+    tick_font = get_wavep_font_size("tick")
+    y_tick_font = tick_font
+    x_tick_font = tick_font
+    legend_font = get_wavep_font_size("legend") * (0.92 if is_en else 1.0)
+    x_axis_label = (
+        "split model (A:50–300→300–600, B:200–600→50–200)\nlabels 1/2 denote Einstein1/Einstein2"
+        if is_en
+        else "split-model (A:50–300→300–600, B:200–600→50–200; 1=Einstein1, 2=Einstein2)"
+    )
 
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10.8, 6.6), sharex=True, gridspec_kw={"height_ratios": [1, 1]})
 
@@ -518,26 +538,38 @@ def main() -> None:
     ax1.set_ylabel("max abs(z)", fontsize=axis_label_font)
     ax1.set_title("Si α(T): temperature-split holdout (Debye+Einstein)", fontsize=title_font)
     ax1.grid(True, axis="y", alpha=0.25)
-    ax1.tick_params(axis="both", labelsize=tick_font)
+    ax1.tick_params(axis="x", labelsize=tick_font)
+    ax1.tick_params(axis="y", labelsize=y_tick_font)
     ax1.legend(loc="upper right", fontsize=legend_font)
 
     ax2.bar([xi - w_bar / 2 for xi in x], chi2_train, width=w_bar, color="#1f77b4", alpha=0.85, label="train")
     ax2.bar([xi + w_bar / 2 for xi in x], chi2_test, width=w_bar, color="#ff7f0e", alpha=0.85, label="test")
     ax2.axhline(2.0, color="#666666", lw=1.0, ls="--", alpha=0.7)
     ax2.set_ylabel("reduced χ² (proxy)", fontsize=axis_label_font)
-    ax2.set_xlabel("split-model (A:50–300→300–600, B:200–600→50–200; 1=Einstein1, 2=Einstein2)", fontsize=axis_label_font)
+    ax2.set_xlabel(x_axis_label, fontsize=x_axis_label_font, labelpad=4 if is_en else None)
     ax2.set_xticks(x, categories)
     ax2.grid(True, axis="y", alpha=0.25)
-    ax2.tick_params(axis="both", labelsize=tick_font)
+    ax2.tick_params(axis="y", labelsize=y_tick_font)
+    ax2.tick_params(axis="x", labelsize=x_tick_font)
 
-    fig.tight_layout()
-    out_pdf = out_dir / "condensed_silicon_thermal_expansion_gruneisen_holdout_splits.pdf"
-    out_png = out_dir / "condensed_silicon_thermal_expansion_gruneisen_holdout_splits.png"
+    fig.tight_layout(rect=(0.03 if is_en else 0.0, 0.075 if is_en else 0.0, 1.0, 1.0))
+    normalize_wavep_export_canvas_to_textwidth(fig, profile_name=_PROFILE_NAME)
+    out_pdf = localize_figure_output_path(
+        out_dir / "condensed_silicon_thermal_expansion_gruneisen_holdout_splits.pdf",
+        root=root,
+    )
+    out_png = localize_figure_output_path(
+        out_dir / "condensed_silicon_thermal_expansion_gruneisen_holdout_splits.png",
+        root=root,
+    )
     fig.savefig(out_pdf)
     fig.savefig(out_png, dpi=180)
     plt.close(fig)
 
-    out_metrics = out_dir / "condensed_silicon_thermal_expansion_gruneisen_holdout_splits_metrics.json"
+    out_metrics = localize_figure_output_path(
+        out_dir / "condensed_silicon_thermal_expansion_gruneisen_holdout_splits_metrics.json",
+        root=root,
+    )
     out_metrics.write_text(
         json.dumps(
             {

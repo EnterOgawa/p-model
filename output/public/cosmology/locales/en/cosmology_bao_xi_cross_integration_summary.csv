@@ -1,0 +1,8 @@
+metric,value
+stage_a_status,pass
+stage_a_max_abs_z,1.0626990258553715
+stage_b_status,watch
+stage_b_promoted,False
+stage_b_passing_tracers_n,0
+overall_status,watch
+part4_scoreboard_update_recommend,False

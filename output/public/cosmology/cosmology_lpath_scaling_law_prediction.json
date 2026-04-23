@@ -50,7 +50,7 @@
       "L_path(2T)/L_path(T) <= 1 under Coulomb-like collisional branch."
     ]
   },
-  "generated_utc": "2026-04-06T11:08:57.552113+00:00",
+  "generated_utc": "2026-04-12T10:42:36.549033+00:00",
   "inputs": {
     "source_tau_json": "output/public/cosmology/cosmology_cluster_collision_pmu_jmu_separation_derivation.json",
     "temp_power_collisional_branch": -1.5

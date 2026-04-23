@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -21,9 +22,12 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size
+from scripts.utils.figure_locale_paths import localize_figure_output_path
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size, install_wavep_font_profile
 
 enable_japanese_figure_localization()
+
+_PROFILE_NAME = "part3b_quantum_verification"
 
 # クラス: `Measurement` の責務と境界条件を定義する。
 @dataclass(frozen=True)
@@ -56,8 +60,11 @@ def epsilon_from_alpha_inv(*, alpha_inv_ref: float, alpha_inv_meas: float) -> fl
 
 def main() -> None:
     root = ROOT
+    install_wavep_font_profile(profile_name=_PROFILE_NAME)
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
+    figure_lang = str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower()
+    is_en = figure_lang.startswith("en")
 
     recoil = Measurement(
         label="Recoil (Rb; Bloch+AI)",
@@ -95,6 +102,7 @@ def main() -> None:
 
     # Plot
     import matplotlib.pyplot as plt
+    from matplotlib.ticker import ScalarFormatter
 
     labels = [recoil.label, g2.label]
     x = np.arange(2, dtype=float)
@@ -103,8 +111,8 @@ def main() -> None:
 
     fig, ax = plt.subplots(dpi=150)
     apply_wavep_figure_layout(fig, template="part2_single_panel_sparse")
-    axis_label_font = get_wavep_font_size("axis")
-    panel_title_font = get_wavep_font_size("title")
+    axis_label_font = get_wavep_font_size("axis") * (0.84 if is_en else 1.0)
+    panel_title_font = get_wavep_font_size("title") * (0.80 if is_en else 1.0)
     tick_font = get_wavep_font_size("tick")
     note_font = get_wavep_font_size("note")
     ax.errorbar(x, y, yerr=yerr, fmt="o", capsize=4, elinewidth=1.8, color="#1f77b4", ecolor="#1f77b4")
@@ -118,6 +126,10 @@ def main() -> None:
     )
     ax.grid(True, ls=":", lw=0.6, alpha=0.7)
     ax.tick_params(axis="y", labelsize=tick_font)
+    y_formatter = ScalarFormatter(useMathText=False)
+    y_formatter.set_scientific(False)
+    y_formatter.set_useOffset(False)
+    ax.yaxis.set_major_formatter(y_formatter)
 
     ax.text(
         0.02,
@@ -134,8 +146,9 @@ def main() -> None:
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.85, "edgecolor": "0.8"},
     )
 
-    out_png = out_dir / "de_broglie_precision_alpha_consistency.png"
-    out_pdf = out_dir / "de_broglie_precision_alpha_consistency.pdf"
+    out_png = localize_figure_output_path(out_dir / "de_broglie_precision_alpha_consistency.png", root=root)
+    out_pdf = localize_figure_output_path(out_dir / "de_broglie_precision_alpha_consistency.pdf", root=root)
+    out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png)
     fig.savefig(out_pdf)
     plt.close(fig)
@@ -177,7 +190,7 @@ def main() -> None:
             "In reality, discrepancies could also come from systematics or theory inputs; epsilon here is an interpretive parameterization.",
         ],
     }
-    out_json = out_dir / "de_broglie_precision_alpha_consistency_metrics.json"
+    out_json = localize_figure_output_path(out_dir / "de_broglie_precision_alpha_consistency_metrics.json", root=root)
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(f"[ok] png : {out_png}")

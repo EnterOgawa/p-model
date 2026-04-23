@@ -1,6 +1,6 @@
 {
   "schema": "wavep.cosmology.ddr_1pz_manual_trace_audit.v1",
-  "generated_utc": "2026-04-06T11:00:20.651444+00:00",
+  "generated_utc": "2026-04-13T01:43:16.203263+00:00",
   "phase": {
     "phase": 5,
     "step": "5.3.18",
@@ -60,7 +60,7 @@
         "pipeline_id": "ddr_combined",
         "pipeline_label": "DDR combined (SNe Ia + BAO): eta construction",
         "line_no": 2,
-        "equation": "if D_A = D_M/(1+z): eta = D_L / ((1+z)*D_M)"
+        "equation": "もし D_A = D_M/(1+z) なら、\neta = D_L / ((1+z)*D_M)"
       }
     ],
     "ddr_symbolic_split": {
@@ -176,7 +176,7 @@
       "pipeline_label": "DDR combined (SNe Ia + BAO): eta construction",
       "line_no": 2,
       "stage": "BAO substitution",
-      "equation": "if D_A = D_M/(1+z): eta = D_L / ((1+z)*D_M)",
+      "equation": "もし D_A = D_M/(1+z) なら、\neta = D_L / ((1+z)*D_M)",
       "assumption": "BAO-side conversion introduces one geometric (1+z) directly into eta.",
       "has_one_plus_z": true,
       "one_plus_z_role": "geometry_DA_from_DM",

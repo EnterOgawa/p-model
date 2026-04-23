@@ -19,6 +19,7 @@ import argparse
 import csv
 import hashlib
 import json
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -650,23 +651,26 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
 # 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, payload: Dict[str, Any]) -> None:
+    is_en = str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
+    title_font_scale = 1.16 if is_en else 1.0
+    axis_font_scale = 1.14 if is_en else 1.0
     display_labels = {
-        "action::status": "作用原理: 状態",
-        "action::criteria": "作用原理: 全判定通過",
-        "action::fail_ids": "作用原理: fail件数",
-        "nonrel::status": "非相対論: 状態",
-        "nonrel::criteria": "非相対論: 全判定通過",
-        "nonrel::fail_channels": "非相対論: 失敗チャネル件数",
-        "born_pack::route_a_gate": "Born pack: 経路A判定",
-        "born_ab::route_transition": "Born A/B: 経路と遷移",
-        "born_ab::hard_lists": "Born A/B: hard逸脱件数",
-        "deriv_pack::route_transition": "導出pack: 経路と遷移",
-        "deriv_pack::hard_lists": "導出pack: hard逸脱件数",
-        "cross::route_consistency": "横断: 経路整合",
-        "shared::overall_status": "共有指標: 全体判定",
-        "bridge::overall_not_reject": "橋渡し表: reject回避",
-        "watch::kwiat_nonhard_stability": "監視: Kwiat 非hard安定",
-        "watch::hom_nonhard_stability": "監視: HOM 非hard安定",
+        "action::status": "action principle: status" if is_en else "作用原理: 状態",
+        "action::criteria": "action principle: all criteria pass" if is_en else "作用原理: 全判定通過",
+        "action::fail_ids": "action principle: fail count" if is_en else "作用原理: fail件数",
+        "nonrel::status": "nonrelativistic: status" if is_en else "非相対論: 状態",
+        "nonrel::criteria": "nonrelativistic: all criteria pass" if is_en else "非相対論: 全判定通過",
+        "nonrel::fail_channels": "nonrelativistic: failed channels" if is_en else "非相対論: 失敗チャネル件数",
+        "born_pack::route_a_gate": "Born pack: route-A gate" if is_en else "Born pack: 経路A判定",
+        "born_ab::route_transition": "Born A/B: route and transition" if is_en else "Born A/B: 経路と遷移",
+        "born_ab::hard_lists": "Born A/B: hard deviations" if is_en else "Born A/B: hard逸脱件数",
+        "deriv_pack::route_transition": "derivation pack: route and transition" if is_en else "導出pack: 経路と遷移",
+        "deriv_pack::hard_lists": "derivation pack: hard deviations" if is_en else "導出pack: hard逸脱件数",
+        "cross::route_consistency": "cross-check: route consistency" if is_en else "横断: 経路整合",
+        "shared::overall_status": "shared KPI: overall status" if is_en else "共有指標: 全体判定",
+        "bridge::overall_not_reject": "bridge table: avoid reject" if is_en else "橋渡し表: reject回避",
+        "watch::kwiat_nonhard_stability": "watch: Kwiat non-hard stability" if is_en else "監視: Kwiat 非hard安定",
+        "watch::hom_nonhard_stability": "watch: HOM non-hard stability" if is_en else "監視: HOM 非hard安定",
     }
     rows = payload.get("checks") if isinstance(payload.get("checks"), list) else []
     labels: List[str] = []
@@ -697,37 +701,48 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     fig_h = max(4.8, 0.34 * len(labels) + 1.6)
     y = np.arange(len(labels))
     status_label = {
-        "pass": "通過",
-        "watch": "監視",
-        "reject": "棄却",
-        "unknown": "不明",
+        "pass": "pass" if is_en else "通過",
+        "watch": "watch" if is_en else "監視",
+        "reject": "reject" if is_en else "棄却",
+        "unknown": "unknown" if is_en else "不明",
     }
     route_label = {
-        "A_continue": "A継続",
-        "A_reject": "A棄却",
-        "unknown": "不明",
+        "A_continue": "A continue" if is_en else "A継続",
+        "A_reject": "A reject" if is_en else "A棄却",
+        "unknown": "unknown" if is_en else "不明",
     }
     transition_label = {
-        "A_stay": "A維持",
-        "A_to_B": "AからBへ遷移",
-        "unknown": "不明",
+        "A_stay": "A stay" if is_en else "A維持",
+        "A_to_B": "A to B" if is_en else "AからBへ遷移",
+        "unknown": "unknown" if is_en else "不明",
     }
+    x_tick_size = 15.4 if is_en else 14.4
+    y_tick_size = 15.8 if is_en else 14.8
     fig, ax = plt.subplots(figsize=(12.6, fig_h), dpi=180)
     ax.barh(y, scores, color=colors)
     ax.axvline(1.0, linestyle="--", color="#6b7280", linewidth=1.2)
     ax.set_yticks(y, labels)
-    ax.tick_params(axis="y", labelsize=14.8)
-    ax.set_xlabel("整合スコア（1で通過、0で棄却）", fontsize=15.2)
+    ax.tick_params(axis="y", labelsize=y_tick_size)
+    for tick in ax.get_yticklabels():
+        tick.set_fontsize(y_tick_size)
+    ax.set_xlabel("consistency score (1 pass, 0 reject)" if is_en else "整合スコア（1で通過、0で棄却）", fontsize=15.2 * axis_font_scale)
     decision = payload.get("decision") if isinstance(payload.get("decision"), dict) else {}
     title_status = str(decision.get("overall_status") or "unknown")
     title_route = str(decision.get("route_a_gate") or "unknown")
     title_trans = str(decision.get("transition") or "unknown")
     ax.set_title(
-        f"導出と観測の連鎖固定監査（{status_label.get(title_status, title_status)}; {route_label.get(title_route, title_route)}/{transition_label.get(title_trans, title_trans)}）",
-        fontsize=15.6,
+        (
+            f"derivation-to-observable chain lock audit ({status_label.get(title_status, title_status)}; "
+            f"{route_label.get(title_route, title_route)}/{transition_label.get(title_trans, title_trans)})"
+        )
+        if is_en
+        else f"導出と観測の連鎖固定監査（{status_label.get(title_status, title_status)}; {route_label.get(title_route, title_route)}/{transition_label.get(title_trans, title_trans)}）",
+        fontsize=15.6 * title_font_scale,
         pad=8.0,
     )
-    ax.tick_params(axis="x", labelsize=14.4)
+    ax.tick_params(axis="x", labelsize=x_tick_size)
+    for tick in ax.get_xticklabels():
+        tick.set_fontsize(x_tick_size)
     ax.grid(axis="x", alpha=0.25, linestyle=":")
     fig.tight_layout()
     path.parent.mkdir(parents=True, exist_ok=True)

@@ -3,7 +3,7 @@
 """
 paper_locale_registry.py
 
-論文 build に使う locale manifest と locale 別出力名を管理する。
+論文 build に使う locale manifest と locale 別出力 path を管理する。
 
 目的:
 - 現行の日本語 build を壊さず、将来の多言語版が同じ source / output 名を
@@ -75,14 +75,24 @@ def resolve_source_path(root: Path, key: str, locale: str | None = None) -> Path
     return (root / Path(manifest[key])).resolve()
 
 
+# 関数: `_append_locale_suffix` の入出力契約と処理意図を定義する。
+def _append_locale_suffix(base_name: str, *, locale: str) -> str:
+    path = Path(base_name)
+    suffix = path.suffix
+    stem = path.stem
+    locale_suffix = f"_{locale}"
+    localized_name = path.name if stem.endswith(locale_suffix) else f"{stem}{locale_suffix}{suffix}"
+    if not path.parent or str(path.parent) == ".":
+        return localized_name
+
+    return str((path.parent / localized_name).as_posix())
+
+
 # 関数: `localized_output_name` の入出力契約と処理意図を定義する。
 def localized_output_name(base_name: str, locale: str | None = None) -> str:
     active_locale = resolve_active_locale(locale)
     if active_locale == DEFAULT_PAPER_LOCALE:
         return base_name
 
-    path = Path(base_name)
-    if path.suffix:
-        return f"{path.stem}_{active_locale}{path.suffix}"
-
-    return f"{base_name}_{active_locale}"
+    localized_base = _append_locale_suffix(base_name, locale=active_locale)
+    return str((Path("locales") / active_locale / Path(localized_base)).as_posix())

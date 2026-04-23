@@ -11,6 +11,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import shutil
 import sys
 from datetime import datetime, timezone
@@ -370,7 +371,18 @@ def _plot(
     max_branch_reversal: float,
     out_png: Path,
 ) -> None:
-    labels = [f"s{int(r['seed'])}-e{float(r['env_scale']):.2f}" for r in rows]
+    is_en = str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
+    title_font = 16.9 if is_en else 14.8
+    axis_font = 14.6 if is_en else 13.4
+    tick_font = 15.1 if is_en else 11.4
+    legend_font = 15.4 if is_en else 11.8
+    suptitle_font = 18.2 if is_en else 16.4
+    fig_width = 12.8
+    fig_height = 17.6 if is_en else 14.2
+    labels = [
+        (f"s{int(r['seed']) % 1000:03d}-e{float(r['env_scale']):.2f}" if is_en else f"s{int(r['seed'])}-e{float(r['env_scale']):.2f}")
+        for r in rows
+    ]
     x = np.arange(len(rows), dtype=float)
 
     tau50_s = np.array([float(r.get("collapse_time_median_s", math.nan)) for r in rows], dtype=float)
@@ -381,46 +393,46 @@ def _plot(
     status_color = {"pass": "#2ca02c", "watch": "#e6b422", "reject": "#d62728"}
     colors = [status_color.get(str(r.get("status", "watch")), "#808080") for r in rows]
 
-    fig, axes = plt.subplots(4, 1, figsize=(12.8, 14.2))
+    fig, axes = plt.subplots(4, 1, figsize=(fig_width, fig_height))
     ax_tau, ax_branch, ax_consensus, ax_collapse = axes
 
     ax_tau.bar(x, tau50_s * 1000.0, color=colors, alpha=0.9)
-    ax_tau.axhline(float(tau50_ref_s) * 1000.0, color="#4c78a8", ls="--", lw=1.2, label="基準 τ50")
+    ax_tau.axhline(float(tau50_ref_s) * 1000.0, color="#4c78a8", ls="--", lw=1.2, label="reference τ50" if is_en else "基準 τ50")
     ax_tau.axhline(float(tau50_ref_s) * float(tau50_ratio_min) * 1000.0, color="#999999", ls=":", lw=1.0)
     ax_tau.axhline(float(tau50_ref_s) * float(tau50_ratio_max) * 1000.0, color="#999999", ls=":", lw=1.0)
-    ax_tau.set_ylabel("τ50 [ms]", fontsize=13.4)
-    ax_tau.set_title("収束時刻中央値の安定性", fontsize=14.8)
+    ax_tau.set_ylabel("τ50 [ms]", fontsize=axis_font)
+    ax_tau.set_title("median collapse-time stability" if is_en else "収束時刻中央値の安定性", fontsize=title_font)
     ax_tau.grid(True, axis="y", alpha=0.25)
-    ax_tau.legend(loc="upper right", fontsize=11.8)
+    ax_tau.legend(loc="upper right", fontsize=legend_font)
 
     ax_branch.bar(x, branch_reversal, color=colors, alpha=0.9)
-    ax_branch.axhline(float(max_branch_reversal), color="#d62728", ls="--", lw=1.2, label="最大枝反転率")
-    ax_branch.set_ylabel("枝反転率", fontsize=13.4)
-    ax_branch.set_title("状態分枝安定性ゲート", fontsize=14.8)
+    ax_branch.axhline(float(max_branch_reversal), color="#d62728", ls="--", lw=1.2, label="max branch-reversal fraction" if is_en else "最大枝反転率")
+    ax_branch.set_ylabel("branch-reversal fraction" if is_en else "枝反転率", fontsize=axis_font)
+    ax_branch.set_title("state-branch stability gate" if is_en else "状態分枝安定性ゲート", fontsize=title_font)
     ax_branch.grid(True, axis="y", alpha=0.25)
-    ax_branch.legend(loc="upper right", fontsize=11.8)
+    ax_branch.legend(loc="upper right", fontsize=legend_font)
 
     ax_consensus.bar(x, pointer_consensus, color=colors, alpha=0.9)
-    ax_consensus.axhline(float(min_pointer_consensus), color="#d62728", ls="--", lw=1.2, label="最小ポインタ合意率")
-    ax_consensus.set_ylabel("ポインタ合意率", fontsize=13.4)
-    ax_consensus.set_title("ポインタ多数決合意", fontsize=14.8)
+    ax_consensus.axhline(float(min_pointer_consensus), color="#d62728", ls="--", lw=1.2, label="min pointer-consensus fraction" if is_en else "最小ポインタ合意率")
+    ax_consensus.set_ylabel("pointer-consensus fraction" if is_en else "ポインタ合意率", fontsize=axis_font)
+    ax_consensus.set_title("pointer-majority consensus" if is_en else "ポインタ多数決合意", fontsize=title_font)
     ax_consensus.grid(True, axis="y", alpha=0.25)
-    ax_consensus.legend(loc="upper right", fontsize=11.8)
+    ax_consensus.legend(loc="upper right", fontsize=legend_font)
 
     ax_collapse.bar(x, collapse_fraction, color=colors, alpha=0.9)
-    ax_collapse.axhline(float(min_collapse_fraction), color="#d62728", ls="--", lw=1.2, label="最小収束率")
-    ax_collapse.set_ylabel("崩壊率", fontsize=13.4)
-    ax_collapse.set_title("収束成功ゲート", fontsize=14.8)
+    ax_collapse.axhline(float(min_collapse_fraction), color="#d62728", ls="--", lw=1.2, label="min collapse fraction" if is_en else "最小収束率")
+    ax_collapse.set_ylabel("collapse fraction" if is_en else "崩壊率", fontsize=axis_font)
+    ax_collapse.set_title("collapse-success gate" if is_en else "収束成功ゲート", fontsize=title_font)
     ax_collapse.grid(True, axis="y", alpha=0.25)
-    ax_collapse.legend(loc="upper right", fontsize=11.8)
+    ax_collapse.legend(loc="upper right", fontsize=legend_font)
 
     for ax in axes:
         ax.set_xticks(x)
-        ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=11.4)
-        ax.set_xlabel("実行条件（seed-env_scale）", fontsize=12.2)
-        ax.tick_params(axis="y", labelsize=11.4)
+        ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=tick_font)
+        ax.set_xlabel("run condition (seed-env_scale)" if is_en else "実行条件（seed-env_scale）", fontsize=axis_font)
+        ax.tick_params(axis="y", labelsize=tick_font)
 
-    fig.suptitle("動的収束の環境結合安定性監査", fontsize=16.4)
+    fig.suptitle("dynamic-collapse stability audit" if is_en else "動的収束の環境結合安定性監査", fontsize=suptitle_font)
     fig.tight_layout(rect=[0.01, 0.01, 0.99, 0.97])
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200, bbox_inches="tight")

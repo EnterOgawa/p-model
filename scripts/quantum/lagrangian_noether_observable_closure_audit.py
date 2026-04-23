@@ -20,6 +20,7 @@ import csv
 import hashlib
 import json
 import math
+import os
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -28,6 +29,11 @@ from typing import Any, Dict, List, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
+
+
+# 関数: `WAVEP_FIGURE_LANG` から英語 surface かどうかを判定する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
 
 ROOT = Path(__file__).resolve().parents[2]
 # 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
@@ -554,22 +560,25 @@ def _wrap_two_line_label(text: str) -> str:
 # 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, payload: Dict[str, Any]) -> None:
+    is_en = _is_en_figure()
+    title_font_scale = 1.18 if is_en else 1.0
+    axis_font_scale = 1.16 if is_en else 1.0
     display_labels = {
-        "action::route_a_gate": "作用原理: 経路A判定",
-        "action::criteria_all_pass": "作用原理: 全判定通過",
-        "action::required_equations": "作用原理: 必須式充足",
-        "action::noether_gauge": "作用原理: Noether\nゲージ余裕",
-        "action::noether_realness": "作用原理: Noether\n実数性余裕",
-        "nonrel::route_gate": "非相対論: 経路判定",
-        "nonrel::criteria_all_pass": "非相対論: 全判定通過",
-        "nonrel::required_channels": "非相対論: 必須チャネル充足",
-        "deriv_pack::hard_fail_unknown": "導出pack: hard失敗/不明",
-        "deriv_pack::derivation_channel_pass": "導出pack: 導出チャネル通過",
-        "closure::observables_present": "閉包: 観測量経路の存在",
-        "closure::observables_unique": "閉包: 観測量経路の一意性",
-        "chain::hard_fail": "連鎖監査: hard失敗件数",
-        "chain::shared_gate_policy": "連鎖監査: 共有ゲート方針",
-        "chain::watch_convergence": "連鎖監査: 監視収束",
+        "action::route_a_gate": "Action: route-A gate" if is_en else "作用原理: 経路A判定",
+        "action::criteria_all_pass": "Action: all criteria pass" if is_en else "作用原理: 全判定通過",
+        "action::required_equations": "Action: required equations" if is_en else "作用原理: 必須式充足",
+        "action::noether_gauge": "Action: Noether\ngauge margin" if is_en else "作用原理: Noether\nゲージ余裕",
+        "action::noether_realness": "Action: Noether\nreality margin" if is_en else "作用原理: Noether\n実数性余裕",
+        "nonrel::route_gate": "Nonrel.: route gate" if is_en else "非相対論: 経路判定",
+        "nonrel::criteria_all_pass": "Nonrel.: all criteria pass" if is_en else "非相対論: 全判定通過",
+        "nonrel::required_channels": "Nonrel.: required channels" if is_en else "非相対論: 必須チャネル充足",
+        "deriv_pack::hard_fail_unknown": "Deriv. pack: hard fail / unknown" if is_en else "導出pack: hard失敗/不明",
+        "deriv_pack::derivation_channel_pass": "Deriv. pack: channel pass" if is_en else "導出pack: 導出チャネル通過",
+        "closure::observables_present": "Closure: observable path\nexists" if is_en else "閉包: 観測量経路の存在",
+        "closure::observables_unique": "Closure: observable path\nunique" if is_en else "閉包: 観測量経路の一意性",
+        "chain::hard_fail": "Chain audit: hard-fail count" if is_en else "連鎖監査: hard失敗件数",
+        "chain::shared_gate_policy": "Chain audit: shared gate policy" if is_en else "連鎖監査: 共有ゲート方針",
+        "chain::watch_convergence": "Chain audit: watch convergence" if is_en else "連鎖監査: 監視収束",
     }
     checks = payload.get("checks") if isinstance(payload.get("checks"), list) else []
     matrix = payload.get("closure_matrix") if isinstance(payload.get("closure_matrix"), list) else []
@@ -612,8 +621,8 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
 
     # 上段（閉包監査）の可読性を図8相当に合わせるため、上段比率を拡大する。
 
-    title_size = max(get_wavep_font_size("title"), 16.0)
-    axis_size = max(get_wavep_font_size("axis"), 14.0)
+    title_size = max(get_wavep_font_size("title"), 16.0) * title_font_scale
+    axis_size = max(get_wavep_font_size("axis"), 14.0) * axis_font_scale
     tick_size = max(get_wavep_font_size("tick"), 13.0)
     upper_y_tick_size = max(tick_size + 1.8, 14.8)
 
@@ -630,8 +639,12 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
 
     ax0.set_xlim(0.0, 1.05)
     ax0.axvline(1.0, linestyle="--", color="#6b7280", linewidth=1.2)
-    ax0.set_xlabel("監査スコア（1で通過、0.5で監視、0で棄却）", fontsize=axis_size)
-    ax0.set_title("L_total -> EL -> 観測量閉包監査（Noether + 非相対論写像）", fontsize=title_size, pad=9.0)
+    ax0.set_xlabel("audit score (1 pass, 0.5 watch, 0 reject)" if is_en else "監査スコア（1で通過、0.5で監視、0で棄却）", fontsize=axis_size)
+    ax0.set_title(
+        "L_total -> EL -> observed-quantity closure audit (Noether + nonrelativistic mapping)" if is_en else "L_total -> EL -> 観測量閉包監査（Noether + 非相対論写像）",
+        fontsize=title_size,
+        pad=9.0,
+    )
     ax0.tick_params(axis="x", labelsize=tick_size)
     ax0.tick_params(axis="y", pad=7.0)
     ax0.grid(axis="x", alpha=0.25, linestyle=":")
@@ -642,12 +655,12 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     ax1.set_xticklabels(obs_labels, rotation=10, ha="right", fontsize=tick_size)
     ax1.set_ylim(0.0, 1.05)
     ax1.axhline(1.0, linestyle="--", color="#6b7280", linewidth=1.2)
-    ax1.set_ylabel("経路固定スコア", fontsize=axis_size)
-    ax1.set_title("観測量経路の一意固定", fontsize=title_size, pad=8.0)
+    ax1.set_ylabel("route-fix score" if is_en else "経路固定スコア", fontsize=axis_size)
+    ax1.set_title("Unique observable-route assignment" if is_en else "観測量経路の一意固定", fontsize=title_size, pad=8.0)
     ax1.tick_params(axis="y", labelsize=tick_size)
     ax1.grid(axis="y", alpha=0.25, linestyle=":")
 
-    fig.subplots_adjust(left=0.25, right=0.98, top=0.96, bottom=0.10, hspace=0.66)
+    fig.subplots_adjust(left=0.25, right=0.98, top=0.96, bottom=0.10, hspace=0.34)
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path)
     plt.close(fig)

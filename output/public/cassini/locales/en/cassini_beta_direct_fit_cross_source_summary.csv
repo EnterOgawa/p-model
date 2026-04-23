@@ -1,0 +1,4 @@
+scenario,label,source_effective,window_days,n_points,delta_beta,delta_beta_sigma_proxy,beta_est,gamma_est,corr_obs_fit,rmse,weighted_rms,metrics_json
+tdf_plasma,TDF processed plasma,pds_tdf_processed_plasma,10,190,0.105649925084843,0.0141100222740671,1.10564992508484,1.21129985016969,0.487982475717322,6.416485082254296e-11,2.495920441448025e-11,C:\develop\waveP\output\cassini\cassini_tdf_delta_beta_fit_metrics.json
+tdf_raw,TDF raw,pds_tdf_raw,10,844707,0.0286034989597528,0.000107997853247147,1.02860349895975,1.05720699791951,0.276903635413977,1.249625959850900e-11,1.249625959850901e-11,C:\develop\waveP\output\cassini\cassini_tdf_delta_beta_fit_metrics.json
+odf_raw,ODF raw,pds_odf_raw,10,421841,-615.108974266645,13.63815593297,-614.108974266645,-1229.21794853329,0.0692753030547071,1.139270031002146e-06,1.139270031002150e-06,C:\develop\waveP\output\cassini\cassini_odf_beta_direct_fit_metrics.json

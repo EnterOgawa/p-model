@@ -30,7 +30,12 @@ def _configure_japanese_font() -> None:
     import matplotlib as mpl
     from scripts.utils.plot_style import install_wavep_cjk_font_override
 
-    install_wavep_cjk_font_override(preferred_name="Noto Sans CJK JP")
+    figure_lang = str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower()
+    if figure_lang.startswith("en"):
+        mpl.rcParams["font.family"] = ["DejaVu Sans"]
+        mpl.rcParams["font.sans-serif"] = ["DejaVu Sans"]
+    else:
+        install_wavep_cjk_font_override(preferred_name="Noto Sans CJK JP")
     mpl.rcParams["axes.unicode_minus"] = False
 
 
@@ -8726,6 +8731,14 @@ def main(argv: list[str] | None = None) -> None:
     legend_font = get_wavep_font_size("legend")
     note_font = get_wavep_font_size("note")
     suptitle_font = get_wavep_font_size("suptitle") + 2.0
+    figure_lang = str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower()
+    is_en = figure_lang.startswith("en")
+    if is_en and step == "7.13.8.5":
+        suptitle_font = max(float(get_wavep_font_size("suptitle")), suptitle_font - 1.5)
+
+    # 関数: `_display_label` の入出力契約と処理意図を定義する。
+    def _display_label(ja: str, en: str) -> str:
+        return en if is_en else ja
 
     enlarged_readability_steps = {"7.9.7", "7.13.8", "7.13.8.5"}
     # 条件分岐: `step in enlarged_readability_steps` を満たす経路を評価する。
@@ -9016,13 +9029,19 @@ def main(argv: list[str] | None = None) -> None:
             vt = [v_profile(rr, vc_mev=vc, rc_fm=rc, r1_fm=r1, r2_fm=r2, r3_fm=r3, v1=v1t, v2=v2t, v3=v3t) for rr in r_plot]
             vs = [v_profile(rr, vc_mev=vc, rc_fm=rc, r1_fm=r1_s, r2_fm=r2_s, r3_fm=r3, v1=v1s, v2=v2s, v3=v3s) for rr in r_plot]
 
-        ax0.plot(r_plot, vt, lw=2.0, color="tab:blue", label="三重項（B, a_t, r_t, v2t をフィット）")
+        ax0.plot(
+            r_plot,
+            vt,
+            lw=2.0,
+            color="tab:blue",
+            label=_display_label("三重項（B, a_t, r_t, v2t をフィット）", "triplet (fit B, a_t, r_t, v2t)"),
+        )
         # 条件分岐: `step == "7.9.6"` を満たす経路を評価する。
         if step == "7.9.6":
-            ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label="一重項（V1共有、a_sでV2をフィット）")
+            ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label=_display_label("一重項（V1共有、a_sでV2をフィット）", "singlet (shared V1; fit V2 by a_s)"))
         # 条件分岐: 前段条件が不成立で、`step == "7.13.3"` を追加評価する。
         elif step == "7.13.3":
-            ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label="一重項（a_s, r_sで V1, V2 をフィット）")
+            ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label=_display_label("一重項（a_s, r_sで V1, V2 をフィット）", "singlet (fit V1, V2 by a_s, r_s)"))
         elif step in (
             "7.13.5",
             "7.13.6",
@@ -9034,12 +9053,12 @@ def main(argv: list[str] | None = None) -> None:
             "7.13.8.4",
             "7.13.8.5",
         ):
-            ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label="一重項（a_s, r_sで V1, V2>=0 をフィット）")
+            ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label=_display_label("一重項（a_s, r_sで V1, V2>=0 をフィット）", "singlet (fit V1, V2>=0 by a_s, r_s)"))
         # 条件分岐: 前段条件が不成立で、`step == "7.13.4"` を追加評価する。
         elif step == "7.13.4":
-            ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label="一重項（a_s, r_sで V1, V2 をフィット、テール共有）")
+            ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label=_display_label("一重項（a_s, r_sで V1, V2 をフィット、テール共有）", "singlet (fit V1, V2 by a_s, r_s; shared tail)"))
         else:
-            ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label="一重項（a_s, r_sで V1, V2 をフィット）")
+            ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label=_display_label("一重項（a_s, r_sで V1, V2 をフィット）", "singlet (fit V1, V2 by a_s, r_s)"))
 
         # 条件分岐: `step == "7.9.8" and rc > 0.0` を満たす経路を評価する。
 
@@ -9108,8 +9127,8 @@ def main(argv: list[str] | None = None) -> None:
         ):
             ax0.axvline(float(lambda_pi_pm_fm), color="tab:green", lw=1.1, ls="--")
 
-        ax0.set_xlabel("距離 r（fm）", fontsize=axis_font)
-        ax0.set_ylabel("ポテンシャル V(r)（MeV）", fontsize=axis_font)
+        ax0.set_xlabel(_display_label("距離 r（fm）", "distance r (fm)"), fontsize=axis_font)
+        ax0.set_ylabel(_display_label("ポテンシャル V(r)（MeV）", "Potential V(r) (MeV)"), fontsize=axis_font)
         # 条件分岐: `step == "7.13.3"` を満たす経路を評価する。
         if step == "7.13.3":
             title = f"{label}\n2レンジ（λπ拘束、符号付きV2_s）"
@@ -9118,7 +9137,11 @@ def main(argv: list[str] | None = None) -> None:
             title = f"{label}\n3レンジ（λπ拘束、障壁+テール分割）"
         # 条件分岐: 前段条件が不成立で、`step in ("7.13.7", "7.13.8", "7.13.8.1")` を追加評価する。
         elif step in ("7.13.7", "7.13.8", "7.13.8.1"):
-            title = f"{label}\n3レンジ（λπ拘束、障壁+テール分割、テール深さ自由）"
+            title = (
+                f"{label}\n3レンジ（λπ拘束、障壁+テール分割、テール深さ自由）"
+                if not is_en
+                else f"{label}\nthree-range (λπ constrained, barrier+tail split, free tail depth)"
+            )
         # 条件分岐: 前段条件が不成立で、`step == "7.13.8.2"` を追加評価する。
         elif step == "7.13.8.2":
             title = f"{label}\n3レンジ（λπ拘束、障壁+テール分割、チャネル分離）"
@@ -9130,7 +9153,7 @@ def main(argv: list[str] | None = None) -> None:
             title = f"{label}\n3レンジ（チャネル分離 + 一重項R2_s走査）"
         # 条件分岐: 前段条件が不成立で、`step == "7.13.8.5"` を追加評価する。
         elif step == "7.13.8.5":
-            title = f"{label}\n3レンジ（三重項障壁比率走査）"
+            title = f"{label}\n3レンジ（三重項障壁比率走査）" if not is_en else f"{label}\nthree-range (triplet barrier-fraction scan)"
         # 条件分岐: 前段条件が不成立で、`step == "7.13.4"` を追加評価する。
         elif step == "7.13.4":
             title = f"{label}\n3レンジ（λπ拘束、テール共有）"
@@ -9138,7 +9161,7 @@ def main(argv: list[str] | None = None) -> None:
         elif step == "7.9.8":
             title = f"{label}\n反発コア + 2レンジ井戸"
         else:
-            title = f"{label}\n2レンジ井戸（幾何共有）"
+            title = f"{label}\n2レンジ井戸（幾何共有）" if not is_en else f"{label}\ntwo-range well (shared geometry)"
 
         ax0.set_title(title, fontsize=title_font, pad=5.0)
         ax0.grid(True, ls=":", lw=0.6, alpha=0.6)
@@ -9193,17 +9216,17 @@ def main(argv: list[str] | None = None) -> None:
         pts = ere_t["points"]
         xs = [(p["k_fm1"] ** 2) for p in pts]
         ys = [p["kcot_fm1"] for p in pts]
-        ax1.plot(xs, ys, "o", ms=3.2, alpha=0.8, label="kグリッド")
+        ax1.plot(xs, ys, "o", ms=3.2, alpha=0.8, label=_display_label("kグリッド", "k grid"))
         coeffs = ere_t["coeffs"]
         c0 = float(coeffs["c0_fm1"])
         c2 = float(coeffs["c2_fm"])
         c4 = float(coeffs["c4_fm3"])
         x_line = [0.0, max(xs) if xs else 0.002**2]
         y_line = [c0 + c2 * x + c4 * (x * x) for x in x_line]
-        ax1.plot(x_line, y_line, "-", lw=2.0, color="0.35", label="EREフィット")
-        ax1.set_xlabel("波数二乗 $k^2$（fm$^{-2}$）", fontsize=axis_font)
-        ax1.set_ylabel("有効レンジ関数 $k\\cot\\delta$（fm$^{-1}$）", fontsize=axis_font)
-        ax1.set_title("三重項: EREフィット（v2を目標）", fontsize=title_font, pad=5.0)
+        ax1.plot(x_line, y_line, "-", lw=2.0, color="0.35", label=_display_label("EREフィット", "ERE fit"))
+        ax1.set_xlabel(_display_label("波数二乗 $k^2$（fm$^{-2}$）", "squared wavenumber $k^2$ (fm$^{-2}$)"), fontsize=axis_font)
+        ax1.set_ylabel(_display_label("有効レンジ関数 $k\\cot\\delta$（fm$^{-1}$）", "effective-range function $k\\cot\\delta$ (fm$^{-1}$)"), fontsize=axis_font)
+        ax1.set_title(_display_label("三重項: EREフィット（v2を目標）", "triplet: ERE fit (v2 targets)"), fontsize=title_font, pad=5.0)
         ax1.grid(True, ls=":", lw=0.6, alpha=0.6)
         ax1.legend(frameon=True, fontsize=legend_fontsize, loc="best")
         ax1.tick_params(axis="both", labelsize=tick_font)
@@ -9223,14 +9246,22 @@ def main(argv: list[str] | None = None) -> None:
         ds = r["comparison"]["singlet"]
         # 条件分岐: `step == "7.9.6"` を満たす経路を評価する。
         if step == "7.9.6":
-            names = ["v2t（フィット）", "r_s（予測）", "v2s（予測）"]
+            names = (
+                ["v2t (fit)", "r_s (pred)", "v2s (pred)"]
+                if is_en
+                else ["v2t（フィット）", "r_s（予測）", "v2s（予測）"]
+            )
             deltas = [
                 float(dt["v2t_fit_minus_obs_fm3"]),
                 float(ds["r_s_pred_minus_obs_fm"]),
                 float(ds["v2s_pred_minus_obs_fm3"]),
             ]
         else:
-            names = ["v2t（フィット）", "r_s（フィット）", "v2s（予測）"]
+            names = (
+                ["v2t (fit)", "r_s (fit)", "v2s (pred)"]
+                if is_en
+                else ["v2t（フィット）", "r_s（フィット）", "v2s（予測）"]
+            )
             deltas = [
                 float(dt["v2t_fit_minus_obs_fm3"]),
                 float(ds["r_s_fit_minus_obs_fm"]),
@@ -9241,8 +9272,8 @@ def main(argv: list[str] | None = None) -> None:
         ax2.bar(range(len(names)), deltas, color=["tab:blue", "tab:orange", "tab:orange"], alpha=0.85)
         ax2.set_xticks(range(len(names)))
         ax2.set_xticklabels(names, rotation=10, ha="right")
-        ax2.set_ylabel("フィット/予測 − 観測（単位: fm³, fm, fm³）", fontsize=axis_font)
-        ax2.set_title("観測値とのクロスチェック（eq出典）", fontsize=title_font, pad=5.0)
+        ax2.set_ylabel(_display_label("フィット/予測 − 観測（単位: fm³, fm, fm³）", "fit/predictions − observed (units: fm³, fm, fm³)"), fontsize=axis_font)
+        ax2.set_title(_display_label("観測値とのクロスチェック（eq出典）", "cross-check against observed values (eq source)"), fontsize=title_font, pad=5.0)
         ax2.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
         ax2.tick_params(axis="both", labelsize=tick_font)
         crosscheck_note_y = 0.02 if step == "7.13.8" else 0.98
@@ -9250,7 +9281,7 @@ def main(argv: list[str] | None = None) -> None:
         ax2.text(
             0.02,
             crosscheck_note_y,
-            "三重項: v2を目標\n一重項: a_s（+ r_s）を目標; v2は予測",
+            _display_label("三重項: v2を目標\n一重項: a_s（+ r_s）を目標; v2は予測", "triplet: v2 target\nsinglet: target a_s (+ r_s); v2 remains prediction"),
             transform=ax2.transAxes,
             va=crosscheck_note_va,
             ha="left",
@@ -9260,19 +9291,25 @@ def main(argv: list[str] | None = None) -> None:
 
     suptitle_by_step = {
         "7.9.6": "2レンジ仮説: 三重項(B,a_t,r_t,v2t)をフィットし、一重項(r_s,v2s)を予測",
-        "7.9.7": "2レンジ仮説: 三重項(B,a_t,r_t,v2t)と一重項(a_s,r_s)をフィットし、v2sを予測",
+        "7.9.7": _display_label(
+            "2レンジ仮説: 三重項(B,a_t,r_t,v2t)と一重項(a_s,r_s)をフィットし、v2sを予測",
+            "two-range hypothesis:\nfit triplet(B,a_t,r_t,v2t) and singlet(a_s,r_s), then predict v2s",
+        ),
         "7.9.8": "反発コア + 2レンジ: 三重項/一重項をフィットして v2s を予測",
         "7.13.3": "λπ拘束2レンジ: 三重項をフィットし、一重項(a_s,r_s)を符号付きV2でフィット",
         "7.13.4": "λπ拘束3レンジ（テール共有）: 三重項/一重項をフィットして v2s を予測",
         "7.13.5": "λπ拘束3レンジ（障壁+テール分割）: 三重項/一重項をフィットして v2s を予測",
         "7.13.6": "λπ拘束3レンジ（障壁+テール分割）+ k走査: k選択後に三重項/一重項をフィット",
         "7.13.7": "λπ拘束3レンジ（障壁+テール分割、テール深さ自由）+ q走査",
-        "7.13.8": "λπ拘束3レンジ（障壁+テール分割、テール深さ自由）+ (k,q)走査",
+        "7.13.8": _display_label("λπ拘束3レンジ（障壁+テール分割、テール深さ自由）+ (k,q)走査", "λπ-constrained three-range (barrier+tail split, free tail depth) + (k,q) scan"),
         "7.13.8.1": "λπ拘束3レンジ + 拡張(k,q)走査: 三重項v2t/一重項v2s包絡を要求",
         "7.13.8.2": "λπ拘束3レンジ + チャネル分離(k,q): (k_t,q_t,k_s,q_s)を走査",
         "7.13.8.3": "λπ拘束3レンジ + チャネル分離(k,q) + 一重項R1_s/λπ走査",
         "7.13.8.4": "λπ拘束3レンジ + チャネル分離(k,q) + 一重項R2_s/λπ走査",
-        "7.13.8.5": "λπ拘束3レンジ + チャネル分離(k,q) + 三重項障壁比率走査",
+        "7.13.8.5": _display_label(
+            "λπ拘束3レンジ + チャネル分離(k,q) + 三重項障壁比率走査",
+            "lambda_pi-constrained three-range\nchannel split (k,q) + triplet barrier-fraction scan",
+        ),
     }
     fig.suptitle(suptitle_by_step[step], y=0.992, fontsize=suptitle_font)
     # 条件分岐: `not use_constrained_layout` を満たす経路を評価する。

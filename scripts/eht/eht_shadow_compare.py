@@ -23,6 +23,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.quantum.figure_japanese_localizer import get_figure_language  # noqa: E402
 from scripts.utils.plot_style import (  # noqa: E402
     apply_paper_style,
     apply_wavep_figure_layout,
@@ -61,6 +62,93 @@ def _set_japanese_font() -> None:
             mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         pass
+
+
+# 関数: `_set_figure_font_for_lang` の入出力契約と処理意図を定義する。
+
+def _set_figure_font_for_lang(lang: str) -> None:
+    if lang != "en":
+        _set_japanese_font()
+
+
+# 関数: `_eht_plot_text` の入出力契約と処理意図を定義する。
+
+def _eht_plot_text(text: str, *, lang: str) -> str:
+    if lang != "en":
+        return text
+
+    mapping = {
+        "観測（リング直径 θ_ring）": "Observed ring diameter $\\theta_{\\rm ring}$",
+        "参考（推定影直径 d_sh；リングからの推定）": "Reference inferred shadow diameter $d_{\\rm sh}$",
+        "角直径 [µas]": "Angular diameter [µas]",
+        "EHT：観測リング θ_ring と、影直径 θ_sh（モデル；κ=1）の比較": "EHT: observed ring $\\theta_{\\rm ring}$ vs.\nshadow diameter $\\theta_{\\rm sh}$ ($\\kappa=1$)",
+        "差（P-model − GR）[μas]": "Difference (P-model − GR) [μas]",
+        "必要な観測誤差（1σ）[μas]": "Required observational error (1σ) [μas]",
+        "差分予測：シャドウ直径の差": "Shadow-diameter offset",
+        "3σで判別するための必要精度": "Required precision (3σ)",
+        "P-model：4eβ": "P-model: 4eβ",
+        "GR（Schwarzschild）：2√27": "GR (Schwarzschild): 2√27",
+        "GR（Kerr 参考レンジ）": "GR (Kerr reference range)",
+        "シャドウ直径係数（θ / (GM/(c^2 D)))": "Shadow-diameter coefficient\n[θ / (GM/(c² D))]",
+        "係数の比較（βとスピン依存）": "Coefficient comparison",
+        "κ（P-model, β固定）": "κ (P-model, fixed β)",
+        "κ（GR, Schwarzschild）": "κ (GR, Schwarzschild)",
+        "κ_ref(d_sh)（一次ソース）": "κ_ref(d_sh) (primary source)",
+        "κ = リング直径 / シャドウ直径": "κ = ring diameter / shadow diameter",
+        "リング≒シャドウ近似の系統誤差（κ）\n（縦線=Kerr係数レンジによるκの幅）": "Systematic conversion error $\\kappa$",
+        "EHT：系統誤差（κ）と GR スピン依存（参考）": "EHT systematics overview",
+        "ターゲット": "Target",
+        "W/d（リング幅 / 直径）": "W/d (ring width / diameter)",
+        "リングの幅（fractional width）": "Ring width\n(fractional width)",
+        "上限（≤）": "Upper limit (≤)",
+        "下限（≥）": "Lower limit (≥)",
+        "A（brightness asymmetry）": "A (brightness asymmetry)",
+        "リングの非対称性（brightness asymmetry）": "Ring asymmetry\n(brightness asymmetry)",
+        "EHT：リング形状指標（一次ソースの範囲）": "EHT: ring morphology indicators\n(primary-source ranges)",
+        "リング直径（観測）": "Observed ring diameter",
+        "散乱カーネルFWHM（長軸, 230 GHz）": "Scattering-kernel FWHM\n(major axis, 230 GHz)",
+        "散乱カーネルFWHM（短軸, 230 GHz）": "Scattering-kernel FWHM\n(minor axis, 230 GHz)",
+        "角サイズ（µas）": "Angular scale [µas]",
+        "直径スケール：観測リングと散乱blur（参考）": "Diameter scale:\nobserved ring vs scattering blur",
+        "散乱（長軸）": "Scattering (major axis)",
+        "散乱（短軸）": "Scattering (minor axis)",
+        "形状スケール：リング幅（W/d→µas）と散乱blur（参考）": "Morphology scale:\nring width (W/d → µas) vs scattering blur",
+        "幅の上限（≤）": "Width upper limit (≤)",
+        "幅の下限（≥）": "Width lower limit (≥)",
+        "EHT：散乱（Sgr A*）のスケール感（κ系統の背景）": "EHT: scattering scale in Sgr A*\n(background to κ systematics)",
+        "観測リング直径の統計誤差 σ_obs": "Statistical error of observed ring diameter σ_obs",
+        "3σ判別に必要なσ_obs（理想）": "Ideal σ_obs required for 3σ discrimination",
+        "散乱カーネル係数の不確かさ（1σ, 長軸/短軸）": "Uncertainty in scattering-kernel coefficients\n(1σ, major/minor axes)",
+        "屈折散乱 wander（min–max, Zhu 2018; 230 GHz）": "Refractive-scattering wander\n(min-max, Zhu 2018; 230 GHz)",
+        "屈折散乱 distortion（min–max, Zhu 2018; 230 GHz）": "Refractive-scattering distortion\n(min-max, Zhu 2018; 230 GHz)",
+        "屈折散乱 asymmetry（min–max, Zhu 2018; 230 GHz）": "Refractive-scattering asymmetry\n(min-max, Zhu 2018; 230 GHz)",
+        "角スケール（μas）": "Angular scale [µas]",
+        "EHT：屈折散乱のゆらぎスケール（κ系統の一要因）と必要精度（参考）": "EHT: refractive-scattering fluctuation scales\nand required precision (reference)",
+        "P-model（β固定, κ=1）": "P-model (fixed β, κ=1)",
+        "GR（Schwarzschild, κ=1）": "GR (Schwarzschild, κ=1)",
+        "zスコア = (観測 - 予測) / σ_total": "z score = (observed - predicted) / σ_total",
+        "EHT：観測とモデルのずれ（zスコア, κ=1）": "EHT: observed-model offset\n(z score, κ=1)",
+        "κ=1（リング≒シャドウの目安）": "κ=1 (ring ≈ shadow)",
+        "κ_fit（観測リング ÷ P-modelシャドウ）": "κ_fit (observed ring ÷ P-model shadow)",
+        "EHT：κ（リング/シャドウ）— κ_fit（モデル）と κ_ref(d_sh)": "EHT: κ (ring/shadow)\nκ_fit vs κ_ref(d_sh)",
+        "必要 κ精度（1σ, ringσ→0 の最良ケース）": "Required κ precision\n(1σ, best case with ringσ → 0)",
+        "現状 ring σ/diameter（%）": "Current ring σ / diameter [%]",
+        "現状 κσ/κ（一次ソース/参考）": "Current κσ / κ\n(primary source / reference)",
+        "相対不確かさ（%）": "Relative uncertainty [%]",
+        "EHT：κ（リング/シャドウ変換）を何%まで詰める必要があるか（3σ判別の入口）": "EHT: how tightly κ (ring/shadow)\nmust be constrained for 3σ discrimination",
+        "現状 δσ（VLTI; 一次ソース）": "Current δσ (VLTI; primary source)",
+        "現状 δσ（Keck; 一次ソース）": "Current δσ (Keck; primary source)",
+        "Kerrレンジ由来の δ系統（uniform仮定; 参考）": "δ systematic from Kerr range\n(uniform assumption; reference)",
+        "EHT：δ（Schwarzschild shadow deviation）の必要精度（参考; δはモデル依存）": "EHT: required precision for δ\n(reference; δ is model-dependent)",
+        "3σ判別の許容域（下側）": "Allowed region for 3σ discrimination",
+        "現状 ring σ/diameter": "Current ring σ / diameter",
+        "参考: Kerr κ系統（constrained）": "Reference: Kerr κ systematic (constrained)",
+        "参考: Kerr κ系統（full）": "Reference: Kerr κ systematic (full)",
+        "リング直径の相対誤差（1σ, %）": "Relative ring-diameter error (1σ, %)",
+        "許容 κ の相対誤差（1σ, %）": "Allowed relative κ error (1σ, %)",
+        "EHT：3σ判別のための誤差予算（ringσ と κσ のトレードオフ；κ≈1）": "EHT: κ precision tradeoff (3σ)",
+    }
+    return mapping.get(text, text)
 
 
 # 関数: `_read_json` の入出力契約と処理意図を定義する。
@@ -800,6 +888,7 @@ def main() -> int:
     in_path = root / "data" / "eht" / "eht_black_holes.json"
     out_dir = root / "output" / "private" / "eht"
     public_dir = root / "output" / "public" / "eht"
+    figure_lang = get_figure_language(default="ja")
     out_dir.mkdir(parents=True, exist_ok=True)
     public_dir.mkdir(parents=True, exist_ok=True)
 
@@ -1436,7 +1525,7 @@ def main() -> int:
 
         apply_paper_style()
         apply_paper_style()
-        _set_japanese_font()
+        _set_figure_font_for_lang(figure_lang)
 
         names = [r["name"] for r in rows]
         x = list(range(len(names)))
@@ -1458,7 +1547,7 @@ def main() -> int:
             width=width,
             yerr=psig,
             error_kw={"ecolor": "#1f77b4", "capsize": 3.6, "alpha": 0.75},
-            label=f"P-model（影直径; β={beta:g}）",
+            label=(f"P-model (shadow diameter; β={beta:g})" if figure_lang == "en" else f"P-model（影直径; β={beta:g}）"),
             color="#1f77b4",
             alpha=0.9,
         )
@@ -1468,7 +1557,7 @@ def main() -> int:
             width=width,
             yerr=gsig,
             error_kw={"ecolor": "#666666", "capsize": 3.6, "alpha": 0.75},
-            label="標準理論（影直径; GR, Schwarzschild）",
+            label=("Standard theory (shadow diameter; GR, Schwarzschild)" if figure_lang == "en" else "標準理論（影直径; GR, Schwarzschild）"),
             color="#9aa0a6",
             alpha=0.9,
         )
@@ -1480,7 +1569,7 @@ def main() -> int:
             color="#d62728",
             markersize=5.8,
             capsize=3.6,
-            label="観測（リング直径 θ_ring）",
+            label=_eht_plot_text("観測（リング直径 θ_ring）", lang=figure_lang),
             zorder=4,
         )
 
@@ -1494,7 +1583,7 @@ def main() -> int:
                 yerr=shadow_obs_sig,
                 fmt="D",
                 color="#111111",
-                label="参考（推定影直径 d_sh；リングからの推定）",
+                label=_eht_plot_text("参考（推定影直径 d_sh；リングからの推定）", lang=figure_lang),
                 zorder=5,
             )
 
@@ -1508,12 +1597,12 @@ def main() -> int:
                 continue
 
             dr = float(obs[i]) - float(so)
-            diff_labels.append((i + width * 1.25, f"θ_ring−d_sh={dr:+.1f} µas"))
+            diff_labels.append((i + width * 1.25, rf"$\theta_{{\rm ring}}-d_{{\rm sh}}$={dr:+.1f} µas"))
 
         ax.set_xticks(x)
         ax.set_xticklabels(names)
-        ax.set_ylabel("角直径 [µas]")
-        ax.set_title("EHT：観測リング θ_ring と、影直径 θ_sh（モデル；κ=1）の比較", pad=6.0)
+        ax.set_ylabel(_eht_plot_text("角直径 [µas]", lang=figure_lang))
+        ax.set_title(_eht_plot_text("EHT：観測リング θ_ring と、影直径 θ_sh（モデル；κ=1）の比較", lang=figure_lang), pad=6.0)
         ax.tick_params(axis="y")
         ax.grid(True, alpha=0.25, axis="y")
         y_floor = 0.0
@@ -1571,14 +1660,14 @@ def main() -> int:
             kobs_sig = float(row.get("kappa_ring_over_shadow_obs_sigma", float("nan")))
             # 条件分岐: `math.isfinite(kfit) and math.isfinite(ksig)` を満たす経路を評価する。
             if math.isfinite(kfit) and math.isfinite(ksig):
-                txt = f"κ_fit={kfit:.3f}±{ksig:.3f}"
+                txt = rf"$\kappa_{{\rm fit}}$={kfit:.3f}±{ksig:.3f}"
             else:
-                txt = "κ_fit=n/a"
+                txt = r"$\kappa_{\rm fit}$=n/a"
 
             # 条件分岐: `math.isfinite(kobs) and math.isfinite(kobs_sig)` を満たす経路を評価する。
 
             if math.isfinite(kobs) and math.isfinite(kobs_sig):
-                txt = f"{txt}\nκ_ref(d_sh)={kobs:.3f}±{kobs_sig:.3f}"
+                txt = f"{txt}\n" + rf"$\kappa_{{\rm ref}}(d_{{\rm sh}})$={kobs:.3f}±{kobs_sig:.3f}"
 
             ax.text(
                 i,
@@ -1607,7 +1696,7 @@ def main() -> int:
     try:
         import matplotlib.pyplot as plt
 
-        _set_japanese_font()
+        _set_figure_font_for_lang(figure_lang)
 
         names = [r["name"] for r in rows]
         x = list(range(len(names)))
@@ -1615,15 +1704,15 @@ def main() -> int:
         diff_sig = [float(r["shadow_diameter_diff_p_minus_gr_uas_sigma"]) for r in rows]
         sigma_need = [float(r["shadow_diameter_sigma_obs_needed_3sigma_uas"]) for r in rows]
 
-        fig2, (ax0, ax1) = plt.subplots(1, 2)
+        fig2, (ax0, ax1) = plt.subplots(1, 2, figsize=(11.8, 4.9))
         apply_wavep_figure_layout(fig2, template="part2_side_by_side")
 
         ax0.bar(x, diff, color="#9467bd", alpha=0.9, yerr=diff_sig)
         ax0.axhline(0.0, color="#333333", linewidth=1.0)
         ax0.set_xticks(x)
         ax0.set_xticklabels(names)
-        ax0.set_ylabel("差（P-model − GR）[μas]")
-        ax0.set_title("差分予測：シャドウ直径の差", fontsize=get_wavep_font_size("title"))
+        ax0.set_ylabel(_eht_plot_text("差（P-model − GR）[μas]", lang=figure_lang))
+        ax0.set_title(_eht_plot_text("差分予測：シャドウ直径の差", lang=figure_lang), fontsize=get_wavep_font_size("title"))
         ax0.tick_params()
         ax0.grid(True, alpha=0.25, axis="y")
 
@@ -1644,19 +1733,28 @@ def main() -> int:
 
         ax1.set_xticks(x)
         ax1.set_xticklabels(names)
-        ax1.set_ylabel("必要な観測誤差（1σ）[μas]")
-        ax1.set_title("3σで判別するための必要精度", fontsize=get_wavep_font_size("title"))
+        ax1.set_ylabel(_eht_plot_text("必要な観測誤差（1σ）[μas]", lang=figure_lang))
+        ax1.set_title(_eht_plot_text("3σで判別するための必要精度", lang=figure_lang), fontsize=get_wavep_font_size("title"))
         ax1.tick_params()
         ax1.grid(True, alpha=0.25, axis="y")
 
         # 条件分岐: `math.isfinite(coeff_ratio_p_over_gr)` を満たす経路を評価する。
         if math.isfinite(coeff_ratio_p_over_gr):
-            fig2.suptitle(
-                f"EHT：P-model と GR の差分予測（係数比 {coeff_ratio_p_over_gr:.4f}、差 {((coeff_ratio_p_over_gr-1)*100):.2f}%）",
-                fontsize=get_wavep_font_size("suptitle"),
+            fig2.text(
+                0.12,
+                0.06,
+                (
+                    f"P/GR ratio {coeff_ratio_p_over_gr:.4f}, difference {((coeff_ratio_p_over_gr-1)*100):.2f}%"
+                    if figure_lang == "en"
+                    else f"係数比 P/GR={coeff_ratio_p_over_gr:.4f}、差 {((coeff_ratio_p_over_gr-1)*100):.2f}%"
+                ),
+                ha="left",
+                va="center",
+                fontsize=max(7.8, get_wavep_font_size("note") - 0.2),
+                color="#444444",
             )
-        else:
-            fig2.suptitle("EHT：P-model と GR の差分予測", fontsize=get_wavep_font_size("suptitle"))
+
+        fig2.subplots_adjust(top=0.88, bottom=0.18, wspace=0.34)
 
         diff_png_path, _diff_pdf_path, _diff_public_png_path, _diff_public_pdf_path = _save_public_figure(
             fig2,
@@ -1681,36 +1779,40 @@ def main() -> int:
 
         apply_paper_style()
         apply_paper_style()
-        _set_japanese_font()
+        _set_figure_font_for_lang(figure_lang)
 
-        fig3, (ax0, ax1) = plt.subplots(2, 1, gridspec_kw={"height_ratios": [1.0, 1.0]})
+        fig3, (ax0, ax1) = plt.subplots(2, 1, figsize=(11.9, 6.1), gridspec_kw={"height_ratios": [1.0, 1.0]})
         apply_wavep_figure_layout(fig3, template="part2_two_panel")
 
         # Left: coefficient comparison (P-model vs GR, with Kerr range as a reference)
         beta_grid = np.linspace(0.8, 1.2, 200)
-        ax0.plot(beta_grid, 4.0 * math.e * beta_grid, color="#1f77b4", label="P-model：4eβ")
-        ax0.axhline(coeff_gr, color="#666666", linestyle="--", label="GR（Schwarzschild）：2√27")
+        ax0.plot(beta_grid, 4.0 * math.e * beta_grid, color="#1f77b4", label=_eht_plot_text("P-model：4eβ", lang=figure_lang))
+        ax0.axhline(coeff_gr, color="#666666", linestyle="--", label=_eht_plot_text("GR（Schwarzschild）：2√27", lang=figure_lang))
 
         kmin = kerr_range_full.get("coeff_min") if isinstance(kerr_range_full, dict) else None
         kmax = kerr_range_full.get("coeff_max") if isinstance(kerr_range_full, dict) else None
         # 条件分岐: `isinstance(kmin, (int, float)) and isinstance(kmax, (int, float)) and math.is...` を満たす経路を評価する。
         if isinstance(kmin, (int, float)) and isinstance(kmax, (int, float)) and math.isfinite(kmin) and math.isfinite(kmax):
-            ax0.fill_between(beta_grid, float(kmin), float(kmax), color="#9aa0a6", alpha=0.18, label="GR（Kerr 参考レンジ）")
+            ax0.fill_between(beta_grid, float(kmin), float(kmax), color="#9aa0a6", alpha=0.18, label=_eht_plot_text("GR（Kerr 参考レンジ）", lang=figure_lang))
 
         ax0.scatter([beta], [coeff_pmodel], color="#1f77b4", zorder=3)
         ax0.set_xlabel("β")
-        ax0.set_ylabel("シャドウ直径係数（θ / (GM/(c^2 D)))")
-        ax0.set_title("係数の比較（βとスピン依存）", pad=4.0)
+        ax0.set_ylabel(_eht_plot_text("シャドウ直径係数（θ / (GM/(c^2 D)))", lang=figure_lang))
+        ax0.set_title(_eht_plot_text("係数の比較（βとスピン依存）", lang=figure_lang), pad=4.0)
         ax0.tick_params()
         ax0.grid(True, alpha=0.25)
-        ax0.legend(loc="lower right", fontsize=get_wavep_font_size("legend"))
+        ax0.legend(loc="lower right", fontsize=max(7.8, get_wavep_font_size("legend") - 0.8))
 
         # 条件分岐: `math.isfinite(coeff_ratio_p_over_gr)` を満たす経路を評価する。
         if math.isfinite(coeff_ratio_p_over_gr):
             ax0.text(
                 0.805,
                 max(coeff_pmodel, coeff_gr) * 0.995,
-                f"β={beta:g} での差: {(coeff_ratio_p_over_gr-1)*100:+.2f}%",
+                (
+                    f"Difference at β={beta:g}: {(coeff_ratio_p_over_gr-1)*100:+.2f}%"
+                    if figure_lang == "en"
+                    else f"β={beta:g} での差: {(coeff_ratio_p_over_gr-1)*100:+.2f}%"
+                ),
                 fontsize=get_wavep_font_size("note"),
                 ha="left",
                 va="top",
@@ -1732,8 +1834,8 @@ def main() -> int:
         kg_lo = np.array([float(r.get("kappa_gr_kerr_coeff_range_low", float("nan"))) for r in rows], dtype=float)
         kg_hi = np.array([float(r.get("kappa_gr_kerr_coeff_range_high", float("nan"))) for r in rows], dtype=float)
 
-        ax1.bar(x - width / 2, kp, width=width, color="#1f77b4", alpha=0.9, label="κ（P-model, β固定）")
-        ax1.bar(x + width / 2, kg, width=width, color="#9aa0a6", alpha=0.9, label="κ（GR, Schwarzschild）")
+        ax1.bar(x - width / 2, kp, width=width, color="#1f77b4", alpha=0.9, label=_eht_plot_text("κ（P-model, β固定）", lang=figure_lang))
+        ax1.bar(x + width / 2, kg, width=width, color="#9aa0a6", alpha=0.9, label=_eht_plot_text("κ（GR, Schwarzschild）", lang=figure_lang))
         ax1.errorbar(x - width / 2, kp, yerr=kps, fmt="none", ecolor="#1f77b4", capsize=3)
         ax1.errorbar(x + width / 2, kg, yerr=kgs, fmt="none", ecolor="#666666", capsize=3)
 
@@ -1749,7 +1851,7 @@ def main() -> int:
                 color="#111111",
                 ecolor="#111111",
                 capsize=3,
-                label="κ_ref(d_sh)（一次ソース）",
+                label=_eht_plot_text("κ_ref(d_sh)（一次ソース）", lang=figure_lang),
                 zorder=4,
             )
 
@@ -1771,17 +1873,17 @@ def main() -> int:
 
         ax1.set_xticks(x)
         ax1.set_xticklabels(names)
-        ax1.set_ylabel("κ = リング直径 / シャドウ直径")
-        ax1.set_title("リング≒シャドウ近似の系統誤差（κ）\n（縦線=Kerr係数レンジによるκの幅）", pad=4.0)
+        ax1.set_ylabel(_eht_plot_text("κ = リング直径 / シャドウ直径", lang=figure_lang))
+        ax1.set_title(_eht_plot_text("リング≒シャドウ近似の系統誤差（κ）\n（縦線=Kerr係数レンジによるκの幅）", lang=figure_lang), pad=4.0)
         ax1.tick_params()
         ax1.grid(True, alpha=0.25, axis="y")
         ax1.legend(
             loc="lower right",
-            fontsize=get_wavep_font_size("legend"),
+            fontsize=max(7.8, get_wavep_font_size("legend") - 0.8),
             frameon=True,
         )
 
-        fig3.suptitle("EHT：系統誤差（κ）と GR スピン依存（参考）", y=0.982)
+        fig3.subplots_adjust(top=0.92, bottom=0.10, hspace=0.66)
         sys_png_path, _sys_pdf_path, sys_public_png_path, _sys_public_pdf_path = _save_public_figure(
             fig3,
             out_dir=out_dir,
@@ -1802,7 +1904,7 @@ def main() -> int:
         import matplotlib.pyplot as plt
         import numpy as np
 
-        _set_japanese_font()
+        _set_figure_font_for_lang(figure_lang)
 
         names = [str(r.get("name") or r.get("key") or "") for r in rows]
         x = np.arange(len(names), dtype=float)
@@ -1847,9 +1949,9 @@ def main() -> int:
 
         ax0.set_xticks(x)
         ax0.set_xticklabels(names)
-        ax0.set_xlabel("ターゲット")
-        ax0.set_ylabel("W/d（リング幅 / 直径）")
-        ax0.set_title("リングの幅（fractional width）")
+        ax0.set_xlabel(_eht_plot_text("ターゲット", lang=figure_lang))
+        ax0.set_ylabel(_eht_plot_text("W/d（リング幅 / 直径）", lang=figure_lang))
+        ax0.set_title(_eht_plot_text("リングの幅（fractional width）", lang=figure_lang))
         ax0.set_ylim(0.0, 0.65)
         ax0.grid(True, alpha=0.25, axis="y")
         # 条件分岐: `any_w_lim_hi or any_w_lim_lo` を満たす経路を評価する。
@@ -1859,13 +1961,13 @@ def main() -> int:
             # 条件分岐: `any_w_lim_hi` を満たす経路を評価する。
             if any_w_lim_hi:
                 handles.append(ax0.scatter([], [], marker="v", color="#1f77b4"))
-                labels.append("上限（≤）")
+                labels.append(_eht_plot_text("上限（≤）", lang=figure_lang))
 
             # 条件分岐: `any_w_lim_lo` を満たす経路を評価する。
 
             if any_w_lim_lo:
                 handles.append(ax0.scatter([], [], marker="^", color="#1f77b4"))
-                labels.append("下限（≥）")
+                labels.append(_eht_plot_text("下限（≥）", lang=figure_lang))
 
             # 条件分岐: `handles` を満たす経路を評価する。
 
@@ -1906,9 +2008,9 @@ def main() -> int:
 
         ax1.set_xticks(x)
         ax1.set_xticklabels(names)
-        ax1.set_xlabel("ターゲット")
-        ax1.set_ylabel("A（brightness asymmetry）")
-        ax1.set_title("リングの非対称性（brightness asymmetry）")
+        ax1.set_xlabel(_eht_plot_text("ターゲット", lang=figure_lang))
+        ax1.set_ylabel(_eht_plot_text("A（brightness asymmetry）", lang=figure_lang))
+        ax1.set_title(_eht_plot_text("リングの非対称性（brightness asymmetry）", lang=figure_lang))
         ax1.set_ylim(0.0, 0.35)
         ax1.grid(True, alpha=0.25, axis="y")
         # 条件分岐: `any_a_lim_hi or any_a_lim_lo` を満たす経路を評価する。
@@ -1918,20 +2020,20 @@ def main() -> int:
             # 条件分岐: `any_a_lim_hi` を満たす経路を評価する。
             if any_a_lim_hi:
                 handles.append(ax1.scatter([], [], marker="v", color="#ff7f0e"))
-                labels.append("上限（≤）")
+                labels.append(_eht_plot_text("上限（≤）", lang=figure_lang))
 
             # 条件分岐: `any_a_lim_lo` を満たす経路を評価する。
 
             if any_a_lim_lo:
                 handles.append(ax1.scatter([], [], marker="^", color="#ff7f0e"))
-                labels.append("下限（≥）")
+                labels.append(_eht_plot_text("下限（≥）", lang=figure_lang))
 
             # 条件分岐: `handles` を満たす経路を評価する。
 
             if handles:
                 ax1.legend(handles, labels, loc="upper right")
 
-        fig5.suptitle("EHT：リング形状指標（一次ソースの範囲）")
+        fig5.suptitle(_eht_plot_text("EHT：リング形状指標（一次ソースの範囲）", lang=figure_lang))
         fig5.tight_layout()
         ring_png_path = out_dir / "eht_ring_morphology.png"
         fig5.savefig(ring_png_path, dpi=220)
@@ -1951,7 +2053,7 @@ def main() -> int:
         import matplotlib.pyplot as plt
         import numpy as np
 
-        _set_japanese_font()
+        _set_figure_font_for_lang(figure_lang)
 
         names = [str(r.get("name") or r.get("key") or "") for r in rows]
         x = np.arange(len(names), dtype=float)
@@ -1978,7 +2080,7 @@ def main() -> int:
         fig7, (ax0, ax1) = plt.subplots(1, 2, figsize=(12.0, 4.9))
 
         # Panel A: ring diameter vs scattering kernel axes.
-        ax0.errorbar(x, ring, yerr=np.where(np.isfinite(ring_s) & (ring_s > 0), ring_s, 0.0), fmt="o", capsize=4, color="#1f77b4", label="リング直径（観測）")
+        ax0.errorbar(x, ring, yerr=np.where(np.isfinite(ring_s) & (ring_s > 0), ring_s, 0.0), fmt="o", capsize=4, color="#1f77b4", label=_eht_plot_text("リング直径（観測）", lang=figure_lang))
 
         a_ok = np.isfinite(sca)
         # 条件分岐: `bool(np.any(a_ok))` を満たす経路を評価する。
@@ -1990,7 +2092,7 @@ def main() -> int:
                 fmt="x",
                 capsize=3,
                 color="#d62728",
-                label="散乱カーネルFWHM（長軸, 230 GHz）",
+                label=_eht_plot_text("散乱カーネルFWHM（長軸, 230 GHz）", lang=figure_lang),
             )
 
         b_ok = np.isfinite(scb)
@@ -2003,7 +2105,7 @@ def main() -> int:
                 fmt="+",
                 capsize=3,
                 color="#ff7f0e",
-                label="散乱カーネルFWHM（短軸, 230 GHz）",
+                label=_eht_plot_text("散乱カーネルFWHM（短軸, 230 GHz）", lang=figure_lang),
             )
 
         for i, name in enumerate(names):
@@ -2018,9 +2120,9 @@ def main() -> int:
 
         ax0.set_xticks(x)
         ax0.set_xticklabels(names)
-        ax0.set_xlabel("ターゲット")
-        ax0.set_ylabel("角サイズ（µas）")
-        ax0.set_title("直径スケール：観測リングと散乱blur（参考）")
+        ax0.set_xlabel(_eht_plot_text("ターゲット", lang=figure_lang))
+        ax0.set_ylabel(_eht_plot_text("角サイズ（µas）", lang=figure_lang))
+        ax0.set_title(_eht_plot_text("直径スケール：観測リングと散乱blur（参考）", lang=figure_lang))
         ax0.grid(True, alpha=0.25, axis="y")
         ax0.legend(loc="upper right")
 
@@ -2065,7 +2167,7 @@ def main() -> int:
                 fmt="x",
                 capsize=3,
                 color="#d62728",
-                label="散乱（長軸）",
+                label=_eht_plot_text("散乱（長軸）", lang=figure_lang),
             )
 
         # 条件分岐: `bool(np.any(b_ok))` を満たす経路を評価する。
@@ -2078,14 +2180,14 @@ def main() -> int:
                 fmt="+",
                 capsize=3,
                 color="#ff7f0e",
-                label="散乱（短軸）",
+                label=_eht_plot_text("散乱（短軸）", lang=figure_lang),
             )
 
         ax1.set_xticks(x)
         ax1.set_xticklabels(names)
-        ax1.set_xlabel("ターゲット")
-        ax1.set_ylabel("角サイズ（µas）")
-        ax1.set_title("形状スケール：リング幅（W/d→µas）と散乱blur（参考）")
+        ax1.set_xlabel(_eht_plot_text("ターゲット", lang=figure_lang))
+        ax1.set_ylabel(_eht_plot_text("角サイズ（µas）", lang=figure_lang))
+        ax1.set_title(_eht_plot_text("形状スケール：リング幅（W/d→µas）と散乱blur（参考）", lang=figure_lang))
         ax1.grid(True, alpha=0.25, axis="y")
 
         # 条件分岐: `any_w_lim_hi or any_w_lim_lo` を満たす経路を評価する。
@@ -2095,20 +2197,20 @@ def main() -> int:
             # 条件分岐: `any_w_lim_hi` を満たす経路を評価する。
             if any_w_lim_hi:
                 handles.append(ax1.scatter([], [], marker="v", color="#1f77b4"))
-                labels.append("幅の上限（≤）")
+                labels.append(_eht_plot_text("幅の上限（≤）", lang=figure_lang))
 
             # 条件分岐: `any_w_lim_lo` を満たす経路を評価する。
 
             if any_w_lim_lo:
                 handles.append(ax1.scatter([], [], marker="^", color="#1f77b4"))
-                labels.append("幅の下限（≥）")
+                labels.append(_eht_plot_text("幅の下限（≥）", lang=figure_lang))
 
             # 条件分岐: `handles` を満たす経路を評価する。
 
             if handles:
                 ax1.legend(handles, labels, loc="upper left")
 
-        fig7.suptitle("EHT：散乱（Sgr A*）のスケール感（κ系統の背景）")
+        fig7.suptitle(_eht_plot_text("EHT：散乱（Sgr A*）のスケール感（κ系統の背景）", lang=figure_lang))
         fig7.tight_layout()
         scat_png_path = out_dir / "eht_scattering_budget.png"
         fig7.savefig(scat_png_path, dpi=220)
@@ -2129,7 +2231,7 @@ def main() -> int:
         import matplotlib.pyplot as plt
         import numpy as np
 
-        _set_japanese_font()
+        _set_figure_font_for_lang(figure_lang)
 
         names = [str(r.get("name") or r.get("key") or "") for r in rows]
         x = np.arange(len(names), dtype=float)
@@ -2167,8 +2269,8 @@ def main() -> int:
 
         fig8, ax = plt.subplots(1, 1, figsize=(11.8, 4.9))
 
-        ax.scatter(x - 0.06, ring_s, marker="o", color="#1f77b4", label="観測リング直径の統計誤差 σ_obs")
-        ax.scatter(x + 0.06, need_s, marker="D", color="#2ca02c", label="3σ判別に必要なσ_obs（理想）")
+        ax.scatter(x - 0.06, ring_s, marker="o", color="#1f77b4", label=_eht_plot_text("観測リング直径の統計誤差 σ_obs", lang=figure_lang))
+        ax.scatter(x + 0.06, need_s, marker="D", color="#2ca02c", label=_eht_plot_text("3σ判別に必要なσ_obs（理想）", lang=figure_lang))
 
         k_ok = np.isfinite(kernel_s)
         # 条件分岐: `bool(np.any(k_ok))` を満たす経路を評価する。
@@ -2178,7 +2280,7 @@ def main() -> int:
                 kernel_s[k_ok],
                 marker="x",
                 color="#d62728",
-                label="散乱カーネル係数の不確かさ（1σ, 長軸/短軸）",
+                label=_eht_plot_text("散乱カーネル係数の不確かさ（1σ, 長軸/短軸）", lang=figure_lang),
                 zorder=3,
             )
 
@@ -2193,7 +2295,7 @@ def main() -> int:
                 capsize=5,
                 color="#9467bd",
                 alpha=0.95,
-                label="屈折散乱 wander（min–max, Zhu 2018; 230 GHz）",
+                label=_eht_plot_text("屈折散乱 wander（min–max, Zhu 2018; 230 GHz）", lang=figure_lang),
             )
 
         # 条件分岐: `bool(np.any(d_ok))` を満たす経路を評価する。
@@ -2207,7 +2309,7 @@ def main() -> int:
                 capsize=5,
                 color="#ff7f0e",
                 alpha=0.95,
-                label="屈折散乱 distortion（min–max, Zhu 2018; 230 GHz）",
+                label=_eht_plot_text("屈折散乱 distortion（min–max, Zhu 2018; 230 GHz）", lang=figure_lang),
             )
 
         # 条件分岐: `bool(np.any(a_ok))` を満たす経路を評価する。
@@ -2221,14 +2323,14 @@ def main() -> int:
                 capsize=5,
                 color="#8c564b",
                 alpha=0.95,
-                label="屈折散乱 asymmetry（min–max, Zhu 2018; 230 GHz）",
+                label=_eht_plot_text("屈折散乱 asymmetry（min–max, Zhu 2018; 230 GHz）", lang=figure_lang),
             )
 
         ax.set_xticks(x)
         ax.set_xticklabels(names)
-        ax.set_xlabel("ターゲット")
-        ax.set_ylabel("角スケール（μas）")
-        ax.set_title("EHT：屈折散乱のゆらぎスケール（κ系統の一要因）と必要精度（参考）")
+        ax.set_xlabel(_eht_plot_text("ターゲット", lang=figure_lang))
+        ax.set_ylabel(_eht_plot_text("角スケール（μas）", lang=figure_lang))
+        ax.set_title(_eht_plot_text("EHT：屈折散乱のゆらぎスケール（κ系統の一要因）と必要精度（参考）", lang=figure_lang))
         ax.grid(True, alpha=0.25, axis="y")
         ax.legend(loc="upper left")
 
@@ -2324,7 +2426,7 @@ def main() -> int:
         import matplotlib.pyplot as plt
         import numpy as np
 
-        _set_japanese_font()
+        _set_figure_font_for_lang(figure_lang)
 
         names = [str(r.get("name") or r.get("key") or "") for r in rows]
         y = np.arange(len(names), dtype=float)
@@ -2334,8 +2436,8 @@ def main() -> int:
         fig4, ax = plt.subplots(1, 1)
         apply_wavep_figure_layout(fig4, template="part2_single_panel_sparse")
         h = 0.36
-        ax.barh(y - h / 2, z_p, height=h, color="#1f77b4", alpha=0.9, label="P-model（β固定, κ=1）")
-        ax.barh(y + h / 2, z_gr, height=h, color="#9aa0a6", alpha=0.9, label="GR（Schwarzschild, κ=1）")
+        ax.barh(y - h / 2, z_p, height=h, color="#1f77b4", alpha=0.9, label=_eht_plot_text("P-model（β固定, κ=1）", lang=figure_lang))
+        ax.barh(y + h / 2, z_gr, height=h, color="#9aa0a6", alpha=0.9, label=_eht_plot_text("GR（Schwarzschild, κ=1）", lang=figure_lang))
 
         ax.axvline(0.0, color="#333333", linewidth=1.0)
         for v, c0 in [(1.0, "#2ca02c"), (2.0, "#ff7f0e"), (3.0, "#d62728")]:
@@ -2344,8 +2446,8 @@ def main() -> int:
 
         ax.set_yticks(y)
         ax.set_yticklabels(names)
-        ax.set_xlabel("zスコア = (観測 - 予測) / σ_total")
-        ax.set_title("EHT：観測とモデルのずれ（zスコア, κ=1）", fontsize=get_wavep_font_size("title"))
+        ax.set_xlabel(_eht_plot_text("zスコア = (観測 - 予測) / σ_total", lang=figure_lang))
+        ax.set_title(_eht_plot_text("EHT：観測とモデルのずれ（zスコア, κ=1）", lang=figure_lang), fontsize=get_wavep_font_size("title"))
         ax.tick_params()
         ax.grid(True, alpha=0.25, axis="x")
         ax.legend(loc="lower right", fontsize=get_wavep_font_size("legend"))
@@ -2371,7 +2473,7 @@ def main() -> int:
         import numpy as np
 
         apply_paper_style()
-        _set_japanese_font()
+        _set_figure_font_for_lang(figure_lang)
 
         names = [str(r.get("name") or r.get("key") or "") for r in rows]
         x = np.arange(len(names), dtype=float)
@@ -2385,7 +2487,7 @@ def main() -> int:
 
         fig6, ax = plt.subplots()
         apply_wavep_figure_layout(fig6, template="part2_single_panel")
-        ax.axhline(1.0, color="#666666", lw=1.2, ls="--", alpha=0.85, label="κ=1（リング≒シャドウの目安）")
+        ax.axhline(1.0, color="#666666", lw=1.2, ls="--", alpha=0.85, label=_eht_plot_text("κ=1（リング≒シャドウの目安）", lang=figure_lang))
 
         ax.errorbar(
             x,
@@ -2395,7 +2497,7 @@ def main() -> int:
             capsize=5,
             color="#1f77b4",
             alpha=0.9,
-            label="κ_fit（観測リング ÷ P-modelシャドウ）",
+            label=_eht_plot_text("κ_fit（観測リング ÷ P-modelシャドウ）", lang=figure_lang),
         )
 
         # 条件分岐: `np.any(np.isfinite(kobs))` を満たす経路を評価する。
@@ -2408,7 +2510,7 @@ def main() -> int:
                 capsize=5,
                 color="#111111",
                 alpha=0.9,
-                label="κ_ref(d_sh)（一次ソース）",
+                label=_eht_plot_text("κ_ref(d_sh)（一次ソース）", lang=figure_lang),
             )
 
         for xi, v, sig in zip(x, kfit, kfit_sig):
@@ -2434,9 +2536,9 @@ def main() -> int:
 
         ax.set_xticks(x)
         ax.set_xticklabels(names)
-        ax.set_xlabel("ターゲット")
-        ax.set_ylabel("κ（リング直径 / シャドウ直径）")
-        ax.set_title("EHT：κ（リング/シャドウ）— κ_fit（モデル）と κ_ref(d_sh)", pad=6.0)
+        ax.set_xlabel(_eht_plot_text("ターゲット", lang=figure_lang))
+        ax.set_ylabel(_eht_plot_text("κ = リング直径 / シャドウ直径", lang=figure_lang))
+        ax.set_title(_eht_plot_text("EHT：κ（リング/シャドウ）— κ_fit（モデル）と κ_ref(d_sh)", lang=figure_lang), pad=6.0)
         ax.tick_params()
         ax.grid(True, alpha=0.25, axis="y")
         ax.legend(
@@ -2476,7 +2578,7 @@ def main() -> int:
         import numpy as np
 
         apply_paper_style()
-        _set_japanese_font()
+        _set_figure_font_for_lang(figure_lang)
 
         names = [str(r.get("name") or r.get("key") or "") for r in rows]
         x = np.arange(len(names), dtype=float)
@@ -2513,20 +2615,20 @@ def main() -> int:
         fig7, ax = plt.subplots()
         apply_wavep_figure_layout(fig7, template="part2_single_panel_tall")
 
-        ax.bar(x, kreq_pct, color="#1f77b4", alpha=0.25, label="必要 κ精度（1σ, ringσ→0 の最良ケース）")
-        ax.plot(x, ring_sig_pct, "o", color="#ff7f0e", alpha=0.95, label="現状 ring σ/diameter（%）")
+        ax.bar(x, kreq_pct, color="#1f77b4", alpha=0.25, label=_eht_plot_text("必要 κ精度（1σ, ringσ→0 の最良ケース）", lang=figure_lang))
+        ax.plot(x, ring_sig_pct, "o", color="#ff7f0e", alpha=0.95, label=_eht_plot_text("現状 ring σ/diameter（%）", lang=figure_lang))
         # 条件分岐: `np.any(np.isfinite(ksig_pct))` を満たす経路を評価する。
         if np.any(np.isfinite(ksig_pct)):
-            ax.plot(x + 0.06, ksig_pct, "D", color="#111111", alpha=0.9, label="現状 κσ/κ（一次ソース/参考）")
+            ax.plot(x + 0.06, ksig_pct, "D", color="#111111", alpha=0.9, label=_eht_plot_text("現状 κσ/κ（一次ソース/参考）", lang=figure_lang))
 
         for v, c0, lab in [(1.0, "#2ca02c", "1%"), (2.0, "#2ca02c", "2%")]:
             ax.axhline(v, color=c0, linestyle="--", linewidth=1.0, alpha=0.55)
 
         ax.set_xticks(x)
         ax.set_xticklabels(names)
-        ax.set_xlabel("ターゲット")
-        ax.set_ylabel("相対不確かさ（%）")
-        ax.set_title("EHT：κ（リング/シャドウ変換）を何%まで詰める必要があるか（3σ判別の入口）", pad=6.0)
+        ax.set_xlabel(_eht_plot_text("ターゲット", lang=figure_lang))
+        ax.set_ylabel(_eht_plot_text("相対不確かさ（%）", lang=figure_lang))
+        ax.set_title(_eht_plot_text("EHT：κ（リング/シャドウ変換）を何%まで詰める必要があるか（3σ判別の入口）", lang=figure_lang), pad=6.0)
         ax.tick_params()
         ax.grid(True, alpha=0.25, axis="y")
         ax.legend(
@@ -2565,7 +2667,7 @@ def main() -> int:
         import numpy as np
 
         apply_paper_style()
-        _set_japanese_font()
+        _set_figure_font_for_lang(figure_lang)
 
         names = [str(r.get("name") or r.get("key") or "") for r in rows]
         x = np.arange(len(names), dtype=float)
@@ -2585,35 +2687,39 @@ def main() -> int:
 
         fig9, ax = plt.subplots()
         apply_wavep_figure_layout(fig9, template="part2_single_panel_tall")
-        req_label = "必要 δ精度（1σ, 係数差の3σ判別; 参考）"
+        req_label = _eht_plot_text("必要 δ精度（1σ, 係数差の3σ判別; 参考）", lang=figure_lang)
         # 条件分岐: `math.isfinite(coeff_diff_pct_phase4)` を満たす経路を評価する。
         if math.isfinite(coeff_diff_pct_phase4):
-            req_label = f"必要 δ精度（1σ, 係数差{coeff_diff_pct_phase4:.4f}%の3σ判別; 参考）"
+            req_label = (
+                f"Required δ precision\n(1σ, 3σ discrimination of a {coeff_diff_pct_phase4:.4f}% coefficient difference; reference)"
+                if figure_lang == "en"
+                else f"必要 δ精度（1σ, 係数差{coeff_diff_pct_phase4:.4f}%の3σ判別; 参考）"
+            )
 
         ax.bar(x, req_pct, color="#1f77b4", alpha=0.25, label=req_label)
 
         # 条件分岐: `np.any(np.isfinite(vlti_pct))` を満たす経路を評価する。
         if np.any(np.isfinite(vlti_pct)):
-            ax.plot(x, vlti_pct, "o", color="#ff7f0e", alpha=0.95, label="現状 δσ（VLTI; 一次ソース）")
+            ax.plot(x, vlti_pct, "o", color="#ff7f0e", alpha=0.95, label=_eht_plot_text("現状 δσ（VLTI; 一次ソース）", lang=figure_lang))
 
         # 条件分岐: `np.any(np.isfinite(keck_pct))` を満たす経路を評価する。
 
         if np.any(np.isfinite(keck_pct)):
-            ax.plot(x + 0.06, keck_pct, "D", color="#111111", alpha=0.9, label="現状 δσ（Keck; 一次ソース）")
+            ax.plot(x + 0.06, keck_pct, "D", color="#111111", alpha=0.9, label=_eht_plot_text("現状 δσ（Keck; 一次ソース）", lang=figure_lang))
 
         # 条件分岐: `np.any(np.isfinite(kerr_pct))` を満たす経路を評価する。
 
         if np.any(np.isfinite(kerr_pct)):
-            ax.plot(x - 0.06, kerr_pct, "s", color="#9aa0a6", alpha=0.9, label="Kerrレンジ由来の δ系統（uniform仮定; 参考）")
+            ax.plot(x - 0.06, kerr_pct, "s", color="#9aa0a6", alpha=0.9, label=_eht_plot_text("Kerrレンジ由来の δ系統（uniform仮定; 参考）", lang=figure_lang))
 
         for v, c0 in [(1.0, "#2ca02c"), (2.0, "#2ca02c")]:
             ax.axhline(v, color=c0, linestyle="--", linewidth=1.0, alpha=0.55)
 
         ax.set_xticks(x)
         ax.set_xticklabels(names)
-        ax.set_xlabel("ターゲット")
-        ax.set_ylabel("相対不確かさ（%）")
-        ax.set_title("EHT：δ（Schwarzschild shadow deviation）の必要精度（参考; δはモデル依存）", pad=6.0)
+        ax.set_xlabel(_eht_plot_text("ターゲット", lang=figure_lang))
+        ax.set_ylabel(_eht_plot_text("相対不確かさ（%）", lang=figure_lang))
+        ax.set_title(_eht_plot_text("EHT：δ（Schwarzschild shadow deviation）の必要精度（参考; δはモデル依存）", lang=figure_lang), pad=6.0)
         ax.tick_params()
         ax.grid(True, alpha=0.25, axis="y")
         ax.legend(
@@ -2650,14 +2756,14 @@ def main() -> int:
         import numpy as np
 
         apply_paper_style()
-        _set_japanese_font()
+        _set_figure_font_for_lang(figure_lang)
 
         n = len(rows)
         # 条件分岐: `n <= 0` を満たす経路を評価する。
         if n <= 0:
             raise RuntimeError("no rows")
 
-        fig8, axes = plt.subplots(n, 1, sharey=True, gridspec_kw={"height_ratios": [1.0] * n})
+        fig8, axes = plt.subplots(n, 1, figsize=(9.5, 7.3), sharey=True, gridspec_kw={"height_ratios": [1.0] * n})
         # 条件分岐: `n == 1` を満たす経路を評価する。
         if n == 1:
             axes = [axes]
@@ -2709,15 +2815,19 @@ def main() -> int:
                 kappa_rel_grid = 100.0 * kappa_sig_grid
 
                 ax.fill_between(ring_rel_grid, 0.0, kappa_rel_grid, color="#1f77b4", alpha=0.12)
-                ax.plot(ring_rel_grid, kappa_rel_grid, color="#1f77b4", lw=2.0, label="3σ判別の許容域（下側）")
+                ax.plot(ring_rel_grid, kappa_rel_grid, color="#1f77b4", lw=2.0, label=_eht_plot_text("3σ判別の許容域（下側）", lang=figure_lang))
 
                 for v, c0 in [(1.0, "#2ca02c"), (2.0, "#2ca02c")]:
                     ax.axhline(v, color=c0, linestyle="--", linewidth=1.0, alpha=0.55)
             else:
-                msg = "3σ判別: n/a"
+                msg = "3σ discrimination: n/a" if figure_lang == "en" else "3σ判別: n/a"
                 # 条件分岐: `math.isfinite(theta_rel) and math.isfinite(theta_rel_req) and theta_rel_req > 0` を満たす経路を評価する。
                 if math.isfinite(theta_rel) and math.isfinite(theta_rel_req) and theta_rel_req > 0:
-                    msg += f"（θ_unit相対誤差={theta_rel*100:.1f}% > 要求={theta_rel_req*100:.1f}%）"
+                    msg += (
+                        f" (θ_unit relative error={theta_rel*100:.1f}% > required={theta_rel_req*100:.1f}%)"
+                        if figure_lang == "en"
+                        else f"（θ_unit相対誤差={theta_rel*100:.1f}% > 要求={theta_rel_req*100:.1f}%）"
+                    )
 
                 ax.text(
                     0.02,
@@ -2734,20 +2844,20 @@ def main() -> int:
             # 条件分岐: `math.isfinite(ring_rel_now_pct)` を満たす経路を評価する。
 
             if math.isfinite(ring_rel_now_pct):
-                ax.axvline(ring_rel_now_pct, color="#ff7f0e", linestyle="--", linewidth=1.0, alpha=0.55, label="現状 ring σ/diameter")
+                ax.axvline(ring_rel_now_pct, color="#ff7f0e", linestyle="--", linewidth=1.0, alpha=0.55, label=_eht_plot_text("現状 ring σ/diameter", lang=figure_lang))
                 # 条件分岐: `math.isfinite(kerr_rel_pct)` を満たす経路を評価する。
                 if math.isfinite(kerr_rel_pct):
-                    ax.plot(ring_rel_now_pct, kerr_rel_pct, "D", color="#111111", alpha=0.9, label="参考: Kerr κ系統（constrained）")
+                    ax.plot(ring_rel_now_pct, kerr_rel_pct, "D", color="#111111", alpha=0.9, label=_eht_plot_text("参考: Kerr κ系統（constrained）", lang=figure_lang))
 
                 # 条件分岐: `math.isfinite(kerr_rel_pct_full)` を満たす経路を評価する。
 
                 if math.isfinite(kerr_rel_pct_full):
-                    ax.plot(ring_rel_now_pct, kerr_rel_pct_full, "s", color="#7f7f7f", alpha=0.9, label="参考: Kerr κ系統（full）")
+                    ax.plot(ring_rel_now_pct, kerr_rel_pct_full, "s", color="#7f7f7f", alpha=0.9, label=_eht_plot_text("参考: Kerr κ系統（full）", lang=figure_lang))
 
             panel_title = ax.set_title(name, pad=4.0, fontsize=13.6, fontweight="normal")
             panel_title.set_fontsize(13.6)
             panel_title.set_fontweight("normal")
-            ax.set_xlabel("リング直径の相対誤差（1σ, %）")
+            ax.set_xlabel(_eht_plot_text("リング直径の相対誤差（1σ, %）", lang=figure_lang))
             ax.tick_params(axis="both", labelsize=get_wavep_font_size("tick"))
             ax.grid(True, alpha=0.25)
 
@@ -2764,15 +2874,15 @@ def main() -> int:
             ax.set_xlim(0.0, max(5.0, 1.15 * x_max))
 
         for ax in axes:
-            ax.set_ylabel("許容 κ の相対誤差（1σ, %）")
+            ax.set_ylabel(_eht_plot_text("許容 κ の相対誤差（1σ, %）", lang=figure_lang))
 
         fig8_suptitle = fig8.suptitle(
-            "EHT：3σ判別のための誤差予算（ringσ と κσ のトレードオフ；κ≈1）",
-            y=0.978,
-            fontsize=12.8,
+            _eht_plot_text("EHT：3σ判別のための誤差予算（ringσ と κσ のトレードオフ；κ≈1）", lang=figure_lang),
+            y=0.968,
+            fontsize=12.2,
             fontweight="normal",
         )
-        fig8_suptitle.set_fontsize(12.8)
+        fig8_suptitle.set_fontsize(12.2)
         fig8_suptitle.set_fontweight("normal")
 
         # De-duplicate legend entries across subplots.
@@ -2793,15 +2903,15 @@ def main() -> int:
                 labels,
                 loc="lower center",
                 ncol=min(2, len(labels)),
-                bbox_to_anchor=(0.5, 0.050),
-                fontsize=get_wavep_font_size("legend"),
+                bbox_to_anchor=(0.5, 0.055),
+                fontsize=max(7.6, get_wavep_font_size("legend") - 0.8),
                 frameon=False,
                 handlelength=1.8,
                 columnspacing=1.5,
                 labelspacing=0.55,
             )
 
-        fig8.subplots_adjust(left=0.12, right=0.97, top=0.90, bottom=0.19, hspace=0.34)
+        fig8.subplots_adjust(left=0.12, right=0.97, top=0.86, bottom=0.20, hspace=0.38)
         kappa_trade_png_path, _kappa_trade_pdf_path, kappa_trade_public_png_path, _kappa_trade_public_pdf_path = _save_public_figure(
             fig8,
             out_dir=out_dir,

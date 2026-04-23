@@ -24,6 +24,7 @@ import csv
 import hashlib
 import json
 import math
+import os
 import shutil
 import sys
 from dataclasses import dataclass
@@ -47,6 +48,20 @@ try:
     import matplotlib.pyplot as plt  # type: ignore
 except Exception:
     plt = None
+
+
+# 関数: `WAVEP_FIGURE_LANG` から英語 surface かどうかを判定する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
+
+
+# 関数: locale ごとの既定出力先を解決する。
+def _default_output_dir(kind: str) -> Path:
+    base = ROOT / "output" / kind / "cosmology"
+    if _is_en_figure():
+        return base / "locales" / "en"
+
+    return base
 
 
 # クラス: `TransferCase` の責務と境界条件を定義する。
@@ -398,6 +413,13 @@ def _render_png(path: Path, rows: Sequence[Dict[str, Any]], *, pi0: float, temp_
     labels = [str(r["case_id"]) for r in rows]
     ratios = [float(r["lpath_ratio"]) if _safe_float(r.get("lpath_ratio")) is not None else float("nan") for r in rows]
     x = np.arange(len(labels), dtype=float)
+    font_scale = 1.16 if _is_en_figure() else 1.0
+    axis_font = 13.2 * font_scale
+    title_font = 14.2 * font_scale
+    tick_font = 11.6 * font_scale
+    legend_font = 12.0 * font_scale
+    suptitle_font = 15.4 * font_scale
+    note_font = 12.0 * font_scale
 
     fig, axes = plt.subplots(1, 2, figsize=(12.8, 5.2), dpi=160)
 
@@ -406,10 +428,10 @@ def _render_png(path: Path, rows: Sequence[Dict[str, Any]], *, pi0: float, temp_
     axes[0].axhline(1.0, color="#666666", linestyle="--", linewidth=1.0)
     axes[0].set_xticks(x)
     axes[0].set_xticklabels(labels, rotation=25, ha="right")
-    axes[0].set_ylabel("L_path / L_path,0", fontsize=13.2)
-    axes[0].set_title("L_path transfer ratios", fontsize=14.2)
-    axes[0].tick_params(axis="x", labelsize=11.6)
-    axes[0].tick_params(axis="y", labelsize=11.6)
+    axes[0].set_ylabel("L_path / L_path,0", fontsize=axis_font)
+    axes[0].set_title("L_path transfer ratios", fontsize=title_font)
+    axes[0].tick_params(axis="x", labelsize=tick_font)
+    axes[0].tick_params(axis="y", labelsize=tick_font)
     axes[0].grid(True, axis="y", alpha=0.25)
 
     obs_rows = [r for r in rows if _safe_float(r.get("offset_obs_kpc")) is not None and _safe_float(r.get("offset_sigma_kpc")) is not None]
@@ -424,22 +446,26 @@ def _render_png(path: Path, rows: Sequence[Dict[str, Any]], *, pi0: float, temp_
         axes[1].scatter(x2, pred, color="#d62728", marker="s", label="predicted offset")
         axes[1].set_xticks(x2)
         axes[1].set_xticklabels(labels2, rotation=25, ha="right")
-        axes[1].set_ylabel("offset [kpc]", fontsize=13.2)
-        axes[1].set_title("Observed vs predicted (rows with observations)", fontsize=14.2)
+        axes[1].set_ylabel("offset [kpc]", fontsize=axis_font)
+        axes[1].set_title("Observed vs predicted (rows with observations)", fontsize=title_font)
         axes[1].grid(True, axis="y", alpha=0.25)
-        axes[1].legend(loc="best", fontsize=12.0)
-        axes[1].tick_params(axis="x", labelsize=11.6)
-        axes[1].tick_params(axis="y", labelsize=11.6)
+        axes[1].legend(loc="best", fontsize=legend_font)
+        axes[1].tick_params(axis="x", labelsize=tick_font)
+        axes[1].tick_params(axis="y", labelsize=tick_font)
     else:
-        axes[1].text(0.5, 0.5, "no observed offsets in transfer table", ha="center", va="center", fontsize=12.0)
+        axes[1].text(0.5, 0.5, "no observed offsets in transfer table", ha="center", va="center", fontsize=note_font)
         axes[1].set_axis_off()
 
-    fig.suptitle("Cluster-collision L_path transfer template audit", fontsize=15.4)
+    for axis in axes:
+        for tick in [*axis.get_xticklabels(), *axis.get_yticklabels()]:
+            tick.set_fontsize(tick_font)
+
+    fig.suptitle("Cluster-collision L_path transfer template audit", fontsize=suptitle_font)
     fig.text(
         0.01,
         -0.02,
         f"Pi0={pi0:.6f}, temp_power={temp_power:.3f}, formula: (1+Pi0)/(r_v + Pi0*r_rho*r_T^temp_power)",
-        fontsize=12.0,
+        fontsize=note_font,
         va="top",
     )
     fig.tight_layout()
@@ -498,6 +524,17 @@ def main() -> int:
     )
     parser.add_argument("--step-tag", default="8.7.25.25")
     args = parser.parse_args()
+
+    default_private = (ROOT / "output" / "private" / "cosmology").resolve()
+    default_public = (ROOT / "output" / "public" / "cosmology").resolve()
+    default_lpath_json = (default_public / "cosmology_lpath_scaling_law_prediction.json").resolve()
+    if _is_en_figure():
+        if args.outdir.resolve() == default_private:
+            args.outdir = _default_output_dir("private")
+        if args.public_outdir.resolve() == default_public:
+            args.public_outdir = _default_output_dir("public")
+        if args.lpath_scaling_json.resolve() == default_lpath_json:
+            args.lpath_scaling_json = _default_output_dir("public") / default_lpath_json.name
 
     out_private_json = args.outdir / "cosmology_cluster_collision_lpath_transfer_template.json"
     out_private_csv = args.outdir / "cosmology_cluster_collision_lpath_transfer_template.csv"

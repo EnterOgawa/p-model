@@ -12,10 +12,17 @@ from typing import Any, Optional
 
 import matplotlib.pyplot as plt
 
+_ROOT = Path(__file__).resolve().parents[2]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
 from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.figure_locale_paths import localize_figure_output_path
+from scripts.utils.plot_style import apply_wavep_figure_layout, get_wavep_font_size, install_wavep_font_profile
 
 enable_japanese_figure_localization()
+
+_PROFILE_NAME = "part3b_quantum_verification"
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
@@ -23,9 +30,6 @@ def _repo_root() -> Path:
 
 
 _ROOT = _repo_root()
-# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
-if str(_ROOT) not in sys.path:
-    sys.path.insert(0, str(_ROOT))
 
 # Reuse the same implementation as Step 7.14.11/7.14.14 so that this test
 # does not fork the underlying physics/utility code.
@@ -398,6 +402,7 @@ def _parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
 
 def main(argv: Optional[list[str]] = None) -> None:
     args = _parse_args(argv)
+    install_wavep_font_profile(profile_name=_PROFILE_NAME)
     root = _repo_root()
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -796,13 +801,26 @@ def main(argv: Optional[list[str]] = None) -> None:
 
     # Figure
 
-    title_font = 15.0
-    axis_label_font = 13.6
-    tick_font = 12.4
-    legend_font = 11.6
-    annotation_font = 12.2
+    title_font = get_wavep_font_size("title")
+    axis_label_font = get_wavep_font_size("axis")
+    tick_font = get_wavep_font_size("tick")
+    legend_font = get_wavep_font_size("legend")
+    annotation_font = get_wavep_font_size("note")
 
-    fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(11.8, 7.2), sharex=True)
+    fig_height = 6.95
+    height_ratios = [1.04, 0.80]
+    hspace = 0.10
+
+    fig, (ax0, ax1) = plt.subplots(
+        2,
+        1,
+        figsize=(11.6, fig_height),
+        sharex=True,
+        gridspec_kw={"height_ratios": height_ratios},
+    )
+    apply_wavep_figure_layout(fig, template="part2_two_panel_quantum_spacious")
+    target_width_in, _ = fig.get_size_inches()
+    fig.set_size_inches(target_width_in, fig_height, forward=True)
     ax0.plot(temps, alpha_obs_1e8, color="#000000", lw=2.2, label="obs α(T) (NIST TRC fit)")
     ax0.plot(
         temps,
@@ -830,8 +848,9 @@ def main(argv: Optional[list[str]] = None) -> None:
 
     ax0.set_ylabel("α (1e-8 / K)", fontsize=axis_label_font)
     ax0.set_title(
-        f"Si thermal expansion: Debye+Einstein×{einstein_anchors} with θE anchors from Ioffe phonon frequencies",
+        f"Si thermal expansion with Ioffe phonon anchors\n(Debye+Einstein×{einstein_anchors})",
         fontsize=title_font,
+        pad=7.0,
     )
     ax0.grid(True, alpha=0.25)
     ax0.tick_params(axis="both", labelsize=tick_font)
@@ -857,40 +876,40 @@ def main(argv: Optional[list[str]] = None) -> None:
     # Small annotation block (anchors + fit metrics).
     if einstein_anchors == 2:
         ann = (
-            f"E1(anchor)={low['label']}: θE1={theta_e1_k:.1f} K\n"
-            f"E2(anchor)={high['label']}: θE2={theta_e2_k:.1f} K\n"
-            f"fit: A_D={a_d:.3e}, A_E1={a_e1:.3e}, A_E2={a_e2:.3e}\n"
-            f"fit-range: max|z|={metrics_fit['max_abs_z']:.2f}, χ²ν={metrics_fit['reduced_chi2']:.2f}"
+            f"Anchors: {low['label']} ({theta_e1_k:.1f} K), {high['label']} ({theta_e2_k:.1f} K)\n"
+            f"A_D={a_d:.2e}, A_E1={a_e1:.2e}, A_E2={a_e2:.2e}\n"
+            f"fit max|z|={metrics_fit['max_abs_z']:.2f}, χ²ν={metrics_fit['reduced_chi2']:.2f}"
         )
     else:
         assert theta_e3_k is not None and a_e3 is not None
         ann = (
-            f"E1(anchor)={low['label']}: θE1={theta_e1_k:.1f} K\n"
-            f"E2(anchor)={mid['label']}: θE2={theta_e2_k:.1f} K\n"
-            f"E3(anchor)={high['label']}: θE3={theta_e3_k:.1f} K\n"
-            f"fit: A_D={a_d:.3e}, A_E1={a_e1:.3e}, A_E2={a_e2:.3e}, A_E3={a_e3:.3e}\n"
-            f"fit-range: max|z|={metrics_fit['max_abs_z']:.2f}, χ²ν={metrics_fit['reduced_chi2']:.2f}"
+            f"Anchors: {low['label']} ({theta_e1_k:.1f} K), {mid['label']} ({theta_e2_k:.1f} K)\n"
+            f"{high['label']} ({theta_e3_k:.1f} K)\n"
+            f"A_D={a_d:.2e}, A_E1={a_e1:.2e}, A_E2={a_e2:.2e}, A_E3={a_e3:.2e}\n"
+            f"fit max|z|={metrics_fit['max_abs_z']:.2f}, χ²ν={metrics_fit['reduced_chi2']:.2f}"
         )
 
     ax1.text(
-        0.98,
-        0.98,
+        0.985,
+        0.965,
         ann,
         transform=ax1.transAxes,
         fontsize=annotation_font,
         va="top",
         ha="right",
-        bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.85, "edgecolor": "0.8"},
+        linespacing=1.18,
+        bbox={"boxstyle": "round,pad=0.22", "facecolor": "white", "alpha": 0.88, "edgecolor": "0.8"},
     )
 
-    fig.tight_layout()
-    out_pdf = out_dir / f"{out_tag}.pdf"
-    out_png = out_dir / f"{out_tag}.png"
+    fig.subplots_adjust(left=0.082, right=0.985, top=0.930, bottom=0.092, hspace=hspace)
+    out_pdf = localize_figure_output_path(out_dir / f"{out_tag}.pdf", root=root)
+    out_png = localize_figure_output_path(out_dir / f"{out_tag}.png", root=root)
+    out_pdf.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_pdf)
     fig.savefig(out_png, dpi=180)
     plt.close(fig)
 
-    out_metrics = out_dir / f"{out_tag}_metrics.json"
+    out_metrics = localize_figure_output_path(out_dir / f"{out_tag}_metrics.json", root=root)
     out_metrics.write_text(
         json.dumps(
             {

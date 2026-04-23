@@ -1,0 +1,99 @@
+{
+  "generated_utc": "2026-04-13T11:13:00.729228+00:00",
+  "profile": "part5_future_predictions",
+  "outputs": [
+    {
+      "stem": "part5_conceptual_eht",
+      "private_pdf": "output/private/summary/figures/locales/en/part5_conceptual_eht.pdf",
+      "private_png": "output/private/summary/figures/locales/en/part5_conceptual_eht.png",
+      "public_pdf": "output/public/summary/locales/en/part5_conceptual_eht.pdf",
+      "public_png": "output/public/summary/locales/en/part5_conceptual_eht.png",
+      "figure_size_inches": {
+        "width_in": 6.6929,
+        "height_in": 4.45
+      }
+    },
+    {
+      "stem": "part5_conceptual_gw",
+      "private_pdf": "output/private/summary/figures/locales/en/part5_conceptual_gw.pdf",
+      "private_png": "output/private/summary/figures/locales/en/part5_conceptual_gw.png",
+      "public_pdf": "output/public/summary/locales/en/part5_conceptual_gw.pdf",
+      "public_png": "output/public/summary/locales/en/part5_conceptual_gw.png",
+      "figure_size_inches": {
+        "width_in": 6.6929,
+        "height_in": 4.55
+      }
+    },
+    {
+      "stem": "part5_conceptual_cosmo",
+      "private_pdf": "output/private/summary/figures/locales/en/part5_conceptual_cosmo.pdf",
+      "private_png": "output/private/summary/figures/locales/en/part5_conceptual_cosmo.png",
+      "public_pdf": "output/public/summary/locales/en/part5_conceptual_cosmo.pdf",
+      "public_png": "output/public/summary/locales/en/part5_conceptual_cosmo.png",
+      "figure_size_inches": {
+        "width_in": 6.6929,
+        "height_in": 4.65
+      }
+    },
+    {
+      "stem": "part5_conceptual_sparc",
+      "private_pdf": "output/private/summary/figures/locales/en/part5_conceptual_sparc.pdf",
+      "private_png": "output/private/summary/figures/locales/en/part5_conceptual_sparc.png",
+      "public_pdf": "output/public/summary/locales/en/part5_conceptual_sparc.pdf",
+      "public_png": "output/public/summary/locales/en/part5_conceptual_sparc.png",
+      "figure_size_inches": {
+        "width_in": 6.6929,
+        "height_in": 4.65
+      }
+    },
+    {
+      "stem": "part5_conceptual_macro",
+      "private_pdf": "output/private/summary/figures/locales/en/part5_conceptual_macro.pdf",
+      "private_png": "output/private/summary/figures/locales/en/part5_conceptual_macro.png",
+      "public_pdf": "output/public/summary/locales/en/part5_conceptual_macro.pdf",
+      "public_png": "output/public/summary/locales/en/part5_conceptual_macro.png",
+      "figure_size_inches": {
+        "width_in": 6.6929,
+        "height_in": 6.05
+      }
+    },
+    {
+      "stem": "part5_conceptual_qc",
+      "private_pdf": "output/private/summary/figures/locales/en/part5_conceptual_qc.pdf",
+      "private_png": "output/private/summary/figures/locales/en/part5_conceptual_qc.png",
+      "public_pdf": "output/public/summary/locales/en/part5_conceptual_qc.pdf",
+      "public_png": "output/public/summary/locales/en/part5_conceptual_qc.png",
+      "figure_size_inches": {
+        "width_in": 6.6929,
+        "height_in": 4.65
+      }
+    },
+    {
+      "stem": "part5_conceptual_gq",
+      "private_pdf": "output/private/summary/figures/locales/en/part5_conceptual_gq.pdf",
+      "private_png": "output/private/summary/figures/locales/en/part5_conceptual_gq.png",
+      "public_pdf": "output/public/summary/locales/en/part5_conceptual_gq.pdf",
+      "public_png": "output/public/summary/locales/en/part5_conceptual_gq.png",
+      "figure_size_inches": {
+        "width_in": 6.6929,
+        "height_in": 4.65
+      }
+    },
+    {
+      "stem": "part5_conceptual_ddr",
+      "private_pdf": "output/private/summary/figures/locales/en/part5_conceptual_ddr.pdf",
+      "private_png": "output/private/summary/figures/locales/en/part5_conceptual_ddr.png",
+      "public_pdf": "output/public/summary/locales/en/part5_conceptual_ddr.pdf",
+      "public_png": "output/public/summary/locales/en/part5_conceptual_ddr.png",
+      "figure_size_inches": {
+        "width_in": 6.6929,
+        "height_in": 5.3
+      }
+    }
+  ],
+  "notes": [
+    "Reader-facing conceptual figures for Part V.",
+    "All figures are generated as Matplotlib vector PDFs.",
+    "Japanese figures remain canonical under output/public/summary, while non-ja locales are saved under locales/<locale>/."
+  ]
+}

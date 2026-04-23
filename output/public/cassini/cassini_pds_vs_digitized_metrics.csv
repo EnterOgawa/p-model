@@ -1,0 +1,2 @@
+n,rmse,corr,shift_days,rmse_zero_shift,corr_zero_shift,n_zero_shift
+265,1.683278032679031e-10,0.4425686335147,1.300,1.834443374623815e-10,0.366323796377669,268

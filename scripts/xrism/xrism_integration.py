@@ -19,6 +19,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import shutil
 import sys
 from datetime import datetime, timezone
@@ -37,6 +38,7 @@ _ROOT = Path(__file__).resolve().parents[2]
 # 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
+
 
 from scripts.summary import worklog  # noqa: E402
 from scripts.utils.plot_style import (  # noqa: E402
@@ -180,8 +182,13 @@ def _rel(path: Path) -> str:
 
 def _sync_public_figure_assets(root: Path, out_png: Path) -> None:
     out_pdf = out_png.with_suffix(".pdf")
-    public_dir = root / "output" / "public" / "xrism"
-    summary_dir = root / "output" / "private" / "summary" / "figures"
+    figure_lang = str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower()
+    public_dir = (root / "output" / "public" / "xrism" / "locales" / "en") if figure_lang.startswith("en") else (root / "output" / "public" / "xrism")
+    summary_dir = (
+        root / "output" / "private" / "summary" / "locales" / "en" / "figures"
+        if figure_lang.startswith("en")
+        else root / "output" / "private" / "summary" / "figures"
+    )
     public_dir.mkdir(parents=True, exist_ok=True)
     summary_dir.mkdir(parents=True, exist_ok=True)
     for src in (out_png, out_pdf):
@@ -191,6 +198,37 @@ def _sync_public_figure_assets(root: Path, out_png: Path) -> None:
 
         shutil.copy2(src, public_dir / src.name)
         shutil.copy2(src, summary_dir / src.name)
+
+
+# 関数: `_display_target_name` の入出力契約と処理意図を定義する。
+def _display_target_name(raw: str) -> str:
+    token = str(raw).strip()
+    display_map = {
+        "CENTAURUS_A": "Centaurus A",
+        "NGC4151": "NGC 4151",
+        "PDS456": "PDS 456",
+        "Centaurus_Cluster": "Centaurus cluster",
+        "Perseus_C1": "Perseus core",
+        "COMA_CENTER": "Coma center",
+    }
+    if token in display_map:
+        return display_map[token]
+
+    token = token.replace("_", " ").strip()
+    return token if token else raw
+
+
+# 関数: `_display_line_id` の入出力契約と処理意図を定義する。
+def _display_line_id(raw: str) -> str:
+    token = str(raw).strip()
+    display_map = {
+        "FeXXV_HeA": "Fe XXV He-α",
+        "FeXXVI_LyA": "Fe XXVI Ly-α",
+    }
+    if token in display_map:
+        return display_map[token]
+
+    return token.replace("_", " ")
 
 
 # 関数: `_combine_sigma` の入出力契約と処理意図を定義する。
@@ -695,6 +733,8 @@ def _plot_resolve_summary(out_png: Path, bh: Dict[str, Any], cluster: Dict[str, 
 
     apply_paper_style()
     _set_japanese_font()
+    figure_lang = str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower()
+    is_en = figure_lang.startswith("en")
     bh_rows = [r for r in (bh.get("per_obsid_best") or []) if r.get("detected") is True]
     cl_rows = [r for r in (cluster.get("per_obsid_best") or []) if r.get("detected") is True]
     # 条件分岐: `not bh_rows and not cl_rows` を満たす経路を評価する。
@@ -705,7 +745,7 @@ def _plot_resolve_summary(out_png: Path, bh: Dict[str, Any], cluster: Dict[str, 
         ax.text(
             0.5,
             0.62,
-            "XRISM Resolve：検出済み obsid 行はまだありません",
+            "XRISM Resolve: no detected rows yet" if is_en else "XRISM Resolve：検出済み obsid 行はまだありません",
             ha="center",
             va="center",
             fontsize=get_wavep_font_size("title"),
@@ -715,7 +755,12 @@ def _plot_resolve_summary(out_png: Path, bh: Dict[str, Any], cluster: Dict[str, 
         ax.text(
             0.5,
             0.45,
-            "これは論文本体の可読性を保つための仮図である。\n"
+            (
+                "This is a placeholder panel kept only for paper readability.\n"
+                "Rebuild the XRISM fixed outputs (BH/AGN, clusters, event-level QC) to populate this panel."
+            )
+            if is_en
+            else "これは論文本体の可読性を保つための仮図である。\n"
             "このパネルを埋めるには、XRISM 固定出力（BH/AGN、銀河団、イベントレベルQC）を生成して再実行する。",
             ha="center",
             va="center",
@@ -751,21 +796,31 @@ def _plot_resolve_summary(out_png: Path, bh: Dict[str, Any], cluster: Dict[str, 
 
             ys.append(beta)
             yerrs.append(float(sigma or 0.0))
-            target = str(r.get("target_name", "")).strip() or str(r.get("obsid", "")).strip()
-            line_id = str(r.get("line_id", "")).strip()
+            target = _display_target_name(str(r.get("target_name", "")).strip() or str(r.get("obsid", "")).strip())
+            line_id = _display_line_id(str(r.get("line_id", "")).strip())
             labels.append(f"{target}\n{line_id}")
 
         ax_bh.errorbar(xs, ys, yerr=yerrs, fmt="o", capsize=4, lw=1.2, markersize=4.8)
         ax_bh.axhline(0.0, color="k", lw=1, alpha=0.4)
-        ax_bh.set_ylabel("観測 β (v/c)")
-        ax_bh.set_title("XRISM Resolve：BH/AGN 線重心からの β", fontsize=get_wavep_font_size("title"))
+        ax_bh.set_ylabel("observed β (v/c)" if is_en else "観測 β (v/c)")
+        ax_bh.set_title(
+            "XRISM Resolve: BH/AGN line-centroid β" if is_en else "XRISM Resolve：BH/AGN 線重心からの β",
+            fontsize=get_wavep_font_size("title"),
+        )
         ax_bh.set_xticks(xs)
         ax_bh.set_xticklabels(labels, rotation=0)
         ax_bh.tick_params(axis="x", pad=13)
         ax_bh.tick_params(axis="y")
     else:
         ax_bh.set_axis_off()
-        ax_bh.text(0.5, 0.5, "BH/AGN：検出済み obsid なし", ha="center", va="center", transform=ax_bh.transAxes)
+        ax_bh.text(
+            0.5,
+            0.5,
+            "BH/AGN: no detected obsids" if is_en else "BH/AGN：検出済み obsid なし",
+            ha="center",
+            va="center",
+            transform=ax_bh.transAxes,
+        )
 
     # Panel B: cluster delta_v (converted from delta_z)
 
@@ -786,21 +841,31 @@ def _plot_resolve_summary(out_png: Path, bh: Dict[str, Any], cluster: Dict[str, 
             dv_err = (c_kms * float(sigma_z) / (1.0 + z_opt)) if sigma_z is not None else 0.0
             ys.append(dv)
             yerrs.append(float(dv_err))
-            target = str(r.get("target_name", "")).strip() or str(r.get("obsid", "")).strip()
-            line_id = str(r.get("line_id", "")).strip()
+            target = _display_target_name(str(r.get("target_name", "")).strip() or str(r.get("obsid", "")).strip())
+            line_id = _display_line_id(str(r.get("line_id", "")).strip())
             labels.append(f"{target}\n{line_id}")
 
         ax_cl.errorbar(xs, ys, yerr=yerrs, fmt="o", capsize=4, lw=1.2, color="#d55e00", markersize=4.8)
         ax_cl.axhline(0.0, color="k", lw=1, alpha=0.4)
-        ax_cl.set_ylabel("Δv (km/s)\n(X線 − 光学)")
-        ax_cl.set_title("XRISM Resolve：銀河団 z_xray − z_opt (Δv)", fontsize=get_wavep_font_size("title"))
+        ax_cl.set_ylabel("Δv (km/s)\n(X-ray - optical)" if is_en else "Δv (km/s)\n(X線 − 光学)")
+        ax_cl.set_title(
+            "XRISM Resolve: cluster z_xray - z_opt (Δv)" if is_en else "XRISM Resolve：銀河団 z_xray − z_opt (Δv)",
+            fontsize=get_wavep_font_size("title"),
+        )
         ax_cl.set_xticks(xs)
         ax_cl.set_xticklabels(labels, rotation=0)
         ax_cl.tick_params(axis="x", pad=13)
         ax_cl.tick_params(axis="y")
     else:
         ax_cl.set_axis_off()
-        ax_cl.text(0.5, 0.5, "銀河団：検出済み obsid なし", ha="center", va="center", transform=ax_cl.transAxes)
+        ax_cl.text(
+            0.5,
+            0.5,
+            "Clusters: no detected obsids" if is_en else "銀河団：検出済み obsid なし",
+            ha="center",
+            va="center",
+            transform=ax_cl.transAxes,
+        )
 
     out_png.parent.mkdir(parents=True, exist_ok=True)
     with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):

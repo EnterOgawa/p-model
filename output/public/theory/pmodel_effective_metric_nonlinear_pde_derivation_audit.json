@@ -61,7 +61,7 @@
     ],
     "watch_if": []
   },
-  "generated_utc": "2026-04-05T12:49:59.194143+00:00",
+  "generated_utc": "2026-04-12T10:47:48.089840+00:00",
   "inputs": {
     "caseb_json": "output/public/theory/pmodel_vector_metric_choice_audit_caseB_effective.json",
     "direct_json": "output/public/theory/pmodel_rotating_bh_photon_ring_direct_audit.json",

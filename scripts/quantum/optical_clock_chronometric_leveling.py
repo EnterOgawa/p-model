@@ -2,13 +2,20 @@ from __future__ import annotations
 
 import json
 import math
+import os
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
 
 
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from figure_japanese_localizer import enable_japanese_figure_localization
+from scripts.utils.figure_locale_paths import localize_figure_output_path
 
 enable_japanese_figure_localization()
 
@@ -87,11 +94,13 @@ def main() -> None:
         ecolor="#1f77b4",
         label="ΔU (m²/s²)",
     )
-    tick_font = 12.4
-    axis_label_font = 13.6
-    panel_title_font = 14.8
-    legend_font = 11.8
-    note_font = 11.2
+    figure_lang = str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower()
+    is_en = figure_lang.startswith("en")
+    tick_font = 12.4 * (0.70 if is_en else 1.0)
+    axis_label_font = 13.6 * (0.68 if is_en else 1.0)
+    panel_title_font = 14.8 * (0.72 if is_en else 1.0)
+    legend_font = 11.8 * (0.72 if is_en else 1.0)
+    note_font = 11.2 * (0.66 if is_en else 1.0)
     ax.set_xticks(x)
     ax.set_xticklabels(labels, fontsize=tick_font)
     ax.set_ylabel("geopotential difference ΔU (m²/s²)", fontsize=axis_label_font)
@@ -117,12 +126,20 @@ def main() -> None:
     )
 
     ax.legend(loc="upper right", fontsize=legend_font, frameon=True)
-    fig.tight_layout()
+    if is_en:
+        fig.subplots_adjust(left=0.13, right=0.965, top=0.85, bottom=0.20)
+    else:
+        fig.tight_layout()
 
-    out_png = out_dir / "optical_clock_chronometric_leveling.png"
-    out_pdf = out_dir / "optical_clock_chronometric_leveling.pdf"
-    fig.savefig(out_png, bbox_inches="tight")
-    fig.savefig(out_pdf, bbox_inches="tight")
+    out_png = localize_figure_output_path(out_dir / "optical_clock_chronometric_leveling.png", root=root)
+    out_pdf = localize_figure_output_path(out_dir / "optical_clock_chronometric_leveling.pdf", root=root)
+    out_png.parent.mkdir(parents=True, exist_ok=True)
+    if is_en:
+        fig.savefig(out_png)
+        fig.savefig(out_pdf)
+    else:
+        fig.savefig(out_png, bbox_inches="tight")
+        fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
 
     local_pdf = root / "data" / "quantum" / "sources" / "arxiv_2309.14953v3.pdf"
@@ -160,7 +177,7 @@ def main() -> None:
             "P-model (stationary clocks) predicts the same leading redshift relation Δf/f ≈ ΔU/c^2 in the weak field.",
         ],
     }
-    out_json = out_dir / "optical_clock_chronometric_leveling_metrics.json"
+    out_json = localize_figure_output_path(out_dir / "optical_clock_chronometric_leveling_metrics.json", root=root)
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(f"[ok] png : {out_png}")

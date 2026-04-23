@@ -36,6 +36,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import shutil
 import sys
 from dataclasses import dataclass
@@ -51,6 +52,20 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+
+
+# 関数: 英語 localized surface かどうかを判定する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
+
+
+# 関数: locale ごとの既定出力先を解決する。
+def _default_output_dir(kind: str) -> Path:
+    base = _ROOT / "output" / kind / "cosmology"
+    if _is_en_figure():
+        return base / "locales" / "en"
+
+    return base
 
 
 # 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
@@ -600,6 +615,13 @@ def _plot(
     _set_japanese_font()
     import matplotlib.pyplot as plt
 
+    font_scale = 1.14 if _is_en_figure() else 1.0
+    axis_font = 15.8 * font_scale
+    title_font = 18.4 * font_scale
+    legend_font = 17.0 * font_scale
+    tick_font = 15.0 * font_scale
+    note_font = 16.4 * font_scale
+    suptitle_font = 19.6 * font_scale
     fig, (ax1, ax2) = plt.subplots(
         2,
         1,
@@ -622,12 +644,12 @@ def _plot(
 
     ax1.set_xlim(50.0, 2200.0)
     ax1.set_ylim(0.0, max(float(np.max(dl) * 1.08), 6200.0))
-    ax1.set_xlabel("multipole ℓ", fontsize=15.8)
-    ax1.set_ylabel("D_ℓ = ℓ(ℓ+1)C_ℓ/2π  [μK²]", fontsize=15.8)
-    ax1.set_title("CMB TT acoustic peaks: Planck vs P-model modal reconstruction", fontsize=18.4)
+    ax1.set_xlabel("multipole ℓ", fontsize=axis_font)
+    ax1.set_ylabel("D_ℓ = ℓ(ℓ+1)C_ℓ/2π  [μK²]", fontsize=axis_font)
+    ax1.set_title("CMB TT acoustic peaks: Planck vs P-model modal reconstruction", fontsize=title_font)
     ax1.grid(True, linestyle="--", alpha=0.35)
-    ax1.legend(fontsize=17.0, loc="upper right")
-    ax1.tick_params(labelsize=15.0)
+    ax1.legend(fontsize=legend_font, loc="upper right")
+    ax1.tick_params(labelsize=tick_font)
 
     labels = ["ℓ1", "ℓ2", "ℓ3"] + [f"ℓ{int(p.n)}(h)" for p in holdouts]
     d_ell = [float(pred3[i]["ell"] - obs3[i].ell) for i in range(3)] + [
@@ -643,11 +665,11 @@ def _plot(
     ax2.bar(x + 0.5 * w, d_amp, width=w, color="#ff7f0e", label="ΔA/A")
     ax2.set_xticks(x)
     ax2.set_xticklabels(labels)
-    ax2.set_ylabel("residual", fontsize=15.8)
-    ax2.set_title("Peak residuals (first3 fit + ℓ4-ℓ6 holdout)", fontsize=18.4)
+    ax2.set_ylabel("residual", fontsize=axis_font)
+    ax2.set_title("Peak residuals (first3 fit + ℓ4-ℓ6 holdout)", fontsize=title_font)
     ax2.grid(True, linestyle="--", alpha=0.35, axis="y")
-    ax2.legend(fontsize=17.0, loc="upper right")
-    ax2.tick_params(labelsize=15.0)
+    ax2.legend(fontsize=legend_font, loc="upper right")
+    ax2.tick_params(labelsize=tick_font)
 
     status = gate.get("overall", {}).get("status", "n/a")
     status_ext = gate.get("overall_extended", {}).get("status", "n/a")
@@ -657,7 +679,7 @@ def _plot(
     d4_amp = gate.get("holdout4", {}).get("residual", {}).get("delta_amp_rel", float("nan"))
     d46_ell = gate.get("extended_4to6", {}).get("max_abs_delta_ell", float("nan"))
     d46_amp = gate.get("extended_4to6", {}).get("max_abs_delta_amp_rel", float("nan"))
-    fig.suptitle("P-model CMB acoustic-peak audit (ℓ1-ℓ3 fit + ℓ4-ℓ6 holdout)", fontsize=19.6)
+    fig.suptitle("P-model CMB acoustic-peak audit (ℓ1-ℓ3 fit + ℓ4-ℓ6 holdout)", fontsize=suptitle_font)
     ax2.text(
         0.02,
         0.05,
@@ -670,7 +692,7 @@ def _plot(
         transform=ax2.transAxes,
         ha="left",
         va="bottom",
-        fontsize=16.4,
+        fontsize=note_font,
         bbox={"boxstyle": "round,pad=0.22", "facecolor": "white", "edgecolor": "#999999", "alpha": 0.92},
     )
     plt.tight_layout(rect=(0.0, 0.030, 1.0, 0.95))
@@ -765,8 +787,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     data_path = Path(args.data).resolve()
-    out_dir = Path(args.out_dir).resolve()
-    pub_dir = Path(args.public_dir).resolve()
+    default_private = (_ROOT / "output" / "private" / "cosmology").resolve()
+    default_public = (_ROOT / "output" / "public" / "cosmology").resolve()
+    requested_private = Path(args.out_dir).resolve()
+    requested_public = Path(args.public_dir).resolve()
+    out_dir = _default_output_dir("private") if _is_en_figure() and requested_private == default_private else requested_private
+    pub_dir = _default_output_dir("public") if _is_en_figure() and requested_public == default_public else requested_public
     n_modes = max(int(args.n_modes), 6)
     silk_kappa = max(float(args.silk_kappa), 1e-6)
 

@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import shutil
 import sys
 from collections import Counter
@@ -71,6 +72,23 @@ def _safe_rel(path: Path, root: Path) -> str:
         return str(path.resolve().relative_to(root)).replace("\\", "/")
     except Exception:
         return str(path.resolve()).replace("\\", "/")
+
+
+# 関数: `_is_en_figure_locale` の入出力契約と処理意図を定義する。
+def _is_en_figure_locale() -> bool:
+    return os.environ.get("WAVEP_FIGURE_LANG", "").strip().lower() == "en"
+
+
+# 関数: `_locale_font` の入出力契約と処理意図を定義する。
+def _locale_font(base: float, *, en_scale: float = 1.16) -> float:
+    scale = en_scale if _is_en_figure_locale() else 1.0
+    return float(base * scale)
+
+
+# 関数: `_save_png_and_pdf` の入出力契約と処理意図を定義する。
+def _save_png_and_pdf(path: Path, *, dpi: int = 180) -> None:
+    plt.savefig(path, dpi=dpi)
+    plt.savefig(path.with_suffix(".pdf"))
 
 
 # 関数: `_read_record11_meta` の入出力契約と処理意図を定義する。
@@ -1181,6 +1199,11 @@ def _write_root_cause_plot(path: Path, root_cause: Dict[str, Any]) -> None:
     gain_share = root_cause.get("gain_share_median") or {}
     station_rows = list(root_cause.get("station_breakdown") or [])[:5]
     top_groups = list(root_cause.get("top_group_sse_contributors") or [])[:5]
+    ylabel_font = _locale_font(13.6)
+    title_font = _locale_font(15.0)
+    tick_font = _locale_font(11.8)
+    note_font = _locale_font(12.8)
+    suptitle_font = _locale_font(16.6)
 
     fig, ax = plt.subplots(4, 1, figsize=(13.8, 16.2))
 
@@ -1192,9 +1215,9 @@ def _write_root_cause_plot(path: Path, root_cause: Dict[str, Any]) -> None:
         _to_float(ab_m.get("station_reflector_tropo_no_shapiro")),
     ]
     ax[0].bar(labels_ab, vals_ab, color=["#4e79a7", "#f28e2b", "#59a14f", "#e15759"])
-    ax[0].set_ylabel("median RMS [ns]", fontsize=13.6)
-    ax[0].set_title("Ablation chain (median RMS)", fontsize=15.0)
-    ax[0].tick_params(axis="x", rotation=18, labelsize=11.8)
+    ax[0].set_ylabel("median RMS [ns]", fontsize=ylabel_font)
+    ax[0].set_title("Ablation chain (median RMS)", fontsize=title_font)
+    ax[0].tick_params(axis="x", rotation=18, labelsize=tick_font)
 
     labels_gain = ["tropo", "tide"]
     vals_gain = [
@@ -1203,20 +1226,20 @@ def _write_root_cause_plot(path: Path, root_cause: Dict[str, Any]) -> None:
     ]
     ax[1].bar(labels_gain, vals_gain, color=["#f28e2b", "#59a14f"])
     ax[1].set_ylim(0.0, max(1.0, np.nanmax(vals_gain) * 1.15 if np.any(np.isfinite(vals_gain)) else 1.0))
-    ax[1].set_ylabel("share of total gain", fontsize=13.6)
-    ax[1].set_title("Gain-share split (median)", fontsize=15.0)
-    ax[1].tick_params(axis="x", labelsize=11.8)
+    ax[1].set_ylabel("share of total gain", fontsize=ylabel_font)
+    ax[1].set_title("Gain-share split (median)", fontsize=title_font)
+    ax[1].tick_params(axis="x", labelsize=tick_font)
 
     # 条件分岐: `station_rows` を満たす経路を評価する。
     if station_rows:
         st_labels = [str(r.get("station")) for r in station_rows]
         st_vals = [_to_float(r.get("sse_share")) for r in station_rows]
         ax[2].bar(st_labels, st_vals, color="#76b7b2")
-        ax[2].set_ylabel("SSE share", fontsize=13.6)
-        ax[2].set_title("Station contribution (top)", fontsize=15.0)
-        ax[2].tick_params(axis="x", rotation=20, labelsize=11.8)
+        ax[2].set_ylabel("SSE share", fontsize=ylabel_font)
+        ax[2].set_title("Station contribution (top)", fontsize=title_font)
+        ax[2].tick_params(axis="x", rotation=20, labelsize=tick_font)
     else:
-        ax[2].text(0.5, 0.5, "no station rows", ha="center", va="center", fontsize=12.8)
+        ax[2].text(0.5, 0.5, "no station rows", ha="center", va="center", fontsize=note_font)
         ax[2].set_axis_off()
 
     # 条件分岐: `top_groups` を満たす経路を評価する。
@@ -1225,18 +1248,18 @@ def _write_root_cause_plot(path: Path, root_cause: Dict[str, Any]) -> None:
         gp_labels = [f"{r.get('station')}/{r.get('target')}" for r in top_groups]
         gp_vals = [_to_float(r.get("sse_share")) for r in top_groups]
         ax[3].bar(gp_labels, gp_vals, color="#edc948")
-        ax[3].set_ylabel("SSE share", fontsize=13.6)
-        ax[3].set_title("Top group contributors", fontsize=15.0)
-        ax[3].tick_params(axis="x", rotation=30, labelsize=11.8)
+        ax[3].set_ylabel("SSE share", fontsize=ylabel_font)
+        ax[3].set_title("Top group contributors", fontsize=title_font)
+        ax[3].tick_params(axis="x", rotation=30, labelsize=tick_font)
     else:
-        ax[3].text(0.5, 0.5, "no group rows", ha="center", va="center", fontsize=12.8)
+        ax[3].text(0.5, 0.5, "no group rows", ha="center", va="center", fontsize=note_font)
         ax[3].set_axis_off()
 
     for axis in ax:
-        axis.tick_params(axis="y", labelsize=11.8)
-    fig.suptitle("LLR residual root-cause decomposition", fontsize=16.6)
+        axis.tick_params(axis="y", labelsize=tick_font)
+    fig.suptitle("LLR residual root-cause decomposition", fontsize=suptitle_font)
     plt.tight_layout(rect=[0, 0, 1, 0.975])
-    plt.savefig(path, dpi=180)
+    _save_png_and_pdf(path, dpi=180)
     plt.close(fig)
 
 
@@ -1261,6 +1284,15 @@ def _write_root_cause_over4_plot(path: Path, root_cause: Dict[str, Any]) -> None
     group_ex = list(ex4.get("top_group_excess_contributors") or [])[:6]
     scenarios = root_cause.get("bottleneck_scenarios") or {}
     ranking = list(root_cause.get("bottleneck_ranking") or [])
+    xlabel_font = _locale_font(13.6)
+    ylabel_font = _locale_font(13.6)
+    title_font = _locale_font(15.0)
+    tick_font = _locale_font(11.8)
+    tick_font_alt = _locale_font(11.6)
+    note_font = _locale_font(12.8)
+    annotation_font = _locale_font(12.0)
+    legend_font = _locale_font(12.0)
+    suptitle_font = _locale_font(16.6)
 
     fig, ax = plt.subplots(4, 1, figsize=(13.8, 16.4))
 
@@ -1269,23 +1301,23 @@ def _write_root_cause_over4_plot(path: Path, root_cause: Dict[str, Any]) -> None
     for i, v in enumerate(stage_vals):
         # 条件分岐: `np.isfinite(v)` を満たす経路を評価する。
         if np.isfinite(v):
-            ax[0].text(i, v + 0.04, f"+{max(v - threshold, 0.0):.2f} ns", ha="center", va="bottom", fontsize=12.0)
+            ax[0].text(i, v + 0.04, f"+{max(v - threshold, 0.0):.2f} ns", ha="center", va="bottom", fontsize=annotation_font)
 
-    ax[0].set_ylabel("median RMS [ns]", fontsize=13.6)
-    ax[0].set_title("Ablation vs 4 ns threshold", fontsize=15.0)
-    ax[0].legend(loc="upper right", fontsize=12.0)
-    ax[0].tick_params(axis="x", labelsize=11.8)
+    ax[0].set_ylabel("median RMS [ns]", fontsize=ylabel_font)
+    ax[0].set_title("Ablation vs 4 ns threshold", fontsize=title_font)
+    ax[0].legend(loc="upper right", fontsize=legend_font)
+    ax[0].tick_params(axis="x", labelsize=tick_font)
 
     # 条件分岐: `station_ex` を満たす経路を評価する。
     if station_ex:
         st_labels = [str(r.get("station")) for r in station_ex][::-1]
         st_vals = [_to_float(r.get("excess_share_over4ns")) for r in station_ex][::-1]
         ax[1].barh(st_labels, st_vals, color="#76b7b2")
-        ax[1].set_xlabel("share of >4ns excess (SSE-based)", fontsize=13.6)
-        ax[1].set_title("Station bottleneck share", fontsize=15.0)
-        ax[1].tick_params(axis="x", labelsize=11.8)
+        ax[1].set_xlabel("share of >4ns excess (SSE-based)", fontsize=xlabel_font)
+        ax[1].set_title("Station bottleneck share", fontsize=title_font)
+        ax[1].tick_params(axis="x", labelsize=tick_font)
     else:
-        ax[1].text(0.5, 0.5, "no station excess rows", ha="center", va="center", fontsize=12.8)
+        ax[1].text(0.5, 0.5, "no station excess rows", ha="center", va="center", fontsize=note_font)
         ax[1].set_axis_off()
 
     # 条件分岐: `group_ex` を満たす経路を評価する。
@@ -1294,11 +1326,11 @@ def _write_root_cause_over4_plot(path: Path, root_cause: Dict[str, Any]) -> None
         gp_labels = [f"{r.get('station')}/{r.get('target')}" for r in group_ex][::-1]
         gp_vals = [_to_float(r.get("excess_share_over4ns")) for r in group_ex][::-1]
         ax[2].barh(gp_labels, gp_vals, color="#edc948")
-        ax[2].set_xlabel("share of >4ns excess (SSE-based)", fontsize=13.6)
-        ax[2].set_title("Top group bottlenecks", fontsize=15.0)
-        ax[2].tick_params(axis="x", labelsize=11.8)
+        ax[2].set_xlabel("share of >4ns excess (SSE-based)", fontsize=xlabel_font)
+        ax[2].set_title("Top group bottlenecks", fontsize=title_font)
+        ax[2].tick_params(axis="x", labelsize=tick_font)
     else:
-        ax[2].text(0.5, 0.5, "no group excess rows", ha="center", va="center", fontsize=12.8)
+        ax[2].text(0.5, 0.5, "no group excess rows", ha="center", va="center", fontsize=note_font)
         ax[2].set_axis_off()
 
     # 条件分岐: `ranking` を満たす経路を評価する。
@@ -1307,9 +1339,9 @@ def _write_root_cause_over4_plot(path: Path, root_cause: Dict[str, Any]) -> None
         r_labels = [str(r.get("id", "")).replace("_", "\n") for r in ranking]
         r_vals = [_to_float(r.get("estimated_gain_ns")) for r in ranking]
         ax[3].bar(r_labels, r_vals, color="#e15759")
-        ax[3].set_ylabel("estimated gain [ns]", fontsize=13.6)
-        ax[3].set_title("Expected gain by bottleneck fix", fontsize=15.0)
-        ax[3].tick_params(axis="x", labelsize=11.6)
+        ax[3].set_ylabel("estimated gain [ns]", fontsize=ylabel_font)
+        ax[3].set_title("Expected gain by bottleneck fix", fontsize=title_font)
+        ax[3].tick_params(axis="x", labelsize=tick_font_alt)
     else:
         scenario_labels = ["current", "apol_cap", "bias_corrected", "exclude_nglr1"]
         scenario_vals = [
@@ -1320,16 +1352,16 @@ def _write_root_cause_over4_plot(path: Path, root_cause: Dict[str, Any]) -> None
         ]
         ax[3].bar(scenario_labels, scenario_vals, color="#e15759")
         ax[3].axhline(threshold, color="black", linestyle="--", linewidth=1.2)
-        ax[3].set_ylabel("group-weighted RMS [ns]", fontsize=13.6)
-        ax[3].set_title("What-if scenarios", fontsize=15.0)
-        ax[3].tick_params(axis="x", labelsize=11.6)
+        ax[3].set_ylabel("group-weighted RMS [ns]", fontsize=ylabel_font)
+        ax[3].set_title("What-if scenarios", fontsize=title_font)
+        ax[3].tick_params(axis="x", labelsize=tick_font_alt)
 
     for axis in ax:
-        axis.tick_params(axis="y", labelsize=11.8)
+        axis.tick_params(axis="y", labelsize=tick_font)
 
-    fig.suptitle("LLR residual bottlenecks (>4 ns) systematic audit", fontsize=16.6)
+    fig.suptitle("LLR residual bottlenecks (>4 ns) systematic audit", fontsize=suptitle_font)
     plt.tight_layout(rect=[0, 0, 1, 0.975])
-    plt.savefig(path, dpi=180)
+    _save_png_and_pdf(path, dpi=180)
     plt.close(fig)
 
 
@@ -1819,7 +1851,7 @@ def _write_bottleneck_deepdive_plot(path: Path, deep: Dict[str, Any]) -> None:
 
     fig.suptitle("LLR residual bottleneck deep-dive (cause isolation)", fontsize=13)
     plt.tight_layout(rect=[0, 0, 1, 0.95])
-    plt.savefig(path, dpi=180)
+    _save_png_and_pdf(path, dpi=180)
     plt.close(fig)
 
 
@@ -2474,7 +2506,7 @@ def _write_plot(path: Path, manifest_diag: Dict[str, Any], metrics_diag: Dict[st
 
     fig.suptitle("LLR precision re-audit: coverage, semantics, and modern gap", fontsize=13)
     plt.tight_layout(rect=[0, 0, 1, 0.95])
-    plt.savefig(path, dpi=180)
+    _save_png_and_pdf(path, dpi=180)
     plt.close(fig)
 
 

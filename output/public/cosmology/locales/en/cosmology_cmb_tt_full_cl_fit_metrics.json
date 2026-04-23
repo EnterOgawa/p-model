@@ -1,0 +1,54 @@
+{
+  "generated_utc": "2026-04-13T03:23:27.654701+00:00",
+  "domain": "cosmology",
+  "step": "8.7.34.11 (CMB full C_ell fit; TT, ell<=2500)",
+  "dataset": "Planck 2018 TT binned (COM_PowerSpect_CMB-TT-binned_R3.01)",
+  "inputs": {
+    "tt_data": "C:/develop/waveP/data/cosmology/planck2018_com_power_spect_tt_binned_r3.01.txt",
+    "ell_max": 2500.0,
+    "grid": {
+      "alpha_min": 0.97,
+      "alpha_max": 1.03,
+      "alpha_step": 0.0005,
+      "delta_min": -80.0,
+      "delta_max": 80.0,
+      "delta_step": 0.5,
+      "n_alpha": 121,
+      "n_delta": 321
+    }
+  },
+  "fit": {
+    "baseline_lcdm": {
+      "chi2": 65.12154684822823,
+      "dof": 83,
+      "chi2_dof": 0.7845969499786535,
+      "aic": 65.12154684822823,
+      "k_params": 0
+    },
+    "pmodel_template_remap": {
+      "chi2": 64.13935618128198,
+      "dof": 79,
+      "chi2_dof": 0.8118905845731896,
+      "aic": 72.13935618128198,
+      "k_params": 4,
+      "alpha": 1.001,
+      "delta_ell": -0.5,
+      "gain": 0.9997005227021882,
+      "offset": 1.1245600953579942
+    },
+    "delta_aic_baseline_minus_pmodel": -7.017809333053748,
+    "winner": "baseline_lcdm",
+    "status": "reject",
+    "decision_rule": "ΔAIC=AIC_baseline-AIC_P; >2:pass, (-2,2]:watch, <=-2:reject"
+  },
+  "notes": [
+    "本監査は TT binned spectrum の full-range 運用評価であり、TE/EE 同時fitは別タスク。",
+    "P-model側は baseline best-fit テンプレートへの remap（alpha,delta）+線形振幅/offset で評価し、第一原理 C_ell 生成器の代替ではない。"
+  ],
+  "outputs": {
+    "png": "C:/develop/waveP/output/private/cosmology/locales/en/cosmology_cmb_tt_full_cl_fit.png",
+    "pdf": "C:/develop/waveP/output/private/cosmology/locales/en/cosmology_cmb_tt_full_cl_fit.pdf",
+    "metrics_json": "C:/develop/waveP/output/private/cosmology/locales/en/cosmology_cmb_tt_full_cl_fit_metrics.json",
+    "summary_csv": "C:/develop/waveP/output/private/cosmology/locales/en/cosmology_cmb_tt_full_cl_fit_summary.csv"
+  }
+}

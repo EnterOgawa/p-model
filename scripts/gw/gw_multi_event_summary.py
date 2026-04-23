@@ -27,6 +27,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.quantum.figure_japanese_localizer import get_figure_language  # noqa: E402
 from scripts.utils.plot_style import (  # noqa: E402
     apply_paper_style,
     apply_wavep_figure_layout,
@@ -61,6 +62,11 @@ def _set_japanese_font() -> None:
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         pass
+
+
+# 関数: `_plot_text` の入出力契約と処理意図を定義する。
+def _plot_text(ja: str, en: str, *, lang: str) -> str:
+    return ja if lang == "ja" else en
 
 
 # 関数: `_read_json` の入出力契約と処理意図を定義する。
@@ -315,7 +321,9 @@ def _plot_summary(
     match_omitted_by_reason: Optional[Dict[str, int]] = None,
 ) -> None:
     apply_paper_style()
-    _set_japanese_font()
+    figure_lang = get_figure_language(default="ja")
+    if figure_lang == "ja":
+        _set_japanese_font()
 
     dets = _detector_order(sorted({p.detector for p in points if p.detector}))
     ev_index = {ev: i for i, ev in enumerate(events)}
@@ -398,11 +406,9 @@ def _plot_summary(
     ax_r2.set_ylim(-0.05, 1.05)
     # 条件分岐: `wave_frange_hz is not None` を満たす経路を評価する。
     if wave_frange_hz is not None:
-        ax_m.set_ylabel(
-            f"match ({wave_frange_hz[0]:g}..{wave_frange_hz[1]:g} Hz)",
-        )
+        ax_m.set_ylabel(_plot_text(f"match ({wave_frange_hz[0]:g}..{wave_frange_hz[1]:g} Hz)", f"match ({wave_frange_hz[0]:g}..{wave_frange_hz[1]:g} Hz)", lang=figure_lang))
     else:
-        ax_m.set_ylabel("match")
+        ax_m.set_ylabel(_plot_text("match", "match", lang=figure_lang))
 
     ax_m.set_ylim(-0.05, 1.05)
     ax_r2.margins(x=0.03)
@@ -563,10 +569,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # 条件分岐: `points` を満たす経路を評価する。
 
     if points:
-        title = "重力波（複数イベント）：R^2 と match の要約"
+        title = _plot_text("重力波（複数イベント）：R^2 と match の要約", "GW multi-event: R^2 and match summary", lang=get_figure_language(default="ja"))
         # 条件分岐: `wave_frange_hz is not None` を満たす経路を評価する。
         if wave_frange_hz is not None:
-            title = f"重力波（複数イベント）：R^2 と match ({wave_frange_hz[0]:g}..{wave_frange_hz[1]:g} Hz)"
+            title = _plot_text(
+                f"重力波（複数イベント）：R^2 と match ({wave_frange_hz[0]:g}..{wave_frange_hz[1]:g} Hz)",
+                f"GW multi-event: R^2 and match ({wave_frange_hz[0]:g}..{wave_frange_hz[1]:g} Hz)",
+                lang=get_figure_language(default="ja"),
+            )
 
         _plot_summary(
             points=points,
@@ -583,14 +593,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             events=events,
             tick_labels=tick_labels_public,
             out_png=out_png_public,
-            title="重力波（複数イベント）：観測と単純モデルの一致度",
+            title=_plot_text("重力波（複数イベント）：観測と単純モデルの一致度", "GW multi-event: observed vs simple-model agreement", lang=get_figure_language(default="ja")),
             public=True,
             wave_frange_hz=wave_frange_hz,
             match_omitted_by_reason=match_omitted_by_reason,
         )
     else:
-        _plot_placeholder(out_png, title="重力波（複数イベント）要約")
-        _plot_placeholder(out_png_public, title="重力波（複数イベント）要約")
+        _plot_placeholder(out_png, title=_plot_text("重力波（複数イベント）要約", "GW multi-event summary", lang=get_figure_language(default="ja")))
+        _plot_placeholder(out_png_public, title=_plot_text("重力波（複数イベント）要約", "GW multi-event summary", lang=get_figure_language(default="ja")))
 
     out_pdf = out_png.with_suffix(".pdf")
     out_pdf_public = out_png_public.with_suffix(".pdf")

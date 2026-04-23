@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-04-06T11:09:23.325689+00:00",
+  "generated_utc": "2026-04-12T11:16:29.699760+00:00",
   "kind": "fsigma8_growth_mapping",
   "decision_rule": {
     "mapping_defined": "growth_mapping_defined=true and fsigma8_gate_defined=true",

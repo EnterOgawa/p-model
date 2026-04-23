@@ -1,0 +1,26 @@
+{
+  "generated_utc": "2026-04-11T08:19:07.118239+00:00",
+  "locale": "en",
+  "script": "scripts/theory/pmodel_core_concept_comparison.py",
+  "outputs": {
+    "png_private": "C:/develop/waveP/output/private/theory/locales/en/pmodel_core_concept_comparison.png",
+    "png_public": "C:/develop/waveP/output/public/theory/locales/en/pmodel_core_concept_comparison.png",
+    "pdf_private": "C:/develop/waveP/output/private/theory/locales/en/pmodel_core_concept_comparison.pdf",
+    "pdf_public": "C:/develop/waveP/output/public/theory/locales/en/pmodel_core_concept_comparison.pdf",
+    "json_private": "C:/develop/waveP/output/private/theory/locales/en/pmodel_core_concept_comparison_metrics.json",
+    "json_public": "C:/develop/waveP/output/public/theory/locales/en/pmodel_core_concept_comparison_metrics.json"
+  },
+  "diag": {
+    "locale": "en",
+    "columns": [
+      "Viewpoint",
+      "Reference frame (GR)",
+      "P-model"
+    ],
+    "n_rows": 5
+  },
+  "notes": [
+    "This is a conceptual comparison diagram rather than a numerical fit.",
+    "The English locale is emitted under output/public/theory/locales/en and output/private/theory/locales/en."
+  ]
+}

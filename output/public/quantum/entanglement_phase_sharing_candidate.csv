@@ -1,6 +1,6 @@
 id,metric,value,threshold,operator,pass,gate,status,normalized_score,note
 u1_effective_sector_present,effective_u1_sector_adopted(pass=1),1.0,1.0,>=,True,True,pass,1.0,8.7.49.3 の結論どおり、U(1) は P 単独導出ではなく独立の有効理論として採用されている必要がある。
-antisymmetric_pair_kernel,swap_antisymmetry_error,0.0,1e-12,<=,True,True,pass,0.0,最小 pair kernel は交換で符号反転する antisymmetric 形を持つこと。
-global_phase_invariance,max_abs_probability_delta_under_global_phase_shift,3.3306690738754696e-16,1e-12,<=,True,True,pass,0.00033306690738754696,共有 source phase は global U(1) 位相として確率を変えないこと。
-remote_marginal_independence,max_abs_remote_setting_dependence_of_local_marginals,3.885780586188048e-16,1e-12,<=,True,True,pass,0.0003885780586188048,理想 candidate は remote setting に依らず local marginal 1/2 を返すこと。
-ideal_chsh_capability,ideal_abs_s_standard,2.82842712474619,2.7,>=,True,False,pass,0.9545941546018393,理想 nonseparable pair amplitude が Bell 型相関の上限 2sqrt(2) に到達できることを確認する。実データへの適用判定ではない。
+antisymmetric_pair_kernel,swap_antisymmetry_error,2,1e-12,<=,False,True,pass,2000000000000,最小 pair kernel は交換で符号反転する antisymmetric 形を持つこと。
+global_phase_invariance,max_abs_probability_delta_under_global_phase_shift,4.440892098500626e-16,1e-12,<=,True,True,pass,0.0004440892098500626,共有 source phase は global U(1) 位相として確率を変えないこと。
+remote_marginal_independence,max_abs_remote_setting_dependence_of_local_marginals,0,1e-12,<=,True,True,pass,0,理想 candidate は remote setting に依らず local marginal 1/2 を返すこと。
+ideal_chsh_capability,ideal_abs_s_standard,2.82842712474619,2.7,>=,True,False,pass,0.9999999999999999,理想 nonseparable pair amplitude が Bell 型相関の上限 2sqrt(2) に到達できることを確認する。実データへの適用判定ではない。

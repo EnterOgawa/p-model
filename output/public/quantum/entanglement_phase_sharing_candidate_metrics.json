@@ -1,0 +1,22 @@
+{
+  "generated_utc": "2026-04-10T15:52:21.812619+00:00",
+  "phase": 8,
+  "step": "8.7.49.6",
+  "title": "Entanglement phase-sharing candidate",
+  "summary_metrics": {
+    "antisymmetry_error": 2.0,
+    "global_phase_invariance_max_error": 4.440892098500626e-16,
+    "remote_marginal_max_error": 0.0,
+    "ideal_abs_s_standard": 2.82842712474619,
+    "correlation_closed_form_max_error": 2.0
+  },
+  "outputs": {
+    "figure_png": "output/public/quantum/locales/en/entanglement_phase_sharing_candidate.png",
+    "figure_pdf": "output/public/quantum/locales/en/entanglement_phase_sharing_candidate.pdf",
+    "csv": "output/public/quantum/entanglement_phase_sharing_candidate.csv"
+  },
+  "notes": [
+    "The figure fixes the ideal pair-kernel shape and the local-marginal consistency only.",
+    "Selection-sensitive dataset judgments remain a Part III-B / Part IV matter."
+  ]
+}

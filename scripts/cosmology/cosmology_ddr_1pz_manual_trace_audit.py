@@ -204,7 +204,7 @@ def _build_trace_rows() -> List[Dict[str, Any]]:
         pipeline_label="DDR combined (SNe Ia + BAO): eta construction",
         line_no=2,
         stage="BAO substitution",
-        equation="if D_A = D_M/(1+z): eta = D_L / ((1+z)*D_M)",
+        equation="もし D_A = D_M/(1+z) なら、\neta = D_L / ((1+z)*D_M)",
         assumption="BAO-side conversion introduces one geometric (1+z) directly into eta.",
         has_one_plus_z=True,
         one_plus_z_role="geometry_DA_from_DM",
@@ -331,6 +331,9 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 # 関数: `_format_equation_note` の入出力契約と処理意図を定義する。
 
 def _format_equation_note(equation: str) -> str:
+    if "\n" in str(equation):
+        return str(equation)
+
     parts = str(equation).split(" = ", 1)
     # 条件分岐: `len(parts) == 2` を満たす経路を評価する。
     if len(parts) == 2:
@@ -347,9 +350,10 @@ def _format_equation_note(equation: str) -> str:
 # 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, rows: List[Dict[str, Any]], summary: Dict[str, Any]) -> None:
+    figure_lang = os.environ.get("WAVEP_FIGURE_LANG", "").strip().lower() or "ja"
     os.environ["WAVEP_MPL_FONT_PROFILE"] = "part2_astrophysics"
     os.environ["WAVEP_MPL_CJK_FONT"] = "Noto Sans CJK JP"
-    os.environ["WAVEP_FIGURE_LANG"] = "ja"
+    os.environ["WAVEP_FIGURE_LANG"] = figure_lang
     apply_paper_style()
     import matplotlib.pyplot as plt
 
@@ -374,6 +378,21 @@ def _plot(path: Path, rows: List[Dict[str, Any]], summary: Dict[str, Any]) -> No
         "flux_or_timing_side": "#3b82f6",
         "definition": "#6b7280",
     }
+    role_labels = (
+        {
+            "geometry_DA_from_DM": "geometry D_A←D_M",
+            "timing_restframe": "timing/rest-frame",
+            "flux_or_timing_side": "flux/timing side",
+            "definition": "definition",
+        }
+        if figure_lang == "en"
+        else {
+            "geometry_DA_from_DM": "幾何 D_A←D_M",
+            "timing_restframe": "時間/静止系",
+            "flux_or_timing_side": "flux/timing 側",
+            "definition": "定義",
+        }
+    )
 
     role_matrix = np.zeros((len(role_order), len(pipeline_ids)), dtype=float)
     for pipeline_index, pipeline_id in enumerate(pipeline_ids):
@@ -397,14 +416,22 @@ def _plot(path: Path, rows: List[Dict[str, Any]], summary: Dict[str, Any]) -> No
             color=role_colors[role_name],
             edgecolor="#222222",
             linewidth=0.8,
-            label=role_name,
+            label=role_labels.get(role_name, role_name),
         )
         cumulative += counts
 
     axis_top.set_xticks(x_positions)
     axis_top.set_xticklabels(pipeline_labels, rotation=10, ha="right", rotation_mode="anchor")
-    axis_top.set_ylabel("rows with (1+z)", fontsize=axis_font)
-    axis_top.set_title("DDR audit: where (1+z) enters in SNe Ia/BAO pipelines", fontsize=title_font)
+    axis_top.set_ylabel(
+        "rows with (1+z)" if figure_lang == "en" else "（1+z）を含む行数",
+        fontsize=axis_font,
+    )
+    axis_top.set_title(
+        "DDR audit: where (1+z) enters in SNe Ia/BAO pipelines"
+        if figure_lang == "en"
+        else "DDR監査: SNe Ia/BAO パイプラインのどこに (1+z) が入るか",
+        fontsize=title_font,
+    )
     axis_top.tick_params(labelsize=tick_font)
     axis_top.grid(axis="y", linestyle="--", alpha=0.35)
     axis_top.legend(loc="upper left", frameon=True, fontsize=legend_font)
@@ -414,22 +441,51 @@ def _plot(path: Path, rows: List[Dict[str, Any]], summary: Dict[str, Any]) -> No
     if geometry_points:
         y_positions = np.arange(len(geometry_points))
         labels = [
-            f"{item['pipeline_label']}\nline {item['line_no']}"
+            (
+                (
+                    f"DDR combined\nline {item['line_no']}"
+                    if figure_lang == "en"
+                    else f"DDR統合\n行 {item['line_no']}"
+                )
+                if str(item["pipeline_id"]) == "ddr_combined"
+                else (
+                    f"BAO scales\nline {item['line_no']}"
+                    if figure_lang == "en"
+                    else f"BAO尺度\n行 {item['line_no']}"
+                )
+            )
             for item in geometry_points
         ]
         axis_bottom.barh(y_positions, np.ones(len(geometry_points)), color="#dc2626", edgecolor="#222222", linewidth=0.8)
         axis_bottom.set_yticks(y_positions)
         axis_bottom.set_yticklabels(labels)
         axis_bottom.set_xlim(0.0, 1.4)
-        axis_bottom.set_xlabel("geometry-side injection marker (1 = detected)", fontsize=axis_font)
-        axis_bottom.set_title("Detected insertion points for D_A = D_M/(1+z)", fontsize=title_font)
+        axis_bottom.set_xlabel(
+            "geometry-side injection marker (1 = detected)"
+            if figure_lang == "en"
+            else "幾何側注入マーカー（1 = 検出）",
+            fontsize=axis_font,
+        )
+        axis_bottom.set_title(
+            "Detected insertion points for D_A = D_M/(1+z)"
+            if figure_lang == "en"
+            else "D_A = D_M/(1+z) の検出箇所",
+            fontsize=title_font,
+        )
         axis_bottom.tick_params(labelsize=tick_font)
         axis_bottom.grid(axis="x", linestyle="--", alpha=0.35)
         for point_index, item in enumerate(geometry_points):
+            note_text = _format_equation_note(str(item["equation"]))
+            if figure_lang == "en" and str(item["pipeline_id"]) == "ddr_combined" and int(item["line_no"]) == 2:
+                note_text = "If D_A =\nD_M/(1+z), then\neta = D_L /\n((1+z)*D_M)"
+            if figure_lang == "en" and str(item["pipeline_id"]) == "bao_anisotropic" and int(item["line_no"]) == 3:
+                note_text = "D_V =\n[(1+z)^2 * D_A^2\n * c*z/H(z)]^(1/3)"
+            if figure_lang == "en" and str(item["pipeline_id"]) == "bao_anisotropic" and int(item["line_no"]) == 2:
+                note_text = "D_A =\nD_M/(1+z)"
             axis_bottom.text(
                 1.02,
                 point_index,
-                _format_equation_note(str(item["equation"])),
+                note_text,
                 va="center",
                 ha="left",
                 fontsize=note_font,
@@ -437,14 +493,30 @@ def _plot(path: Path, rows: List[Dict[str, Any]], summary: Dict[str, Any]) -> No
             )
     else:
         axis_bottom.axis("off")
-        axis_bottom.text(0.5, 0.5, "No geometry-side (1+z) insertion detected.", ha="center", va="center", fontsize=axis_font)
+        axis_bottom.text(
+            0.5,
+            0.5,
+            "No geometry-side (1+z) insertion detected."
+            if figure_lang == "en"
+            else "幾何側の (1+z) 注入は検出されなかった。",
+            ha="center",
+            va="center",
+            fontsize=axis_font,
+        )
 
+    suptitle_text = "Manual line-by-line trace for implicit expansion assumption in DDR pipelines"
     figure.suptitle(
-        "Step 5.3.18: manual line-by-line trace for implicit expansion assumption in DDR pipelines",
+        suptitle_text,
         fontsize=suptitle_font,
         y=0.95,
     )
-    figure.subplots_adjust(left=0.23, right=0.97, top=0.87, bottom=0.12, hspace=0.58)
+    figure.subplots_adjust(
+        left=0.27 if figure_lang == "en" else 0.31,
+        right=0.985 if figure_lang == "en" else 0.97,
+        top=0.87,
+        bottom=0.12,
+        hspace=0.58,
+    )
     path.parent.mkdir(parents=True, exist_ok=True)
     pdf_path = path.with_suffix(".pdf")
     with plt.rc_context({"savefig.bbox": None, "savefig.pad_inches": 0.0}):

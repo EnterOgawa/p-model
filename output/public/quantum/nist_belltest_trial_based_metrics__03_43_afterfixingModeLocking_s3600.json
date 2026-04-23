@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-04-09T17:10:18.831274+00:00",
+  "generated_utc": "2026-04-10T15:54:11.276998+00:00",
   "dataset": {
     "source": "NIST belltestdata (processed_compressed/hdf5 build; Shalm et al. 2015 time-tag repository)",
     "hdf5": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_belltestdata\\processed_compressed\\hdf5\\2015_09_18\\03_43_CH_pockel_100kHz.run4.afterTimingfix2_afterfixingModeLocking.dat.compressed.build.hdf5"
@@ -99,7 +99,7 @@
     }
   },
   "comparison": {
-    "coincidence_sweep_csv": "C:\\develop\\waveP\\output\\public\\quantum\\nist_belltest_coincidence_sweep__03_43_afterfixingModeLocking_s3600.csv",
+    "coincidence_sweep_csv": "output\\public\\quantum\\nist_belltest_coincidence_sweep__03_43_afterfixingModeLocking_s3600.csv",
     "windows_ns": [
       0.5,
       1.0,

@@ -27,6 +27,8 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.utils.plot_style import apply_wavep_figure_layout
+from scripts.quantum.figure_japanese_localizer import get_figure_language
+from scripts.utils.figure_locale_paths import localize_figure_output_path
 
 
 # Physical constants
@@ -60,6 +62,12 @@ def _set_japanese_font() -> None:
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
         pass
+
+
+# 関数: `_plot_text` の入出力契約と処理意図を定義する。
+
+def _plot_text(ja: str, en: str, *, lang: str) -> str:
+    return ja if lang == "ja" else en
 
 
 # クラス: `GammaMeasurement` の責務と境界条件を定義する。
@@ -294,27 +302,55 @@ def main() -> int:
     obs_rows = list(meta.get("observations") or [])
     metrics["beta_source"] = beta_source
 
-    _set_japanese_font()
-    fig, (ax1, ax2) = plt.subplots(
-        2,
-        1,
-        figsize=(10.4, 7.35),
-        gridspec_kw={"height_ratios": [1.12, 1.0]},
-    )
+    figure_lang = get_figure_language(default="ja")
+    if figure_lang == "ja":
+        _set_japanese_font()
+
+    if figure_lang == "en":
+        fig, (ax1, ax2) = plt.subplots(
+            2,
+            1,
+            figsize=(7.2, 6.45),
+            gridspec_kw={"height_ratios": [1.0, 1.0]},
+        )
+    else:
+        fig, (ax1, ax2) = plt.subplots(
+            1,
+            2,
+            figsize=(11.9, 5.1),
+            gridspec_kw={"width_ratios": [1.08, 1.0]},
+        )
 
     # Left: alpha(b)
-    ax1.plot(b_over, alpha_arcsec, linewidth=2.2, label=f"P-model（β={metrics.get('beta', 1.0):g}）")
+
+    ax1.plot(
+        b_over,
+        alpha_arcsec,
+        linewidth=2.2,
+        label=_plot_text(
+            f"P-model（β={metrics.get('beta', 1.0):g}）",
+            f"P-model (β={metrics.get('beta', 1.0):g})",
+            lang=figure_lang,
+        ),
+    )
     ax1.scatter([1.0], [float(metrics.get("alpha_pmodel_arcsec_limb", float("nan")))], color="black", s=32, zorder=3)
     ax1.axhline(
         float(metrics.get("reference_arcsec_limb", 1.75)),
         color="gray",
         linestyle="--",
             linewidth=1.25,
-            label=f"標準理論（GR, γ=1）: {float(metrics.get('reference_arcsec_limb', 1.75)):.3f} 角秒（太陽縁）",
+            label=_plot_text(
+                f"標準理論（GR, γ=1）: {float(metrics.get('reference_arcsec_limb', 1.75)):.3f} 角秒（太陽縁）",
+                f"Standard GR: {float(metrics.get('reference_arcsec_limb', 1.75)):.3f} arcsec at the solar limb",
+                lang=figure_lang,
+            ),
         )
     # 条件分岐: `metrics.get("observed_alpha_arcsec_limb_best") is not None and metrics.get("o...` を満たす経路を評価する。
     if metrics.get("observed_alpha_arcsec_limb_best") is not None and metrics.get("observed_alpha_sigma_arcsec_limb_best") is not None:
-        label = str(metrics.get("observed_best_label") or metrics.get("observed_best_id") or "観測")
+        label = str(metrics.get("observed_best_label") or metrics.get("observed_best_id") or _plot_text("観測", "Observed", lang=figure_lang))
+        if figure_lang == "en":
+            label = label.replace("（", "(").replace("）", ")")
+
         ax1.errorbar(
             [1.0],
             [float(metrics["observed_alpha_arcsec_limb_best"])],
@@ -323,19 +359,19 @@ def main() -> int:
             color="tab:red",
             capsize=3,
             markersize=5.2,
-            label=f"観測（代表: {label}）",
+            label=_plot_text(f"観測（代表: {label}）", f"Observed (best: {label})", lang=figure_lang),
         )
 
     ax1.set_xlim(1.0, 10.0)
-    ax1.set_xlabel("インパクトパラメータ b [太陽半径 R_sun]", fontsize=15.0)
-    ax1.set_ylabel("偏向角 α [角秒]", fontsize=15.0)
-    ax1.set_title("太陽重力による光の偏向（弱場）", fontsize=18.0, pad=8.0)
+    ax1.set_xlabel(_plot_text("インパクトパラメータ b [太陽半径 R_sun]", "Impact parameter b [R_sun]", lang=figure_lang), fontsize=12.2)
+    ax1.set_ylabel(_plot_text("偏向角 α [角秒]", "Deflection angle α [arcsec]", lang=figure_lang), fontsize=15.0)
+    ax1.set_title(_plot_text("太陽重力による光の偏向（弱場）", "Deflection curve", lang=figure_lang), fontsize=13.8, pad=6.0)
     ax1.grid(True, alpha=0.3)
-    ax1.tick_params(axis="both", labelsize=13.4)
-    ax1.legend(fontsize=12.4, loc="upper right")
+    ax1.tick_params(axis="both", labelsize=11.0)
+    ax1.legend(fontsize=8.6, loc="upper right", frameon=True)
 
     # Right: observed gamma
-    ax2.axhline(1.0, color="gray", linestyle="--", linewidth=1.25, label="標準理論（GR）: γ=1")
+    ax2.axhline(1.0, color="gray", linestyle="--", linewidth=1.25, label=_plot_text("標準理論（GR）: γ=1", "Standard theory (GR): γ=1", lang=figure_lang))
     # 条件分岐: `metrics.get("gamma_pmodel") is not None` を満たす経路を評価する。
     if metrics.get("gamma_pmodel") is not None:
         ax2.axhline(
@@ -343,7 +379,11 @@ def main() -> int:
             color="tab:blue",
             linestyle="-",
             linewidth=1.25,
-            label=f"P-model 予測: γ=2β-1 = {float(metrics['gamma_pmodel']):.6f}",
+            label=_plot_text(
+                f"P-model 予測: γ=2β-1 = {float(metrics['gamma_pmodel']):.6f}",
+                f"P-model prediction: γ = 2β - 1 = {float(metrics['gamma_pmodel']):.6f}",
+                lang=figure_lang,
+            ),
         )
 
     # 条件分岐: `obs_rows` を満たす経路を評価する。
@@ -361,34 +401,40 @@ def main() -> int:
                 fmt="o",
                 capsize=3,
                 markersize=5.2,
-                label=str(r.get("short_label") or r.get("id") or "obs"),
+                label=str(r.get("short_label") or r.get("id") or "obs").replace("（", "(").replace("）", ")") if figure_lang == "en" else str(r.get("short_label") or r.get("id") or "obs"),
             )
     else:
-        ax2.text(0.5, 0.5, "観測データなし", ha="center", va="center", transform=ax2.transAxes, fontsize=14.0)
+        ax2.text(0.5, 0.5, _plot_text("観測データなし", "No observed data", lang=figure_lang), ha="center", va="center", transform=ax2.transAxes, fontsize=14.0)
 
-    ax2.set_xlabel("年", fontsize=15.0)
-    ax2.set_ylabel("PPN γ（光偏向の強さ）", fontsize=15.0)
-    ax2.set_title("光偏向パラメータ γ（観測）", fontsize=18.0, pad=8.0)
+    ax2.set_xlabel(_plot_text("年", "Year", lang=figure_lang), fontsize=12.2)
+    ax2.set_ylabel(_plot_text("PPN γ（光偏向の強さ）", "Observed PPN γ", lang=figure_lang), fontsize=13.8)
+    ax2.set_title(_plot_text("光偏向パラメータ γ（観測）", "Observed γ", lang=figure_lang), fontsize=13.8, pad=6.0)
     ax2.grid(True, alpha=0.3)
-    ax2.tick_params(axis="both", labelsize=13.4)
-    ax2.legend(fontsize=12.4, loc="lower right")
+    ax2.tick_params(axis="both", labelsize=11.0)
+    ax2.legend(fontsize=8.3, loc="lower right", frameon=True)
 
     apply_wavep_figure_layout(fig, template="part2_two_panel")
+    if figure_lang == "en":
+        fig.subplots_adjust(hspace=0.36, top=0.93, bottom=0.12, left=0.14, right=0.97)
+    else:
+        fig.subplots_adjust(wspace=0.36, top=0.90, bottom=0.16)
 
-    png_path = outdir / "solar_light_deflection.png"
-    pdf_path = outdir / "solar_light_deflection.pdf"
+    png_path = localize_figure_output_path(outdir / "solar_light_deflection.png", root=root, locale=figure_lang)
+    pdf_path = localize_figure_output_path(outdir / "solar_light_deflection.pdf", root=root, locale=figure_lang)
+    png_path.parent.mkdir(parents=True, exist_ok=True)
+    pdf_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(png_path, dpi=200)
     fig.savefig(pdf_path)
     plt.close(fig)
 
-    out_rows_csv = outdir / "solar_light_deflection_measurements.csv"
+    out_rows_csv = localize_figure_output_path(outdir / "solar_light_deflection_measurements.csv", root=root, locale=figure_lang)
     _write_measurements_csv(out_rows_csv, obs_rows)
 
     public_dir = root / "output" / "public" / "theory"
     public_dir.mkdir(parents=True, exist_ok=True)
-    public_png = public_dir / png_path.name
-    public_pdf = public_dir / pdf_path.name
-    public_csv = public_dir / out_rows_csv.name
+    public_png = localize_figure_output_path(public_dir / png_path.name, root=root, locale=figure_lang)
+    public_pdf = localize_figure_output_path(public_dir / pdf_path.name, root=root, locale=figure_lang)
+    public_csv = localize_figure_output_path(public_dir / out_rows_csv.name, root=root, locale=figure_lang)
     shutil.copy2(png_path, public_png)
     shutil.copy2(pdf_path, public_pdf)
     shutil.copy2(out_rows_csv, public_csv)
@@ -413,7 +459,7 @@ def main() -> int:
             "public_measurements_csv": str(public_csv),
         },
     }
-    json_path = outdir / "solar_light_deflection_metrics.json"
+    json_path = localize_figure_output_path(outdir / "solar_light_deflection_metrics.json", root=root, locale=figure_lang)
     _write_json(json_path, payload)
 
     print(f"[ok] plot : {png_path}")

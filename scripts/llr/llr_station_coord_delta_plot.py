@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -27,6 +28,8 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog  # noqa: E402
+from scripts.utils.figure_locale_paths import localize_figure_output_path  # noqa: E402
+from scripts.utils.plot_style import get_wavep_font_size  # noqa: E402
 
 
 # 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
@@ -106,12 +109,13 @@ def main(argv: List[str] | None = None) -> int:
         print(f"[err] missing: {in_json}")
         return 2
 
-    out_png = Path(str(args.out_png))
+    out_png = localize_figure_output_path(Path(str(args.out_png)), root=_ROOT)
     # 条件分岐: `not out_png.is_absolute()` を満たす経路を評価する。
     if not out_png.is_absolute():
         out_png = (_ROOT / out_png).resolve()
 
     out_png.parent.mkdir(parents=True, exist_ok=True)
+    out_pdf = out_png.with_suffix(".pdf")
 
     d = _read_json(in_json)
     stations = d.get("stations") if isinstance(d.get("stations"), dict) else {}
@@ -121,6 +125,10 @@ def main(argv: List[str] | None = None) -> int:
         print("[err] no delta_vs_slrlog_m values found in input json")
         return 2
 
+    figure_lang = str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower()
+    is_en = figure_lang.startswith("en")
+    font_scale = 1.55 if is_en else 1.0
+    tick_scale = 1.75 if is_en else 1.0
     _set_japanese_font()
     try:
         import matplotlib
@@ -137,16 +145,27 @@ def main(argv: List[str] | None = None) -> int:
 
     fig, ax = plt.subplots(figsize=(width_in, 6.0), dpi=200)
     ax.bar(xs, ys)
-    ax.set_ylabel("||Δr|| [m]（pos+eop - slrlog）")
-    title = str(args.title).strip() or "LLR：局座標の差分（pos+eop - slrlog）"
-    ax.set_title(title)
+    ax.set_ylabel(
+        "||Δr|| [m] (pos+eop - slrlog)" if is_en else "||Δr|| [m]（pos+eop - slrlog）",
+        fontsize=get_wavep_font_size("axis") * font_scale,
+    )
+    title = str(args.title).strip() or (
+        "LLR: station-coordinate delta (pos+eop - slrlog)" if is_en else "LLR：局座標の差分（pos+eop - slrlog）"
+    )
+    ax.set_title(title, fontsize=get_wavep_font_size("title") * font_scale)
     ax.grid(True, axis="y", alpha=0.3)
+    ax.tick_params(axis="x", labelsize=get_wavep_font_size("tick") * tick_scale)
+    ax.tick_params(axis="y", labelsize=get_wavep_font_size("tick") * tick_scale)
     for label in ax.get_xticklabels():
+        label.set_fontsize(get_wavep_font_size("tick") * tick_scale)
         label.set_rotation(45)
         label.set_ha("right")
+    for label in ax.get_yticklabels():
+        label.set_fontsize(get_wavep_font_size("tick") * tick_scale)
 
     fig.tight_layout()
     fig.savefig(out_png, dpi=220, bbox_inches="tight")
+    fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
 
     worklog.append_event(
@@ -154,12 +173,13 @@ def main(argv: List[str] | None = None) -> int:
             "domain": "llr",
             "action": "llr_station_coord_delta_plot",
             "inputs": [str(in_json).replace("\\", "/")],
-            "outputs": [str(out_png).replace("\\", "/")],
+            "outputs": [str(out_png).replace("\\", "/"), str(out_pdf).replace("\\", "/")],
             "params": {"title": title},
         }
     )
 
     print(f"[ok] png: {out_png}")
+    print(f"[ok] pdf: {out_pdf}")
     return 0
 
 

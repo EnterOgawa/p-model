@@ -21,6 +21,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -28,6 +29,11 @@ from typing import Any, Dict, List, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
+
+
+# 関数: `WAVEP_FIGURE_LANG` から英語 surface かどうかを判定する。
+def _is_en_figure() -> bool:
+    return str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
 
 ROOT = Path(__file__).resolve().parents[2]
 # 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
@@ -461,13 +467,15 @@ def _write_csv(path: Path, criteria: List[Dict[str, Any]]) -> None:
 # 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, payload: Dict[str, Any]) -> None:
+    is_en = _is_en_figure()
+    font_scale = 1.18 if is_en else 1.0
     display_labels = {
-        "phase_alpha_consistency": "位相: 原子反跳 α\n整合",
-        "phase_molecular_scaling": "位相: 分子同位体\nスケーリング",
-        "selection_delay_signature_fast": "選別: 高速切替\n遅延指標",
-        "selection_sweep_sensitivity_fast": "選別: 高速切替\n感度掃引",
-        "visibility_atom_precision_gap": "可視度: 原子干渉計\n精度差",
-        "statistical_bridge_mc_max_abs_frequency_error": "Born橋渡し:\nモンテカルロ最大誤差",
+        "phase_alpha_consistency": "Phase: atomic recoil α\nconsistency" if is_en else "位相: 原子反跳 α\n整合",
+        "phase_molecular_scaling": "Phase: molecular-isotope\nscaling" if is_en else "位相: 分子同位体\nスケーリング",
+        "selection_delay_signature_fast": "Selection: fast switching\ndelay signature" if is_en else "選別: 高速切替\n遅延指標",
+        "selection_sweep_sensitivity_fast": "Selection: fast switching\nsensitivity sweep" if is_en else "選別: 高速切替\n感度掃引",
+        "visibility_atom_precision_gap": "Visibility: atom interferometer\nprecision gap" if is_en else "可視度: 原子干渉計\n精度差",
+        "statistical_bridge_mc_max_abs_frequency_error": "Born bridge:\nMonte Carlo max error" if is_en else "Born橋渡し:\nモンテカルロ最大誤差",
     }
     crit = payload.get("criteria") if isinstance(payload.get("criteria"), list) else []
     score_rows = []
@@ -509,22 +517,22 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
 
     y = np.arange(len(labels))
     decision_label = {
-        "A_continue": "A継続",
-        "A_reject": "A棄却",
-        "unknown": "不明",
+        "A_continue": "A continue" if is_en else "A継続",
+        "A_reject": "A reject" if is_en else "A棄却",
+        "unknown": "unknown" if is_en else "不明",
     }.get(str(payload.get("decision", {}).get("route_a_gate", "unknown")), str(payload.get("decision", {}).get("route_a_gate", "unknown")))
     fig, ax = plt.subplots(figsize=(11.8, 5.8), dpi=180)
     ax.barh(y, scores, color=colors)
     ax.axvline(1.0, linestyle="--", color="#6b7280", linewidth=1.2)
     ax.set_yticks(y, labels)
-    ax.tick_params(axis="y", labelsize=14.8)
-    ax.set_xlabel("正規化スコア（1以下で通過）", fontsize=15.2)
+    ax.tick_params(axis="y", labelsize=14.8 * font_scale)
+    ax.set_xlabel("normalized score (pass at <= 1)" if is_en else "正規化スコア（1以下で通過）", fontsize=15.2 * font_scale)
     ax.set_title(
-        f"Born 経路A プロキシ判定（{decision_label}）",
-        fontsize=16.0,
+        f"Born route-A proxy constraints ({decision_label})" if is_en else f"Born 経路A プロキシ判定（{decision_label}）",
+        fontsize=16.0 * font_scale,
         pad=8.0,
     )
-    ax.tick_params(axis="x", labelsize=14.4)
+    ax.tick_params(axis="x", labelsize=14.4 * font_scale)
     ax.grid(axis="x", alpha=0.25, linestyle=":")
     fig.tight_layout()
     path.parent.mkdir(parents=True, exist_ok=True)

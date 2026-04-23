@@ -201,6 +201,8 @@ def main() -> None:
     root = ROOT
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
+    figure_lang = str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower()
+    is_en = figure_lang.startswith("en")
 
     cfg = Config()
 
@@ -327,12 +329,12 @@ def main() -> None:
 
     # Panel A: Casimir force magnitude vs separation
     ax0 = fig.add_subplot(gs[0, 0])
-    ax0.plot(a_nm, force_n, lw=2.0, label="理想導体（PFA）")
+    ax0.plot(a_nm, force_n, lw=2.0, label=("ideal conductor (PFA)" if is_en else "理想導体（PFA）"))
     ax0.set_xscale("log")
     ax0.set_yscale("log")
-    ax0.set_xlabel("間隔 a (nm)", fontsize=axis_font)
+    ax0.set_xlabel(("separation a (nm)" if is_en else "間隔 a (nm)"), fontsize=axis_font)
     ax0.set_ylabel("|F| (N)", fontsize=axis_font)
-    ax0.set_title("Casimir：球-平板スケール", fontsize=title_font, pad=5.0)
+    ax0.set_title(("Casimir: sphere-plane scale" if is_en else "Casimir：球-平板スケール"), fontsize=title_font, pad=5.0)
     ax0.grid(True, which="both", ls=":", lw=0.6, alpha=0.6)
     ax0.legend(frameon=True, fontsize=legend_font, loc="lower left")
     ax0.text(
@@ -341,7 +343,11 @@ def main() -> None:
         (
             f"R≈{radius_m*1e6:.1f} μm (Roy+2000)\n"
             "F≈π^3 ħ c R / (360 a^3)\n"
-            f"報告精度 ≈ {cfg.casimir_force_rel_precision*100:.0f}%（最小 a）"
+            + (
+                f"reported precision ≈ {cfg.casimir_force_rel_precision*100:.0f}% (smallest a)"
+                if is_en
+                else f"報告精度 ≈ {cfg.casimir_force_rel_precision*100:.0f}%（最小 a）"
+            )
         ),
         transform=ax0.transAxes,
         va="top",
@@ -354,11 +360,11 @@ def main() -> None:
     # Panel B: Lamb shift scaling factors
     ax1 = fig.add_subplot(gs[1, 0])
     ax1.plot(z, z4_rel, marker="o", lw=1.8, label="Lamb shift ∝ Z^4")
-    ax1.plot(z, z6_rel, marker="o", lw=1.8, label="未知 2-loop ∝ Z^6")
+    ax1.plot(z, z6_rel, marker="o", lw=1.8, label=("unknown 2-loop ∝ Z^6" if is_en else "未知 2-loop ∝ Z^6"))
     ax1.set_yscale("log")
     ax1.set_xlabel("Z", fontsize=axis_font)
-    ax1.set_ylabel("相対スケール（Z=1 → 1）", fontsize=axis_font)
-    ax1.set_title("Lamb シフト：Z 依存スケール", fontsize=title_font, pad=5.0)
+    ax1.set_ylabel(("relative scale (Z=1 → 1)" if is_en else "相対スケール（Z=1 → 1）"), fontsize=axis_font)
+    ax1.set_title(("Lamb shift: Z-dependent scale" if is_en else "Lamb シフト：Z 依存スケール"), fontsize=title_font, pad=5.0)
     ax1.grid(True, which="both", ls=":", lw=0.6, alpha=0.6)
     ax1.legend(frameon=True, fontsize=legend_font, loc="upper left")
     ax1.scatter([2, 7], [2**4, 7**4], s=45, zorder=5, color="#1f77b4")
@@ -366,7 +372,7 @@ def main() -> None:
     ax1.text(
         0.02,
         0.02,
-        "出典: physics/0009069v1（スケーリング記述）",
+        ("source: physics/0009069v1 (scaling discussion)" if is_en else "出典: physics/0009069v1（スケーリング記述）"),
         transform=ax1.transAxes,
         va="bottom",
         ha="left",
@@ -382,12 +388,12 @@ def main() -> None:
     ax2.set_xticks(x)
     ax2.set_xticklabels(nucl_labels, rotation=15, ha="right")
     ax2.set_ylabel("ΔE_nucl(2s) (MHz)", fontsize=axis_font)
-    ax2.set_title("核サイズ項（例; Table 4）", fontsize=title_font, pad=5.0)
+    ax2.set_title(("nuclear-size term (example: Table 4)" if is_en else "核サイズ項（例; Table 4）"), fontsize=title_font, pad=5.0)
     ax2.grid(True, which="both", ls=":", lw=0.6, alpha=0.6)
     ax2.text(
         0.02,
         0.98,
-            "非QED系統（半径）の例",
+            ("non-QED systematic (radius) example" if is_en else "非QED系統（半径）の例"),
             transform=ax2.transAxes,
             va="top",
             ha="left",
@@ -401,20 +407,38 @@ def main() -> None:
             # 条件分岐: `deltaE_grav_h_eV is not None and deltaE_grav_h_eV > 0` を満たす経路を評価する。
             if deltaE_grav_h_eV is not None and deltaE_grav_h_eV > 0:
                 extra = (
-                    "\nH 1S–2S precision（Parthey+2011）:\n"
-                    f"σf={sigma_1s2s_hz} Hz ⇒ hσ≈{_fmt_sci_no_e(sigma_1s2s_e_ev, digits=2)} eV\n"
-                    f"ratio (hσ / ΔE_grav(H))≈{_fmt_sci_no_e(ratio_sigma_to_grav_h, digits=2)}"
+                    (
+                        "\nH 1S–2S precision (Parthey+2011):\n"
+                        f"σf={sigma_1s2s_hz} Hz ⇒ hσ≈{_fmt_sci_no_e(sigma_1s2s_e_ev, digits=2)} eV\n"
+                        f"ratio (hσ / ΔE_grav(H))≈{_fmt_sci_no_e(ratio_sigma_to_grav_h, digits=2)}"
+                    )
+                    if is_en
+                    else (
+                        "\nH 1S–2S precision（Parthey+2011）:\n"
+                        f"σf={sigma_1s2s_hz} Hz ⇒ hσ≈{_fmt_sci_no_e(sigma_1s2s_e_ev, digits=2)} eV\n"
+                        f"ratio (hσ / ΔE_grav(H))≈{_fmt_sci_no_e(ratio_sigma_to_grav_h, digits=2)}"
+                    )
                 )
 
             ax2.text(
                 0.02,
                 0.02,
                 (
-                    "原子重力のオーダー:\n"
-                    f"|φ|/c^2 ~ {_fmt_sci_no_e(h_case['phi_over_c2_abs'], digits=2)} (H), "
-                    f"{_fmt_sci_no_e(u_case['phi_over_c2_abs'], digits=2)} (U)\n"
-                    f"ΔE ~ {_fmt_sci_no_e(h_case['deltaE_eV_abs'], digits=2)}–"
-                    f"{_fmt_sci_no_e(u_case['deltaE_eV_abs'], digits=2)} eV"
+                    (
+                        "atomic-gravity order of magnitude:\n"
+                        f"|φ|/c^2 ~ {_fmt_sci_no_e(h_case['phi_over_c2_abs'], digits=2)} (H), "
+                        f"{_fmt_sci_no_e(u_case['phi_over_c2_abs'], digits=2)} (U)\n"
+                        f"ΔE ~ {_fmt_sci_no_e(h_case['deltaE_eV_abs'], digits=2)}–"
+                        f"{_fmt_sci_no_e(u_case['deltaE_eV_abs'], digits=2)} eV"
+                    )
+                    if is_en
+                    else (
+                        "原子重力のオーダー:\n"
+                        f"|φ|/c^2 ~ {_fmt_sci_no_e(h_case['phi_over_c2_abs'], digits=2)} (H), "
+                        f"{_fmt_sci_no_e(u_case['phi_over_c2_abs'], digits=2)} (U)\n"
+                        f"ΔE ~ {_fmt_sci_no_e(h_case['deltaE_eV_abs'], digits=2)}–"
+                        f"{_fmt_sci_no_e(u_case['deltaE_eV_abs'], digits=2)} eV"
+                    )
                     + extra
                 ),
                 transform=ax2.transAxes,
@@ -431,7 +455,13 @@ def main() -> None:
     # Panel D: alpha^{-1} (recoil vs electron g-2)
 
     ax3 = fig.add_subplot(gs[3, 0])
-    labels = ["反跳（Rb; 0812.3139）", "g-2（e−; 0801.1134）"]
+    from matplotlib.ticker import FuncFormatter
+
+    labels = (
+        ["recoil (Rb; 0812.3139)", "g-2 (e−; 0801.1134)"]
+        if is_en
+        else ["反跳（Rb; 0812.3139）", "g-2（e−; 0801.1134）"]
+    )
     y = np.array([alpha_inv_recoil, alpha_inv_g2], dtype=float)
     yerr = np.array([alpha_inv_recoil_sigma, alpha_inv_g2_sigma], dtype=float)
     xx = np.arange(2, dtype=float)
@@ -439,7 +469,9 @@ def main() -> None:
     ax3.set_xticks(xx)
     ax3.set_xticklabels(labels)
     ax3.set_ylabel("alpha^{-1}", fontsize=axis_font)
-    ax3.set_title("α 精度クロスチェック", fontsize=title_font, pad=5.0)
+    ax3.set_title(("alpha precision cross-check" if is_en else "α 精度クロスチェック"), fontsize=title_font, pad=5.0)
+    yfmt = FuncFormatter(lambda value, _pos: f"{value:.7f}")
+    ax3.yaxis.set_major_formatter(yfmt)
     ax3.grid(True, ls=":", lw=0.6, alpha=0.7)
     ax3.text(
         0.02,
@@ -447,7 +479,11 @@ def main() -> None:
         (
             f"Δ(alpha^-1) = {_fmt_sci_no_e(alpha_inv_delta, digits=3)} ± "
             f"{_fmt_sci_no_e(alpha_inv_delta_sigma, digits=3)} (z={alpha_inv_z:+.2f})\n"
-            f"必要な epsilon（recoil）≈ {epsilon_required*1e9:+.2f} ppb"
+            + (
+                f"required epsilon (recoil)≈ {epsilon_required*1e9:+.2f} ppb"
+                if is_en
+                else f"必要な epsilon（recoil）≈ {epsilon_required*1e9:+.2f} ppb"
+            )
         ),
         transform=ax3.transAxes,
         fontsize=note_font,
@@ -457,7 +493,7 @@ def main() -> None:
     )
     ax3.tick_params(axis="both", labelsize=tick_font)
 
-    fig.suptitle("真空 + QED 精密観測量", y=0.992, fontsize=suptitle_font)
+    fig.suptitle(("Vacuum + QED precision observables" if is_en else "真空 + QED 精密観測量"), y=0.992, fontsize=suptitle_font)
 
     out_png = out_dir / "qed_vacuum_precision.png"
     out_pdf = out_dir / "qed_vacuum_precision.pdf"

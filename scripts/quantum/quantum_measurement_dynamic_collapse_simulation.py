@@ -10,6 +10,7 @@ from __future__ import annotations
 import csv
 import json
 import math
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -39,6 +40,8 @@ try:
     _INSTALL_WAVEP_FONT_PROFILE = _install_wavep_font_profile
 except Exception:
     _INSTALL_WAVEP_FONT_PROFILE = None
+
+from scripts.utils.figure_locale_paths import localize_figure_output_path
 
 
 # 関数: `_repo_root` の入出力契約と処理意図を定義する。
@@ -223,8 +226,14 @@ def main() -> None:
         _INSTALL_WAVEP_FONT_PROFILE(profile_name="part4_verification")
 
     root = _repo_root()
-    out_dir = root / "output" / "public" / "quantum"
+    base_out_dir = root / "output" / "public" / "quantum"
+    out_dir = (base_out_dir / "locales" / "en") if str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en") else base_out_dir
     out_dir.mkdir(parents=True, exist_ok=True)
+    figure_lang = str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower()
+    is_en = figure_lang.startswith("en")
+    subplot_title_scale = 1.35 if is_en else 1.0
+    suptitle_scale = 1.35 if is_en else 1.0
+    body_scale = 1.0
 
     phase = 8
     step = "8.7.20"
@@ -366,6 +375,19 @@ def main() -> None:
 
             writer.writerow(row)
 
+    title_size = 16.8 * subplot_title_scale
+    axis_size = 14.6 * body_scale
+    legend_size = 13.0 * body_scale
+    note_size = 13.8 * body_scale
+    suptitle_size = 25.2 * suptitle_scale
+    tick_size = 13.2 * body_scale
+    title_prop = None if is_en else _jp_prop(16.8)
+    axis_prop = None if is_en else _jp_prop(14.6)
+    legend_prop = None if is_en else _jp_prop(13.0)
+    note_prop = None if is_en else _jp_prop(13.8)
+    suptitle_prop = None if is_en else _jp_prop(25.2)
+    title_pad = 12.0 if is_en else 6.0
+
     fig, axes = plt.subplots(2, 2, figsize=(14.2, 10.4), dpi=160)
 
     sample_count = min(n_samples_for_plot, n_trajectories)
@@ -375,9 +397,13 @@ def main() -> None:
 
     axes[0, 0].axhline(collapse_threshold_abs_z, color="black", ls="--", lw=1.0, alpha=0.7)
     axes[0, 0].axhline(-collapse_threshold_abs_z, color="black", ls="--", lw=1.0, alpha=0.7)
-    axes[0, 0].set_title("期待値の収束", fontsize=16.8, fontproperties=_jp_prop(16.8))
-    axes[0, 0].set_xlabel("時間 [s]", fontsize=14.6, fontproperties=_jp_prop(14.6))
-    axes[0, 0].set_ylabel("期待値 z", fontsize=14.6, fontproperties=_jp_prop(14.6))
+    title_kwargs = {"fontsize": title_size, "pad": title_pad}
+    if title_prop is not None:
+        title_kwargs["fontproperties"] = title_prop
+
+    axes[0, 0].set_title("expectation-value collapse" if is_en else "期待値の収束", **title_kwargs)
+    axes[0, 0].set_xlabel("time [s]" if is_en else "時間 [s]", fontsize=axis_size, fontproperties=axis_prop)
+    axes[0, 0].set_ylabel("expectation z" if is_en else "期待値 z", fontsize=axis_size, fontproperties=axis_prop)
     axes[0, 0].set_ylim(-1.05, 1.05)
     axes[0, 0].grid(ls=":", alpha=0.35)
 
@@ -389,7 +415,7 @@ def main() -> None:
             sample_pointer_hist[:, channel_index],
             lw=1.2,
             alpha=0.9,
-            label=f"第{channel_index + 1}",
+            label=(f"ch {channel_index + 1}" if is_en else f"第{channel_index + 1}"),
         )
 
     axes[0, 1].plot(
@@ -398,12 +424,12 @@ def main() -> None:
         color="black",
         lw=1.4,
         ls="--",
-        label="平均",
+        label="mean" if is_en else "平均",
     )
-    axes[0, 1].set_title("ポインタ軌跡", fontsize=16.8, fontproperties=_jp_prop(16.8))
-    axes[0, 1].set_xlabel("時間 [s]", fontsize=14.6, fontproperties=_jp_prop(14.6))
-    axes[0, 1].set_ylabel("ポインタ値", fontsize=14.6, fontproperties=_jp_prop(14.6))
-    axes[0, 1].legend(loc="best", prop=_jp_prop(13.0))
+    axes[0, 1].set_title("pointer trajectories" if is_en else "ポインタ軌跡", **title_kwargs)
+    axes[0, 1].set_xlabel("time [s]" if is_en else "時間 [s]", fontsize=axis_size, fontproperties=axis_prop)
+    axes[0, 1].set_ylabel("pointer value" if is_en else "ポインタ値", fontsize=axis_size, fontproperties=axis_prop)
+    axes[0, 1].legend(loc="best", prop=legend_prop if legend_prop is not None else None, fontsize=None if legend_prop is not None else legend_size)
     axes[0, 1].grid(ls=":", alpha=0.35)
 
     # 条件分岐: `collapsed_n > 0` を満たす経路を評価する。
@@ -411,42 +437,46 @@ def main() -> None:
         axes[1, 0].hist(collapse_times[collapsed_mask], bins=24, color="#4c78a8", alpha=0.85)
         # 条件分岐: `np.isfinite(collapse_time_median_s)` を満たす経路を評価する。
         if np.isfinite(collapse_time_median_s):
-            axes[1, 0].axvline(collapse_time_median_s, color="black", ls="--", lw=1.0, label="中央値")
-            axes[1, 0].legend(loc="upper right", prop=_jp_prop(13.0))
+            axes[1, 0].axvline(collapse_time_median_s, color="black", ls="--", lw=1.0, label="median" if is_en else "中央値")
+            axes[1, 0].legend(loc="upper right", prop=legend_prop if legend_prop is not None else None, fontsize=None if legend_prop is not None else legend_size)
     else:
         axes[1, 0].text(
             0.5,
             0.5,
-            "この実行では収束事象なし",
+            "no collapse events in this run" if is_en else "この実行では収束事象なし",
             ha="center",
             va="center",
             transform=axes[1, 0].transAxes,
-            fontsize=13.8,
-            fontproperties=_jp_prop(13.8),
+            fontsize=note_size,
+            fontproperties=note_prop,
         )
 
-    axes[1, 0].set_title("収束時刻", fontsize=16.8, fontproperties=_jp_prop(16.8))
-    axes[1, 0].set_xlabel("収束時刻 [s]", fontsize=14.6, fontproperties=_jp_prop(14.6))
-    axes[1, 0].set_ylabel("件数", fontsize=14.6, fontproperties=_jp_prop(14.6))
+    axes[1, 0].set_title("collapse-time distribution" if is_en else "収束時刻", **title_kwargs)
+    axes[1, 0].set_xlabel("collapse time [s]" if is_en else "収束時刻 [s]", fontsize=axis_size, fontproperties=axis_prop)
+    axes[1, 0].set_ylabel("count" if is_en else "件数", fontsize=axis_size, fontproperties=axis_prop)
     axes[1, 0].grid(ls=":", alpha=0.35)
 
     color_values = np.where(collapse_states == 1, "#2ca02c", np.where(collapse_states == -1, "#d62728", "#7f7f7f"))
     axes[1, 1].scatter(final_pointer_mean, final_expect_z, s=20, alpha=0.75, c=color_values)
     axes[1, 1].axhline(0.0, color="black", ls="--", lw=1.0, alpha=0.6)
-    axes[1, 1].set_title("最終状態", fontsize=16.8, fontproperties=_jp_prop(16.8))
-    axes[1, 1].set_xlabel("ポインタ平均 x̄(T)", fontsize=14.6, fontproperties=_jp_prop(14.6))
-    axes[1, 1].set_ylabel("最終期待値 z(T)", fontsize=14.6, fontproperties=_jp_prop(14.6))
+    axes[1, 1].set_title("final-state scatter" if is_en else "最終状態", **title_kwargs)
+    axes[1, 1].set_xlabel("mean pointer x̄(T)" if is_en else "ポインタ平均 x̄(T)", fontsize=axis_size, fontproperties=axis_prop)
+    axes[1, 1].set_ylabel("final expectation z(T)" if is_en else "最終期待値 z(T)", fontsize=axis_size, fontproperties=axis_prop)
     axes[1, 1].set_ylim(-1.05, 1.05)
     axes[1, 1].grid(ls=":", alpha=0.35)
 
     fig.suptitle(
-        "動的収束",
-        fontsize=25.2,
+        "dynamic-collapse simulation" if is_en else "動的収束",
+        fontsize=suptitle_size,
         y=0.98,
-        fontproperties=_jp_prop(25.2),
+        fontproperties=suptitle_prop,
     )
     for axis in axes.ravel():
-        axis.tick_params(labelsize=13.2)
+        axis.tick_params(labelsize=tick_size)
+        for label in axis.get_xticklabels():
+            label.set_fontsize(tick_size)
+        for label in axis.get_yticklabels():
+            label.set_fontsize(tick_size)
 
     fig.tight_layout(rect=[0, 0, 1, 0.96])
     out_png = out_dir / "quantum_measurement_dynamic_collapse_simulation.png"

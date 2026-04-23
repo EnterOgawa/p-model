@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
@@ -201,6 +202,10 @@ def _write_plot(path: Path, summary_rows: List[Dict[str, Any]]) -> None:
     floor = [float(r.get("model_floor_ns_for_chi2eq1", float("nan"))) for r in summary_rows]
     p95z = [float(r.get("p95_abs_z_np", float("nan"))) for r in summary_rows]
 
+    is_en = str(os.getenv("WAVEP_FIGURE_LANG", "ja")).strip().lower().startswith("en")
+    title_font = 18.4 if is_en else 14.6
+    axis_font = 15.4 if is_en else 13.4
+    tick_font = 15.0 if is_en else 12.2
     # 図95: 1列表示を優先し、3パネルを縦並びにする。
     fig = plt.figure(figsize=(13.8, 15.8))
     grid = fig.add_gridspec(3, 1, height_ratios=[1.0, 1.0, 1.15], hspace=0.98)
@@ -210,25 +215,29 @@ def _write_plot(path: Path, summary_rows: List[Dict[str, Any]]) -> None:
     x = np.arange(len(names), dtype=float)
 
     ax0.bar(x, wrms, color="#4e79a7")
-    ax0.set_title("Weighted RMS (bin-RMS weight)", fontsize=14.6, pad=10.0)
-    ax0.set_ylabel("ns", fontsize=13.4)
+    ax0.set_title("Weighted RMS (bin-RMS weight)", fontsize=title_font, pad=10.0)
+    ax0.set_ylabel("ns", fontsize=axis_font)
     ax0.set_xticks(x)
     ax0.set_xticklabels(names, rotation=20, ha="right")
 
     ax1.bar(x, floor, color="#f28e2b")
-    ax1.set_title("Model floor for χ²≈1", fontsize=14.6, pad=10.0)
-    ax1.set_ylabel("ns", fontsize=13.4)
+    ax1.set_title("Model floor for χ²≈1", fontsize=title_font, pad=10.0)
+    ax1.set_ylabel("ns", fontsize=axis_font)
     ax1.set_xticks(x)
     ax1.set_xticklabels(names, rotation=20, ha="right")
 
     ax2.bar(x, p95z, color="#e15759")
-    ax2.set_title("p95 |z| (residual / NP bin RMS)", fontsize=14.6, pad=10.0)
-    ax2.set_ylabel("dimensionless", fontsize=13.4)
+    ax2.set_title("p95 |z| (residual / NP bin RMS)", fontsize=title_font, pad=10.0)
+    ax2.set_ylabel("dimensionless", fontsize=axis_font)
     ax2.set_xticks(x)
     ax2.set_xticklabels(names, rotation=20, ha="right")
 
     for axis in (ax0, ax1, ax2):
-        axis.tick_params(labelsize=12.2)
+        axis.tick_params(labelsize=tick_font)
+        for label in axis.get_xticklabels():
+            label.set_fontsize(tick_font)
+        for label in axis.get_yticklabels():
+            label.set_fontsize(tick_font)
 
     fig.tight_layout(rect=[0.0, 0.0, 1.0, 0.98], h_pad=5.4)
     path.parent.mkdir(parents=True, exist_ok=True)
