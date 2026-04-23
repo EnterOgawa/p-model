@@ -67,8 +67,9 @@ radius audit:
 ## Push Scope
 
 The inventory writes an explicit `dependency_list`. For the next Trial-1 commit,
-only files listed there are paper-critical by default. The 80 other restored
-`output/public/quantum` metrics remain local holding artifacts recorded by
+only files listed there are paper-critical by default. Restored
+`output/public/quantum` metrics not promoted by that dependency list remain
+local holding artifacts recorded by
 `output/private/summary/windows_worksets/v3_trial1_untracked_public_quantum_metrics_20260423.csv`.
 
 This branch is not a theory-stuck branch. No roadmap rewrite is needed yet.

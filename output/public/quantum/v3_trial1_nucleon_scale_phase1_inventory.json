@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-04-23T13:36:57.390041+00:00",
+  "generated_utc": "2026-04-23T13:41:06.582988+00:00",
   "phase": {
     "program": "P-model v3.0",
     "trial": "Trial-1 baryon mass ratio and proton radius",
@@ -660,17 +660,17 @@
         "TARGET_FILENAMES": "<non-literal>",
         "TARGET_SUBSTRINGS": "<non-literal>",
         "SKIP_DIR_NAMES": [
-          ".venv_wsl",
-          ".git"
+          ".git",
+          ".venv_wsl"
         ]
       }
     },
     "phase1_inventory": {
       "path": "scripts/quantum/v3_trial1_nucleon_scale_phase1_inventory.py",
       "exists": true,
-      "size_bytes": 22700,
-      "mtime_utc": "2026-04-23T13:36:45.529014+00:00",
-      "sha256": "14ef66117a18a6babf63be61526536cc141e350f382d9231932dbf39d7ff5cab",
+      "size_bytes": 22759,
+      "mtime_utc": "2026-04-23T13:40:26.286041+00:00",
+      "sha256": "fb9e7105302e94fbebbe23a10042f0ffc61977ddfe382f58634f8e4f2ae814af",
       "parse_ok": true,
       "functions": [
         "build_dependency_list",
@@ -1083,7 +1083,7 @@
     ],
     "holding_local_only": [
       "output/private/summary/windows_worksets/v3_trial1_untracked_public_quantum_metrics_20260423.csv",
-      "80 untracked output/public/quantum metrics recorded in the manifest above"
+      "Non-promoted restored output/public/quantum metrics recorded in the manifest remain local unless later dependency maps promote them."
     ],
     "excluded_by_default": [
       "fb7ed024 broad restored quantum-script set unless a later dependency map promotes individual files",

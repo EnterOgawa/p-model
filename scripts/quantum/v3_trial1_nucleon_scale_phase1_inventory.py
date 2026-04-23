@@ -410,7 +410,7 @@ def build_dependency_list() -> dict[str, Any]:
         ],
         "holding_local_only": [
             rel(UNTRACKED_METRIC_MANIFEST),
-            "80 untracked output/public/quantum metrics recorded in the manifest above",
+            "Non-promoted restored output/public/quantum metrics recorded in the manifest remain local unless later dependency maps promote them.",
         ],
         "excluded_by_default": [
             "fb7ed024 broad restored quantum-script set unless a later dependency map promotes individual files",

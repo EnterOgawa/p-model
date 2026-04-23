@@ -39,7 +39,7 @@
 - Paper-critical push scope:
   - The Phase 1 JSON contains `dependency_list.paper_critical_scripts` and `dependency_list.paper_critical_public_outputs`.
   - Only those files are eligible for the next Trial-1 commit/push by default.
-  - The remaining 80 restored `output/public/quantum` metrics remain local holding artifacts in `output/private/summary/windows_worksets/v3_trial1_untracked_public_quantum_metrics_20260423.csv`.
+  - Restored `output/public/quantum` metrics not promoted by that dependency list remain local holding artifacts recorded by `output/private/summary/windows_worksets/v3_trial1_untracked_public_quantum_metrics_20260423.csv`.
 - Verification completed:
   - `python -B scripts/summary/enforce_python_block_spacing.py --paths scripts/quantum/v3_trial1_nucleon_scale_phase1_inventory.py --fix`
   - `python -B scripts/summary/enforce_python_def_class_comments.py --paths scripts/quantum/v3_trial1_nucleon_scale_phase1_inventory.py --fix`
