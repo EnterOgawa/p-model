@@ -1,34 +1,27 @@
 # STATUS
 
-- Current focus: `part5_en` Final Note wording/typesetting cleanup on the canonical paper surface.
-- Status: live Part V EN Final Note review note fixed on the canonical paper surface.
+- Current focus: v3.0 challenge handoff after the v2.0 bilingual release completion.
+- Status: v2.0 JP/EN papers, figure corrections, README synchronization, and GitHub publication updates are complete and pushed.
 - Result:
-  - Part V EN Final Note now uses `as we have known it`, `Everything began with`, `Science too is something done by human beings.`, proper LaTeX opening/closing quotes, and `we are sustained by the people around us`.
-  - `the singularity` was kept intentionally to preserve the JP original's assertive meaning.
-  - Part V EN and full EN paper were rebuilt after the fixed-content script update.
+  - English paper series is closed after the repeated third-party audit fixes and the final Part V EN Final Note cleanup.
+  - Root `README.md` and `output/public/README.md` are synchronized for the v2.0 bilingual release.
+  - Latest pushed commit: `250ed757` (`Polish README wording`) on `origin/main`.
+  - Previous completion commits: `c04ea8c0` (`Finalize English paper revisions`), `c48821f7` (`Update public README for bilingual release`), and `59818b84` (`Sync root README for bilingual release`).
 - Evidence:
-  - Final Note source block:
-    - [paper_profile_content.py](/C:/develop/waveP/scripts/summary/paper_profile_content.py)
-  - canonical EN Part V paper:
-    - [pmodel_paper_part5_future_predictions_en.pdf](/C:/develop/waveP/papers/locales/en/pmodel_paper_part5_future_predictions_en.pdf)
-  - canonical EN full paper:
-    - [pmodel_paper_en.pdf](/C:/develop/waveP/papers/locales/en/pmodel_paper_en.pdf)
-  - Part V EN final-note text probe:
-    - [part5_en_final_note_check.txt](/C:/develop/waveP/output/private/summary/locales/en/part5_en_final_note_check.txt)
-  - actual Part V EN final-note page:
-    - [page-25.png](/C:/develop/waveP/output/private/summary/page_audit/part5_en_final_note_review/page-25.png)
-  - actual full EN final-note page:
-    - [page-53.png](/C:/develop/waveP/output/private/summary/page_audit/paper_en_final_note_review/page-53.png)
+  - [README.md](/C:/develop/waveP/README.md)
+  - [output/public/README.md](/C:/develop/waveP/output/public/README.md)
+  - [pmodel_paper_en.pdf](/C:/develop/waveP/papers/locales/en/pmodel_paper_en.pdf)
+  - [pmodel_paper.pdf](/C:/develop/waveP/papers/pmodel_paper.pdf)
+  - [pmodel_paper_part5_future_predictions_en.pdf](/C:/develop/waveP/papers/locales/en/pmodel_paper_part5_future_predictions_en.pdf)
 - Verification:
-  - `paper_tex_audit --profile part5_future_predictions --locale en --engine xelatex`: `ok=True`
-  - `paper_pdf --profile part5_future_predictions --locale en --engine xelatex --sync-papers --papers-dir papers`: `ok=True warnings=0`
-  - `paper_locale_qc --profile part5_future_predictions --locale en --mode all`: `ok=True errors=0 warnings=0`
-  - `paper_tex_audit --profile paper --locale en --engine xelatex`: `ok=True`
-  - `paper_pdf --profile paper --locale en --engine xelatex --sync-papers --papers-dir papers`: `ok=True warnings=0`
-  - `paper_locale_qc --profile paper --locale en --mode all`: `ok=True errors=0 warnings=0`
-- Root cause:
-  - The Final Note was not sourced from `doc/paper/locales/en/14_part5_future_predictions.md`; it was injected from the fixed post-bibliography content block in `scripts/summary/paper_profile_content.py`.
-  - Earlier inspection of the markdown file alone would not have caught these live English wording issues.
+  - Final English paper branch: `paper_tex_audit`, `paper_pdf`, and `paper_locale_qc` were `ok=True` for Part V EN and full paper EN.
+  - README branch: root README was copied from the user-updated public README, then `sync_public_readme.py --direction root-to-public` was run before commit/push.
+  - GitHub push completed through `250ed757` on `main`.
+- Environment:
+  - Default work mode: Windows native in `C:\develop\waveP`.
+  - RHEL 9.2 VM is available only when needed for Corrfunc/Linux-dependent computation.
+  - RHEL details: host `192.100.1.111`, user `mcp7`, repo `/home/mcp7/work/waveP`, venv `/home/mcp7/work/waveP/.venv_wsl`.
 - Next:
-  1. Treat Part V EN Final Note as closed unless a new paper-surface issue appears on page 25 / full-paper page 53.
-  2. For future Final Note revisions, inspect `paper_profile_content.py` first, then rebuild `part5_future_predictions` and full `paper` EN together.
+  1. Start v3.0 from a fresh task definition after context clear.
+  2. At session start, read `doc/AI_CONTEXT_MIN.json`, `doc/STATUS.md`, `doc/ROADMAP.md`, `doc/WORK_HISTORY_RECENT.md`, and `doc/PRIMARY_SOURCES.md`.
+  3. If v3.0 requires Corrfunc or other Linux-only work, ask the user to start the RHEL 9.2 VM first.
