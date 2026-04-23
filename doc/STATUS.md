@@ -1,27 +1,64 @@
 # STATUS
 
-- Current focus: v3.0 challenge handoff after the v2.0 bilingual release completion.
-- Status: v2.0 JP/EN papers, figure corrections, README synchronization, and GitHub publication updates are complete and pushed.
-- Result:
-  - English paper series is closed after the repeated third-party audit fixes and the final Part V EN Final Note cleanup.
-  - Root `README.md` and `output/public/README.md` are synchronized for the v2.0 bilingual release.
-  - Latest pushed commit: `250ed757` (`Polish README wording`) on `origin/main`.
-  - Previous completion commits: `c04ea8c0` (`Finalize English paper revisions`), `c48821f7` (`Update public README for bilingual release`), and `59818b84` (`Sync root README for bilingual release`).
-- Evidence:
-  - [README.md](/C:/develop/waveP/README.md)
-  - [output/public/README.md](/C:/develop/waveP/output/public/README.md)
-  - [pmodel_paper_en.pdf](/C:/develop/waveP/papers/locales/en/pmodel_paper_en.pdf)
-  - [pmodel_paper.pdf](/C:/develop/waveP/papers/pmodel_paper.pdf)
-  - [pmodel_paper_part5_future_predictions_en.pdf](/C:/develop/waveP/papers/locales/en/pmodel_paper_part5_future_predictions_en.pdf)
+- Current focus: v3.0 Trial-1 baryon mass-ratio / proton-radius challenge, Phase 0 readiness restoration.
+- Status: restored and recalculated. Phase 0 now reports `overall_status=ready_for_phase1`, `can_advance_to_phase1=true`.
+- What was restored:
+  - W/Z / Trial-3 source scripts from `stash@{0}^3` (`On main: pre-tag leftover untracked scripts`).
+  - Public W/Z source metrics and upstream dependency metrics from `stash@{1}^3` (`On main: pre-tag leftover public temp artifacts`).
+  - Restoration/audit manifest: `output/private/summary/windows_worksets/v3_trial1_restored_wz_sources.txt`.
+- Recalculation commands completed:
+  - `python -B scripts/quantum/mass_origin_vector_qball_route_branch.py`
+  - `python -B scripts/quantum/mass_origin_vector_qball_numerical_solver_branch.py`
+  - `python -B scripts/quantum/mass_origin_vector_qball_full_coupled_solver_branch.py`
+  - `python -B scripts/quantum/mass_origin_v2_trial3_two_component_pivot_branch.py`
+  - `python -B scripts/quantum/mass_origin_v2_trial3_two_component_spectrum_branch.py`
+  - `python -B scripts/quantum/mass_origin_v2_t3_t2_coupled_localization_closeout_branch.py`
+  - `python -B scripts/quantum/v3_trial1_baryon_mass_size_phase0_inventory.py`
+  - `python -B scripts/quantum/v3_trial1_wz_source_strict_search.py`
+- Results:
+  - Phase 0 gates: environment freeze `pass`, W/Z reproduction `pass`, random seed `pass`, hash record `pass`.
+  - W/Z contract values match:
+    - anchor family `{k:17, ell:1, s:1}`
+    - localized solutions `41`
+    - exact vector rows `905838`
+    - `exact_w_kappa_coupled=1.6024037199246677`
+    - `exact_z_kappa_coupled=1.6817234303593958`
+  - Spectrum recomputation:
+    - base modes `324937`
+    - exact vector rows `905838`
+    - rebuilt ceiling/electron `50007305.25347868`
+  - Strict search after restore:
+    - `conclusion=source_py_present`
+    - exact source `.py` count `13`
+    - source `.pyc` count `13`
+    - exact metric JSON count `6`
+    - text references `628`
+    - stash untracked entries `17`
+- Outputs:
+  - `output/public/quantum/v3_trial1_baryon_mass_size_phase0_inventory.json`
+  - `output/public/quantum/v3_trial1_baryon_mass_size_phase0_inventory.csv`
+  - `output/public/quantum/v3_trial1_wz_source_strict_search.json`
+  - `output/public/quantum/v3_trial1_wz_source_strict_search.csv`
+  - `output/private/quantum/v3_trial1_pip_freeze.txt`
+- Rule update:
+  - `AGENTS.md` now includes `0.3.1 stash / untracked 復元確認ゲート（必須）`.
+  - Before declaring an important source/artifact absent, check worktree including ignored files, `__pycache__`, release/dirty manifests, normal git history, `git stash list`, and stash `^3` untracked parents.
+  - External `Downloads` notes are no longer allowed as hard required inputs; scripts must use repo-local `doc/` sources or optional fallback.
+  - Push scope is now limited to paper-critical computation code: scripts that regenerate paper text values, figures, validation tables, or the public metrics directly cited by those surfaces.
+  - Exploratory, abandoned, or archive-only calculations are not pushed just because they exist. They stay local or in a manifest unless promoted into the paper-critical dependency chain.
+  - Before the next Trial-1 commit/push, create an explicit paper-critical dependency list for the active calculation and stage only that list plus any required public metric artifacts.
+- Cleanup note:
+  - Scope record: `doc/quantum/187_v3_trial1_push_scope_cleanup.md`.
+  - Untracked Phase 0 public metrics were hashed into `output/private/summary/windows_worksets/v3_trial1_untracked_public_quantum_metrics_20260423.csv` and were not staged.
+  - Existing broad pushed script commits were not rewritten or mass-removed; any removal from tracking requires a separate dependency audit.
 - Verification:
-  - Final English paper branch: `paper_tex_audit`, `paper_pdf`, and `paper_locale_qc` were `ok=True` for Part V EN and full paper EN.
-  - README branch: root README was copied from the user-updated public README, then `sync_public_readme.py --direction root-to-public` was run before commit/push.
-  - GitHub push completed through `250ed757` on `main`.
-- Environment:
-  - Default work mode: Windows native in `C:\develop\waveP`.
-  - RHEL 9.2 VM is available only when needed for Corrfunc/Linux-dependent computation.
-  - RHEL details: host `192.100.1.111`, user `mcp7`, repo `/home/mcp7/work/waveP`, venv `/home/mcp7/work/waveP/.venv_wsl`.
+  - `python -B scripts/summary/enforce_python_block_spacing.py --paths-file output/private/summary/windows_worksets/v3_trial1_restored_wz_sources.txt`
+  - `python -B scripts/summary/enforce_python_def_class_comments.py --paths-file output/private/summary/windows_worksets/v3_trial1_restored_wz_sources.txt`
+  - `Get-Content output/private/summary/windows_worksets/v3_trial1_restored_wz_sources.txt | ForEach-Object { python -m py_compile $_ }`
+- Warnings:
+  - The historical W/Z scan-time pip-freeze baseline was not found; current Python environment was frozen and used for the rerun.
+  - Private expert-review closeout bundles remain incomplete for aggregate spectrum fields; regenerated public metrics are canonical.
+  - Paper build was not run, per AGENTS rule requiring explicit user instruction.
 - Next:
-  1. Start v3.0 from a fresh task definition after context clear.
-  2. At session start, read `doc/AI_CONTEXT_MIN.json`, `doc/STATUS.md`, `doc/ROADMAP.md`, `doc/WORK_HISTORY_RECENT.md`, and `doc/PRIMARY_SOURCES.md`.
-  3. If v3.0 requires Corrfunc or other Linux-only work, ask the user to start the RHEL 9.2 VM first.
+  1. Treat Phase 0 as closed for the current environment.
+  2. Start Phase 1 nucleon-scale scan for `m_n/m_p` and proton radius by first writing the paper-critical dependency list, then committing/pushing only the scripts required to regenerate that calculation's paper-facing outputs.
